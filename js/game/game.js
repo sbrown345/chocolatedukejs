@@ -4,8 +4,25 @@
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
 
+var confilename = "GAME.CON";
+
+function compilecons() {
+    var userconfilename = confilename;
+
+    mymembuf = new Uint8Array(999999);
+
+    loaddefs(userconfilename, mymembuf, false);
+}
+
 function Startup() {
     Console.init();
+
+    KB.startup();
+
+    Config.getSetupFilename();
+    Config.readSetup();
+
+    compilecons();
 }
 
 function findGRPToUse() {
@@ -14,9 +31,9 @@ function findGRPToUse() {
 
 function main(argc, argv) {
     console.log("*** Chocolate DukeNukem3D JavaScript v" + CHOCOLATE_DUKE_REV_X + "." + CHOCOLATE_DUKE_REV_DOT_Y + " ***");
-    
+
     ud.multimode = 1;  // xduke: must be done before checkcommandline or that will prevent Fakeplayer and AI
-    
+
     if (!load_duke3d_groupfile()) {
         throw new Error("Could not initialize any original BASE duke3d*.grp file\n" +
             "Even if you are playing a custom GRP you still need\n" +
@@ -24,16 +41,16 @@ function main(argc, argv) {
             "the v1.5 ATOMIC GRP file. Such a file seems to be missing\n" +
             "or is corrupted");
     }
-    
+
     // Detecting grp version
     // We keep the old GRP scheme detection for 19.6 compliance. Will be obsolete.
     // todo: get grpVersion
     grpVersion = tempConstants.GRP_VERSION;
-    
+
     // todo: print some info about GRP
-    
+
     // todo: checkcommandline
-    
+
     _platform_init(argc, argv, "Duke Nukem 3D", "Duke3D");
 }
 

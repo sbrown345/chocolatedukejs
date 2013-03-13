@@ -1,6 +1,9 @@
 ﻿'use strict';
 
 var MAXGROUPFILES = 4;
+
+var gameDir = "";
+
 var groupefil_crc32 = new Int32Array(MAXGROUPFILES);
 
 function grpArchive_t() {
@@ -49,24 +52,24 @@ function initgroupfile(filename) {
     archive.numFiles = ds.readUint32();
 
     archive.gfilelist = new Array(archive.numFiles);
-    archive.fileOffsets = new Uint8Array(archive.numFiles);
-    archive.filesizes = new Uint8Array(archive.numFiles);
+    archive.fileOffsets = new Int32Array(archive.numFiles);
+    archive.filesizes = new Int32Array(archive.numFiles);
 
     // Load the full index 16 bytes per file (12bytes for name + 4 bytes for the size).
     var j = 12 + 4 + archive.numFiles * 16;
     for (var i = 0; i < archive.numFiles; i++) {
-        archive.gfilelist[i] = ds.readString(12);
+        archive.gfilelist[i] = ds.readString(12).trimNullTerminatedString();
         var k = ds.readInt32();
         archive.filesizes[i] = k;
         archive.fileOffsets[i] = j;
         j += k;
     }
-    
+
     // Rewind the fileDescriptor
     ds.position = 0;
 
     ////archive.crc32 = crc32(ds.mapUint8Array(ds.byteLength)); // slow!
-    archive.crc32 = tempConstants.GRP_CRC; 
+    archive.crc32 = tempConstants.GRP_CRC;
 
     groupefil_crc32[grpSet.num] = archive.crc32;
 
@@ -75,4 +78,87 @@ function initgroupfile(filename) {
     grpSet.num++;
 
     return grpSet - 1;
+}
+
+var fileType = { SYSTEM_FILE: 0, GRP_FILE: 1 };
+
+function OpenFile() {
+    this.type = 0;
+    this.fd = 0; //Either the fileDescriptor or the fileIndex in a GRP depending on the type.
+    this.cursor = 0; //lseek cursor
+    this.grpID = 0; //GRP id
+    this.used = 0; //Marker 1=used
+}
+
+var MAXOPENFILES = 64;
+var openFiles = structArray(OpenFile, MAXOPENFILES);
+
+function kopen4load(filename, readfromGrp) {
+    var newHandle = MAXOPENFILES - 1;
+    var archive;
+
+    while (openFiles[newHandle].used && newHandle >= 0)
+        newHandle--;
+
+    if (newHandle < 0) {
+        throw new Error("Too Many files open!");
+    }
+
+    //Try to look in the filesystem first. In this case fd = filedescriptor.
+    //todo: look in normal file system
+
+    //Try to look in the GRP archives. In this case fd = index of the file in the GRP.
+    for (var k = grpSet.num - 1; k >= 0; k--) {
+        archive = grpSet.archives[k];
+
+        for (var i = archive.numFiles - 1; i >= 0; i--) {
+            //console.log(i, archive.gfilelist[i].trim().length, archive.gfilelist[i].toLowerCase().trim() == filename.toLowerCase().trim(), filename.toLowerCase(), archive.gfilelist[i].toLowerCase())
+            if (archive.gfilelist[i].toLowerCase().trim() == filename.toLowerCase().trim()) {
+                openFiles[newHandle].type = fileType.GRP_FILE;
+                openFiles[newHandle].used = 1;
+                openFiles[newHandle].cursor = 0;
+                openFiles[newHandle].fd = i;
+                openFiles[newHandle].grpID = k;
+                return newHandle;
+            }
+        }
+    }
+
+    return -1;
+}
+
+function kfilelength(handle) {
+    var openFile = openFiles[handle];
+    
+    if (!openFile.used) {
+        throw new Error("Invalide handle. Unrecoverable error.");
+    }
+    
+    if (openFile.type = fileType.SYSTEM_FILE) {
+        throw new Error("todo kfilelength SYSTEM_FILE")
+    } else {
+        var archive = grpSet.archives[openFile.grpID];
+        return archive.filesizes[openFile.fd];
+    }
+}
+
+function TCkopen4load(filename, readfromGrp) {
+    var fullFilename = "";
+    var result = 0;
+
+    if (gameDir && !readfromGrp) {
+        fullFilename = gameDir + "\\" + filename;
+        throw new Error("todo TCkopen4load gameDir stuff");
+    } else {
+        fullFilename = filename;
+    }
+
+    result = kopen4load(fullFilename, readfromGrp);
+
+    return result;
+}
+
+
+function getGameDir() {
+    return gameDir;
 }
