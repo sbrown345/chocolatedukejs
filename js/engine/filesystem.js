@@ -52,25 +52,19 @@ function initgroupfile(filename) {
     archive.filesizes = new Uint8Array(archive.numFiles);
 
     // Load the full index 16 bytes per file (12bytes for name + 4 bytes for the size).
-    for (var i = 0; i < archive.numFiles; i++) {
-        archive.gfilelist[i] = ds.readUint8Array(16);
-    }
-
     var j = 12 + 4 + archive.numFiles * 16;
     for (var i = 0; i < archive.numFiles; i++) {
-        var size = [archive.gfilelist[i][12], archive.gfilelist[i][13], archive.gfilelist[i][14], archive.gfilelist[i][15]];
-        var k =    (size[3] << 24) | (size[2] << 16) | (size[1] << 8) | size[0]; // get size
-        
-        archive.gfilelist[i][12] = 0;
+        archive.gfilelist[i] = ds.readString(12);
+        var k = ds.readInt32();
         archive.filesizes[i] = k;
         archive.fileOffsets[i] = j;
         j += k;
     }
-
-    // Compute CRC32 of the whole grp and implicitely caches the GRP in memory through windows caching service.
+    
     // Rewind the fileDescriptor
-
     ds.position = 0;
+
+    ////archive.crc32 = crc32(ds.mapUint8Array(ds.byteLength)); // 4248686577
 
     console.log(archive);
 }
