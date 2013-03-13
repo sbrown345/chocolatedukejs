@@ -1,6 +1,7 @@
 ﻿'use strict';
 
 var MAXGROUPFILES = 4;
+var groupefil_crc32 = new Int32Array(MAXGROUPFILES);
 
 function grpArchive_t() {
     this.numFiles = 0; //Number of files in the archive.
@@ -64,7 +65,14 @@ function initgroupfile(filename) {
     // Rewind the fileDescriptor
     ds.position = 0;
 
-    ////archive.crc32 = crc32(ds.mapUint8Array(ds.byteLength)); // 4248686577
+    ////archive.crc32 = crc32(ds.mapUint8Array(ds.byteLength)); // slow!
+    archive.crc32 = tempConstants.GRP_CRC; 
+
+    groupefil_crc32[grpSet.num] = archive.crc32;
 
     console.log(archive);
+
+    grpSet.num++;
+
+    return grpSet - 1;
 }
