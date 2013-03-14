@@ -1,6 +1,7 @@
 ﻿'use strict';
 
 var total_lines, line_number;
+var checking_ifelse = 0, parsing_state = 0;
 
 var last_used_text;
 var last_used_size;
@@ -155,7 +156,7 @@ function loadefs(filename, mptr, readfromGrp) {
 
         textptr = kread(fp, fs);
         kclose(fp);
-        ud.conCRC[0] = crc32(textptr);
+        ud.conCRC[0] = crc32Update(textptr, fs, ud.conCRC[0]);
     }
     
     textptr[fs - 2] = 0;
@@ -242,6 +243,82 @@ function parseCommand(readFromGrp) {
     //if(error > 12 || textptr) return 1;  // todo
 
     tw = transword();
+    switch (tw) {
+        default:
+        case -1:
+            throw  new Error("todo end")
+            return 0; // End
+        case 39: // Rem endrem
+            scriptptr--;
+            j = line_number;
+            do {
+                textptrIdx++;
+                if (textptr[textptrIdx] == 0x0a) line_number++;
+                if (textptr[textptrIdx] == 0) {
+                    console.log("  * ERROR!(L%d) Found '/*' with no '*/'.\n", j);
+                    error++;
+                    return 0;
+                }
+            } while (textptr[textptrIdx] != '*'.charCodeAt(0) || textptr[textptrIdx + 1] != '/'.charCodeAt(0));
+            textptrIdx += 2;
+            return 0;
+            
+        case 55: // include other con files.
+            {
+                var includedConFile = "";
+                scriptptr--;
+                while (!isaltok(textptr[textptrIdx])) {
+                    if (textptr[textptrIdx] == 0x0a) line_number++;
+                    textptrIdx++;
+                    if (textptr[textptrIdx] == 0) break;
+                }
+                j = 0;
+                while (isaltok(textptr[textptrIdx + j])) {
+                    tempbuf[j] = textptr[textptrIdx + j];
+                    j++;
+                }
+                tempbuf[j] = 0;
+
+                includedConFile = stringFromArray(tempbuf);
+
+                fp = TCkopen4load(includedConFile, readFromGrp);
+                if (fp <= 0) {
+                    error++;
+                    console.log("  * ERROR!(ln%hd) Could not find '%s'.\n", line_number, label + (labelcnt << 6));
+                    console.log("ERROR: could not open (%s)\n", includedConFile);
+                    throw new Error();
+                }
+
+                j = kfilelength(fp);
+
+                console.log("Including: '%s'.\n", includedConFile);
+
+                temp_line_number = line_number;
+                line_number = 1;
+                temp_ifelse_check = checking_ifelse;
+                checking_ifelse = 0;
+                origtptr = textptr;
+                textptr[textptrIdx] = last_used_text + last_used_size;
+
+                textptr[textptrIdx + j] = 0;
+
+                textptr = kread(fp, j);
+                kclose(fp);
+                //ud.conCRC[0] = crc32(textptr);
+                ud.conCRC[0] = crc32Update(textptr, j, ud.conCRC[0]);
+
+                do {
+                    done = parseCommand(readFromGrp);
+                } while (done == 0);
+                
+                textptr = origtptr;
+                total_lines += line_number;
+                line_number = temp_line_number;
+                checking_ifelse = temp_ifelse_check;
+
+                return 0;
+            }
+    }
 }
 
 function passOne(readFromGrp) {
