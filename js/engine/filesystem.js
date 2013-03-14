@@ -21,6 +21,7 @@ function grpSet_t() {
 }
 
 var grpSet = new grpSet_t();
+var grpStream;
 
 function initgroupfile(filename) {
     console.log("Loading " + filename + "...");
@@ -77,6 +78,8 @@ function initgroupfile(filename) {
 
     grpSet.num++;
 
+    grpStream = ds;
+
     return grpSet - 1;
 }
 
@@ -97,8 +100,9 @@ function kopen4load(filename, readfromGrp) {
     var newHandle = MAXOPENFILES - 1;
     var archive;
 
-    while (openFiles[newHandle].used && newHandle >= 0)
+    while (openFiles[newHandle].used && newHandle >= 0) {
         newHandle--;
+    }
 
     if (newHandle < 0) {
         throw new Error("Too Many files open!");
@@ -127,6 +131,61 @@ function kopen4load(filename, readfromGrp) {
     return -1;
 }
 
+//function kreadtext(handle, leng) {
+//    var openFile = openFiles[handle];
+    
+//    if (!openFile.used) {
+//        throw new Error("Invalid handle. Unrecoverable error.");
+//    }
+
+//    var text = readText(openFile, leng);
+
+//    return text;
+//}
+
+//function readText(openFile, length) {
+//    grpStream.position = grpSet.archives[openFile.grpID]
+       
+
+//    this.fileOffsets = 0; //Array containing the file offsets.
+//    this.filesizes = 0;
+
+//}
+
+function kread(handle, leng) {
+    var openFile = openFiles[handle];
+    
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFile.grpID];
+    
+    //Adjust leng so we cannot read more than filesystem-cursor location.
+    //leng = Math.min(leng, archive.filesizes[openFile.fd]);
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    var buffer = grpStream.readUint8Array(leng);
+
+    return buffer;
+}
+
+//function kreadText(handle, leng) {
+//    var openFile = openFiles[handle];
+    
+//    if (!openFile.used) {
+//        throw new Error("Invalid handle. Unrecoverable error.");
+//    }
+
+//    var archive = grpSet.archives[openFile.grpID];
+    
+//    //Adjust leng so we cannot read more than filesystem-cursor location.
+//    //leng = Math.min(leng, archive.filesizes[openFile.fd]);
+//    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+//    var str = grpStream.readString(leng);
+
+//    return str;
+//}
+
 function kfilelength(handle) {
     var openFile = openFiles[handle];
     
@@ -135,11 +194,21 @@ function kfilelength(handle) {
     }
     
     if (openFile.type = fileType.SYSTEM_FILE) {
-        throw new Error("todo kfilelength SYSTEM_FILE")
+        throw new Error("todo kfilelength SYSTEM_FILE");
     } else {
         var archive = grpSet.archives[openFile.grpID];
         return archive.filesizes[openFile.fd];
     }
+}
+
+function kclose(handle) {
+    var openFile = openFiles[handle];
+
+    if (!openFile.used) {
+        throw new Error("Invalide handle. Unrecoverable error.");
+    }
+
+    openFiles[handle] = new OpenFile();
 }
 
 function TCkopen4load(filename, readfromGrp) {
@@ -157,7 +226,6 @@ function TCkopen4load(filename, readfromGrp) {
 
     return result;
 }
-
 
 function getGameDir() {
     return gameDir;

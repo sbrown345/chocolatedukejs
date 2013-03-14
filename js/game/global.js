@@ -18,10 +18,12 @@ var ud = {
     conSize: new Uint32Array(MAXPLAYERS),
 };
 
+var tempbuf = new Uint8Array(2048);
+var packbuf = new Uint8Array(576);
 
 var script = new Int8Array(MAXSCRIPTSIZE), scriptptr, insptr, labelcode, labelcnt;
 var actorscrptr = new Int8Array(MAXTILES), parsing_actor;
-var label, textptr, error, warning;
+var label, textptr, textptrIdx = 0, error, warning;
 var killit_flag;
 var music_pointer;
 var actortype = new Uint8Array(MAXTILES);

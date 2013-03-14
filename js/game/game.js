@@ -11,7 +11,7 @@ function compilecons() {
 
     mymembuf = new Uint8Array(999999);
 
-    loaddefs(userconfilename, mymembuf, false);
+    loadefs(userconfilename, mymembuf, false);
 }
 
 function Startup() {
