@@ -19,3 +19,9 @@ function stringFromArray(array) {
     }
     return str;
 }
+
+function isalnum(c) {
+    return (c >= 48 && c <= 57)
+        || (c >= 65 && c <= 90)
+        || (c >= 97 && c <= 122);
+}

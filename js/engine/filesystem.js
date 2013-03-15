@@ -425,7 +425,7 @@ function kopen4load(filename, readfromGrp) {
 
 //}
 
-function kread(handle, leng) {
+function kread(handle, buffer, leng) {
     var openFile = openFiles[handle];
     
     if (!openFile.used) {
@@ -437,11 +437,11 @@ function kread(handle, leng) {
     //Adjust leng so we cannot read more than filesystem-cursor location.
     //leng = Math.min(leng, archive.filesizes[openFile.fd]);
     grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
-    var buffer = grpStream.readUint8Array(leng);
+    for (var i = 0; i < leng; i++) {
+        buffer[i] = grpStream.readUint8();
+    }
 
     openFile.cursor += leng;
-    
-    return buffer;
 }
 
 //function kreadText(handle, leng) {

@@ -150,29 +150,41 @@ function loadefs(filename, mptr, readfromGrp) {
         console.log("Compiling '" + filename + "'.");
 
         fs = kfilelength(fp);
-        
-        last_used_text = textptr = /*(char  *) */mptr; // TODO ??????????
+
+        last_used_text = textptr = mptr;
         last_used_size = fs;
 
-        textptr = kread(fp, fs);
+        kread(fp, textptr, fs);
         kclose(fp);
         ud.conCRC[0] = crc32Update(textptr, fs, ud.conCRC[0]);
     }
-    
+
     textptr[fs - 2] = 0;
-    
+
     actorscrptr = new Int8Array(MAXTILES);
     actortype = new Uint8Array(MAXTILES);
-    
+
     labelcnt = 0;
     scriptptr = script[1];
     warning = 0;
     error = 0;
     line_number = 1;
     total_lines = 0;
-    
+
     passOne(readfromGrp); //Tokenize
     script[0] = scriptptr;
+}
+
+function ispecial(c) {
+    if (c == 0x0a) {
+        line_number++;
+        return 1;
+    }
+
+    if (c == ' '.charCodeAt(0) || c == 0x0d)
+        return 1;
+
+    return 0;
 }
 
 function isaltok(c) {
@@ -180,25 +192,35 @@ function isaltok(c) {
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
 
-function isalnum(c) {
-    return (c >= 48 && c <= 57)
-        || (c >= 65 && c <= 90)
-        || (c >= 97 && c <= 122);
+function getLabel() {
+    while (!isalnum(textptr[textptrIdx])) {
+        if (textptr[textptrIdx] == 0x0a) line_number++;
+        textptrIdx++;
+        if (textptr[textptrIdx] == 0)
+            return;
+    }
+
+    var i = 0;
+    var tempLabel = "";
+    while (ispecial(textptr[textptrIdx])) {
+        tempLabel += String.fromCharCode(textptr[textptrIdx]);
+    }
+    label = tempLabel;
 }
 
 // Returns its code #
 function transword() {
     var i, l;
-    
+
     while (!isaltok(textptr[textptrIdx])) {
-        if(textptr[textptrIdx] == 0x0a) line_number++;
+        if (textptr[textptrIdx] == 0x0a) line_number++;
         if (textptr[textptrIdx] == 0)
             return -1;
         textptrIdx++;
     }
 
     l = 0;
-    while (isaltok(textptr[textptrIdx+l])) {
+    while (isaltok(textptr[textptrIdx + l])) {
         tempbuf[l] = textptr[textptrIdx + l];
         l++;
     }
@@ -236,19 +258,22 @@ function parseCommand(readFromGrp) {
     var i, j, k, tempscrptr;
     var done, temp_ifelse_check;
     var tw;
-    var origtptr;
+    var origtptrIdx;
     var temp_line_number;
     var fp;
 
     //if(error > 12 || textptr) return 1;  // todo
 
     tw = transword();
+    console.log("The value of tw is %i", tw);
     switch (tw) {
         default:
         case -1:
-            throw  new Error("todo end")
-            return 0; // End
-        case 39: // Rem endrem
+            throw new Error("todo end");
+            return 0;
+            // End
+        case 39:
+            // Rem endrem
             scriptptr--;
             j = line_number;
             do {
@@ -262,8 +287,26 @@ function parseCommand(readFromGrp) {
             } while (textptr[textptrIdx] != '*'.charCodeAt(0) || textptr[textptrIdx + 1] != '/'.charCodeAt(0));
             textptrIdx += 2;
             return 0;
-            
-        case 55: // include other con files.
+        case 17:
+            throw new Error("todo");
+        case 15:
+        case 92:
+        case 87:
+        case 89:
+        case 93:
+            throw new Error("todo");
+        case 18:
+            throw new Error("todo");
+        case 19:
+            getLabel();
+        case 14:
+            throw new Error("todo");
+        case 32:
+            throw new Error("todo");
+        case 54:
+            throw new Error("todo");
+        case 55:
+            // include other con files.
             {
                 var includedConFile = "";
                 scriptptr--;
@@ -297,33 +340,156 @@ function parseCommand(readFromGrp) {
                 line_number = 1;
                 temp_ifelse_check = checking_ifelse;
                 checking_ifelse = 0;
-                origtptr = textptr;
-                textptr[textptrIdx] = last_used_text + last_used_size;
+                origtptrIdx = textptrIdx;
+                textptr = last_used_text.slice(last_used_size);
 
                 textptr[textptrIdx + j] = 0;
 
-                textptr = kread(fp, j);
+                kread(fp, textptr, j);
                 kclose(fp);
-                //ud.conCRC[0] = crc32(textptr);
                 ud.conCRC[0] = crc32Update(textptr, j, ud.conCRC[0]);
 
                 do {
                     done = parseCommand(readFromGrp);
                 } while (done == 0);
-                
-                textptr = origtptr;
+
+                textptrIdx = origtptrIdx;
                 total_lines += line_number;
                 line_number = temp_line_number;
                 checking_ifelse = temp_ifelse_check;
 
                 return 0;
             }
-    }
+        case 7:
+            throw new Error("todo");
+        case 1:
+            throw new Error("todo");
+        case 98:
+            throw new Error("todo");
+        case 11:
+        case 13:
+        case 25:
+        case 31:
+        case 40:
+        case 52:
+        case 69:
+        case 74:
+        case 77:
+        case 80:
+        case 86:
+        case 88:
+        case 68:
+        case 100:
+        case 101:
+        case 102:
+        case 103:
+        case 105:
+        case 110:
+            throw new Error("todo");
+        case 2:
+        case 23:
+        case 28:
+        case 99:
+        case 37:
+        case 48:
+        case 58:
+            throw new Error("todo");
+        case 50:
+            throw new Error("todo");
+        case 10:
+            throw new Error("todo");
+        case 75:
+            throw new Error("todo");
+        case 3:
+        case 8:
+        case 9:
+        case 21:
+        case 33:
+        case 34:
+        case 35:
+        case 41:
+        case 46:
+        case 53:
+        case 56:
+        case 59:
+        case 62:
+        case 72:
+        case 73:
+            //        case 74:
+        case 78:
+        case 85:
+        case 94:
+        case 111:
+            throw new Error("todo");
+        case 43:
+        case 44:
+        case 49:
+        case 5:
+        case 6:
+        case 27:
+        case 26:
+        case 45:
+        case 51:
+        case 63:
+        case 64:
+        case 65:
+        case 67:
+        case 70:
+        case 71:
+        case 81:
+        case 82:
+        case 90:
+        case 91:
+        case 109:
+            throw new Error("todo");
+        case 29:
+            throw new Error("todo");
+        case 30:
+            throw new Error("todo");
+        case 76:
+            throw new Error("todo");
+        case 20:
+            throw new Error("todo");
+        case 107:
+            throw new Error("todo");
+        case 108:
+            throw new Error("todo");
+        case 0:
+            throw new Error("todo");
+        case 79:
+            throw new Error("todo");
+        case 57:
+            throw new Error("todo");
+        case 4:
+            throw new Error("todo");
+        case 12:
+        case 16:
+        case 84:
+            //        case 21:
+        case 22: //KILLIT
+        case 36:
+        case 38:
+        case 42:
+        case 47:
+        case 61:
+        case 66:
+        case 83:
+        case 95:
+        case 96:
+        case 97:
+        case 104:
+        case 106:
+            throw new Error("todo");
+        case 60:
+            throw new Error("todo");
+    } // end of switch(tw)
+
+    return 0;
 }
 
 function passOne(readFromGrp) {
     while (parseCommand(readFromGrp) === 0);
-    
+
     if ((error + warning) > 12) {
         console.log("  * ERROR! Too many warnings or errors.");
     }
