@@ -205,7 +205,7 @@ function getLabel() {
         tempLabel += textptr[textptrIdx];
         textptrIdx++;
     }
-    label[labelcnt << 6] = tempLabel;
+    labels[labelcnt] = tempLabel;
 }
 
 // Returns its code #
@@ -252,6 +252,54 @@ function transword() {
 
     error++;
     return -1;
+}
+
+function transNumber() {
+    var i, l;
+
+    while (!isaltok(textptr[textptrIdx])) {
+        if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
+        textptrIdx++;
+        if (textptr.charCodeAt(textptrIdx) == 0)
+            return;
+    }
+
+    l = 0;
+    while (isaltok(textptr.charCodeAt(textptrIdx + l))) {
+        tempbuf[l] = textptr.charCodeAt(textptrIdx + l);
+        l++;
+    }
+    tempbuf[l] = 0;
+
+    for (i = 0; i < NUMKEYWORDS; i++) {
+        if (labels[labelcnt] == keyw) {
+            error++;
+            console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, labels[labelcnt]);
+            textptrIdx += l;
+        }
+    }
+    
+    for (i = 0; i < labelcnt; i++) {
+        if (stringFromArray(tempbuf) == labels[i]) {
+            scriptptr = labelcode[i];
+            scriptptr++;
+            textptrIdx += l;
+            return;
+        }
+    }
+    
+    if (!isDigit(textptr[textptrIdx]) && textptr[textptrIdx] != '-') {
+
+        console.log("  * ERROR!(L%hd) Parameter '%s' is undefined.\n", line_number, stringFromArray(tempbuf));
+        error++;
+        textptrIdx += l;
+        return;
+    }
+
+    scriptptr = parseInt(textptr[textptrIdx]);
+    scriptptr++;
+
+    textptrIdx += l;
 }
 
 function parseCommand(readFromGrp) {
@@ -301,15 +349,32 @@ function parseCommand(readFromGrp) {
             throw new Error("todo");
         case 19:
             getLabel();
-            // Check to see it's already defined
             
+            // Check to see it's already defined
             for(i=0;i<NUMKEYWORDS;i++)
             {
-               if (label == keyw[i]) {
+                if (labels[labelcnt] == keyw[i]) {
                    error++;
-                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, label);
+                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, labels[labelcnt]);
+                   return 0;
                }
             }
+                       
+            for (i = 0; i < labelcnt; i++)
+            {
+                if (labels[labelcnt] == labels[i]) {
+                   error++;
+                   printf("  * WARNING.(L%hd) Duplicate definition '%s' ignored.\n", line_number, labels[labelcnt]);
+                   break;
+               }
+            }
+            
+            transNumber();
+            if (i == labelcnt) {
+                labelcode[labelcnt++] = scriptptr - 1;
+            }
+            scriptptr -= 2;
+            return 0;
         case 14:
             throw new Error("todo");
         case 32:
@@ -338,7 +403,7 @@ function parseCommand(readFromGrp) {
                 fp = TCkopen4load(includedConFile, readFromGrp);
                 if (fp <= 0) {
                     error++;
-                    console.log("  * ERROR!(ln%hd) Could not find '%s'.\n", line_number, label + (labelcnt << 6));
+                    console.log("  * ERROR!(ln%hd) Could not find '%s'.\n", line_number, labels[labelcnt]);
                     console.log("ERROR: could not open (%s)\n", includedConFile);
                     throw new Error();
                 }

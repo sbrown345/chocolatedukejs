@@ -34,3 +34,8 @@ function isalnum(c) {
         || (c >= 65 && c <= 90)
         || (c >= 97 && c <= 122);
 }
+
+function isDigit(c) {
+    c = typeof c === "number" ? c : c.charCodeAt(0);
+    return (c >= 48 && c <= 57);
+}

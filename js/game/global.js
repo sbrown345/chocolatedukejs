@@ -23,7 +23,7 @@ var packbuf = new Uint8Array(576);
 
 var script = new Int8Array(MAXSCRIPTSIZE), scriptptr, insptr, labelcode, labelcnt;
 var actorscrptr = new Int8Array(MAXTILES), parsing_actor;
-var label, textptr, textptrIdx = 0, error, warning;
+var labels = new Array(50000 /*todo, not sure of limit...*/), textptr, textptrIdx = 0, error, warning;
 var killit_flag;
 var music_pointer;
 var actortype = new Uint8Array(MAXTILES);
