@@ -69,14 +69,9 @@ function initgroupfile(filename) {
     // Rewind the fileDescriptor
     ds.position = 0;
 
-    //archive.crc32 = crc32(ds.mapUint8Array(ds.byteLength)); // slow!
-
     archive.crc32 = crc32Update(ds.mapUint8Array(ds.byteLength), j, archive.crc32);
-    //archive.crc32 = tempConstants.GRP_CRC;
 
     groupefil_crc32[grpSet.num] = archive.crc32;
-
-    console.log(archive);
 
     grpSet.num++;
 
@@ -435,7 +430,7 @@ function kread(handle, buffer, leng) {
     var archive = grpSet.archives[openFile.grpID];
     
     //Adjust leng so we cannot read more than filesystem-cursor location.
-    //leng = Math.min(leng, archive.filesizes[openFile.fd]);
+    leng = Math.min(leng, archive.filesizes[openFile.fd]);
     grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
     for (var i = 0; i < leng; i++) {
         buffer[i] = grpStream.readUint8();
@@ -444,22 +439,28 @@ function kread(handle, buffer, leng) {
     openFile.cursor += leng;
 }
 
-//function kreadText(handle, leng) {
-//    var openFile = openFiles[handle];
+function kreadText(handle, leng) {
+    var openFile = openFiles[handle];
     
-//    if (!openFile.used) {
-//        throw new Error("Invalid handle. Unrecoverable error.");
-//    }
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
 
-//    var archive = grpSet.archives[openFile.grpID];
+    var archive = grpSet.archives[openFile.grpID];
     
-//    //Adjust leng so we cannot read more than filesystem-cursor location.
-//    //leng = Math.min(leng, archive.filesizes[openFile.fd]);
-//    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
-//    var str = grpStream.readString(leng);
+    //Adjust leng so we cannot read more than filesystem-cursor location.
+    leng = Math.min(leng, archive.filesizes[openFile.fd]);
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    var array = new Array(leng);
+    for (var i = 0; i < leng; i++) {
+        array[i] = String.fromCharCode(grpStream.readUint8());
+    }
+    var text = array.join("");
 
-//    return str;
-//}
+    openFile.cursor += leng;
+    return text;
+}
+
 
 function kfilelength(handle) {
     var openFile = openFiles[handle];

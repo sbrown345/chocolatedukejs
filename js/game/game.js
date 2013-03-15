@@ -8,10 +8,10 @@ var confilename = "GAME.CON";
 
 function compilecons() {
     var userconfilename = confilename;
+    
+    // todo: missing some things here...
 
-    mymembuf = new Uint8Array(512000);
-
-    loadefs(userconfilename, mymembuf, false);
+    loadefs(userconfilename, false);
 }
 
 function Startup() {

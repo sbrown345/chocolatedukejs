@@ -2,8 +2,16 @@
     return this.slice(0, this.indexOf('\0'));
 };
 
-function ab2str(buf) {
-    return String.fromCharCode.apply(null, new Uint16Array(buf));
+function str2Bytes(str) {
+    var array = new Uint8Array(str.length);
+    for (var i = 0; i < str.length; i++) {
+        array[i] = str.charCodeAt(i);
+    }
+    return array;
+}
+
+function uint8ArrayToString(bytes) {
+    return String.fromCharCode.apply(null, bytes);
 }
 
 // todo: performance
@@ -21,6 +29,7 @@ function stringFromArray(array) {
 }
 
 function isalnum(c) {
+    c = typeof c === "number" ? c : c.charCodeAt(0);
     return (c >= 48 && c <= 57)
         || (c >= 65 && c <= 90)
         || (c >= 97 && c <= 122);

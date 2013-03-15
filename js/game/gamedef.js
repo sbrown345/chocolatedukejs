@@ -140,7 +140,7 @@ var SETUPFILENAME = "duke3d.cfg";
 //// Max number of players
 //#define MAXPLAYERS 16 // dupe of engine const also called MAXPLAYERS????
 
-function loadefs(filename, mptr, readfromGrp) {
+function loadefs(filename, readfromGrp) {
     var fs, fp;
 
     fp = TCkopen4load(filename, readfromGrp);
@@ -151,15 +151,13 @@ function loadefs(filename, mptr, readfromGrp) {
 
         fs = kfilelength(fp);
 
-        last_used_text = textptr = mptr;
+        last_used_text = textptr;
         last_used_size = fs;
 
-        kread(fp, textptr, fs);
+        textptr = kreadText(fp, fs);
         kclose(fp);
-        ud.conCRC[0] = crc32Update(textptr, fs, ud.conCRC[0]);
+        ud.conCRC[0] = crc32Update(str2Bytes(textptr), fs, ud.conCRC[0]);
     }
-
-    textptr[fs - 2] = 0;
 
     actorscrptr = new Int8Array(MAXTILES);
     actortype = new Uint8Array(MAXTILES);
@@ -176,36 +174,38 @@ function loadefs(filename, mptr, readfromGrp) {
 }
 
 function ispecial(c) {
+    c = typeof c === "number" ? c : c.charCodeAt(0);
     if (c == 0x0a) {
         line_number++;
-        return 1;
+        return true;
     }
 
     if (c == ' '.charCodeAt(0) || c == 0x0d)
-        return 1;
+        return true;
 
-    return 0;
+    return false;
 }
 
 function isaltok(c) {
-    var ch = String.fromCharCode(c);
+    var ch = typeof c === "number" ? String.fromCharCode(c) : c;
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
 
 function getLabel() {
     while (!isalnum(textptr[textptrIdx])) {
-        if (textptr[textptrIdx] == 0x0a) line_number++;
+        if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
         textptrIdx++;
-        if (textptr[textptrIdx] == 0)
+        if (textptr.charCodeAt(textptrIdx) == 0)
             return;
     }
 
     var i = 0;
     var tempLabel = "";
-    while (ispecial(textptr[textptrIdx])) {
-        tempLabel += String.fromCharCode(textptr[textptrIdx]);
+    while (!ispecial(textptr[textptrIdx])) {
+        tempLabel += textptr[textptrIdx];
+        textptrIdx++;
     }
-    label = tempLabel;
+    label[labelcnt << 6] = tempLabel;
 }
 
 // Returns its code #
@@ -213,21 +213,21 @@ function transword() {
     var i, l;
 
     while (!isaltok(textptr[textptrIdx])) {
-        if (textptr[textptrIdx] == 0x0a) line_number++;
-        if (textptr[textptrIdx] == 0)
+        if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
+        if (textptr.charCodeAt(textptrIdx) == 0)
             return -1;
         textptrIdx++;
     }
 
     l = 0;
-    while (isaltok(textptr[textptrIdx + l])) {
-        tempbuf[l] = textptr[textptrIdx + l];
+    while (isaltok(textptr.charCodeAt(textptrIdx + l))) {
+        tempbuf[l] = textptr.charCodeAt(textptrIdx + l);
         l++;
     }
     tempbuf[l] = 0;
 
+    var str = stringFromArray(tempbuf);
     for (i = 0; i < NUMKEYWORDS; i++) {
-        var str = stringFromArray(tempbuf);
         if (keyw[i] == str) {
             scriptptr = i;
             textptrIdx += l;
@@ -239,16 +239,16 @@ function transword() {
     textptrIdx += l;
 
     if (tempbuf[0] == '{'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.\n", line_number, tempbuf + 1);
+        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.\n", line_number,String.fromCharCode( tempbuf[1]));
     else if (tempbuf[0] == '}'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.\n", line_number, tempbuf + 1);
+        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.\n", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.\n", line_number, tempbuf + 2);
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '*' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.\n", line_number, tempbuf + 2);
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '*'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.\n", line_number, tempbuf + 2);
-    else console.log("  * ERROR!(L%hd) Expecting key word, but found '%s'.\n", line_number, tempbuf);
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
+    else console.log("  * ERROR!(L%hd) Expecting key word, but found '%s'.\n", line_number, stringFromArray(tempbuf));
 
     error++;
     return -1;
@@ -258,11 +258,13 @@ function parseCommand(readFromGrp) {
     var i, j, k, tempscrptr;
     var done, temp_ifelse_check;
     var tw;
-    var origtptrIdx;
+    var origtptr, origtptrIdx;
     var temp_line_number;
     var fp;
 
-    //if(error > 12 || textptr) return 1;  // todo
+    if (error > 12 || !textptr[textptrIdx] || textptr[textptrIdx] == '\0' || textptr[textptrIdx + 1] == '\0') {
+        return 1;
+    }
 
     tw = transword();
     console.log("The value of tw is %i", tw);
@@ -278,13 +280,13 @@ function parseCommand(readFromGrp) {
             j = line_number;
             do {
                 textptrIdx++;
-                if (textptr[textptrIdx] == 0x0a) line_number++;
-                if (textptr[textptrIdx] == 0) {
+                if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
+                if (textptr.charCodeAt(textptrIdx)== 0) {
                     console.log("  * ERROR!(L%d) Found '/*' with no '*/'.\n", j);
                     error++;
                     return 0;
                 }
-            } while (textptr[textptrIdx] != '*'.charCodeAt(0) || textptr[textptrIdx + 1] != '/'.charCodeAt(0));
+            } while (textptr[textptrIdx] != '*' || textptr[textptrIdx + 1] != '/');
             textptrIdx += 2;
             return 0;
         case 17:
@@ -299,6 +301,15 @@ function parseCommand(readFromGrp) {
             throw new Error("todo");
         case 19:
             getLabel();
+            // Check to see it's already defined
+            
+            for(i=0;i<NUMKEYWORDS;i++)
+            {
+               if (label == keyw[i]) {
+                   error++;
+                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, label);
+               }
+            }
         case 14:
             throw new Error("todo");
         case 32:
@@ -311,13 +322,13 @@ function parseCommand(readFromGrp) {
                 var includedConFile = "";
                 scriptptr--;
                 while (!isaltok(textptr[textptrIdx])) {
-                    if (textptr[textptrIdx] == 0x0a) line_number++;
+                    if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
                     textptrIdx++;
-                    if (textptr[textptrIdx] == 0) break;
+                    if (textptr.charCodeAt(textptrIdx) == 0) break;
                 }
                 j = 0;
-                while (isaltok(textptr[textptrIdx + j])) {
-                    tempbuf[j] = textptr[textptrIdx + j];
+                while (isaltok(textptr.charCodeAt(textptrIdx + j))) {
+                    tempbuf[j] = textptr.charCodeAt(textptrIdx + j);
                     j++;
                 }
                 tempbuf[j] = 0;
@@ -341,18 +352,18 @@ function parseCommand(readFromGrp) {
                 temp_ifelse_check = checking_ifelse;
                 checking_ifelse = 0;
                 origtptrIdx = textptrIdx;
-                textptr = last_used_text.slice(last_used_size);
+                origtptr = textptr;
 
-                textptr[textptrIdx + j] = 0;
-
-                kread(fp, textptr, j);
+                textptr = kreadText(fp, j);
+                textptrIdx = 0;
                 kclose(fp);
-                ud.conCRC[0] = crc32Update(textptr, j, ud.conCRC[0]);
+                ud.conCRC[0] = crc32Update(str2Bytes(textptr), j, ud.conCRC[0]);
 
                 do {
                     done = parseCommand(readFromGrp);
                 } while (done == 0);
 
+                textptr = origtptr;
                 textptrIdx = origtptrIdx;
                 total_lines += line_number;
                 line_number = temp_line_number;
