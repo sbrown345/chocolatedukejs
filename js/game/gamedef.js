@@ -163,14 +163,14 @@ function loadefs(filename, readfromGrp) {
     actortype = new Uint8Array(MAXTILES);
 
     labelcnt = 0;
-    scriptptr = script[1];
+    scriptptr = scriptIdx + 1;
     warning = 0;
     error = 0;
     line_number = 1;
     total_lines = 0;
 
     passOne(readfromGrp); //Tokenize
-    script[0] = scriptptr;
+    throw new Error("todo. *script = (int32_t) scriptptr etc");
 }
 
 function ispecial(c) {
@@ -209,7 +209,7 @@ function getLabel() {
 }
 
 // Returns its code #
-function transword() {
+function transWord() {
     var i, l;
 
     while (!isaltok(textptr[textptrIdx])) {
@@ -229,7 +229,7 @@ function transword() {
     var str = stringFromArray(tempbuf);
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (keyw[i] == str) {
-            scriptptr = i;
+            script[scriptptr] = i;
             textptrIdx += l;
             scriptptr++;
             return i;
@@ -239,16 +239,16 @@ function transword() {
     textptrIdx += l;
 
     if (tempbuf[0] == '{'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.\n", line_number,String.fromCharCode( tempbuf[1]));
+        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.", line_number,String.fromCharCode( tempbuf[1]));
     else if (tempbuf[0] == '}'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.\n", line_number, String.fromCharCode(tempbuf[1]));
+        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '*' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '*'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.\n", line_number, String.fromCharCode(tempbuf[2]));
-    else console.log("  * ERROR!(L%hd) Expecting key word, but found '%s'.\n", line_number, stringFromArray(tempbuf));
+        console.log("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+    else console.log("  * ERROR!(L%hd) Expecting key word, but found '%s'.", line_number, stringFromArray(tempbuf));
 
     error++;
     return -1;
@@ -274,29 +274,31 @@ function transNumber() {
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (labels[labelcnt] == keyw) {
             error++;
-            console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, labels[labelcnt]);
+            console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
             textptrIdx += l;
         }
     }
     
+    var tempBufStr = stringFromArray(tempbuf);
     for (i = 0; i < labelcnt; i++) {
-        if (stringFromArray(tempbuf) == labels[i]) {
-            scriptptr = labelcode[i];
+        if (tempBufStr == labels[i]) {
+            debugger; // is this right here?
+            script[scriptptr] = labelcode[i];
             scriptptr++;
             textptrIdx += l;
             return;
         }
     }
-    
+
     if (!isDigit(textptr[textptrIdx]) && textptr[textptrIdx] != '-') {
 
-        console.log("  * ERROR!(L%hd) Parameter '%s' is undefined.\n", line_number, stringFromArray(tempbuf));
+        console.log("  * ERROR!(L%hd) Parameter '%s' is undefined.", line_number, stringFromArray(tempbuf));
         error++;
         textptrIdx += l;
         return;
     }
 
-    scriptptr = parseInt(textptr[textptrIdx]);
+    script[scriptptr] = parseInt(textptr[textptrIdx]);
     scriptptr++;
 
     textptrIdx += l;
@@ -314,7 +316,7 @@ function parseCommand(readFromGrp) {
         return 1;
     }
 
-    tw = transword();
+    tw = transWord();
     console.log("The value of tw is %i", tw);
     switch (tw) {
         default:
@@ -355,7 +357,7 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == keyw[i]) {
                    error++;
-                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.\n", line_number, labels[labelcnt]);
+                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
                    return 0;
                }
             }
@@ -364,14 +366,14 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == labels[i]) {
                    error++;
-                   printf("  * WARNING.(L%hd) Duplicate definition '%s' ignored.\n", line_number, labels[labelcnt]);
+                   console.log("  * WARNING.(L%hd) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
                    break;
                }
             }
             
             transNumber();
             if (i == labelcnt) {
-                labelcode[labelcnt++] = scriptptr - 1;
+                labelcode[labelcnt++] = script[scriptptr - 1];
             }
             scriptptr -= 2;
             return 0;
