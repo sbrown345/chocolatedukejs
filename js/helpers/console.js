@@ -1,1 +1,0 @@
-﻿//var printf = console.log; // easier to compare logs (todo: need a better way still)

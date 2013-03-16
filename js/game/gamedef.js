@@ -283,7 +283,7 @@ function transNumber() {
     var tempBufStr = stringFromArray(tempbuf);
     for (i = 0; i < labelcnt; i++) {
         if (tempBufStr == labels[i]) {
-            debugger; // is this right here?
+            // todo: is this right here?
             script[scriptptr] = labelcode[i];
             scriptptr++;
             textptrIdx += l;
@@ -398,8 +398,8 @@ function parseCommand(readFromGrp) {
                     if (!textptr[textptrIdx]) break;
                 }
                 j = 0;
-                while (isaltok(textptr.charCodeAt(textptrIdx + j))) {
-                    tempbuf[j] = textptr.charCodeAt(textptrIdx + j);
+                while (isaltok(textptr.charCodeAt(textptrIdx))) {
+                    tempbuf[j] = textptr.charCodeAt(textptrIdx++);
                     j++;
                 }
                 tempbuf[j] = 0;
