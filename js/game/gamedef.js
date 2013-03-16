@@ -209,6 +209,31 @@ function getLabel() {
     labels[labelcnt] = tempLabel;
 }
 
+function keyword() {
+    var tempTextPtrIdx = textptrIdx;
+
+    while (!isaltok(textptr[tempTextPtrIdx])) {
+        tempTextPtrIdx++;
+        if (!textptr[tempTextPtrIdx])
+            return 0;
+    }
+
+    var i = 0;
+    while (isaltok(textptr[tempTextPtrIdx])) {
+        tempbuf[i] = textptr[tempTextPtrIdx++].charCodeAt(0);
+        i++;
+    }
+    tempbuf[i] = 0;
+
+    var tempBufStr = stringFromArray(tempbuf);
+    for (i = 0; i < NUMKEYWORDS; i++) {
+        if (tempBufStr == keyw[i])
+            return i;
+    }
+
+    return -1;
+}
+
 // Returns its code #
 function transWord() {
     var i, l;
@@ -568,7 +593,116 @@ function parseCommand(readFromGrp) {
         case 106:
             throw new Error("todo");
         case 60:
-            throw new Error("todo");
+            {
+                var params = new Int32Array(30);
+
+                scriptptr--;
+                for (j = 0; j < 30; j++) {
+                    transNumber();
+                    scriptptr--;
+                    params[j] = script[scriptptr];
+
+                    if (j != 25) continue; // we try to guess if we are using 1.3/1.3d or 1.4/1.5 con files
+
+                    if (keyword() != -1) // Is the 26th variable set? If so then it's probably a 1.4/1.5 con file
+                    {
+                        break;
+                    }
+                    else {
+                        conVersion = 15;
+                    }
+                }
+                /* From Jonathon's code --mk
+                v1.3d					v1.5
+    
+                DEFAULTVISIBILITY		DEFAULTVISIBILITY
+                GENERICIMPACTDAMAGE		GENERICIMPACTDAMAGE
+                MAXPLAYERHEALTH			MAXPLAYERHEALTH
+                STARTARMORHEALTH		STARTARMORHEALTH
+                RESPAWNACTORTIME		RESPAWNACTORTIME
+                RESPAWNITEMTIME			RESPAWNITEMTIME
+                RUNNINGSPEED			RUNNINGSPEED
+                                        GRAVITATIONALCONSTANT
+                RPGBLASTRADIUS			RPGBLASTRADIUS
+                PIPEBOMBRADIUS			PIPEBOMBRADIUS
+                SHRINKERBLASTRADIUS		SHRINKERBLASTRADIUS
+                TRIPBOMBBLASTRADIUS		TRIPBOMBBLASTRADIUS
+                MORTERBLASTRADIUS		MORTERBLASTRADIUS
+                BOUNCEMINEBLASTRADIUS	BOUNCEMINEBLASTRADIUS
+                SEENINEBLASTRADIUS		SEENINEBLASTRADIUS
+                MAXPISTOLAMMO			MAXPISTOLAMMO
+                MAXSHOTGUNAMMO			MAXSHOTGUNAMMO
+                MAXCHAINGUNAMMO			MAXCHAINGUNAMMO
+                MAXRPGAMMO				MAXRPGAMMO
+                MAXHANDBOMBAMMO			MAXHANDBOMBAMMO
+                MAXSHRINKERAMMO			MAXSHRINKERAMMO
+                MAXDEVISTATORAMMO		MAXDEVISTATORAMMO
+                MAXTRIPBOMBAMMO			MAXTRIPBOMBAMMO
+                MAXFREEZEAMMO			MAXFREEZEAMMO
+                                        MAXGROWAMMO
+                CAMERASDESTRUCTABLE		CAMERASDESTRUCTABLE
+                NUMFREEZEBOUNCES		NUMFREEZEBOUNCES
+                FREEZERHURTOWNER		FREEZERHURTOWNER
+                                        QSIZE
+                                        TRIPBOMBLASERMODE
+                */
+
+                // Used Jonathon Fowler's parser. Cool to make the code 
+                // robust to 1.3 con files --mk
+
+                j = 0;
+
+                ud.const_visibility = params[j++];
+                impact_damage = params[j++];
+                max_player_health = params[j++];
+                max_armour_amount = params[j++];
+                respawnactortime = params[j++];
+                respawnitemtime = params[j++];
+                dukefriction = params[j++];
+                if (conVersion == 15)
+                    gc = params[j++];
+                else
+                    gc = 176; // default (guess) when using 1.3d CONs
+                rpgblastradius = params[j++];
+                pipebombblastradius = params[j++];
+                shrinkerblastradius = params[j++];
+                tripbombblastradius = params[j++];
+                morterblastradius = params[j++];
+                bouncemineblastradius = params[j++];
+                seenineblastradius = params[j++];
+                max_ammo_amount[PISTOL_WEAPON] = params[j++];
+                max_ammo_amount[SHOTGUN_WEAPON] = params[j++];
+                max_ammo_amount[CHAINGUN_WEAPON] = params[j++];
+                max_ammo_amount[RPG_WEAPON] = params[j++];
+                max_ammo_amount[HANDBOMB_WEAPON] = params[j++];
+                max_ammo_amount[SHRINKER_WEAPON] = params[j++];
+                max_ammo_amount[DEVISTATOR_WEAPON] = params[j++];
+                max_ammo_amount[TRIPBOMB_WEAPON] = params[j++];
+                max_ammo_amount[FREEZE_WEAPON] = params[j++];
+                if (conVersion == 15)
+                    max_ammo_amount[GROW_WEAPON] = params[j++];
+                else
+                    max_ammo_amount[GROW_WEAPON] = 50; // default (guess) when using 1.3d CONs
+                camerashitable = params[j++];
+                numfreezebounces = params[j++];
+                freezerhurtowner = params[j++];
+                if (conVersion == 15) {
+                    spriteqamount = params[j++];
+
+                    if (spriteqamount > 1024)
+                        spriteqamount = 1024;
+                    else if (spriteqamount < 0)
+                        spriteqamount = 0;
+                    lasermode = params[j++];
+                }
+                else {
+                    // spriteqamount = 64 is the default
+                    lasermode = 0; // default (guess) when using 1.3d CONs
+                }
+                
+                return 0;
+            }
+
     } // end of switch(tw)
 
     return 0;
