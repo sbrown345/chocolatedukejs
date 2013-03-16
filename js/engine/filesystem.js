@@ -27,7 +27,7 @@ function initgroupfile(filename) {
     console.log("Loading " + filename + "...");
 
     if (grpSet.num == MAXGROUPFILES) {
-        console.log("Error: Unable to open an extra GRP archive <= No more slot available.");
+        console.error("Error: Unable to open an extra GRP archive <= No more slot available.");
         return -1;
     }
 

@@ -147,7 +147,7 @@ function loadefs(filename, readfromGrp) {
     if (fp <= 0) {
         throw new Error("ERROR: CON(" + filename + ") not found.");
     } else {
-        console.log("Compiling '" + filename + "'.");
+        console.log("Compiling: '" + filename + "'.");
 
         fs = kfilelength(fp);
 
@@ -196,7 +196,7 @@ function getLabel() {
     while (!isalnum(textptr[textptrIdx])) {
         if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
         textptrIdx++;
-        if (textptr.charCodeAt(textptrIdx) == 0)
+        if (!textptr[textptrIdx])
             return;
     }
 
@@ -240,16 +240,16 @@ function transWord() {
     textptrIdx += l;
 
     if (tempbuf[0] == '{'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.", line_number,String.fromCharCode( tempbuf[1]));
+        console.error("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '}'.charCodeAt(0) && tempbuf[1] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
+        console.error("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+        console.error("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '*' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+        console.error("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '*'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.log("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
-    else console.log("  * ERROR!(L%hd) Expecting key word, but found '%s'.", line_number, stringFromArray(tempbuf));
+        console.error("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+    else console.error("  * ERROR!(L%hd) Expecting key word, but found '%s'.", line_number, stringFromArray(tempbuf));
 
     error++;
     return -1;
@@ -275,7 +275,7 @@ function transNumber() {
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (labels[labelcnt] == keyw) {
             error++;
-            console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+            console.error("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
             textptrIdx += l;
         }
     }
@@ -293,18 +293,20 @@ function transNumber() {
 
     if (!isDigit(textptr[textptrIdx]) && textptr[textptrIdx] != '-') {
 
-        console.log("  * ERROR!(L%hd) Parameter '%s' is undefined.", line_number, stringFromArray(tempbuf));
+        console.error("  * ERROR!(L%hd) Parameter '%s' is undefined.", line_number, stringFromArray(tempbuf));
         error++;
         textptrIdx += l;
         return;
     }
 
-    script[scriptptr] = parseInt(textptr[textptrIdx]);
+    script[scriptptr] = parseInt(tempBufStr);
+    console.log("script[scriptptr]:", script[scriptptr]);
     scriptptr++;
 
     textptrIdx += l;
 }
 
+var transCount = 0;
 function parseCommand(readFromGrp) {
     var i, j, k, tempscrptr;
     var done, temp_ifelse_check;
@@ -316,9 +318,12 @@ function parseCommand(readFromGrp) {
     if (error > 12 || !textptr[textptrIdx] || textptr[textptrIdx] == '\0' || textptr[textptrIdx + 1] == '\0') {
         return 1;
     }
+    transCount++;
 
     tw = transWord();
-    console.log("The value of tw is %i", tw);
+
+    console.log("tw: %i transCount: %i", tw, transCount);
+    
     switch (tw) {
         default:
         case -1:
@@ -331,7 +336,7 @@ function parseCommand(readFromGrp) {
                 textptrIdx++;
                 if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
                 if (!textptr[textptrIdx]) {
-                    console.log("  * ERROR!(L%d) Found '/*' with no '*/'.\n", j);
+                    console.error("  * ERROR!(L%d) Found '/*' with no '*/'.", j);
                     error++;
                     return 0;
                 }
@@ -356,7 +361,7 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == keyw[i]) {
                    error++;
-                   console.log("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                   console.error("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
                    return 0;
                }
             }
@@ -365,7 +370,7 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == labels[i]) {
                    error++;
-                   console.log("  * WARNING.(L%hd) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
+                   console.warn("  * WARNING.(L%hd) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
                    break;
                }
             }
@@ -404,14 +409,14 @@ function parseCommand(readFromGrp) {
                 fp = TCkopen4load(includedConFile, readFromGrp);
                 if (fp <= 0) {
                     error++;
-                    console.log("  * ERROR!(ln%hd) Could not find '%s'.\n", line_number, labels[labelcnt]);
-                    console.log("ERROR: could not open (%s)\n", includedConFile);
+                    console.error("  * ERROR!(ln%hd) Could not find '%s'.", line_number, labels[labelcnt]);
+                    console.error("ERROR: could not open (%s)", includedConFile);
                     throw new Error();
                 }
 
                 j = kfilelength(fp);
 
-                console.log("Including: '%s'.\n", includedConFile);
+                console.log("Including: '%s'.", includedConFile);
 
                 temp_line_number = line_number;
                 line_number = 1;
@@ -573,6 +578,6 @@ function passOne(readFromGrp) {
     while (parseCommand(readFromGrp) === 0);
 
     if ((error + warning) > 12) {
-        console.log("  * ERROR! Too many warnings or errors.");
+        console.error("  * ERROR! Too many warnings or errors.");
     }
 }
