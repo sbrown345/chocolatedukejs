@@ -563,11 +563,127 @@ function parseCommand(readFromGrp) {
 
             return 0;
         case 107:
-            throw new Error("todo");
+            scriptptr--;
+            transNumber();
+            scriptptr--;
+            j = script[scriptptr];
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            i = 0;
+
+            var volumeName = "";
+            while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                volumeName += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+                if (i > 32) {
+                    console.error("  * ERROR!(L%i) Volume name exceeds character size limit of 32.", line_number);
+                    error++;
+                    while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                        textptrIdx++;
+                    }
+                    break;
+                }
+            }
+            volume_names[j] = volumeName.toUpperCase();
+            return 0;
         case 108:
-            throw new Error("todo");
+            scriptptr--;
+            transNumber();
+            scriptptr--;
+            j = script[scriptptr];
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            i = 0;
+
+            var skillName = "";
+            while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                skillName += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+                if (i > 32) {
+                    console.error("  * ERROR!(L%i) Skill name exceeds character size limit of 32.", line_number);
+                    error++;
+                    while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                        textptrIdx++;
+                    }
+                    break;
+                }
+            }
+            skill_names[j] = skillName.toUpperCase();
+            return 0;
         case 0:
-            throw new Error("todo");
+            scriptptr--;
+            transNumber();
+            scriptptr--;
+            j = script[scriptptr];
+            transNumber();
+            scriptptr--;
+            k = script[scriptptr];
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            i = 0;
+            var levelFileName = "";
+            while (textptr[textptrIdx] != ' ' && textptr.charCodeAt(textptrIdx) != 0x0a) {
+                levelFileName += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+                if (i > 127) {
+                    console.error("  * ERROR!(L%i) Level file name exceeds character size limit of 128.",line_number);
+                    error++;
+                    while (textptr[textptrIdx] == ' ') {
+                        textptrIdx++;
+                    }
+                    break; 
+                }
+            }
+            levelFileName[j * 11 + k] = levelFileName;
+
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            partime[j * 11 + k] = ((((textptr.charCodeAt(textptrIdx)) - '0'.charCodeAt(0)) * 10 + ((textptr.charCodeAt(textptrIdx + 1)) - '0'.charCodeAt(0))) * 26 * 60) +
+                ((((textptr.charCodeAt(textptrIdx + 3)) - '0'.charCodeAt(0)) * 10 + ((textptr.charCodeAt(textptrIdx + 4)) - '0'.charCodeAt(0))) * 26);
+
+            textptrIdx += 5;
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            designertime[j * 11 + k] = ((((textptr.charCodeAt(textptrIdx)) - '0'.charCodeAt(0)) * 10 + ((textptr.charCodeAt(textptrIdx + 1)) - '0'.charCodeAt(0))) * 26 * 60) +
+                ((((textptr.charCodeAt(textptrIdx + 3)) - '0'.charCodeAt(0)) * 10 + ((textptr.charCodeAt(textptrIdx + 4)) - '0'.charCodeAt(0))) * 26);
+
+            textptrIdx += 5;
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+            
+            i = 0;
+            
+            var levelName = "";
+            while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                levelName += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+                if (i > 32) {
+                    console.error("  * ERROR!(L%i) Level name exceeds character size limit of 32.", line_number);
+                    error++;
+                    while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                        textptrIdx++;
+                    }
+                    break;
+                }
+            }
+            level_names[j * 11 + k] = levelName.toUpperCase();
+            
+            return 0;
         case 79:
             scriptptr--;
             transNumber();

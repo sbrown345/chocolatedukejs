@@ -30,6 +30,11 @@ var fta_quotes = new Array(NUMOFFIRSTTIMEACTIVE);
 var tempbuf = new Uint8Array(2048);
 var packbuf = new Uint8Array(576);
 
+var level_names = new Array(44);
+var level_file_names = new Array(44);
+var partime = new Int32Array(44), designertime = new Int32Array(44);
+var volume_names = ["L.A. MELTDOWN", "LUNAR APOCALYPSE", "SHRAPNEL CITY", ""]; // Names are not in 1.3 con files. MUST be in code.
+var skill_names = ["PIECE OF CAKE", "LET'S ROCK", "COME GET SOME", "DAMN I'M GOOD", ""];
 
 //Game recording variables
 
