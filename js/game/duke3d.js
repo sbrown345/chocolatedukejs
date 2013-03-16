@@ -14,6 +14,14 @@ var mymembuf;
 function Player() {
 }
 
+var NUMPAGES = 1;
+
+var AUTO_AIM_ANGLE = 48;
+var RECSYNCBUFSIZ = 2520;   //2520 is the (LCM of 1-8)*3
+var MOVEFIFOSIZ = 256;
+
+var FOURSLEIGHT = (1 << 8);
+
 var MODE_MENU = 1;
 var MODE_DEMO = 2;
 var MODE_GAME = 4;

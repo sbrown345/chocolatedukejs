@@ -25,6 +25,8 @@ var ud = {
     conSize: new Uint32Array(MAXPLAYERS),
 };
 
+var fta_quotes = new Array(NUMOFFIRSTTIMEACTIVE);
+
 var tempbuf = new Uint8Array(2048);
 var packbuf = new Uint8Array(576);
 

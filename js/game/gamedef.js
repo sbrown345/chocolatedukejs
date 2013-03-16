@@ -265,16 +265,16 @@ function transWord() {
     textptrIdx += l;
 
     if (tempbuf[0] == '{'.charCodeAt(0) && tempbuf[1] != 0)
-        console.error("  * ERROR!(L%hd) Expecting a SPACE or CR between '{' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
+        console.error("  * ERROR!(L%i) Expecting a SPACE or CR between '{' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '}'.charCodeAt(0) && tempbuf[1] != 0)
-        console.error("  * ERROR!(L%hd) Expecting a SPACE or CR between '}' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
+        console.error("  * ERROR!(L%i) Expecting a SPACE or CR between '}' and '%s'.", line_number, String.fromCharCode(tempbuf[1]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.error("  * ERROR!(L%hd) Expecting a SPACE between '//' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+        console.error("  * ERROR!(L%i) Expecting a SPACE between '//' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '/'.charCodeAt(0) && tempbuf[1] == '*' && tempbuf[2] != 0)
-        console.error("  * ERROR!(L%hd) Expecting a SPACE between '/*' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+        console.error("  * ERROR!(L%i) Expecting a SPACE between '/*' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
     else if (tempbuf[0] == '*'.charCodeAt(0) && tempbuf[1] == '/' && tempbuf[2] != 0)
-        console.error("  * ERROR!(L%hd) Expecting a SPACE between '*/' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
-    else console.error("  * ERROR!(L%hd) Expecting key word, but found '%s'.", line_number, stringFromArray(tempbuf));
+        console.error("  * ERROR!(L%i) Expecting a SPACE between '*/' and '%s'.", line_number, String.fromCharCode(tempbuf[2]));
+    else console.error("  * ERROR!(L%i) Expecting key word, but found '%s'.", line_number, stringFromArray(tempbuf));
 
     error++;
     return -1;
@@ -300,7 +300,7 @@ function transNumber() {
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (labels[labelcnt] == keyw) {
             error++;
-            console.error("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+            console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
             textptrIdx += l;
         }
     }
@@ -318,7 +318,7 @@ function transNumber() {
 
     if (!isDigit(textptr[textptrIdx]) && textptr[textptrIdx] != '-') {
 
-        console.error("  * ERROR!(L%hd) Parameter '%s' is undefined.", line_number, stringFromArray(tempbuf));
+        console.error("  * ERROR!(L%i) Parameter '%s' is undefined.", line_number, stringFromArray(tempbuf));
         error++;
         textptrIdx += l;
         return;
@@ -386,7 +386,7 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == keyw[i]) {
                    error++;
-                   console.error("  * ERROR!(L%hd) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                   console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
                    return 0;
                }
             }
@@ -395,7 +395,7 @@ function parseCommand(readFromGrp) {
             {
                 if (labels[labelcnt] == labels[i]) {
                    error++;
-                   console.warn("  * WARNING.(L%hd) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
+                   console.warn("  * WARNING.(L%i) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
                    break;
                }
             }
@@ -434,7 +434,7 @@ function parseCommand(readFromGrp) {
                 fp = TCkopen4load(includedConFile, readFromGrp);
                 if (fp <= 0) {
                     error++;
-                    console.error("  * ERROR!(ln%hd) Could not find '%s'.", line_number, labels[labelcnt]);
+                    console.error("  * ERROR!(ln%i) Could not find '%s'.", line_number, labels[labelcnt]);
                     console.error("ERROR: could not open (%s)", includedConFile);
                     throw new Error();
                 }
@@ -569,7 +569,28 @@ function parseCommand(readFromGrp) {
         case 0:
             throw new Error("todo");
         case 79:
-            throw new Error("todo");
+            scriptptr--;
+            transNumber();
+            k = script[scriptptr - 1];
+            if (k > NUMOFFIRSTTIMEACTIVE) {
+                console.error("  * ERROR!(L%i) Quote amount exceeds limit of %d characters.", line_number, NUMOFFIRSTTIMEACTIVE);
+                error++;
+            }
+            scriptptr--;
+            i = 0;
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            var quote = "";
+            while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                quote += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+            }
+
+            fta_quotes[k] = quote;
+            return 0;
         case 57:
             throw new Error("todo");
         case 4:
