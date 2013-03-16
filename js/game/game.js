@@ -9,6 +9,8 @@ var confilename = "GAME.CON";
 function compilecons() {
     var userconfilename = confilename;
     
+    labelcode = sector[0] // todo ??????????
+
     // todo: missing some things here...
 
     loadefs(userconfilename, false);

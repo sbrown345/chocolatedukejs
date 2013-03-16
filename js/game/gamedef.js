@@ -187,6 +187,7 @@ function ispecial(c) {
 }
 
 function isaltok(c) {
+    if (!c) return false;
     var ch = typeof c === "number" ? String.fromCharCode(c) : c;
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
@@ -214,8 +215,8 @@ function transWord() {
 
     while (!isaltok(textptr[textptrIdx])) {
         if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
-        if (textptr.charCodeAt(textptrIdx) == 0)
-            return -1;
+        if (!textptr[textptrIdx])
+            return -1; // end of string
         textptrIdx++;
     }
 
@@ -260,8 +261,8 @@ function transNumber() {
     while (!isaltok(textptr[textptrIdx])) {
         if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
         textptrIdx++;
-        if (textptr.charCodeAt(textptrIdx) == 0)
-            return;
+        if (!textptr[textptrIdx])
+            return; // end of string
     }
 
     l = 0;
@@ -321,9 +322,7 @@ function parseCommand(readFromGrp) {
     switch (tw) {
         default:
         case -1:
-            throw new Error("todo end");
-            return 0;
-            // End
+            return 0; // End
         case 39:
             // Rem endrem
             scriptptr--;
@@ -331,7 +330,7 @@ function parseCommand(readFromGrp) {
             do {
                 textptrIdx++;
                 if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
-                if (textptr.charCodeAt(textptrIdx)== 0) {
+                if (!textptr[textptrIdx]) {
                     console.log("  * ERROR!(L%d) Found '/*' with no '*/'.\n", j);
                     error++;
                     return 0;
@@ -391,7 +390,7 @@ function parseCommand(readFromGrp) {
                 while (!isaltok(textptr[textptrIdx])) {
                     if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
                     textptrIdx++;
-                    if (textptr.charCodeAt(textptrIdx) == 0) break;
+                    if (!textptr[textptrIdx]) break;
                 }
                 j = 0;
                 while (isaltok(textptr.charCodeAt(textptrIdx + j))) {
@@ -527,7 +526,12 @@ function parseCommand(readFromGrp) {
         case 76:
             throw new Error("todo");
         case 20:
-            throw new Error("todo");
+            scriptptr--;
+            while (textptr.charCodeAt(textptrIdx) != 0x0a) {
+                textptrIdx++;
+            }
+
+            return 0;
         case 107:
             throw new Error("todo");
         case 108:
