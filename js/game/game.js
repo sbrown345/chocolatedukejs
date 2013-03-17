@@ -8,8 +8,8 @@ var confilename = "GAME.CON";
 
 function compilecons() {
     var userconfilename = confilename;
-    
-    labelcode = sector[0] // todo ??????????
+
+    //labelcode = sector; // todo ??????????  these arrays are reused????? read comment in loadboard
 
     // todo: missing some things here...
 

@@ -4,7 +4,12 @@ var total_lines, line_number;
 var checking_ifelse = 0, parsing_state = 0;
 
 var last_used_text;
+var num_squigilly_brackets;
 var last_used_size;
+
+//var g_i = 0, g_p = 0;
+//var g_x;
+//var g_t = new Int32Array(5);
 
 var NUMKEYWORDS = 112;
 
@@ -159,18 +164,18 @@ function loadefs(filename, readfromGrp) {
         ud.conCRC[0] = crc32Update(str2Bytes(textptr), fs, ud.conCRC[0]);
     }
 
-    actorscrptr = new Int8Array(MAXTILES);
+    actorscrptr = new Int32Array(MAXTILES);
     actortype = new Uint8Array(MAXTILES);
 
     labelcnt = 0;
-    scriptptr = scriptIdx + 1;
+    scriptPtr = scriptIdx + 1;
     warning = 0;
     error = 0;
     line_number = 1;
     total_lines = 0;
 
     passOne(readfromGrp); //Tokenize
-    throw new Error("todo. *script = (int32_t) scriptptr etc");
+    throw new Error("todo. *script = (int32_t) scriptPtr etc");
 }
 
 function ispecial(c) {
@@ -207,6 +212,7 @@ function getLabel() {
         textptrIdx++;
     }
     labels[labelcnt] = tempLabel;
+    console.info("label: %s", tempLabel);
 }
 
 function keyword() {
@@ -227,8 +233,10 @@ function keyword() {
 
     var tempBufStr = stringFromArray(tempbuf);
     for (i = 0; i < NUMKEYWORDS; i++) {
-        if (tempBufStr == keyw[i])
+        if (tempBufStr == keyw[i]) {
+            console.info("keyword: %s", keyw[i]);
             return i;
+        }
     }
 
     return -1;
@@ -255,9 +263,9 @@ function transWord() {
     var str = stringFromArray(tempbuf);
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (keyw[i] == str) {
-            script[scriptptr] = i;
+            script[scriptPtr] = i;
             textptrIdx += l;
-            scriptptr++;
+            scriptPtr++;
             return i;
         }
     }
@@ -309,8 +317,12 @@ function transNumber() {
     for (i = 0; i < labelcnt; i++) {
         if (tempBufStr == labels[i]) {
             // todo: is this right here?
-            script[scriptptr] = labelcode[i];
-            scriptptr++;
+            script[scriptPtr] = labelcode[i];
+            if (typeof labelcode[i] == "undefined") {
+                debugger;
+            }
+            console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr] ,i, labelcode[i]);
+            scriptPtr++;
             textptrIdx += l;
             return;
         }
@@ -324,9 +336,9 @@ function transNumber() {
         return;
     }
 
-    script[scriptptr] = parseInt(tempBufStr);
-    console.log("script[scriptptr]:", script[scriptptr]);
-    scriptptr++;
+    script[scriptPtr] = parseInt(tempBufStr);
+    console.log("transNumber:", script[scriptPtr]);
+    scriptPtr++;
 
     textptrIdx += l;
 }
@@ -347,7 +359,7 @@ function parseCommand(readFromGrp) {
 
     tw = transWord();
 
-    console.log("tw: %i transCount: %i", tw, transCount);
+    console.log("tw: %i %s transCount: %i", tw, keyw[tw], transCount);
     
     switch (tw) {
         default:
@@ -355,7 +367,7 @@ function parseCommand(readFromGrp) {
             return 0; // End
         case 39:
             // Rem endrem
-            scriptptr--;
+            scriptPtr--;
             j = line_number;
             do {
                 textptrIdx++;
@@ -402,21 +414,123 @@ function parseCommand(readFromGrp) {
             
             transNumber();
             if (i == labelcnt) {
-                labelcode[labelcnt++] = script[scriptptr - 1];
+                console.log("case 19 labelcode[%i] = %i", labelcnt, script[scriptPtr - 1]);
+                labelcode[labelcnt++] = script[scriptPtr - 1];
             }
-            scriptptr -= 2;
+            scriptPtr -= 2;
             return 0;
         case 14:
             throw new Error("todo");
         case 32:
-            throw new Error("todo");
+            if (parsing_actor[0] || parsing_state) {
+                transNumber();
+
+                j = 0;
+                while (keyword() == -1) {
+                    transNumber();
+                    scriptPtr--;
+                    j |= script[scriptPtr];
+                }
+                script[scriptPtr] = j;
+                scriptPtr++;
+            } else {
+                scriptPtr--;
+                getLabel();
+
+                // Check to see it's already defined
+                for (i = 0; i < NUMKEYWORDS; i++) {
+                    if (labels[labelcnt] == keyw[i]) {
+                        error++;
+                        console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                        return 0;
+                    }
+                }
+
+                for (i = 0; i < labelcnt; i++) {
+                    if (labels[labelcnt] == labels[i]) {
+                        error++;
+                        console.warn("  * WARNING.(L%i) Duplicate move '%s' ignored.", line_number, labels[labelcnt]);
+                        break;
+                    }
+                }
+
+                if (i == labelcnt) {
+                    console.log("case 32 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    labelcode[labelcnt++] = scriptPtr;
+                }
+                for (j = 0; j < 2; j++) {
+                    if (keyword() >= 0) {
+                        break;
+                    }
+                    transNumber();
+                }
+                for (k = 0; k < 2; k++) {
+                    script[scriptPtr] = 0;
+                    scriptPtr++;
+                }
+            }
+            return 0;
         case 54:
-            throw new Error("todo");
+            scriptPtr--;
+            transNumber(); // Volume Number (0/4)
+            scriptPtr--;
+
+            k = script[scriptPtr] - 1;
+
+            // if it's background music
+            if (k >= 0) {
+                i = 0;
+                while (keyword() == -1) {
+                    while (!isaltok(textptr[textptrIdx])) {
+                        if (textptr.charCodeAt(textptrIdx) == 0x0a) {
+                            line_number++;
+                        }
+                        textptrIdx++;
+                        if (!textptr[textptrIdx]) break;
+                    }
+                    j = 0;
+                    var musicName = "";
+                    while (isaltok(textptr[textptrIdx + j])) {
+                        musicName += textptr[textptrIdx + j];
+                        j++;
+                    }
+                    music_fn[k][i] = musicName;
+                    textptrIdx += j;
+                    if (i > 9) {
+                        break;
+                    }
+                    i++;
+                }
+            } else {
+                i = 0;
+                while (keyword() == -1) {
+                    while (!isaltok(textptr[textptrIdx])) {
+                        if (textptr.charCodeAt(textptrIdx) == 0x0a) {
+                            line_number++;
+                        }
+                        textptrIdx++;
+                        if (!textptr[textptrIdx]) break;
+                    }
+                    j = 0;
+                    var musicEnvName = "";
+                    while (isaltok(textptr[textptrIdx + j])) {
+                        musicEnvName += textptr[textptrIdx + j];
+                        j++;
+                    }
+                    env_music_fn[i] = musicEnvName;
+                    textptrIdx += j;
+                    if (i > 9) {
+                        break;
+                    }
+                    i++;
+                }
+            }
+            return 0;
         case 55:
             // include other con files.
             {
                 var includedConFile = "";
-                scriptptr--;
+                scriptPtr--;
                 while (!isaltok(textptr[textptrIdx])) {
                     if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;
                     textptrIdx++;
@@ -468,9 +582,91 @@ function parseCommand(readFromGrp) {
                 return 0;
             }
         case 7:
-            throw new Error("todo");
+            if (parsing_actor[0] || parsing_state) {
+                transNumber();
+            } else {
+                scriptPtr--;
+                getLabel();
+
+                // Check to see it's already defined
+                for (i = 0; i < NUMKEYWORDS; i++) {
+                    if (labels[labelcnt] == keyw[i]) {
+                        error++;
+                        console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                        return 0;
+
+                    }
+                }
+                
+                for (i = 0; i < labelcnt; i++) {
+                    if (labels[labelcnt] == labels[i]) {
+                        warning++;
+                        console.warning("  * WARNING.(L%hd) Duplicate action '%s' ignored.", line_number, labels[labelcnt]);
+                        return 0;
+                    }
+                }
+                
+                if (i == labelcnt) {
+                    console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    labelcode[labelcnt++] = scriptPtr; // todo is this right??
+                }
+
+                for (j = 0; j < 5; j++) {
+                    if (keyword() >= 0) {
+                        break;
+                    }
+                    transNumber();
+                }
+
+                for (k = 0; k < 5; k++) {
+                    script[scriptPtr] = 0;
+                    scriptPtr++;
+                }
+            }
+            return 0;
         case 1:
-            throw new Error("todo");
+            if (parsing_state) {
+                console.error("  * ERROR!(L%hd) Found 'actor' within 'state'.", line_number);
+            }
+
+            if (parsing_actor[0]) {
+                console.error("  * ERROR!(L%hd) Found 'actor' within 'actor'.", line_number);
+                error++;
+            }
+
+            num_squigilly_brackets = 0;
+            scriptPtr--;
+            parsing_actor[0] = scriptPtr;
+
+            transNumber();
+            scriptPtr--;
+            actorscrptr[script[scriptPtr]] = parsing_actor[0];
+
+            for (j = 0; j < 4; j++) {
+                parsing_actor[j] = 0;
+                if (j == 3) {
+                    j = 0;
+                    while (keyword() == -1) {
+                        transNumber();
+                        scriptPtr--;
+                        j |= script[scriptPtr];
+                    }
+                    script[scriptPtr] = j;
+                    scriptPtr++;
+                    break;
+                } else {
+                    if (keyword() >= 0) {
+                        scriptPtr += (4 - j);
+                        break;
+                    }
+                    transNumber();
+                    parsing_actor[j] = script[scriptPtr - 1];
+                }
+            }
+
+            checking_ifelse = 0;
+
+            return 0;
         case 98:
             throw new Error("todo");
         case 11:
@@ -556,17 +752,17 @@ function parseCommand(readFromGrp) {
         case 76:
             throw new Error("todo");
         case 20:
-            scriptptr--;
+            scriptPtr--;
             while (textptr.charCodeAt(textptrIdx) != 0x0a) {
                 textptrIdx++;
             }
 
             return 0;
         case 107:
-            scriptptr--;
+            scriptPtr--;
             transNumber();
-            scriptptr--;
-            j = script[scriptptr];
+            scriptPtr--;
+            j = script[scriptPtr];
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
             }
@@ -590,10 +786,10 @@ function parseCommand(readFromGrp) {
             volume_names[j] = volumeName.toUpperCase();
             return 0;
         case 108:
-            scriptptr--;
+            scriptPtr--;
             transNumber();
-            scriptptr--;
-            j = script[scriptptr];
+            scriptPtr--;
+            j = script[scriptPtr];
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
             }
@@ -617,13 +813,13 @@ function parseCommand(readFromGrp) {
             skill_names[j] = skillName.toUpperCase();
             return 0;
         case 0:
-            scriptptr--;
+            scriptPtr--;
             transNumber();
-            scriptptr--;
-            j = script[scriptptr];
+            scriptPtr--;
+            j = script[scriptPtr];
             transNumber();
-            scriptptr--;
-            k = script[scriptptr];
+            scriptPtr--;
+            k = script[scriptPtr];
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
             }
@@ -685,14 +881,14 @@ function parseCommand(readFromGrp) {
             
             return 0;
         case 79:
-            scriptptr--;
+            scriptPtr--;
             transNumber();
-            k = script[scriptptr - 1];
+            k = script[scriptPtr - 1];
             if (k > NUMOFFIRSTTIMEACTIVE) {
                 console.error("  * ERROR!(L%i) Quote amount exceeds limit of %d characters.", line_number, NUMOFFIRSTTIMEACTIVE);
                 error++;
             }
-            scriptptr--;
+            scriptPtr--;
             i = 0;
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
@@ -708,7 +904,53 @@ function parseCommand(readFromGrp) {
             fta_quotes[k] = quote;
             return 0;
         case 57:
-            throw new Error("todo");
+            scriptPtr--;
+            transNumber();
+            k = script[scriptPtr - 1];
+            if (k >= NUM_SOUNDS) {
+                console.error("  * ERROR!(L%i) Exceeded sound limit of %d.", line_number, NUM_SOUNDS);
+                error++;
+            }
+            scriptPtr--;
+            i = 0;
+            while (textptr[textptrIdx] == ' ') {
+                textptrIdx++;
+            }
+
+            var soundName = "";
+            while (textptr[textptrIdx] != ' ') {
+                soundName += textptr[textptrIdx];
+                textptrIdx++;
+                i++;
+                if (i > 13) {
+                    console.log(soundName);
+                    console.error("  * ERROR!(L%i) Sound filename exceeded limit of 13 characters.", line_number);
+                    error++;
+                    while (textptr[textptrIdx] != ' ') {
+                        textptrIdx++;
+                    }
+                    break;
+                }
+            }
+            sounds[k] = soundName;
+
+            transNumber();
+            soundps[k] = script[scriptPtr - 1];
+            scriptPtr--;
+            transNumber();
+            soundpe[k] = script[scriptPtr - 1];
+            scriptPtr--;
+            transNumber();
+            soundpr[k] = script[scriptPtr - 1];
+            scriptPtr--;
+            transNumber();
+            soundm[k] = script[scriptPtr - 1];
+            scriptPtr--;
+            transNumber();
+            soundvo[k] = script[scriptPtr - 1];
+            scriptPtr--;
+
+            return 0;
         case 4:
             throw new Error("todo");
         case 12:
@@ -733,11 +975,11 @@ function parseCommand(readFromGrp) {
             {
                 var params = new Int32Array(30);
 
-                scriptptr--;
+                scriptPtr--;
                 for (j = 0; j < 30; j++) {
                     transNumber();
-                    scriptptr--;
-                    params[j] = script[scriptptr];
+                    scriptPtr--;
+                    params[j] = script[scriptPtr];
 
                     if (j != 25) continue; // we try to guess if we are using 1.3/1.3d or 1.4/1.5 con files
 

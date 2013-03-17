@@ -22,6 +22,8 @@ var MOVEFIFOSIZ = 256;
 
 var FOURSLEIGHT = (1 << 8);
 
+var NUM_SOUNDS = 450;
+
 var MODE_MENU = 1;
 var MODE_DEMO = 2;
 var MODE_GAME = 4;

@@ -1,4 +1,6 @@
-﻿function open(filename) {
+﻿'use strict';
+
+function open(filename) {
     var xhr = new XMLHttpRequest();
     xhr.overrideMimeType('text/plain; charset=x-user-defined');
     xhr.open('GET', filename, false);

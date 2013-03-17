@@ -36,18 +36,54 @@ var partime = new Int32Array(44), designertime = new Int32Array(44);
 var volume_names = ["L.A. MELTDOWN", "LUNAR APOCALYPSE", "SHRAPNEL CITY", ""]; // Names are not in 1.3 con files. MUST be in code.
 var skill_names = ["PIECE OF CAKE", "LET'S ROCK", "COME GET SOME", "DAMN I'M GOOD", ""];
 
+//volatile int32_t checksume;
+//int32_t soundsiz[NUM_SOUNDS];
+
+var soundps = new Int16Array(NUM_SOUNDS), soundpe = new Int16Array(NUM_SOUNDS), soundvo = new Int16Array(NUM_SOUNDS);
+var soundm = new Uint8Array(NUM_SOUNDS), soundpr = new Uint8Array(NUM_SOUNDS);
+var sounds = new Array(NUM_SOUNDS);
+
+//short title_zoom;
+
 //Game recording variables
 
 var playerreadyflag = new Uint8Array(MAXPLAYERS), ready2send;
 var playerquitflag = new Uint8Array(MAXPLAYERS);
 var vel, svel, angvel, horiz, ototalclock, respawnactortime = 768, respawnitemtime = 768, groupfile;
 
-var script = new Int32Array(MAXSCRIPTSIZE), scriptIdx = 0, scriptptr, insptr, labelcode, labelcnt = 0;
-var actorscrptr = new Int8Array(MAXTILES), parsing_actor;
+var script = new Int32Array(MAXSCRIPTSIZE), scriptIdx = 0, scriptPtr, insptr, labelcode = new Int32Array(MAXSECTORS * (40 / 4) /*Sector is 40 bytes, this is int32 array*/), labelcnt = 0;
+var actorscrptr = new Int32Array(MAXTILES), parsing_actor = new Int32Array(4);
 var labels = new Array(50000 /*todo, not sure of limit...*/), textptr, textptrIdx = 0, error, warning;
 var killit_flag;
 var music_pointer;
 var actortype = new Uint8Array(MAXTILES);
+
+//uint8_t  display_mirror,typebuflen;
+//char typebuf[41];
+
+var music_fn = [new Array(11), new Array(11), new Array(11), new Array(11)];
+//uint8_t music_select;
+var env_music_fn = new Array(4);
+//uint8_t  rtsplaying;
+
+
+//short weaponsandammosprites[15] = {
+//    RPGSPRITE,
+//    CHAINGUNSPRITE,
+//    DEVISTATORAMMO,
+//    RPGAMMO,
+//    RPGAMMO,
+//    JETPACK,
+//    SHIELD,
+//    FIRSTAID,
+//    STEROIDS,
+//    RPGAMMO,
+//    RPGAMMO,
+//    RPGSPRITE,
+//    RPGAMMO,
+//    FREEZESPRITE,
+//    FREEZEAMMO
+//    };
 
 var impact_damage;
 
