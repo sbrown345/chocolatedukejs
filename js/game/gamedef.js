@@ -359,7 +359,7 @@ function parseCommand(readFromGrp) {
 
     tw = transWord();
 
-    console.log("tw: %i %s transCount: %i", tw, keyw[tw], transCount);
+    console.log("tw: %i %s transCount: %i, line_number: %i", tw, keyw[tw], transCount, line_number);
     
     switch (tw) {
         default:
@@ -393,7 +393,6 @@ function parseCommand(readFromGrp) {
                 return 0;
             }
 
-            throw new Error("todo check this code:");
             getLabel();
             
             for (i = 0; i < NUMKEYWORDS; i++) {
@@ -406,7 +405,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < labelcnt; j++) {
                 if (labels[j] === labels[labelcnt]) {
-                    script[scriptPtr] = labelcode[j];
+                    script[scriptPtr] = labelcode[j]; // todo: check
                     break;
                 }
             }
@@ -419,14 +418,32 @@ function parseCommand(readFromGrp) {
 
             scriptPtr++;
             return 0;
-        case 15:// sound
-        case 92: //globalsound
-        case 87: //soundonce
-        case 89: //stopsound
-        case 93: //lotsofglass
-            throw new Error("todo");
-        case 18: //ends
-            throw new Error("todo");
+        case 15: // sound
+        case 92: // globalsound
+        case 87: // soundonce
+        case 89: // stopsound
+        case 93: // lotsofglass
+            transNumber();
+            return 0;
+            
+        case 18: // ends
+            if (parsing_state == 0) {
+                console.error("  * ERROR!(L%i) Found 'ends' with no 'state'.", line_number);
+                error++;
+            }
+            // else
+            {
+                if (num_squigilly_brackets > 0) {
+                    printf("  * ERROR!(L%i) Found more '{' than '}' before 'ends'.", line_number);
+                    error++;
+                }
+                if (num_squigilly_brackets < 0) {
+                    printf("  * ERROR!(L%i) Found more '}' than '{' before 'ends'.", line_number);
+                    error++;
+                }
+                parsing_state = 0;
+            }
+            return 0;
         case 19: //define
             getLabel();
             
@@ -457,7 +474,22 @@ function parseCommand(readFromGrp) {
             scriptPtr -= 2;
             return 0;
         case 14: // palfrom
-            throw new Error("todo");
+            for (j = 0; j < 4; j++) {
+                if (keyword() === -1) {
+                    transNumber();
+                } else {
+                    break;
+                }
+
+            }
+            
+            while (j < 4) {
+                script[scriptPtr] = 0;
+                scriptPtr++;
+                j++;
+            }
+            
+            return 0;
         case 32: // move
             if (parsing_actor[0] || parsing_state) {
                 transNumber();
@@ -725,7 +757,8 @@ function parseCommand(readFromGrp) {
         case 103: // paper
         case 105: // sleeptime
         case 110: // clipdist
-            throw new Error("todo");
+            transNumber();
+            return 0;
         case 2: // addammo
         case 23: // addweapon
         case 28: // sizeto
@@ -733,11 +766,30 @@ function parseCommand(readFromGrp) {
         case 37: // debris
         case 48: // addinventory
         case 58: // guts
-            throw new Error("todo");
+            transNumber();
+            transNumber();
+            break;
         case 50: // hitradius
-            throw new Error("todo");
+            transNumber();
+            transNumber();
+            transNumber();
+            transNumber();
+            transNumber();
+            break;
         case 10: // else
-            throw new Error("todo");
+            if (checking_ifelse) {
+                checking_ifelse--;
+                tempscrptr = scriptPtr;
+                scriptPtr++; // Leave a spot for the fail location
+                parseCommand(readFromGrp);
+                script[tempscrptr] = scriptPtr; // todo: is this correct??
+            } else {
+                scriptPtr--;
+                error++;
+                console.error("  * ERROR!(L%i) Found 'else' with no 'if'.", line_number);
+            }
+
+            return 0;
         case 75: // ifpinventory
             throw new Error("todo");
         case 3: // ifrnd
@@ -782,12 +834,12 @@ function parseCommand(readFromGrp) {
         case 91: // ifcanseetarget
         case 109: // ifnosounds
             if (tw === 51) {
-                throw new Error("todo: check");
                 j = 0;
                 do {
                     transNumber();
                     scriptPtr--;
                     j |= script[scriptPtr];
+                    console.log("ifnosounds j: %i", j);
                 } while (keyword() == -1);
                 script[scriptPtr] = j;
                 scriptPtr++;
@@ -816,7 +868,13 @@ function parseCommand(readFromGrp) {
             } while (done === 0);
             return 0;
         case 30: // }
-            throw new Error("todo");
+            num_squigilly_brackets--;
+            if (num_squigilly_brackets < 0) {
+
+                console.error("  * ERROR!(L%i) Found more '}' than '{'.", line_number);
+                error++;
+            }
+            return 1;
         case 76: // betaname
             throw new Error("todo");
         case 20: // "//"
@@ -1051,7 +1109,7 @@ function parseCommand(readFromGrp) {
         case 97: // mikesnd
         case 104: // tossweapon
         case 106: // nullop
-            throw new Error("todo");
+            return 0;
         case 60: //gamestartup
             {
                 var params = new Int32Array(30);
