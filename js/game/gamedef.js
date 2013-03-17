@@ -381,7 +381,7 @@ function parseCommand(readFromGrp) {
             textptrIdx += 2;
             return 0;
         case 17: // state
-            if (parsing_actor[0] == 0 && parsing_state == 0) {
+            if (typeof parsing_actor === "undefined" && parsing_state == 0) {
                 getLabel();
                 scriptPtr--;
                 labelcode[labelcnt] = scriptPtr;
@@ -490,7 +490,7 @@ function parseCommand(readFromGrp) {
             
             return 0;
         case 32: // move
-            if (parsing_actor[0] || parsing_state) {
+            if (typeof parsing_actor !== "undefined" || parsing_state) {
                 transNumber();
 
                 j = 0;
@@ -649,8 +649,10 @@ function parseCommand(readFromGrp) {
 
                 return 0;
             }
+        case 24:
+            throw new Error("todo");
         case 7: // action
-            if (parsing_actor[0] || parsing_state) {
+            if (typeof parsing_actor !== "undefined" || parsing_state) {
                 transNumber();
             } else {
                 scriptPtr--;
@@ -693,11 +695,13 @@ function parseCommand(readFromGrp) {
             }
             return 0;
         case 1: // actor
+            // todo: parsing_actor just points to script[?] ??
+
             if (parsing_state) {
                 console.error("  * ERROR!(L%hd) Found 'actor' within 'state'.", line_number);
             }
 
-            if (parsing_actor[0]) {
+            if (typeof parsing_actor !== "undefined") {
                 console.error("  * ERROR!(L%hd) Found 'actor' within 'actor'.", line_number);
                 error++;
             }
@@ -705,15 +709,15 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            console.log("parsing_actor[0] = %i (scriptPtr)", parsing_actor[0]);
+            console.log("parsing_actorIdx[0] = %i", parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
             actorscrptr[script[scriptPtr]] = parsing_actor[0];
 
             for (j = 0; j < 4; j++) {
-                parsing_actor[j] = 0;
-                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+                script[parsing_actor[j]] = 0;
+                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]); // ? todo check
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -730,8 +734,8 @@ function parseCommand(readFromGrp) {
                         break;
                     }
                     transNumber();
-                    parsing_actor[j] = script[scriptPtr - 1];
-                    console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+                    script[parsing_actor[j]] = script[scriptPtr - 1];
+                    console.log("parsing_actor[%i] = %i", j,  script[ parsing_actor[j]]);
                 }
             }
 
@@ -744,7 +748,7 @@ function parseCommand(readFromGrp) {
                 error++;
             }
             
-            if (parsing_actor[0]) {
+            if (typeof parsing_actor === "undefined") {
                 console.error("  * ERROR!(L%i) Found 'useritem' within 'actor'.", line_number);
                 error++;
             }
@@ -764,8 +768,8 @@ function parseCommand(readFromGrp) {
             actortype[script[scriptPtr]] = j;
 
             for ( j = 0; j < 4; j++) {
-                parsing_actor[j] = 0;
-                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+                script[parsing_actor[j]] = 0;
+                console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
                 if (j === 3) {
                     j = 0;
                     while (keyword() === -1) {
@@ -783,8 +787,8 @@ function parseCommand(readFromGrp) {
                     }
 
                     transNumber();
-                    parsing_actor[j] = script[scriptPtr - 1];
-                    console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+                    script[parsing_actor[j]] = script[scriptPtr - 1];
+                    console.log("parsing_actor[%i] = %i", j,  script[parsing_actor[j]]);
 
                 }
             }
@@ -1133,7 +1137,7 @@ function parseCommand(readFromGrp) {
 
             return 0;
         case 4: // enda
-            if (parsing_actor[0] == 0) {
+            if (typeof parsing_actor === "undefined") {
                 console.error("  * ERROR!(L%i) Found 'enda' without defining 'actor'.", line_number);
                 error++;
             }
@@ -1143,7 +1147,7 @@ function parseCommand(readFromGrp) {
                     console.error("  * ERROR!(L%i) Found more '{' than '}' before 'enda'.", line_number);
                     error++;
                 }
-                parsing_actor[0] = 0;
+                parsing_actor[0] = undefined;
             }
 
             return 0;
