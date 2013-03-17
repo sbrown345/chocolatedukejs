@@ -359,7 +359,7 @@ function parseCommand(readFromGrp) {
 
     tw = transWord();
 
-    console.log("tw: %i %s transCount: %i, line_number: %i", tw, keyw[tw], transCount, line_number);
+    console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i", tw, keyw[tw], transCount, line_number, script[scriptPtr]);
     
     switch (tw) {
         default:
@@ -411,7 +411,6 @@ function parseCommand(readFromGrp) {
             }
 
             if (j === labelcnt) {
-
                 console.error("  * ERROR!(L%i) State '%s' not found.", line_number, labels[labelcnt]);
                 error++;
             }
@@ -706,6 +705,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
+            console.log("parsing_actor[0] = %i (scriptPtr)", parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -713,6 +713,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 parsing_actor[j] = 0;
+                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -730,6 +731,7 @@ function parseCommand(readFromGrp) {
                     }
                     transNumber();
                     parsing_actor[j] = script[scriptPtr - 1];
+                    console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
                 }
             }
 
@@ -737,7 +739,60 @@ function parseCommand(readFromGrp) {
 
             return 0;
         case 98: // useractor
-            throw new Error("todo");
+            if (parsing_state) {
+                console.error("  * ERROR!(L%i) Found 'useritem' within 'state'n", line_number);
+                error++;
+            }
+            
+            if (parsing_actor[0]) {
+                console.error("  * ERROR!(L%i) Found 'useritem' within 'actor'.", line_number);
+                error++;
+            }
+
+            num_squigilly_brackets = 0;
+            scriptPtr--;
+            parsing_actor[0] = scriptPtr;
+            console.log("parsing_actor[%i] = %i", 0, parsing_actor[0]);
+
+            transNumber();
+            scriptPtr--;
+            j = script[scriptPtr];
+
+            transNumber();
+            scriptPtr--;
+            actorscrptr[script[scriptPtr]] = parsing_actor[0];
+            actortype[script[scriptPtr]] = j;
+
+            for ( j = 0; j < 4; j++) {
+                parsing_actor[j] = 0;
+                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+                if (j === 3) {
+                    j = 0;
+                    while (keyword() === -1) {
+                        transNumber();
+                        scriptPtr++;
+                        j |= script[scriptPtr];
+                    }
+                    script[scriptPtr] = j;
+                    scriptPtr++;
+                    break;
+                } else {
+                    if (keyword() >= 0) {
+                        scriptPtr += (4 - j);
+                        break;
+                    }
+
+                    transNumber();
+                    parsing_actor[j] = script[scriptPtr - 1];
+                    console.log("parsing_actor[%i] = %i", j, parsing_actor[j]);
+
+                }
+            }
+
+            checking_ifelse = 0;
+
+            return 0;
+            
         case 11: // strength
         case 13: // shoot
         case 25: // addphealth
