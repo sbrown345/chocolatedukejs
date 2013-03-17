@@ -365,7 +365,7 @@ function parseCommand(readFromGrp) {
         default:
         case -1:
             return 0; // End
-        case 39:
+        case 39: // /*
             // Rem endrem
             scriptPtr--;
             j = line_number;
@@ -380,23 +380,60 @@ function parseCommand(readFromGrp) {
             } while (textptr[textptrIdx] != '*' || textptr[textptrIdx + 1] != '/');
             textptrIdx += 2;
             return 0;
-        case 17:
+        case 17: // state
+            if (parsing_actor[0] == 0 && parsing_state == 0) {
+                getLabel();
+                scriptPtr--;
+                labelcode[labelcnt] = scriptPtr;
+                console.log("case 17 labelcode[%i] = %i", labelcnt, scriptPtr);
+                labelcnt++;
+
+                parsing_state = 1;
+
+                return 0;
+            }
+
+            throw new Error("todo check this code:");
+            getLabel();
+            
+            for (i = 0; i < NUMKEYWORDS; i++) {
+                if (labels[labelcnt] === keyw[i]) {
+                    error++;
+                    console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                    return 0;
+                }
+            }
+
+            for (j = 0; j < labelcnt; j++) {
+                if (labels[j] === labels[labelcnt]) {
+                    script[scriptPtr] = labelcode[j];
+                    break;
+                }
+            }
+
+            if (j === labelcnt) {
+
+                console.error("  * ERROR!(L%i) State '%s' not found.", line_number, labels[labelcnt]);
+                error++;
+            }
+
+            scriptPtr++;
+            return 0;
+        case 15:// sound
+        case 92: //globalsound
+        case 87: //soundonce
+        case 89: //stopsound
+        case 93: //lotsofglass
             throw new Error("todo");
-        case 15:
-        case 92:
-        case 87:
-        case 89:
-        case 93:
+        case 18: //ends
             throw new Error("todo");
-        case 18:
-            throw new Error("todo");
-        case 19:
+        case 19: //define
             getLabel();
             
             // Check to see it's already defined
             for(i=0;i<NUMKEYWORDS;i++)
             {
-                if (labels[labelcnt] == keyw[i]) {
+                if (labels[labelcnt] === keyw[i]) {
                    error++;
                    console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
                    return 0;
@@ -405,7 +442,7 @@ function parseCommand(readFromGrp) {
                        
             for (i = 0; i < labelcnt; i++)
             {
-                if (labels[labelcnt] == labels[i]) {
+                if (labels[labelcnt] === labels[i]) {
                    error++;
                    console.warn("  * WARNING.(L%i) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
                    break;
@@ -419,9 +456,9 @@ function parseCommand(readFromGrp) {
             }
             scriptPtr -= 2;
             return 0;
-        case 14:
+        case 14: // palfrom
             throw new Error("todo");
-        case 32:
+        case 32: // move
             if (parsing_actor[0] || parsing_state) {
                 transNumber();
 
@@ -470,7 +507,7 @@ function parseCommand(readFromGrp) {
                 }
             }
             return 0;
-        case 54:
+        case 54: // music
             scriptPtr--;
             transNumber(); // Volume Number (0/4)
             scriptPtr--;
@@ -526,7 +563,7 @@ function parseCommand(readFromGrp) {
                 }
             }
             return 0;
-        case 55:
+        case 55: // include
             // include other con files.
             {
                 var includedConFile = "";
@@ -581,7 +618,7 @@ function parseCommand(readFromGrp) {
 
                 return 0;
             }
-        case 7:
+        case 7: // action
             if (parsing_actor[0] || parsing_state) {
                 transNumber();
             } else {
@@ -624,7 +661,7 @@ function parseCommand(readFromGrp) {
                 }
             }
             return 0;
-        case 1:
+        case 1: // actor
             if (parsing_state) {
                 console.error("  * ERROR!(L%hd) Found 'actor' within 'state'.", line_number);
             }
@@ -667,98 +704,129 @@ function parseCommand(readFromGrp) {
             checking_ifelse = 0;
 
             return 0;
-        case 98:
+        case 98: // useractor
             throw new Error("todo");
-        case 11:
-        case 13:
-        case 25:
-        case 31:
-        case 40:
-        case 52:
-        case 69:
-        case 74:
-        case 77:
-        case 80:
-        case 86:
-        case 88:
-        case 68:
-        case 100:
-        case 101:
-        case 102:
-        case 103:
-        case 105:
-        case 110:
+        case 11: // strength
+        case 13: // shoot
+        case 25: // addphealth
+        case 31: // spawn
+        case 40: // cstat
+        case 52: // count
+        case 69: // endofgame
+        case 74: // spritepal
+        case 77: // cactor
+        case 80: // quote
+        case 86: // money
+        case 88: // addkills
+        case 68: // debug
+        case 100: // addstrength
+        case 101: // cstator
+        case 102: // mail
+        case 103: // paper
+        case 105: // sleeptime
+        case 110: // clipdist
             throw new Error("todo");
-        case 2:
-        case 23:
-        case 28:
-        case 99:
-        case 37:
-        case 48:
-        case 58:
+        case 2: // addammo
+        case 23: // addweapon
+        case 28: // sizeto
+        case 99: // sizeat
+        case 37: // debris
+        case 48: // addinventory
+        case 58: // guts
             throw new Error("todo");
-        case 50:
+        case 50: // hitradius
             throw new Error("todo");
-        case 10:
+        case 10: // else
             throw new Error("todo");
-        case 75:
+        case 75: // ifpinventory
             throw new Error("todo");
-        case 3:
-        case 8:
-        case 9:
-        case 21:
-        case 33:
-        case 34:
-        case 35:
-        case 41:
-        case 46:
-        case 53:
-        case 56:
-        case 59:
-        case 62:
-        case 72:
-        case 73:
-            //        case 74:
-        case 78:
-        case 85:
-        case 94:
-        case 111:
+        case 3: // ifrnd
+        case 8: // ifpdistl
+        case 9: // ifpdistg
+        case 21: // ifai
+        case 33: // ifwasweapon
+        case 34: // ifaction
+        case 35: // ifactioncount
+        case 41: // ifmove
+        case 46: // ifcount
+        case 53: // ifactor
+        case 56: // ifstrength
+        case 59: // ifspawnedby
+        case 62: // ifgapzl
+        case 72: // iffloordistl
+        case 73: // ifceilingdistl
+            //        case 74: // spritepal
+        case 78: // ifphealthl
+        case 85: // ifspritepal
+        case 94: // ifgotweaponce
+        case 111: // ifangdiffl
+            transNumber();
+        case 43: // ifonwater
+        case 44: // ifinwater
+        case 49: // ifactornotstayput
+        case 5: // ifcansee
+        case 6: // ifhitweapon
+        case 27: // ifsquished
+        case 26: // ifdead
+        case 45: // ifcanshoottarget
+        case 51: // ifp
+        case 63: // ifhitspace
+        case 64: // ifoutside
+        case 65: // ifmultiplayer
+        case 67: // ifinspace
+        case 70: // ifbulletnear
+        case 71: // ifrespawn
+        case 81: // ifinouterspace
+        case 82: // ifnotmoving
+        case 90: // ifawayfromwall
+        case 91: // ifcanseetarget
+        case 109: // ifnosounds
+            if (tw === 51) {
+                throw new Error("todo: check");
+                j = 0;
+                do {
+                    transNumber();
+                    scriptPtr--;
+                    j |= script[scriptPtr];
+                } while (keyword() == -1);
+                script[scriptPtr] = j;
+                scriptPtr++;
+            }
+
+            tempscrptr = scriptPtr;
+            scriptPtr++; // Leave a spot for the fail location
+
+            do {
+                j = keyword();
+                if (j === 20 || j === 39) {
+                    parseCommand(readFromGrp);
+                }
+            } while (j === 20 || j === 39);
+
+            parseCommand(readFromGrp);
+
+            script[tempscrptr] = scriptPtr; // todo: check
+
+            checking_ifelse++;
+            return 0;
+        case 29: // {
+            num_squigilly_brackets++;
+            do {
+                done = parseCommand(readFromGrp);
+            } while (done === 0);
+            return 0;
+        case 30: // }
             throw new Error("todo");
-        case 43:
-        case 44:
-        case 49:
-        case 5:
-        case 6:
-        case 27:
-        case 26:
-        case 45:
-        case 51:
-        case 63:
-        case 64:
-        case 65:
-        case 67:
-        case 70:
-        case 71:
-        case 81:
-        case 82:
-        case 90:
-        case 91:
-        case 109:
+        case 76: // betaname
             throw new Error("todo");
-        case 29:
-            throw new Error("todo");
-        case 30:
-            throw new Error("todo");
-        case 76:
-            throw new Error("todo");
-        case 20:
+        case 20: // "//"
             scriptPtr--;
             while (textptr.charCodeAt(textptrIdx) != 0x0a) {
                 textptrIdx++;
             }
 
             return 0;
-        case 107:
+        case 107: // definevolumename
             scriptPtr--;
             transNumber();
             scriptPtr--;
@@ -785,7 +853,7 @@ function parseCommand(readFromGrp) {
             }
             volume_names[j] = volumeName.toUpperCase();
             return 0;
-        case 108:
+        case 108: // defineskillname
             scriptPtr--;
             transNumber();
             scriptPtr--;
@@ -812,7 +880,7 @@ function parseCommand(readFromGrp) {
             }
             skill_names[j] = skillName.toUpperCase();
             return 0;
-        case 0:
+        case 0: // definelevelname
             scriptPtr--;
             transNumber();
             scriptPtr--;
@@ -880,7 +948,7 @@ function parseCommand(readFromGrp) {
             level_names[j * 11 + k] = levelName.toUpperCase();
             
             return 0;
-        case 79:
+        case 79: // definequote
             scriptPtr--;
             transNumber();
             k = script[scriptPtr - 1];
@@ -903,7 +971,7 @@ function parseCommand(readFromGrp) {
 
             fta_quotes[k] = quote;
             return 0;
-        case 57:
+        case 57: // definesound
             scriptPtr--;
             transNumber();
             k = script[scriptPtr - 1];
@@ -951,27 +1019,40 @@ function parseCommand(readFromGrp) {
             scriptPtr--;
 
             return 0;
-        case 4:
-            throw new Error("todo");
-        case 12:
-        case 16:
-        case 84:
+        case 4: // enda
+            if (parsing_actor[0] == 0) {
+                console.error("  * ERROR!(L%i) Found 'enda' without defining 'actor'.", line_number);
+                error++;
+            }
+            //            else
+            {
+                if (num_squigilly_brackets > 0) {
+                    console.error("  * ERROR!(L%i) Found more '{' than '}' before 'enda'.", line_number);
+                    error++;
+                }
+                parsing_actor[0] = 0;
+            }
+
+            return 0;
+        case 12: // break
+        case 16: // fall
+        case 84: // tip
             //        case 21:
         case 22: //KILLIT
-        case 36:
-        case 38:
-        case 42:
-        case 47:
-        case 61:
-        case 66:
-        case 83:
-        case 95:
-        case 96:
-        case 97:
-        case 104:
-        case 106:
+        case 36: // resetactioncount
+        case 38: // pstomp
+        case 42: // ifmove
+        case 47: // resetcount
+        case 61: // wackplayer
+        case 66: // operate
+        case 83: // respawnhitag
+        case 95: // getlastpal
+        case 96: // pkick
+        case 97: // mikesnd
+        case 104: // tossweapon
+        case 106: // nullop
             throw new Error("todo");
-        case 60:
+        case 60: //gamestartup
             {
                 var params = new Int32Array(30);
 
