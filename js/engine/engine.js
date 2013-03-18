@@ -230,7 +230,6 @@ function initFastColorLookup(rScale, gScale, bScale) {
 
     j = 0;
     for (i = 64; i >= 0; i--) {
-        /*j = (i-64)*(i-64);*/
         rdist[i] = rdist[128 - i] = j * rScale;
         gdist[i] = gdist[128 - i] = j * gScale;
         bdist[i] = bdist[128 - i] = j * bScale;
@@ -243,11 +242,6 @@ function initFastColorLookup(rScale, gScale, bScale) {
     var pal1 = 768 - 3;
     for (i = 255; i >= 0; i--, pal1 -= 3) {
         j = (palette[pal1] >> 3) * FASTPALGRIDSIZ * FASTPALGRIDSIZ + (palette[pal1 +1] >> 3) * FASTPALGRIDSIZ + (palette[pal1 +2] >> 3) + FASTPALGRIDSIZ * FASTPALGRIDSIZ + FASTPALGRIDSIZ + 1;
-        //console.log("pal1: %i", pal1);
-        //console.log("j: %i", j);
-        //console.log("pal1[0]: %i", palette[pal1]);
-        //console.log("pal1[1]: %i", palette[pal1+1]);
-        //console.log("pal1[2]: %i", palette[pal1+2]);
         if (colhere[j >> 3] & pow2char[j & 7]) {
             colnext[i] = colhead[j];
         } else {

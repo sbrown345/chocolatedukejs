@@ -3,6 +3,8 @@
 // Game play speed
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
+var TICRATE = g_iTickRate;
+var TICSPERFRAME = (TICRATE / g_iTicksPerFrame);
 
 var CommandSoundToggleOff = 0;
 var CommandMusicToggleOff = 0;
@@ -39,8 +41,14 @@ function Startup() {
     Control.startup();
 
     initEngine();
-    
-    throw new Error("todo")
+
+    initTimer(g_iTickRate);
+
+    console.log("Loading art header.");
+
+    loadPics("tiles000.art", null);
+
+    throw new Error("todo");
 }
 
 function findGRPToUse() {

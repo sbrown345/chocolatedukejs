@@ -15,3 +15,7 @@ function Tile() {
 var artfilename = "";
 
 var tiles = structArray(Tile, MAXTILES);
+
+function loadPics(filename, gamedir) {
+    throw new Error("todo");
+}

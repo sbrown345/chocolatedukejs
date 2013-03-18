@@ -115,3 +115,31 @@ function _platform_init(argc, argv, title, iconName) {
 
     Startup();
 }
+
+
+//-------------------------------------------------------------------------------------------------
+//  TIMER
+//=================================================================================================
+
+var timerFreq = 0;
+var timerLastSample = 0;
+var timerTicsPerSec = 0;
+var userTimerCallback = null;
+
+function initTimer(ticksPerSecond) {
+    if (timerFreq) {
+        return 0;
+    }
+
+    timerFreq = 1000;
+    timerTicsPerSec = ticksPerSecond;
+    timerLastSample = (getTicks() * timerTicsPerSec / timerFreq) | 0;
+    userTimerCallback = null;
+
+    return 0;
+}
+
+var initTime = Date.now();
+function getTicks() {
+    return Date.now() - initTime;
+}

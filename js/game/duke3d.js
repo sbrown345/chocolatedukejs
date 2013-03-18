@@ -22,6 +22,9 @@ var MOVEFIFOSIZ = 256;
 
 var FOURSLEIGHT = (1 << 8);
 
+//var TICRATE = g_iTickRate; // put in game.js instead
+//var TICSPERFRAME = (TICRATE / g_iTicksPerFrame);
+
 var NUM_SOUNDS = 450;
 
 var MODE_MENU = 1;
