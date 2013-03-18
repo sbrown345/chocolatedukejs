@@ -112,8 +112,6 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_PAGEDOWN] = 0xE051;
     //scancodes[SDLK_INSERT] = 0xE052;
     //scancodes[SDLK_DELETE] = 0xE053;
-
-    Startup();
 }
 
 

@@ -1,5 +1,7 @@
 ﻿'use strict';
 
+var nHostForceDisableAutoaim = 0;
+
 // Game play speed
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
@@ -10,6 +12,7 @@ var CommandSoundToggleOff = 0;
 var CommandMusicToggleOff = 0;
 
 var confilename = "GAME.CON";
+var boardfilename = null;
 
 function compilecons() {
     var userconfilename = confilename;
@@ -57,14 +60,67 @@ function Startup() {
     }
 
     Network.initMultiPlayers(0, 0, 0);
+    
+    if (numplayers > 1) {
+        console.log("Multiplayer initialized.");
+    }
 
-    throw new Error("todo");
+    ps[myconnectindex].palette = palette[0];
+    setupGameButtons();
+    
+    if (networkmode === 255) {
+        networkmode = 1;
+    }
+    
+    //console.log("Checking sound inits.");
+    //todo: SoundStartup(); 
+    //console.log("Checking music inits.");
+    //todo: MusicStartup();
+
+    // AutoAim
+    if (nHostForceDisableAutoaim)
+        ud.auto_aim = 0;
+
+    console.log("loadTmb()");
+    loadTmb();
 }
 
+//7655
+function loadTmb() {
+    var tmb = new Uint8Array(8000);
+
+    var file = kopen4load("d3dtimbr.tmb", false);
+
+    if(file == -1) 
+        return;
+
+    var l = kfilelength(file);
+
+    kread(file, tmb, l);
+
+    Music.RegisterTimbreBank(tmb);
+
+    kclose(file);
+}
+
+//7803
+function getNames() {
+    
+}
+
+// 7977
 function findGRPToUse() {
     return "DUKE3D.GRP";
 }
 
+// 8082
+function load_duke3d_groupfile() {
+    var groupfilefullpath = findGRPToUse();
+
+    return (initgroupfile(groupfilefullpath) != -1);
+}
+
+/// 8100
 function main(argc, argv) {
     console.log("*** Chocolate DukeNukem3D JavaScript v" + CHOCOLATE_DUKE_REV_X + "." + CHOCOLATE_DUKE_REV_DOT_Y + " ***");
 
@@ -88,10 +144,31 @@ function main(argc, argv) {
     // todo: checkcommandline
 
     _platform_init(argc, argv, "Duke Nukem 3D", "Duke3D");
+
+    //todo check memory (maybe use console.memory?)
+    
+    // todo: register shutdown function - needed???
+
+    Startup();
+    
+    //if (g_bStun) {
+    //    waitforeverybody(); //todo
+    //}
+    
+    if (numplayers > 1) {
+        throw new Error("todo");
+    } else if (boardfilename) {
+        ud.m_level_number = 7;
+        ud.m_volume_number = 0;
+        ud.warp_on = 1;
+    }
+
+    getNames();
+
+    throw new Error("todo");
 }
 
-function load_duke3d_groupfile() {
-    var groupfilefullpath = findGRPToUse();
-
-    return (initgroupfile(groupfilefullpath) != -1);
+//10434
+function setupGameButtons() {
+    console.log("todo setupGameButtons");
 }

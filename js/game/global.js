@@ -104,7 +104,7 @@ var myhorizbak = new Int32Array(MOVEFIFOSIZ), dukefriction = 0xcc00, show_sharew
 var camerashitable, freezerhurtowner = 0, lasermode;
 //// CTW - MODIFICATION
 //// uint8_t  networkmode = 255, movesperpacket = 1,gamequit = 0,playonten = 0,everyothertime;
-//uint8_t  networkmode = 255, movesperpacket = 1,gamequit = 0,everyothertime;
+var networkmode = 255, movesperpacket = 1,gamequit = 0,everyothertime;
 //// CTW END - MODIFICATION
 var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradius, shrinkerblastradius, morterblastradius, bouncemineblastradius, seenineblastradius;
 //STATUSBARTYPE sbar;
