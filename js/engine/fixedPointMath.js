@@ -24,6 +24,14 @@ function msqrtasm(input) {
     return a;
 }
 
+function mul32_64(i1, i2) {
+    return i1 * i2;
+}
+
+function scale(input1, input2, input3) {
+    return (mul32_64(input1, input2) / input3) | 0;
+}
+
 for (var i3 = 1; i3 <= 32; i3++) {
     window["divScale" + i3] = new Function("i1", "i2", "return (i1 * Math.pow(2, " + i3 + ") / i2) | 0;");
 }
@@ -42,7 +50,7 @@ function clearbuf(buffer, start, end) {
 }
 
 function clearbufbyte(buffer, start, end) {
-    for (var i = start; i < end; i++) { 
+    for (var i = start; i < end; i++) {
         buffer[i] = 0;
     }
 }

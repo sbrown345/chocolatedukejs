@@ -19,10 +19,14 @@ var ud = {
     ridecule: new Array(10),
     savegame: new Array(10),
     pwlockout: new Array(128),
+    last_level: 0,
+    secretlevel: 0,
     rtsname: new Array(10),
-    mapCRC: new Uint32Array(MAXPLAYERS),
-    conCRC: new Uint32Array(MAXPLAYERS),
+    rev: multiDimArray(Uint8Array, MAXPLAYERS, 10),
     conSize: new Uint32Array(MAXPLAYERS),
+    mapCRC: new Uint32Array(MAXPLAYERS),
+    // exeCRC is meaningless here
+    conCRC: new Uint32Array(MAXPLAYERS),
 };
 
 var fta_quotes = new Array(NUMOFFIRSTTIMEACTIVE);
@@ -104,7 +108,7 @@ var myhorizbak = new Int32Array(MOVEFIFOSIZ), dukefriction = 0xcc00, show_sharew
 var camerashitable, freezerhurtowner = 0, lasermode;
 //// CTW - MODIFICATION
 //// uint8_t  networkmode = 255, movesperpacket = 1,gamequit = 0,playonten = 0,everyothertime;
-var networkmode = 255, movesperpacket = 1,gamequit = 0,everyothertime;
+var networkmode = 255, movesperpacket = 1, gamequit = 0, everyothertime;
 //// CTW END - MODIFICATION
 var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradius, shrinkerblastradius, morterblastradius, bouncemineblastradius, seenineblastradius;
 //STATUSBARTYPE sbar;

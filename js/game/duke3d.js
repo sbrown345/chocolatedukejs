@@ -1,7 +1,16 @@
 ﻿'use strict';
 
+
+var RANCID_ID = 1;
+var XDUKE_ID = 2;
+var JONOF_ID = 3;
+
+// JS Chocolate DukeNukem3D is a fork of xDuke v17.9
+
+var DUKE_ID = XDUKE_ID;
 var CHOCOLATE_DUKE_REV_X = 1;
-var CHOCOLATE_DUKE_REV_DOT_Y = 0;
+var CHOCOLATE_DUKE_REV_DOT_Y = 0; // rev is: CHOCOLATE_DUKE_REV_X.CHOCOLATE_DUKE_REV_DOT_Y
+var MAX_KNOWN_GRP = 4;
 
 var UNKNOWN_GRP = 0;
 var SHAREWARE_GRP13 = 1;

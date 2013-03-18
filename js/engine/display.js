@@ -2,6 +2,25 @@
 
 var scancodes = new Array(323);
 
+var Display = {};
+
+
+var xres, yres, bytesperline, imageSize, maxpages;
+var frameplace;
+
+////The frambuffer address
+var frameoffset;
+var  /**screen,*/ vesachecked;
+var buffermode, origbuffermode, linearmode;
+var permanentupdate = 0, vgacompatible;
+
+var surface = document.getElementById("gameCanvas");
+
+
+var last_render_ticks = 0;
+var total_render_time = 1;
+var total_rendered_frames = 0;
+
 
 function _platform_init(argc, argv, title, iconName) {
 
@@ -114,7 +133,88 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_DELETE] = 0xE053;
 }
 
+// 226
+var screenalloctype = 255;
 
+function init_new_res_vars(screenMode, screenWidth, screenHeight) {
+    var i = 0, j = 0;
+
+    console.log("todo setup mouse");
+
+    xdim = xres = surface.width;
+    ydim = yres = surface.height;
+
+    console.log("init_new_res_vars %d %d", xdim, ydim);
+
+    bytesperline = surface.width;
+    vesachecked = 1;
+    vgacompatible = 1;
+    linearmode = 1;
+    qsetmode = surface.height;
+    activepage = visualpage = 0;
+
+    frameoffset = frameplace = surface.getContext("2d");//.createImageData(screenWidth, screenHeight);
+    j = ydim * 4 * 4;
+
+    if (horizlookup) {
+        throw  new Error("todo");
+    }
+    
+    if (horizlookup2) {
+        throw  new Error("todo");
+    }
+    
+    //horizlookup = (int32_t*)malloc(j);
+    //horizlookup2 = (int32_t*)malloc(j);
+
+    j = 0;
+
+    // Build lookup table (X screespace -> frambuffer offset. 
+    for (i = 0; i < ydim; i++) {
+        ylookup[i] = j;
+        j += bytesperline;
+    }
+    
+    horizycent = ((ydim * 4) >> 1);
+    
+    /* Force drawrooms to call dosetaspect & recalculate stuff */
+    oxyaspect = oxdimen = oviewingrange = -1;
+
+    //Let the Assembly module how many pixels to skip when drawing a column
+    setBytesPerLine(bytesperline);
+
+    setView(0, 0, xdim - 1, ydim - 1);
+    
+    setBrightness(curbrightness, palette);
+
+    if (searchx < 0) {
+        searchx = halfxdimen;
+        searchy = (ydimen >> 1);
+    }
+}
+
+//308
+function go_to_new_vid_mode(screenMode) {
+    init_new_res_vars(screenMode);
+}
+
+Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
+    surface.width = screenWidth;
+    surface.height = screenHeight;
+    go_to_new_vid_mode(screenMode);
+
+    qsetmode = 200;
+    last_render_ticks = getTicks();
+
+    return 0;
+};
+
+//1330
+function VBE_setPalette(paletteBuffer) {
+    console.warn("VBE_setPalette todo when there's something on the screen to test!");
+}
+
+// 1769
 //-------------------------------------------------------------------------------------------------
 //  TIMER
 //=================================================================================================

@@ -98,14 +98,36 @@ function loadTmb() {
 
     kread(file, tmb, l);
 
-    Music.RegisterTimbreBank(tmb);
+    Music.registerTimbreBank(tmb);
 
     kclose(file);
 }
 
 //7803
 function getNames() {
+    var i, j, l;
+
+    //// FIX_00031: Names now limited to 10 chars max that is the fragbar field limit.
+    //for (l = 0; l <= 9 && myname[l]; l++) {
+    // todo: add in with MP
+    //    ud.user_name[myconnectindex][l] = toupper(myname[l]);
+    //    buf[l + 2] = toupper(myname[l]);
+    //}
+
+    ud.rev[myconnectindex][0] = 1;
+    ud.rev[myconnectindex][1] = DUKE_ID;
+    ud.rev[myconnectindex][2] = CHOCOLATE_DUKE_REV_X;
+    ud.rev[myconnectindex][3] = CHOCOLATE_DUKE_REV_DOT_Y;
+
+    ud.conSize[myconnectindex] = ud.conSize[0]; // [0] still containing the original value
+    ud.conCRC[myconnectindex] = ud.conCRC[0];
     
+    if (numplayers > 1) {
+        throw new Error("todo networking");
+    } else if (nHostForceDisableAutoaim === 2) {
+        nHostForceDisableAutoaim = 0;
+        ud.auto_aim = 2;
+    }
 }
 
 // 7977
@@ -164,6 +186,29 @@ function main(argc, argv) {
     }
 
     getNames();
+    
+    if (ud.multimode > 1) {
+        throw new Error("todo");
+    }
+
+    ud.last_level = -1;
+
+    RTS.init(ud.rtsname);
+    if (numlumps) {
+        console.log("Using .RTS file:%s", ud.rtsname);
+    }
+    
+    //todo: Control joystick, center joystick
+
+    console.log("Loading palette/lookups.");
+    
+    if (setGameMode(ScreenMode, ScreenWidth, ScreenHeight) < 0) {
+        throw new Error("todo");
+    }
+
+    console.log("genSpriteRemaps()")
+    genSpriteRemaps();
+    
 
     throw new Error("todo");
 }

@@ -41,6 +41,23 @@ function Sector() {
     this.extra = 0;
 }
 
+//EXTERN uint16_t mapCRC;
+
+//EXTERN int32_t spritesortcnt;
+//EXTERN spritetype tsprite[MAXSPRITESONSCREEN];
+
+//EXTERN uint8_t  vidoption;
+var xdim, ydim, numpages;
+
+//// Fast way to retrive the start of a column in the framebuffer, given a screenspace X coordinate.
+var ylookup = new Int32Array(MAXYDIM + 1);
+
+var yxaspect, viewingrange;
+
+var validmodecnt;
+//EXTERN short validmode[256];
+//EXTERN int32_t validmodexdim[256], validmodeydim[256];
+
 var numsectors, numwalls;
 var totalclock;
 var numframes, randomseed;
@@ -49,19 +66,16 @@ var sinTable = new Int16Array(2048);
 var palette = new Uint8Array(2048);
 var numpalookups;
 
-var validmodecnt;
-//EXTERN short validmode[256];
-//EXTERN int32_t validmodexdim[256], validmodeydim[256];
 
 //EXTERN uint8_t  palette[768];
 //EXTERN short numpalookups;
 var palookup = new Uint8Array(MAXPALOOKUPS);
 var parallaxtype, showinvisibility;
 var parallaxyoffs, parallaxyscale;
-var visibility, parallaxvisibility;
+var visibility, parallaxvisibility; pskyoff
 
-//EXTERN int32_t windowx1, windowy1, windowx2, windowy2;
-//EXTERN short startumost[MAXXDIM], startdmost[MAXXDIM];
+var windowx1, windowy1, windowx2, windowy2;
+var startumost = new Int16Array(MAXXDIM), startdmost = new Int16Array(MAXXDIM);
 
 var pskyoff = new Int16Array(MAXPSKYTILES), pskybits;
 

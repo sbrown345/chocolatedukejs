@@ -1,5 +1,24 @@
 ﻿'use strict';
 
+//int32_t stereowidth = 23040, stereopixelwidth = 28, ostereopixelwidth = -1;
+var stereomode = 0, visualpage, activepage, whiteband, blackband;
+//uint8_t  oa1, o3c2, ortca, ortcb, overtbits, laststereoint;
+
+var MAXCLIPNUM = 512;
+var MAXPERMS = 512;
+var MAXTILEFILES = 256;
+var MAXYSAVES = ((MAXXDIM * MAXSPRITES) >> 7);
+var MAXNODESPERLINE = 42;   /* Warning: This depends on MAXYSAVES & MAXYDIM! */
+var MAXWALLSB = 2048;
+var MAXCLIPDIST = 1024;
+
+var moustat = 0;
+
+var transarea = 0, beforedrawrooms = 1;
+
+var oxdimen = -1, oviewingrange = -1, oxyaspect = -1;
+
+var curbrightness = 0;
 
 var picsiz = new Uint8Array(MAXTILES), tilefilenum = new Uint8Array(MAXTILES);
 //int32_t lastageclock;
@@ -23,6 +42,8 @@ var pow2long =
 ];
 
 var recipTable = new Int32Array(2048), fpuasm = 0;
+
+var kensMessage = "";
 
 var briTable = [
     new Uint8Array(64),
@@ -103,15 +124,15 @@ var textFont = new Uint8Array(1024), smallTextFont = new Uint8Array(1024);
 //static int16_t uwall[MAXXDIM+1], dwall[MAXXDIM+1];
 //static int32_t swplc[MAXXDIM+1], lplc[MAXXDIM+1];
 //static int32_t swall[MAXXDIM+1], lwall[MAXXDIM+4];
-//int32_t xdimen = -1, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
-//int32_t wx1, wy1, wx2, wy2, ydimen;
-//int32_t viewoffset;
+var xdimen = -1, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
+var wx1, wy1, wx2, wy2, ydimen;
+var viewoffset;
 
 //static int32_t rxi[8], ryi[8], rzi[8], rxi2[8], ryi2[8], rzi2[8];
 //static int32_t xsi[8], ysi[8];
 
 ///* used to be static. --ryan. */
-//int32_t *horizlookup=0, *horizlookup2=0, horizycent;
+var horizlookup = 0, horizlookup2 = 0, horizycent;
 
 //int32_t globalposx, globalposy, globalposz, globalhoriz;
 //int16_t globalang, globalcursectnum;
@@ -122,7 +143,7 @@ var globalpalwritten; //ptr
 //int32_t globalvisibility, globalhisibility, globalpisibility, globalcisibility;
 //uint8_t  globparaceilclip, globparaflorclip;
 
-//int32_t xyaspect, viewingrangerecip;
+var xyaspect, viewingrangerecip;
 
 //int32_t asm1, asm2, asm3, asm4;
 
@@ -149,7 +170,7 @@ var globalpalwritten; //ptr
 ////FCS: Moved this on the stack
 
 var tablesLoaded = false;
-//int32_t pageoffset, ydim16, qsetmode = 0;
+var pageoffset, ydim16, qsetmode = 0;
 //int32_t startposx, startposy, startposz;
 //int16_t startang, startsectnum;
 var pointhighlight, linehighlight, highlightcnt;
@@ -173,7 +194,7 @@ var colscan = new Int32Array(27);
 
 //short editstatus = 0;
 var searchit;
-//int32_t searchx = -1, searchy;                     /* search input  */
+var searchx = -1, searchy;                     /* search input  */
 var searchsector, searchwall, searchstat;     /* search output */
 
 var numtilefiles, artfil = -1, artfilnum, artfilplc;
@@ -197,6 +218,7 @@ function initKSqrt() {
     }
 }
 
+3488
 function loadTables() {
     var i, file;
     if (!tablesLoaded) {
@@ -302,6 +324,12 @@ function loadPalette() {
     paletteloaded = true;
 }
 
+function setGameMode(screenMode, screenWidth, screenHeight) {
+    kensMessage = "!!!! BUILD engine&tools programmed by Ken Silverman of E.G. RI.  (c) Copyright 1995 Ken Silverman.  Summary:  BUILD = Ken. !!!!";
+    Display.setGameMode(screenMode, screenWidth, screenHeight);
+}
+
+//3621
 function initEngine() {
     var i;
 
@@ -344,4 +372,72 @@ function initEngine() {
     parallaxvisibility = 512;
 
     loadPalette();
+}
+
+// 7978
+function setView(x1, y1, x2, y2) {
+    var i;
+
+    windowx1 = x1;
+    wx1 = (x1 << 12);
+    windowy1 = y1;
+    wy1 = (y1 << 12);
+    windowx2 = x2;
+    wx2 = ((x2 + 1) << 12);
+    windowy2 = y2;
+    wy2 = ((y2 + 1) << 12);
+
+    xdimen = (x2 - x1) + 1;
+    halfxdimen = (xdimen >> 1);
+    xdimenrecip = divScale32(1, xdimen);
+    ydimen = (y2 - y1) + 1;
+
+    setAspect(65536, divScale16(ydim * 320, xdim * 200));
+
+    for (i = 0; i < windowx1; i++) {
+        startumost[i] = 1;
+        startdmost[i] = 0;
+    }
+
+    for (i = windowx1; i <= windowx2; i++) {
+        startumost[i] = windowy1, startdmost[i] = windowy2 + 1;
+    }
+
+    for (i = windowx2 + 1; i < xdim; i++) {
+        startumost[i] = 1, startdmost[i] = 0;
+    }
+
+    viewoffset = windowy1 * bytesperline + windowx1;
+
+    if (stereomode) {
+        throw new Error("todo"); // todo
+    }
+}
+
+//2593
+function setAspect(daxrange, daaspect) {
+    viewingrange = daxrange;
+    viewingrangerecip = divScale32(1, daxrange);
+
+    yxaspect = daaspect;
+    xyaspect = divScale32(1, yxaspect);
+    xdimenscale = scale(xdimen, yxaspect, 320);
+    xdimscale = scale(320, xyaspect, xdimen);
+}
+
+//8244
+function setBrightness(brightness, dapal) {
+    var newPalette = new Uint8Array(256 * 4);
+
+    curbrightness = Math.min(Math.max(brightness, 0), 15);
+
+    var k=0;
+    for (var i = 0; i < 256; i++) {
+        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 2]];
+        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 1]];
+        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 0]];
+        newPalette[k++] = 0;
+    }
+
+    VBE_setPalette(newPalette);
 }
