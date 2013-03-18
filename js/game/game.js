@@ -15,8 +15,87 @@ var confilename = "GAME.CON";
 var boardfilename = null;
 var waterpal = new Uint8Array(768), slimepal = new Uint8Array(768), titlepal = new Uint8Array(768), drealms = new Uint8Array(768), endingpal = new Uint8Array(768);
 
-function logo() {
+
+//numlumps (points to nlumps in rts.js ?)
+
+
+var restorepalette, screencapt, nomorelogohack = 0;
+var sendmessagecommand = -1;
+
+function getPackets() {
+    //int32_t i, j, k, l;
+    //short other, packbufleng;
+    //input *osyn, *nsyn;
+
+    //sampletimer();
+    //if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
+    //{
+    //    qe = 1;
+    //    gameexit("Quick Exit.");
+    //}
     
+    // not a net game
+    if (numplayers < 2) {
+        return;
+    }
+
+    throw new Error("todo getPackets");
+}
+
+//784
+function faketimerhandler() {
+    var i, j, k;
+    var osyn, nsyn;
+    
+    ////Check if we should quit the game.
+    //todo if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
+    //{
+    //    qe = 1;
+    //    gameexit("Quick Exit.");
+    //}
+    
+    if ((totalclock < ototalclock + TICSPERFRAME) || (ready2send === 0)) {
+        return; // Returns here when playing a demo.
+    }
+
+    if (ud.showcinematics && numplayers < 2) {
+        // This plays the explosion from the nuclear sign at the beginning.
+        if (!VOLUME()) {
+            if (KB.keyWaiting() && nomorelogohack == 0) {
+                getpackets();
+
+                playanm("logo.anm", 5);
+                palto(0, 0, 0, 63);
+                KB.flushKeyboardQueue();
+            }
+            
+            clearView(0);
+            nextpage();
+        }
+        throw new Error("todo")
+    }
+    throw new Error("todo")
+}
+
+function logo() {
+    var i, soundanm = 0;
+
+    ready2send = 0;
+
+    KB.flushKeyboardQueue();
+
+    setView(0, 0, xdim - 1, ydim - 1);
+    clearView(0);
+    palto(0, 0, 0, 63);
+
+    flushperms();
+    nextpage();
+
+    Music.stopSong();
+    
+
+    throw new Error("todo")
+
 }
 
 //7655

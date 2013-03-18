@@ -62,7 +62,7 @@ var sounds = new Array(NUM_SOUNDS);
 
 var playerreadyflag = new Uint8Array(MAXPLAYERS), ready2send;
 var playerquitflag = new Uint8Array(MAXPLAYERS);
-var vel, svel, angvel, horiz, ototalclock, respawnactortime = 768, respawnitemtime = 768, groupfile;
+var vel, svel, angvel, horiz, ototalclock = 0, respawnactortime = 768, respawnitemtime = 768, groupfile;
 
 var script = new Int32Array(MAXSCRIPTSIZE), scriptIdx = 0, scriptPtr, insptr, labelcode = new Int32Array(MAXSECTORS * (40 / 4) /*Sector is 40 bytes, this is int32 array*/), labelcnt = 0;
 var actorscrptr = new Array(MAXTILES), parsing_actor = new Array(4);

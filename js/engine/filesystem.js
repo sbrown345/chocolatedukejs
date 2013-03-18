@@ -549,3 +549,7 @@ function TCkopen4load(filename, readfromGrp) {
 function getGameDir() {
     return gameDir;
 }
+
+function getGRPcrc32(grpId) {
+    return grpSet.archives[grpId].crc32;
+}

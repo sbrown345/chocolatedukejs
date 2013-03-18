@@ -21,7 +21,7 @@ var oxdimen = -1, oviewingrange = -1, oxyaspect = -1;
 var curbrightness = 0;
 
 var picsiz = new Uint8Array(MAXTILES), tilefilenum = new Uint8Array(MAXTILES);
-//int32_t lastageclock;
+var lastageclock = 0;
 var tilefileoffs = new Int32Array(MAXTILES);
 
 var artsize = 0, cachesize = 0;
@@ -184,6 +184,8 @@ var colhead = new Uint8Array((FASTPALGRIDSIZ + 2) * (FASTPALGRIDSIZ + 2) * (FAST
 var colnext = new Int32Array(256);
 //static uint8_t  coldist[8] = {0,1,2,3,4,3,2,1};
 var colscan = new Int32Array(27);
+
+var permhead = 0, permtail = 0;
 
 ////FCS: Num walls to potentially render.
 //short numscans ;
@@ -425,6 +427,44 @@ function setAspect(daxrange, daaspect) {
     xdimscale = scale(320, xyaspect, xdimen);
 }
 
+//4332
+function nextpage() {
+    var i, per;
+
+    if (qsetmode === 200) {
+        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
+            throw new Error("todo")
+            //per = &permfifo[i];
+            //if ((per->pagesleft > 0) && (per->pagesleft <= numpages))
+            //    dorotatesprite(per->sx,per->sy,per->z,per->a,per->picnum,per->dashade,per->dapalnum,per->dastat,per->cx1,per->cy1,per->cx2,per->cy2);
+        }
+    }
+
+    _nextpage();
+
+    if (qsetmode === 200) {
+        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
+            throw new Error("todo")
+        }
+    }
+
+    faketimerhandler();
+    
+    if ((totalclock >= lastageclock + 8) || (totalclock < lastageclock)) {
+        lastageclock = totalclock;
+        agecache();
+    }
+
+    beforedrawrooms = 1;
+    numframes++;
+}
+
+//8034
+function flushperms() {
+    permhead = permtail = 0;
+}
+
+//8193
 function makepalookup(palnum, remapbuf, r, g, b, dastat) {
     var i, j, palscale;
     var ptr, ptr2;
@@ -432,21 +472,21 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
     if (!paletteloaded) {
         return;
     }
-    
+
     //if (palookup[palnum] == null) {
     //    console.log("palookup[palnum] "); // todo
     //} else {
     //    throw new Error("palookup is a ptr etc, fix this")// todo
     //}
-    
+
     if (dastat === 0) {
         return;
     }
-    
+
     if ((r | g | b | 63) !== 63) {
         return;
     }
-    
+
     console.log("makepalookup todo!!!!!!"); // todo
     //if ((r | g | b) === 0) {
     //    for (i = 0; i < 256; i++) {
@@ -463,7 +503,7 @@ function setBrightness(brightness, dapal) {
 
     curbrightness = Math.min(Math.max(brightness, 0), 15);
 
-    var k=0;
+    var k = 0;
     for (var i = 0; i < 256; i++) {
         newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 2]];
         newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 1]];
@@ -472,4 +512,24 @@ function setBrightness(brightness, dapal) {
     }
 
     VBE_setPalette(newPalette);
+}
+
+//8991
+function clearView(dacol) {
+    //var p, y, dx;
+
+    //if (qsetmode !== 200) {
+    //    return;
+    //}
+
+    //dx = windowx2 - windowx1 + 1;
+    //dacol += (dacol << 8);
+    //dacol += (dacol << 16);
+
+    //p = frameplace + ylookup[windowy1] + windowx1;
+    // todo: check this is right
+
+    frameplace.clearRect(0, 0, surface.width, surface.height);
+
+    faketimerhandler();
 }

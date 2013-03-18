@@ -214,6 +214,26 @@ function VBE_setPalette(paletteBuffer) {
     console.warn("VBE_setPalette todo when there's something on the screen to test!");
 }
 
+//1460
+
+function _nextpage() {
+    var ticks;
+    
+    console.log("todo: _nextpage: handle_events");
+    //handle_events();
+    
+    console.log("todo: SDL_UpdateRect. perhaps need to put pixels?");
+
+    ticks = getTicks();
+    total_render_time = (ticks - last_render_ticks);
+    if (total_render_time > 1000) {
+        total_rendered_frames = 0;
+        total_render_time = 1;
+        last_render_ticks = ticks;
+    }
+    total_rendered_frames++;
+}
+
 // 1769
 //-------------------------------------------------------------------------------------------------
 //  TIMER
