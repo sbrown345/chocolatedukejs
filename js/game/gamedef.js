@@ -174,8 +174,28 @@ function loadefs(filename, readfromGrp) {
     line_number = 1;
     total_lines = 0;
 
-    passOne(readfromGrp); //Tokenize
-    throw new Error("todo. *script = (int32_t) scriptPtr etc");
+    passOne(readfromGrp); // Tokenize
+    script[scriptPtr] = scriptPtr;
+    
+    if (warning | error) {
+        console.warn("Found %i warning(s), '%i' error(s).", warning, error);
+    }
+    
+    if (error) {
+        throw new Error("ERROR in CON(" + filename + ")");
+    } else {
+        total_lines += line_number;
+        console.log("Code Size:%d bytes(%d labels).", (scriptPtr << 2) - 4, labelcnt);
+        ud.conSize[0] = scriptPtr - 1;
+        
+        // FIX_00062: Better support and identification for GRP and CON files for 1.3/1.3d/1.4/1.5
+        if (ud.conSize[0] == 16208 && labelcnt == 1794 && conVersion == 15) {
+            conVersion = 14;
+        }
+        console.log("Con version: Looks like v%d", conVersion);
+        
+        // todo: some warnings about con versions...
+    }
 }
 
 function ispecial(c) {
