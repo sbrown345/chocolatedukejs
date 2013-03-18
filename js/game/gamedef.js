@@ -164,8 +164,8 @@ function loadefs(filename, readfromGrp) {
         ud.conCRC[0] = crc32Update(str2Bytes(textptr), fs, ud.conCRC[0]);
     }
 
-    actorscrptr = new Int32Array(MAXTILES);
-    actortype = new Uint8Array(MAXTILES);
+    actorscrptr = new Array(MAXTILES);
+    actortype = new Array(MAXTILES);
 
     labelcnt = 0;
     scriptPtr = scriptIdx + 1;
@@ -359,7 +359,8 @@ function parseCommand(readFromGrp) {
 
     tw = transWord();
 
-    console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i", tw, keyw[tw], transCount, line_number, script[scriptPtr]);
+    console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i, parsing_actor == 0: %i",
+        tw, keyw[tw], transCount, line_number, script[scriptPtr], typeof parsing_actor[0] === "undefined" ? 1 : 0);
     
     switch (tw) {
         default:
@@ -381,7 +382,7 @@ function parseCommand(readFromGrp) {
             textptrIdx += 2;
             return 0;
         case 17: // state
-            if (typeof parsing_actor === "undefined" && parsing_state == 0) {
+            if (typeof parsing_actor[0] === "undefined" && parsing_state == 0) {
                 getLabel();
                 scriptPtr--;
                 labelcode[labelcnt] = scriptPtr;
@@ -490,7 +491,7 @@ function parseCommand(readFromGrp) {
             
             return 0;
         case 32: // move
-            if (typeof parsing_actor !== "undefined" || parsing_state) {
+            if (typeof parsing_actor[0] !== "undefined" || parsing_state) {
                 transNumber();
 
                 j = 0;
@@ -652,7 +653,7 @@ function parseCommand(readFromGrp) {
         case 24:
             throw new Error("todo");
         case 7: // action
-            if (typeof parsing_actor !== "undefined" || parsing_state) {
+            if (typeof parsing_actor[0] !== "undefined" || parsing_state) {
                 transNumber();
             } else {
                 scriptPtr--;
@@ -701,7 +702,7 @@ function parseCommand(readFromGrp) {
                 console.error("  * ERROR!(L%hd) Found 'actor' within 'state'.", line_number);
             }
 
-            if (typeof parsing_actor !== "undefined") {
+            if (typeof parsing_actor[0] !== "undefined") {
                 console.error("  * ERROR!(L%hd) Found 'actor' within 'actor'.", line_number);
                 error++;
             }
@@ -709,7 +710,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            console.log("parsing_actorIdx[0] = %i", parsing_actor[0]);
+            console.log("parsing_actor[0] = %i", parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -717,7 +718,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                console.log("parsing_actor[%i] = %i", j, parsing_actor[j]); // ? todo check
+                console.log("*parsing_actor[%i] = %i", j,  script[parsing_actor[j]]); // ? todo check
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -735,7 +736,7 @@ function parseCommand(readFromGrp) {
                     }
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    console.log("parsing_actor[%i] = %i", j,  script[ parsing_actor[j]]);
+                    console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
                 }
             }
 
@@ -748,7 +749,7 @@ function parseCommand(readFromGrp) {
                 error++;
             }
             
-            if (typeof parsing_actor === "undefined") {
+            if (typeof parsing_actor[0] !== "undefined") {
                 console.error("  * ERROR!(L%i) Found 'useritem' within 'actor'.", line_number);
                 error++;
             }
@@ -1148,6 +1149,7 @@ function parseCommand(readFromGrp) {
                     error++;
                 }
                 parsing_actor[0] = undefined;
+                console.log("case 4 parsing_actor = 0");
             }
 
             return 0;
