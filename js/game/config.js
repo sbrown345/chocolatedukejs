@@ -71,6 +71,10 @@ Config.readSetup = function () {
     // todo: Config.readSetup
 };
 
+Config.readSaveNames = function() {
+    console.log("todo readSaveNames...");
+};
+
 Config.setDefaults = function () {
     console.log("Config.readSetup...");
     // sound

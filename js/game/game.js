@@ -48,6 +48,16 @@ function Startup() {
 
     loadPics("tiles000.art", null);
 
+    Config.readSaveNames();
+
+    tiles[MIRROR].dim.width = tiles[MIRROR].dim.height = 0;
+
+    for (var i = 0; i < MAXPLAYERS; i++) {
+        playerreadyflag[i] = 0;
+    }
+
+    Network.initMultiPlayers(0, 0, 0);
+
     throw new Error("todo");
 }
 

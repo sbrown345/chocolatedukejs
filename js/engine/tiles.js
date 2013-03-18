@@ -103,7 +103,6 @@ function loadPics(filename, gamedir) {
         }
 
         picsiz[i] += (j << 4);
-        console.log("picsiz[%i] = %i", i, picsiz[i]);
     }
 
     artfil = -1;

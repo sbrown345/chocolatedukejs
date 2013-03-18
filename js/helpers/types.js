@@ -7,3 +7,11 @@ function structArray($class, count) {
     }
     return array;
 }
+
+function multiDimArray($class, num, arrLength) {
+    var multiDimArray = new Array(num);
+    for (var i = 0; i < num; i++) {
+        multiDimArray[i] = new $class(arrLength);
+    }
+    return multiDimArray;
+}
