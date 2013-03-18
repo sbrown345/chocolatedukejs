@@ -35,6 +35,12 @@ function divScale(i1, i2, i3) {
     return ((i1 * Math.pow(2, i3)) / i2) | 0;
 }
 
+function clearbuf(buffer, start, end) {
+    for (var i = start; i < end; i++) {
+        buffer[i] = 0;
+    }
+}
+
 function clearbufbyte(buffer, start, end) {
     for (var i = start; i < end; i++) { 
         buffer[i] = 0;

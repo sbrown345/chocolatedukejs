@@ -453,6 +453,21 @@ function kread16(handle) {
     return grpStream.readInt16();
 }
 
+
+function kread32(handle) {
+    var openFile = openFiles[handle];
+
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFile.grpID];
+
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    openFile.cursor += 4;
+    return grpStream.readInt32();
+}
+
 function kreadText(handle, leng) {
     var openFile = openFiles[handle];
     

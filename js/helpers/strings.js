@@ -1,7 +1,11 @@
 ﻿'use strict';
 
 String.prototype.trimNullTerminatedString = function () {
-    return this.slice(0, this.indexOf('\0'));
+    var indexOfNull = this.indexOf('\0');
+    if (indexOfNull === -1) {
+        return this;
+    }
+    return this.slice(0, indexOfNull);
 };
 
 function str2Bytes(str) {

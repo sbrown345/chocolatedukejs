@@ -1,18 +1,25 @@
 ﻿'use strict';
 
+
+var picsiz = new Uint8Array(MAXTILES), tilefilenum = new Uint8Array(MAXTILES);
+//int32_t lastageclock;
+var tilefileoffs = new Int32Array(MAXTILES);
+
+var artsize = 0, cachesize = 0;
+
 var radarang = new Int16Array(1280), radarang2 = new Int16Array(MAXXDIM + 1);
 var sqrTable = new Uint16Array(4096), shLookup = new Uint16Array(4096 + 256);
-var  pow2char = [1,2,4,8,16,32,64,-128];
-var pow2long  =
+var pow2char = [1, 2, 4, 8, 16, 32, 64, -128];
+var pow2long =
 [
-    1,2,4,8,
-    16,32,64,128,
-    256,512,1024,2048,
-    4096,8192,16384,32768,
-    65536,131072,262144,524288,
-    1048576,2097152,4194304,8388608,
-    16777216,33554432,67108864,134217728,
-    268435456,536870912,1073741824,2147483647
+    1, 2, 4, 8,
+    16, 32, 64, 128,
+    256, 512, 1024, 2048,
+    4096, 8192, 16384, 32768,
+    65536, 131072, 262144, 524288,
+    1048576, 2097152, 4194304, 8388608,
+    16777216, 33554432, 67108864, 134217728,
+    268435456, 536870912, 1073741824, 2147483647
 ];
 
 var recipTable = new Int32Array(2048), fpuasm = 0;
@@ -169,6 +176,9 @@ var searchit;
 //int32_t searchx = -1, searchy;                     /* search input  */
 var searchsector, searchwall, searchstat;     /* search output */
 
+var numtilefiles, artfil = -1, artfilnum, artfilplc;
+
+
 function initKSqrt() {
     var i, j, k;
     j = 1;
@@ -200,11 +210,11 @@ function loadTables() {
             for (i = 0; i < 2048; i++) {
                 sinTable[i] = kread16(file);
             }
-            
+
             for (i = 0; i < 640; i++) {
                 radarang[i] = kread16(file);
             }
-            
+
             for (i = 0; i < 640; i++) {
                 radarang[1279 - i] = -radarang[i];
             }
@@ -217,10 +227,10 @@ function loadTables() {
                     briTable[j][k] = briTableTemp[j * 64 + k];
                 }
             }
-            
+
             kclose(file);
         }
-        
+
         tablesLoaded = true;
     }
 }
@@ -241,7 +251,7 @@ function initFastColorLookup(rScale, gScale, bScale) {
 
     var pal1 = 768 - 3;
     for (i = 255; i >= 0; i--, pal1 -= 3) {
-        j = (palette[pal1] >> 3) * FASTPALGRIDSIZ * FASTPALGRIDSIZ + (palette[pal1 +1] >> 3) * FASTPALGRIDSIZ + (palette[pal1 +2] >> 3) + FASTPALGRIDSIZ * FASTPALGRIDSIZ + FASTPALGRIDSIZ + 1;
+        j = (palette[pal1] >> 3) * FASTPALGRIDSIZ * FASTPALGRIDSIZ + (palette[pal1 + 1] >> 3) * FASTPALGRIDSIZ + (palette[pal1 + 2] >> 3) + FASTPALGRIDSIZ * FASTPALGRIDSIZ + FASTPALGRIDSIZ + 1;
         if (colhere[j >> 3] & pow2char[j & 7]) {
             colnext[i] = colhead[j];
         } else {
@@ -263,11 +273,11 @@ function initFastColorLookup(rScale, gScale, bScale) {
 
 function loadPalette() {
     var file;
-    
+
     if (paletteloaded) {
         return;
     }
-    
+
     if ((file = TCkopen4load("palette.dat", false)) == -1) {
         return;
     }
@@ -275,7 +285,7 @@ function loadPalette() {
     kread(file, palette, 768);
 
     numpalookups = kread16(file);
-    
+
     // todo: check these caching methods that dont' seem to get run??, what are they for?
 
     globalpalwritten = 0; //palookup[0] - pointer
@@ -299,7 +309,7 @@ function initEngine() {
 
     pskyoff[0] = 0;
     pskybits = 0;
-    
+
     parallaxtype = 2;
     parallaxyoffs = 0;
     parallaxyscale = 65536;
@@ -317,12 +327,12 @@ function initEngine() {
     for (i = 0; i < MAXTILES; i++) {
         tiles[i].data = null;
     }
-    
+
     show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
     show2dwallnew = new Uint8Array((MAXWALLS + 7) >> 3);
     show2dspritenew = new Uint8Array((MAXSPRITES + 7) >> 3);
     automapping = 0;
-    
+
     validmodecnt = 0;
 
     pointhighlight = -1;
