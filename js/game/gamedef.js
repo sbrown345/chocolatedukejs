@@ -312,7 +312,7 @@ function transNumber() {
             textptrIdx += l;
         }
     }
-    
+
     var tempBufStr = stringFromArray(tempbuf);
     for (i = 0; i < labelcnt; i++) {
         if (tempBufStr == labels[i]) {
@@ -321,7 +321,7 @@ function transNumber() {
             if (typeof labelcode[i] == "undefined") {
                 debugger;
             }
-            console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr] ,i, labelcode[i]);
+            console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr], i, labelcode[i]);
             scriptPtr++;
             textptrIdx += l;
             return;
@@ -361,7 +361,7 @@ function parseCommand(readFromGrp) {
 
     console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i, parsing_actor == 0: %i",
         tw, keyw[tw], transCount, line_number, script[scriptPtr], typeof parsing_actor[0] === "undefined" ? 1 : 0);
-    
+
     switch (tw) {
         default:
         case -1:
@@ -395,7 +395,7 @@ function parseCommand(readFromGrp) {
             }
 
             getLabel();
-            
+
             for (i = 0; i < NUMKEYWORDS; i++) {
                 if (labels[labelcnt] === keyw[i]) {
                     error++;
@@ -425,7 +425,7 @@ function parseCommand(readFromGrp) {
         case 93: // lotsofglass
             transNumber();
             return 0;
-            
+
         case 18: // ends
             if (parsing_state == 0) {
                 console.error("  * ERROR!(L%i) Found 'ends' with no 'state'.", line_number);
@@ -446,26 +446,24 @@ function parseCommand(readFromGrp) {
             return 0;
         case 19: //define
             getLabel();
-            
+
             // Check to see it's already defined
-            for(i=0;i<NUMKEYWORDS;i++)
-            {
+            for (i = 0; i < NUMKEYWORDS; i++) {
                 if (labels[labelcnt] === keyw[i]) {
-                   error++;
-                   console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
-                   return 0;
-               }
+                    error++;
+                    console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                    return 0;
+                }
             }
-                       
-            for (i = 0; i < labelcnt; i++)
-            {
+
+            for (i = 0; i < labelcnt; i++) {
                 if (labels[labelcnt] === labels[i]) {
-                   error++;
-                   console.warn("  * WARNING.(L%i) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
-                   break;
-               }
+                    error++;
+                    console.warn("  * WARNING.(L%i) Duplicate definition '%s' ignored.", line_number, labels[labelcnt]);
+                    break;
+                }
             }
-            
+
             transNumber();
             if (i == labelcnt) {
                 console.log("case 19 labelcode[%i] = %i", labelcnt, script[scriptPtr - 1]);
@@ -482,13 +480,13 @@ function parseCommand(readFromGrp) {
                 }
 
             }
-            
+
             while (j < 4) {
                 script[scriptPtr] = 0;
                 scriptPtr++;
                 j++;
             }
-            
+
             return 0;
         case 32: // move
             if (typeof parsing_actor[0] !== "undefined" || parsing_state) {
@@ -650,8 +648,62 @@ function parseCommand(readFromGrp) {
 
                 return 0;
             }
-        case 24:
-            throw new Error("todo");
+        case 24: // ai
+            if (typeof parsing_actor[0] !== "undefined" || parsing_state) {
+                transNumber();
+            } else {
+                scriptPtr--;
+                getLabel();
+
+                for (i = 0; i < NUMKEYWORDS; i++) {
+                    if (labels[labelcnt] == keyw[i]) {
+                        error++;
+                        console.error("  * ERROR!(L%i) Symbol '%s' is a key word.", line_number, labels[labelcnt]);
+                        return 0;
+
+                    }
+                }
+
+                for (i = 0; i < labelcnt; i++) {
+                    if (labels[labelcnt] == labels[i]) {
+                        warning++;
+                        console.warn("  * WARNING.(L%hd) Duplicate ai '%s' ignored.", line_number, labels[labelcnt]);
+                        return 0;
+                    }
+                }
+
+                if (i === labelcnt) {
+                    console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    labelcode[labelcnt++] = scriptPtr; // todo is this right??
+                }
+
+                for (j = 0; j < 3; j++) {
+                    if (keyword() >= 0) {
+                        break;
+                    }
+                    if (j === 2) {
+                        k = 0;
+                        while (keyword() === -1) {
+                            transNumber();
+                            scriptPtr--;
+                            k |= script[scriptPtr];
+                        }
+                        script[scriptPtr] = k;
+                        scriptPtr++;
+                        return 0;
+                    } else {
+                        transNumber();
+                    }
+                }
+
+                for (k = 0; k < 3; k++) {
+                    script[scriptPtr] = 0;
+                    scriptPtr++;
+                }
+            }
+
+            return 0;
+            
         case 7: // action
             if (typeof parsing_actor[0] !== "undefined" || parsing_state) {
                 transNumber();
@@ -668,15 +720,15 @@ function parseCommand(readFromGrp) {
 
                     }
                 }
-                
+
                 for (i = 0; i < labelcnt; i++) {
                     if (labels[labelcnt] == labels[i]) {
                         warning++;
-                        console.warning("  * WARNING.(L%hd) Duplicate action '%s' ignored.", line_number, labels[labelcnt]);
+                        console.warn("  * WARNING.(L%hd) Duplicate action '%s' ignored.", line_number, labels[labelcnt]);
                         return 0;
                     }
                 }
-                
+
                 if (i == labelcnt) {
                     console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr; // todo is this right??
@@ -718,7 +770,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                console.log("*parsing_actor[%i] = %i", j,  script[parsing_actor[j]]); // ? todo check
+                console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]); // ? todo check
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -748,7 +800,7 @@ function parseCommand(readFromGrp) {
                 console.error("  * ERROR!(L%i) Found 'useritem' within 'state'n", line_number);
                 error++;
             }
-            
+
             if (typeof parsing_actor[0] !== "undefined") {
                 console.error("  * ERROR!(L%i) Found 'useritem' within 'actor'.", line_number);
                 error++;
@@ -768,7 +820,7 @@ function parseCommand(readFromGrp) {
             actorscrptr[script[scriptPtr]] = parsing_actor[0];
             actortype[script[scriptPtr]] = j;
 
-            for ( j = 0; j < 4; j++) {
+            for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
                 console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
                 if (j === 3) {
@@ -789,7 +841,7 @@ function parseCommand(readFromGrp) {
 
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    console.log("parsing_actor[%i] = %i", j,  script[parsing_actor[j]]);
+                    console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
 
                 }
             }
@@ -797,7 +849,7 @@ function parseCommand(readFromGrp) {
             checking_ifelse = 0;
 
             return 0;
-            
+
         case 11: // strength
         case 13: // shoot
         case 25: // addphealth
@@ -851,7 +903,7 @@ function parseCommand(readFromGrp) {
 
             return 0;
         case 75: // ifpinventory
-            throw new Error("todo");
+            transNumber();
         case 3: // ifrnd
         case 8: // ifpdistl
         case 9: // ifpdistg
@@ -1017,12 +1069,12 @@ function parseCommand(readFromGrp) {
                 textptrIdx++;
                 i++;
                 if (i > 127) {
-                    console.error("  * ERROR!(L%i) Level file name exceeds character size limit of 128.",line_number);
+                    console.error("  * ERROR!(L%i) Level file name exceeds character size limit of 128.", line_number);
                     error++;
                     while (textptr[textptrIdx] == ' ') {
                         textptrIdx++;
                     }
-                    break; 
+                    break;
                 }
             }
             levelFileName[j * 11 + k] = levelFileName;
@@ -1046,9 +1098,9 @@ function parseCommand(readFromGrp) {
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
             }
-            
+
             i = 0;
-            
+
             var levelName = "";
             while (textptr.charCodeAt(textptrIdx) != 0x0a) {
                 levelName += textptr[textptrIdx];
@@ -1064,7 +1116,7 @@ function parseCommand(readFromGrp) {
                 }
             }
             level_names[j * 11 + k] = levelName.toUpperCase();
-            
+
             return 0;
         case 79: // definequote
             scriptPtr--;
@@ -1278,7 +1330,7 @@ function parseCommand(readFromGrp) {
                     // spriteqamount = 64 is the default
                     lasermode = 0; // default (guess) when using 1.3d CONs
                 }
-                
+
                 return 0;
             }
 
