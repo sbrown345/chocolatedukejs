@@ -13,3 +13,7 @@ var controltype =
 };
 
 var Control = {};
+
+Control.startup = function () {
+    console.log("todo Control.startup");
+};

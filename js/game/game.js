@@ -4,6 +4,9 @@
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
 
+var CommandSoundToggleOff = 0;
+var CommandMusicToggleOff = 0;
+
 var confilename = "GAME.CON";
 
 function compilecons() {
@@ -25,6 +28,19 @@ function Startup() {
     Config.readSetup();
 
     compilecons();
+
+    if (CommandSoundToggleOff) {
+        SoundToggle = 0;
+    }
+    if (CommandMusicToggleOff) {
+        MusicToggle = 0;
+    }
+
+    Control.startup();
+
+    initEngine();
+    
+    throw new Error("todo")
 }
 
 function findGRPToUse() {

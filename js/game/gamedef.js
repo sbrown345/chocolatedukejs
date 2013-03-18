@@ -232,7 +232,7 @@ function getLabel() {
         textptrIdx++;
     }
     labels[labelcnt] = tempLabel;
-    console.info("label: %s", tempLabel);
+    //console.info("label: %s", tempLabel);
 }
 
 function keyword() {
@@ -254,7 +254,7 @@ function keyword() {
     var tempBufStr = stringFromArray(tempbuf);
     for (i = 0; i < NUMKEYWORDS; i++) {
         if (tempBufStr == keyw[i]) {
-            console.info("keyword: %s", keyw[i]);
+            //console.info("keyword: %s", keyw[i]);
             return i;
         }
     }
@@ -341,7 +341,7 @@ function transNumber() {
             if (typeof labelcode[i] == "undefined") {
                 debugger;
             }
-            console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr], i, labelcode[i]);
+            //console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr], i, labelcode[i]);
             scriptPtr++;
             textptrIdx += l;
             return;
@@ -357,7 +357,7 @@ function transNumber() {
     }
 
     script[scriptPtr] = parseInt(tempBufStr);
-    console.log("transNumber:", script[scriptPtr]);
+    //console.log("transNumber:", script[scriptPtr]);
     scriptPtr++;
 
     textptrIdx += l;
@@ -379,8 +379,8 @@ function parseCommand(readFromGrp) {
 
     tw = transWord();
 
-    console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i, parsing_actor == 0: %i",
-        tw, keyw[tw], transCount, line_number, script[scriptPtr], typeof parsing_actor[0] === "undefined" ? 1 : 0);
+    //console.log("tw: %i %s transCount: %i, line_number: %i, scriptPtr: %i, parsing_actor == 0: %i",
+    //    tw, keyw[tw], transCount, line_number, script[scriptPtr], typeof parsing_actor[0] === "undefined" ? 1 : 0);
 
     switch (tw) {
         default:
@@ -406,7 +406,7 @@ function parseCommand(readFromGrp) {
                 getLabel();
                 scriptPtr--;
                 labelcode[labelcnt] = scriptPtr;
-                console.log("case 17 labelcode[%i] = %i", labelcnt, scriptPtr);
+                //console.log("case 17 labelcode[%i] = %i", labelcnt, scriptPtr);
                 labelcnt++;
 
                 parsing_state = 1;
@@ -486,7 +486,7 @@ function parseCommand(readFromGrp) {
 
             transNumber();
             if (i == labelcnt) {
-                console.log("case 19 labelcode[%i] = %i", labelcnt, script[scriptPtr - 1]);
+                //console.log("case 19 labelcode[%i] = %i", labelcnt, script[scriptPtr - 1]);
                 labelcode[labelcnt++] = script[scriptPtr - 1];
             }
             scriptPtr -= 2;
@@ -542,7 +542,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i == labelcnt) {
-                    console.log("case 32 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //console.log("case 32 labelcode[%i] = %i", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr;
                 }
                 for (j = 0; j < 2; j++) {
@@ -693,7 +693,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i === labelcnt) {
-                    console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr; // todo is this right??
                 }
 
@@ -750,7 +750,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i == labelcnt) {
-                    console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr; // todo is this right??
                 }
 
@@ -782,7 +782,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            console.log("parsing_actor[0] = %i", parsing_actor[0]);
+            //console.log("parsing_actor[0] = %i", parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -790,7 +790,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]); // ? todo check
+                //console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]); // ? todo check
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -808,7 +808,7 @@ function parseCommand(readFromGrp) {
                     }
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                    //console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
                 }
             }
 
@@ -829,7 +829,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            console.log("parsing_actor[%i] = %i", 0, parsing_actor[0]);
+            //console.log("parsing_actor[%i] = %i", 0, parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -842,7 +842,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                //console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
                 if (j === 3) {
                     j = 0;
                     while (keyword() === -1) {
@@ -861,7 +861,7 @@ function parseCommand(readFromGrp) {
 
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                    //console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
 
                 }
             }
@@ -971,7 +971,7 @@ function parseCommand(readFromGrp) {
                     transNumber();
                     scriptPtr--;
                     j |= script[scriptPtr];
-                    console.log("ifnosounds j: %i", j);
+                    //console.log("ifnosounds j: %i", j);
                 } while (keyword() == -1);
                 script[scriptPtr] = j;
                 scriptPtr++;
@@ -1221,7 +1221,7 @@ function parseCommand(readFromGrp) {
                     error++;
                 }
                 parsing_actor[0] = undefined;
-                console.log("case 4 parsing_actor = 0");
+                //console.log("case 4 parsing_actor = 0");
             }
 
             return 0;
