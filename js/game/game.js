@@ -13,7 +13,31 @@ var CommandMusicToggleOff = 0;
 
 var confilename = "GAME.CON";
 var boardfilename = null;
+var waterpal = new Uint8Array(768), slimepal = new Uint8Array(768), titlepal = new Uint8Array(768), drealms = new Uint8Array(768), endingpal = new Uint8Array(768);
 
+function logo() {
+    
+}
+
+//7655
+function loadTmb() {
+    var tmb = new Uint8Array(8000);
+
+    var file = kopen4load("d3dtimbr.tmb", false);
+
+    if (file == -1)
+        return;
+
+    var l = kfilelength(file);
+
+    kread(file, tmb, l);
+
+    Music.registerTimbreBank(tmb);
+
+    kclose(file);
+}
+
+// 7695
 function compilecons() {
     var userconfilename = confilename;
 
@@ -60,18 +84,18 @@ function Startup() {
     }
 
     Network.initMultiPlayers(0, 0, 0);
-    
+
     if (numplayers > 1) {
         console.log("Multiplayer initialized.");
     }
 
     ps[myconnectindex].palette = palette[0];
     setupGameButtons();
-    
+
     if (networkmode === 255) {
         networkmode = 1;
     }
-    
+
     //console.log("Checking sound inits.");
     //todo: SoundStartup(); 
     //console.log("Checking music inits.");
@@ -85,23 +109,6 @@ function Startup() {
     loadTmb();
 }
 
-//7655
-function loadTmb() {
-    var tmb = new Uint8Array(8000);
-
-    var file = kopen4load("d3dtimbr.tmb", false);
-
-    if(file == -1) 
-        return;
-
-    var l = kfilelength(file);
-
-    kread(file, tmb, l);
-
-    Music.registerTimbreBank(tmb);
-
-    kclose(file);
-}
 
 //7803
 function getNames() {
@@ -121,7 +128,7 @@ function getNames() {
 
     ud.conSize[myconnectindex] = ud.conSize[0]; // [0] still containing the original value
     ud.conCRC[myconnectindex] = ud.conCRC[0];
-    
+
     if (numplayers > 1) {
         throw new Error("todo networking");
     } else if (nHostForceDisableAutoaim === 2) {
@@ -168,15 +175,15 @@ function main(argc, argv) {
     _platform_init(argc, argv, "Duke Nukem 3D", "Duke3D");
 
     //todo check memory (maybe use console.memory?)
-    
+
     // todo: register shutdown function - needed???
 
     Startup();
-    
+
     //if (g_bStun) {
     //    waitforeverybody(); //todo
     //}
-    
+
     if (numplayers > 1) {
         throw new Error("todo");
     } else if (boardfilename) {
@@ -186,7 +193,7 @@ function main(argc, argv) {
     }
 
     getNames();
-    
+
     if (ud.multimode > 1) {
         throw new Error("todo");
     }
@@ -197,18 +204,46 @@ function main(argc, argv) {
     if (numlumps) {
         console.log("Using .RTS file:%s", ud.rtsname);
     }
-    
+
     //todo: Control joystick, center joystick
 
     console.log("Loading palette/lookups.");
-    
+
     if (setGameMode(ScreenMode, ScreenWidth, ScreenHeight) < 0) {
         throw new Error("todo");
     }
 
     console.log("genSpriteRemaps()")
     genSpriteRemaps();
-    
+
+    setBrightness(ud.brightness >> 2, ps[myconnectindex].palette);
+
+    // todo:   if(KB_KeyPressed( sc_Escape ) )  
+    //gameexit(" ");
+
+    // todo: FX.StopAllSounds();
+    //clearsoundlocks();
+
+    if (ud.warp_on > 1 && ud.multimode < 2) {
+        throw new Error("todo");
+    }
+
+    // MAIN_LOOP_RESTART:
+
+    // if game is loaded without /V or /L cmd arguments.{
+    if (ud.warp_on === 0) {
+        if (numplayers > 1 && boardfilename[0] != 0) //check if a user map is loaded and in multiplayer.
+        {
+            throw new Error("todo");
+        } else {
+            logo(); //play logo, (game must be started via menus).
+        }
+    }
+    else if (ud.warp_on == 1) {
+        throw new Error("todo");
+    } else {
+        vscrn();
+    }
 
     throw new Error("todo");
 }

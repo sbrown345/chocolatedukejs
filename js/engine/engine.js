@@ -425,6 +425,38 @@ function setAspect(daxrange, daaspect) {
     xdimscale = scale(320, xyaspect, xdimen);
 }
 
+function makepalookup(palnum, remapbuf, r, g, b, dastat) {
+    var i, j, palscale;
+    var ptr, ptr2;
+
+    if (!paletteloaded) {
+        return;
+    }
+    
+    //if (palookup[palnum] == null) {
+    //    console.log("palookup[palnum] "); // todo
+    //} else {
+    //    throw new Error("palookup is a ptr etc, fix this")// todo
+    //}
+    
+    if (dastat === 0) {
+        return;
+    }
+    
+    if ((r | g | b | 63) !== 63) {
+        return;
+    }
+    
+    console.log("makepalookup todo!!!!!!"); // todo
+    //if ((r | g | b) === 0) {
+    //    for (i = 0; i < 256; i++) {
+    //        //ptr=palookup[0]   
+    //    }
+    //} else {
+    //    // todo?   
+    //}
+}
+
 //8244
 function setBrightness(brightness, dapal) {
     var newPalette = new Uint8Array(256 * 4);

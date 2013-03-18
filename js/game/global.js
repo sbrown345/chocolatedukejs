@@ -16,6 +16,15 @@ var ps = structArray(Player, MAXPLAYERS);
 //}
 
 var ud = {
+    god: 0,
+    warp_on: 0,
+    cashman: 0,
+    eog: 0,
+    showallmap: 0,
+    show_help: 0,
+    scrollmode: 0,
+    clipping: 0,
+
     ridecule: new Array(10),
     savegame: new Array(10),
     pwlockout: new Array(128),
