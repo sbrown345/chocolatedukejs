@@ -46,8 +46,8 @@ function Sector() {
 //EXTERN int32_t spritesortcnt;
 //EXTERN spritetype tsprite[MAXSPRITESONSCREEN];
 
-//EXTERN uint8_t  vidoption;
-var xdim, ydim, numpages;
+var vidoption = 0;
+var xdim, ydim, numpages = 0;
 
 //// Fast way to retrive the start of a column in the framebuffer, given a screenspace X coordinate.
 var ylookup = new Int32Array(MAXYDIM + 1);

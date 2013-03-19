@@ -20,6 +20,38 @@ var numTiles;
 
 var gotpic = new Uint8Array((MAXTILES + 7) >> 3);
 
+//94
+
+//1. Lock a picture in the cache system.
+//2. Mark it as used in the bitvector tracker.
+function setgotpic(tileNume) {
+    if (tiles[tileNume].lock < 200) {
+        tiles[tileNume].lock = 199;
+    }
+    
+    gotpic[tileNume >> 3] |= pow2char[tileNume & 7];
+}
+
+// 108
+function loadTile(tileNume) {
+    var i, tileFileSize;
+    
+    if (tileNume >= MAXTILES) {
+        return;
+    }
+
+    tileFileSize = tiles[tileNume].dim.width * tiles[tileNume].dim.height;
+    
+    if (tileFileSize <= 0) {
+        return;
+    }
+
+    i = tilefilenum[tileNume];
+    
+    throw new Error("todo loadTile");
+}
+
+//197
 function loadPics(filename, gamedir) {
     var offscount, localtilestart, localtileend, dasiz;
     var file, i, j, k;
@@ -110,4 +142,11 @@ function loadPics(filename, gamedir) {
     artfilplc = 0;
 
     return 0;
+}
+
+//301
+function TILE_MakeAvailable( picId){
+    if (tiles[picId].data == null) {
+        loadTile(picId);
+    }
 }

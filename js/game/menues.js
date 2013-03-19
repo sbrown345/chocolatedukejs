@@ -92,7 +92,7 @@ function playanm(fn, t) {
         else                           ototalclock += 10;
 
         tiles[MAXTILES-3-t].data = Anim.drawFrame(i);
-        rotatesprite(0<<16,0<<16,65536,512,MAXTILES-3-t,0,0,2+4+8+16+64, 0,0,xdim-1,ydim-1);
+        rotateSprite(0 << 16, 0 << 16, 65536, 512, MAXTILES - 3 - t, 0, 0, 2 + 4 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
         nextpage();
 
         if(t == 8) endanimvol41(i);

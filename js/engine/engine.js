@@ -65,21 +65,19 @@ var briTable = [
 
 var textFont = new Uint8Array(1024), smallTextFont = new Uint8Array(1024);
 
-//enum vector_index_e {VEC_X=0,VEC_Y=1};
-//enum screenSpaceCoo_index_e {VEC_COL=0,VEC_DIST=1};
-//typedef int32_t vector_t[2];
-//typedef int32_t coo2D_t[2];
-//// This is the structure emitted for each wall that is potentially visible.
-//// A stack of those is populated when the sectors are scanned.
-//typedef struct pvWall_s{
-//    vector_t cameraSpaceCoo[2]; //Camera space coordinates of the wall endpoints. Access with vector_index_e.
-//    int16_t sectorId;        //The index of the sector this wall belongs to in the map database.
-//    int16_t worldWallId;     //The index of the wall in the map database.
-//    coo2D_t screenSpaceCoo[2]; //Screen space coordinate of the wall endpoints. Access with screenSpaceCoo_index_e.
-//} pvWall_t;
+var VEC_X = 0, VEC_Y = 1;
+var VEC_COL = 0, VEC_DIST = 1;
+// This is the structure emitted for each wall that is potentially visible.
+// A stack of those is populated when the sectors are scanned.
+function Wall() {
+    this.cameraSpaceCoo = [new Int32Array(2), new Int32Array(2)]; //Camera space coordinates of the wall endpoints. Access with vector_index_e.
+    this.sectorId = 0; //The index of the sector this wall belongs to in the map database.
+    this.worldWallId = 0; //The index of the wall in the map database.
+    this.screenSpaceCoo = [new Int32Array(2), new Int32Array(2)]; //Screen space coordinate of the wall endpoints. Access with screenSpaceCoo_index_e.
+}
 
-//// Potentially Visible walls are stored in this stack.
-//pvWall_t pvWalls[MAXWALLSB];
+// Potentially Visible walls are stored in this stack.
+var pvWalls = structArray(Wall, MAXWALLSB);
 
 
 
@@ -120,7 +118,7 @@ var textFont = new Uint8Array(1024), smallTextFont = new Uint8Array(1024);
 //short dmost[MAXXDIM+1];
 
 //int16_t bakumost[MAXXDIM+1], bakdmost[MAXXDIM+1];
-//short uplc[MAXXDIM+1], dplc[MAXXDIM+1];
+var uplc = new Int16Array(MAXXDIM + 1), dplc = new Int16Array(MAXXDIM + 1);
 //static int16_t uwall[MAXXDIM+1], dwall[MAXXDIM+1];
 //static int32_t swplc[MAXXDIM+1], lplc[MAXXDIM+1];
 //static int32_t swall[MAXXDIM+1], lwall[MAXXDIM+4];
@@ -218,6 +216,11 @@ function initKSqrt() {
             shLookup[i + 4096] = ((k + 6) << 1) + ((10 - (k + 6)) << 8);
         }
     }
+}
+
+//658
+function getpalookup(davis, dashade) {
+    return (Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1));
 }
 
 //3488
@@ -376,6 +379,328 @@ function initEngine() {
     loadPalette();
 }
 
+/* Assume npoints=4 with polygon on &rx1,&ry1 */
+// FCS This is horrible to read: I hate you.
+function clipPoly4(cx1, cy1, cx2, cy2) {
+    var n, nn, z, zz, x, x1, x2, y, y1, y2, t;
+
+    nn = 0;
+    z = 0;
+    do {
+        zz = ((z + 1) & 3);
+
+
+        x1 = pvWalls[z].cameraSpaceCoo[0][VEC_X];
+        x2 = pvWalls[zz].cameraSpaceCoo[0][VEC_X] - x1;
+
+        if ((cx1 <= x1) && (x1 <= cx2)) {
+            pvWalls[nn].cameraSpaceCoo[1][VEC_X] = x1;
+            pvWalls[nn].cameraSpaceCoo[1][VEC_Y] = pvWalls[z].cameraSpaceCoo[0][VEC_Y];
+            nn++;
+        }
+
+        if (x2 <= 0)
+            x = cx2;
+        else
+            x = cx1;
+
+        t = x - x1;
+
+        if (((t - x2) ^ t) < 0) {
+            pvWalls[nn].cameraSpaceCoo[1][VEC_X] = x;
+            pvWalls[nn].cameraSpaceCoo[1][VEC_Y] = pvWalls[z].cameraSpaceCoo[0][VEC_Y] +
+                scale(t, pvWalls[zz].cameraSpaceCoo[0][VEC_Y] - pvWalls[z].cameraSpaceCoo[0][VEC_Y], x2);
+            nn++;
+        }
+
+        if (x2 <= 0)
+            x = cx1;
+        else
+            x = cx2;
+
+        t = x - x1;
+
+        if (((t - x2) ^ t) < 0) {
+            pvWalls[nn].cameraSpaceCoo[1][VEC_X] = x;
+            pvWalls[nn].cameraSpaceCoo[1][VEC_Y] = pvWalls[z].cameraSpaceCoo[0][VEC_Y] +
+                scale(t, pvWalls[zz].cameraSpaceCoo[0][VEC_Y] - pvWalls[z].cameraSpaceCoo[0][VEC_Y], x2);
+            nn++;
+        }
+        z = zz;
+    } while (z != 0);
+    if (nn < 3) return (0);
+
+    n = 0;
+    z = 0;
+    do {
+        zz = z + 1;
+        if (zz == nn)
+            zz = 0;
+
+        y1 = pvWalls[z].cameraSpaceCoo[1][VEC_Y];
+        y2 = pvWalls[zz].cameraSpaceCoo[1][VEC_Y] - y1;
+
+        if ((cy1 <= y1) && (y1 <= cy2)) {
+            pvWalls[n].cameraSpaceCoo[0][VEC_Y] = y1;
+            pvWalls[n].cameraSpaceCoo[0][VEC_X] = pvWalls[z].cameraSpaceCoo[1][VEC_X];
+            n++;
+        }
+        if (y2 <= 0) y = cy2;
+        else y = cy1;
+        t = y - y1;
+        if (((t - y2) ^ t) < 0) {
+            pvWalls[n].cameraSpaceCoo[0][VEC_Y] = y;
+            pvWalls[n].cameraSpaceCoo[0][VEC_X] =
+            pvWalls[z].cameraSpaceCoo[1][VEC_X] + scale(t,
+                                                       pvWalls[zz].cameraSpaceCoo[1][VEC_X] -
+                                                       pvWalls[z].cameraSpaceCoo[1][VEC_X], y2);
+            n++;
+        }
+
+        if (y2 <= 0) y = cy1;
+        else y = cy2;
+        t = y - y1;
+        if (((t - y2) ^ t) < 0) {
+            pvWalls[n].cameraSpaceCoo[0][VEC_Y] = y;
+            pvWalls[n].cameraSpaceCoo[0][VEC_X] =
+            pvWalls[z].cameraSpaceCoo[1][VEC_X] + scale(t,
+                                                       pvWalls[zz].cameraSpaceCoo[1][VEC_X] -
+                                                       pvWalls[z].cameraSpaceCoo[1][VEC_X], y2);
+            n++;
+        }
+        z = zz;
+    } while (z != 0);
+    return (n);
+}
+
+//3781
+function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2) {
+    var cosang, sinang, v, nextv, dax1, dax2, oy, bx, by, ny1, ny2;
+    var i, x, y, x1, y1, x2, y2, gx1, gy1;
+    var bufplc;
+    var palookupoffs;
+    var p;
+    var xoff, yoff, npoints, yplc, yinc, lx, rx, xx, xend;
+    var xv, yv, xv2, yv2, obuffermode = 0, qlinemode = 0, y1ve = new Int32Array(4), y2ve = new Int32Array(4), u4, d4;
+    var bad;
+
+    var tileWidht, tileHeight;
+
+    tileWidht = tiles[picnum].dim.width;
+    tileHeight = tiles[picnum].dim.height;
+
+    if (dastat & 16) {
+        xoff = 0;
+        yoff = 0;
+    } else {
+        throw new Error("todo");
+    }
+
+    if (dastat & 4) {
+        yoff = tileHeight - yoff;
+    }
+
+    cosang = sinTable[(a + 512) & 2047];
+    sinang = sinTable[a & 2047];
+
+
+    if ((dastat & 2) != 0)  /* Auto window size scaling */ {
+        if ((dastat & 8) == 0) {
+            x = xdimenscale;   /* = scale(xdimen,yxaspect,320); */
+            if (stereomode) x = scale(windowx2 - windowx1 + 1, yxaspect, 320);
+            sx = ((cx1 + cx2 + 2) << 15) + scale(sx - (320 << 15), xdimen, 320);
+            sy = ((cy1 + cy2 + 2) << 15) + mulscale16(sy - (200 << 15), x);
+        }
+        else {
+            /*
+             * If not clipping to startmosts, & auto-scaling on, as a
+             *  hard-coded bonus, scale to full screen instead
+             */
+            x = scale(xdim, yxaspect, 320);
+            sx = (xdim << 15) + 32768 + scale(sx - (320 << 15), xdim, 320);
+            sy = (ydim << 15) + 32768 + mulscale16(sy - (200 << 15), x);
+        }
+        z = mulscale16(z, x);
+    }
+
+    xv = mulscale14(cosang, z);
+    yv = mulscale14(sinang, z);
+    if (((dastat & 2) != 0) || ((dastat & 8) == 0)) /* Don't aspect unscaled perms */ {
+        xv2 = mulscale16(xv, xyaspect);
+        yv2 = mulscale16(yv, xyaspect);
+    }
+    else {
+        xv2 = xv;
+        yv2 = yv;
+    }
+
+    //Taking care of the Y coordinates.
+    pvWalls[0].cameraSpaceCoo[0][VEC_Y] = sy - (yv * xoff + xv * yoff);
+    pvWalls[1].cameraSpaceCoo[0][VEC_Y] = pvWalls[0].cameraSpaceCoo[0][VEC_Y] + yv * tileWidht;
+    pvWalls[3].cameraSpaceCoo[0][VEC_Y] = pvWalls[0].cameraSpaceCoo[0][VEC_Y] + xv * tileHeight;
+
+    pvWalls[2].cameraSpaceCoo[0][VEC_Y] = pvWalls[1].cameraSpaceCoo[0][VEC_Y] +
+                                          pvWalls[3].cameraSpaceCoo[0][VEC_Y] -
+                                          pvWalls[0].cameraSpaceCoo[0][VEC_Y];
+    i = (cy1 << 16);
+
+    if ((pvWalls[0].cameraSpaceCoo[0][VEC_Y] < i) &&
+        (pvWalls[1].cameraSpaceCoo[0][VEC_Y] < i) &&
+        (pvWalls[2].cameraSpaceCoo[0][VEC_Y] < i) &&
+        (pvWalls[3].cameraSpaceCoo[0][VEC_Y] < i))
+        return;
+
+    i = (cy2 << 16);
+
+    if ((pvWalls[0].cameraSpaceCoo[0][VEC_Y] > i) &&
+        (pvWalls[1].cameraSpaceCoo[0][VEC_Y] > i) &&
+        (pvWalls[2].cameraSpaceCoo[0][VEC_Y] > i) &&
+        (pvWalls[3].cameraSpaceCoo[0][VEC_Y] > i))
+        return;
+
+
+
+    //Taking care of the X coordinates.
+    pvWalls[0].cameraSpaceCoo[0][VEC_X] = sx - (xv2 * xoff - yv2 * yoff);
+    pvWalls[1].cameraSpaceCoo[0][VEC_X] = pvWalls[0].cameraSpaceCoo[0][VEC_X] + xv2 * tileWidht;
+    pvWalls[3].cameraSpaceCoo[0][VEC_X] = pvWalls[0].cameraSpaceCoo[0][VEC_X] - yv2 * tileHeight;
+    pvWalls[2].cameraSpaceCoo[0][VEC_X] = pvWalls[1].cameraSpaceCoo[0][VEC_X] +
+                                          pvWalls[3].cameraSpaceCoo[0][VEC_X] -
+                                          pvWalls[0].cameraSpaceCoo[0][VEC_X];
+
+    i = (cx1 << 16);
+    if ((pvWalls[0].cameraSpaceCoo[0][VEC_X] < i) &&
+        (pvWalls[1].cameraSpaceCoo[0][VEC_X] < i) &&
+        (pvWalls[2].cameraSpaceCoo[0][VEC_X] < i) &&
+        (pvWalls[3].cameraSpaceCoo[0][VEC_X] < i))
+        return;
+
+    i = (cx2 << 16);
+    if ((pvWalls[0].cameraSpaceCoo[0][VEC_X] > i) &&
+        (pvWalls[1].cameraSpaceCoo[0][VEC_X] > i) &&
+        (pvWalls[2].cameraSpaceCoo[0][VEC_X] > i) &&
+        (pvWalls[3].cameraSpaceCoo[0][VEC_X] > i))
+        return;
+
+
+
+
+    gx1 = pvWalls[0].cameraSpaceCoo[0][VEC_X];
+    gy1 = pvWalls[0].cameraSpaceCoo[0][VEC_Y];   /* back up these before clipping */
+
+    if ((npoints = clipPoly4(cx1 << 16, cy1 << 16, (cx2 + 1) << 16, (cy2 + 1) << 16)) < 3) {
+        return;
+    }
+
+    lx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
+    rx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
+
+    nextv = 0;
+    for (v = npoints - 1; v >= 0; v--) {
+        x1 = pvWalls[v].cameraSpaceCoo[0][VEC_X];
+        x2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_X];
+        dax1 = (x1 >> 16);
+        if (x1 < lx) lx = x1;
+        dax2 = (x2 >> 16);
+        if (x1 > rx) rx = x1;
+        if (dax1 != dax2) {
+            y1 = pvWalls[v].cameraSpaceCoo[0][VEC_Y];
+            y2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_Y];
+            yinc = divScale16(y2 - y1, x2 - x1);
+            if (dax2 > dax1) {
+                yplc = y1 + mulscale16((dax1 << 16) + 65535 - x1, yinc);
+                if (dax1 != 0) {
+                    throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
+                }
+                //qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
+                qinterpolatedown16short(uplc, dax2 - dax1, yplc, yinc);
+            } else {
+                yplc = y2 + mulscale16((dax2 << 16) + 65535 - x2, yinc);
+                if (dax2 != 0) {
+                    throw new Error("need to set start pointer for array, note: (& dplc[dax2])");
+                }
+                //qinterpolatedown16short((int32_t * )( & dplc[dax2]), dax1 - dax2, yplc, yinc);
+                qinterpolatedown16short(dplc, dax1 - dax2, yplc, yinc);
+            }
+        }
+        nextv = v;
+    }
+
+    TILE_MakeAvailable(picnum);
+
+    setgotpic(picnum);
+    bufplc = tiles[picnum].data;
+
+    palookupoffs = palookup[dapalnum] + (getpalookup(0, dashade) << 8);
+
+    i = divScale32(1, z);
+    xv = mulscale14(sinang, i);
+    yv = mulscale14(cosang, i);
+    if (((dastat & 2) != 0) || ((dastat & 8) == 0)) /* Don't aspect unscaled perms */ {
+        yv2 = mulscale16(-xv, yxaspect);
+        xv2 = mulscale16(yv, yxaspect);
+    }
+    else {
+        yv2 = -xv;
+        xv2 = yv;
+    }
+
+    x1 = (lx >> 16);
+    x2 = (rx >> 16);
+
+    oy = 0;
+    x = (x1 << 16) - 1 - gx1;
+    y = (oy << 16) + 65535 - gy1;
+    bx = dmulscale16(x, xv2, y, xv);
+    by = dmulscale16(x, yv2, y, yv);
+
+    if (dastat & 4) {
+        yv = -yv;
+        yv2 = -yv2;
+        by = (tileHeight << 16) - 1 - by;
+    }
+
+    console.warn("should vidoption be 1??????????????");
+    if ((vidoption == 1) && (origbuffermode == 0)) {
+        if (dastat & 128) {
+            obuffermode = buffermode;
+            buffermode = 0;
+
+        }
+    }
+    else if (dastat & 8) {
+        permanentupdate = 1;
+    }
+
+    if ((dastat & 1) == 0) {
+        if (((a & 1023) == 0) && (tileHeight <= 256))  /* vlineasm4 has 256 high limit! */ {
+
+            throw new Error("todo");
+        } else {
+            if (dastat & 64) {
+                if ((xv2 & 0x0000ffff) == 0) {
+                    qlinemode = 1;
+                    setuprhlineasm4(0, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, 0, 0);
+                }
+                else {
+                    qlinemode = 0;
+                    setuprhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
+                }
+            }
+            else {
+                setuprmhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
+            }
+            throw new Error("todo");
+        }
+
+        debugger;
+    } else {
+        throw new Error("todo");
+    }
+
+    debugger;
+}
+
 // 7978
 function setView(x1, y1, x2, y2) {
     var i;
@@ -433,8 +758,7 @@ function nextpage() {
 
     if (qsetmode === 200) {
         for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
-            throw new Error("todo")
-            //per = &permfifo[i];
+            throw new Error("todo"); //per = &permfifo[i];
             //if ((per->pagesleft > 0) && (per->pagesleft <= numpages))
             //    dorotatesprite(per->sx,per->sy,per->z,per->a,per->picnum,per->dashade,per->dapalnum,per->dastat,per->cx1,per->cy1,per->cx2,per->cy2);
         }
@@ -444,12 +768,12 @@ function nextpage() {
 
     if (qsetmode === 200) {
         for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
-            throw new Error("todo")
+            throw new Error("todo");
         }
     }
 
     faketimerhandler();
-    
+
     if ((totalclock >= lastageclock + 8) || (totalclock < lastageclock)) {
         lastageclock = totalclock;
         agecache();
@@ -462,6 +786,44 @@ function nextpage() {
 //8034
 function flushperms() {
     permhead = permtail = 0;
+}
+
+// Render a sprite on screen. This is used by the Engine but also the Game module
+// when drawing the HUD or the Weapon held by the player !!!
+function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2) {
+    var i;
+    var per, per2;
+
+    //If 2D target coordinate do not make sense (left > right)..
+    if ((cx1 > cx2) || (cy1 > cy2))
+        return;
+
+    if (z <= 16)
+        return;
+
+    if (tiles[picnum].animFlags & 192) {
+        picnum += animateoffs(picnum);
+    }
+
+    //Does the tile has negative dimensions ?
+    if ((tiles[picnum].dim.width <= 0) || (tiles[picnum].dim.height <= 0)) {
+        return;
+    }
+
+    if (((dastat & 128) == 0) || (numpages < 2) || (beforedrawrooms != 0)) {
+        doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2);
+    }
+
+    debugger;
+
+    if ((dastat & 64) && (cx1 <= 0) && (cy1 <= 0) && (cx2 >= xdim - 1) && (cy2 >= ydim - 1) &&
+        (sx == (160 << 16)) && (sy == (100 << 16)) && (z == 65536) && (a == 0) && ((dastat & 1) == 0)) {
+        permhead = permtail = 0;
+    }
+
+    if ((dastat & 128) == 0) {
+        return;
+    }
 }
 
 //8193
