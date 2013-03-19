@@ -95,8 +95,40 @@ function loadPage(pageNumber) {
         ds.position += 2;
         return ds.readUint16Array(anim.curlp.nBytes + (anim.curlp.nRecords * 2));
     }
-    
+
     throw new Error("anim.curlpnum should not equal pageNumber");
+}
+
+function CPlayRunSkipDump(idx, buffer) {
+    debugger;
+}
+
+function renderFrame(frameNumber, buffer) {
+    var offset = 0;
+    var i;
+    var destFrame;
+    var ppointer;
+
+    checkAnimStarted("renderFrame");
+    destFrame = frameNumber - anim.curlp.baseRecord;
+
+    for (i = 0; i < destFrame; i++) {
+        offset += buffer[i];
+    }
+
+    var ds = new DataStream(buffer);
+    ds.position += anim.curlp.nRecords * 2 + offset;
+
+    var nextBytes = ds.readUint8Array(2);
+    ds.position -= 2;
+    console.log("ppointer[1] %i", nextBytes[1]);
+    if (nextBytes[1]) {
+        throw Error("todo");
+    } else {
+        ds.position += 4;
+    }
+
+    CPlayRunSkipDump(ds);
 }
 
 function drawFrame(frameNumber) {
