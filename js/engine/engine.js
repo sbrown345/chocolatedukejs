@@ -212,7 +212,7 @@ function initKSqrt() {
             k++;
         }
 
-        sqrTable[i] = msqrtasm((i << 18) + 131072) << 1;
+        sqrTable[i] = Math.sqrt((i << 18) + 131072) << 1;
         shLookup[i] = (k << 1) + ((10 - k) << 8);
         if (i < 256) {
             shLookup[i + 4096] = ((k + 6) << 1) + ((10 - (k + 6)) << 8);
@@ -220,7 +220,7 @@ function initKSqrt() {
     }
 }
 
-3488
+//3488
 function loadTables() {
     var i, file;
     if (!tablesLoaded) {
