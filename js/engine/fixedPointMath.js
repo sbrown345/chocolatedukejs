@@ -4,6 +4,15 @@ function scale(input1, input2, input3) {
     return (input1 * input2 / input3) | 0;
 }
 
+function mulscale(input1, input2, input3) {
+    return (input1 * input2 / Math.pow(2, input3)) | 0;
+}
+
+for (var input3 = 1; input3 <= 32; input3++) {
+    window["mulscale" + input3] =
+        new Function("input1", "input2", "return (input1 * input2 / Math.pow(2, " + input3 + ")) | 0");
+}
+
 for (var i3 = 1; i3 <= 32; i3++) {
     window["divScale" + i3] = new Function("i1", "i2", "return (i1 * Math.pow(2, " + i3 + ") / i2) | 0;");
 }
