@@ -35,8 +35,8 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
 
     numPixels = i1;
     do {
-        console.log("texture pos: %i", texture.position);
-        console.log("i1: %i, i3: %i, i4: %i, i5: %i, rmach_ebx: %i", i1, i3, i4, i5, rmach_ebx);
+        //console.log("texture pos: %i", texture.position);
+        //console.log("i1: %i, i3: %i, i4: %i, i5: %i, rmach_ebx: %i", i1, i3, i4, i5, rmach_ebx);
         //i3 = ((i3&0xffffff00)|(*texture));
         i3 = ((i3 & 0xffffff00) | texture.readUint8());
         texture.position--;
@@ -53,7 +53,7 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
             texture.position -= rmach_ecx;
 
         ebp &= rmach_esi;
-        console.log("numPixels = %i, ebp = %i", numPixels, ebp);
+        //console.log("numPixels = %i, ebp = %i", numPixels, ebp);
         i1 = ((i1 & 0xffffff00) | dest[i3]);
         //i1 = ((i1&0xffffff00)|(((uint8_t *)i3)[rmach_edx]));
 
@@ -66,5 +66,5 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
         numPixels--;
     } while (numPixels);
     
-    throw new Error("todo")
+    //throw new Error("todo")
 }

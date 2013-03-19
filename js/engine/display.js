@@ -215,14 +215,26 @@ function VBE_setPalette(paletteBuffer) {
 }
 
 //1460
-
+var tempFramePlaceThing;
 function _nextpage() {
     var ticks;
 
     console.log("todo: _nextpage: handle_events");
     //handle_events();
 
-    console.log("todo: SDL_UpdateRect. perhaps need to put pixels?");
+    // SDL_UpdateRect alternative
+    if (tempFramePlaceThing) {
+        var imageData = frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight);
+        var newImageData = new Uint8Array(tempFramePlaceThing.buffer);
+        for (var i = 0; i < imageData.data.length; i++) {
+            imageData.data[i] = newImageData[i];
+            if ((i+1) % 4 == 0) {
+                imageData.data[i] = 255;
+            }
+        }
+        frameplace.putImageData(imageData, 0, 0);
+    }
+    tempFramePlaceThing = new DataStream(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
 
     ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);
@@ -233,6 +245,8 @@ function _nextpage() {
     }
     total_rendered_frames++;
 }
+
+
 
 // 1769
 //-------------------------------------------------------------------------------------------------

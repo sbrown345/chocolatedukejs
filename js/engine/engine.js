@@ -816,13 +816,12 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 oy = y1;
                 if (dastat&64) {
                     if (qlinemode) {
-                        debugger;
                         bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
-                        var tempFramePlaceThing = new DataStream(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
+                       
                         tempFramePlaceThing.position = ylookup[y1] + x2;
 
-                        console.log("texture ptr: %i", (bx >> 16) * tileHeight + (by >> 16));
-                        console.log("frameplace ptr: %i", ylookup[y1] + x2);
+                        //console.log("texture ptr: %i", (bx >> 16) * tileHeight + (by >> 16));
+                        //console.log("frameplace ptr: %i", ylookup[y1] + x2);
                         rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, tempFramePlaceThing);
                         //rhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x2+frameplace);
                     }
@@ -908,9 +907,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     if ((vidoption == 1) && (dastat&128) && (origbuffermode == 0))
     {
         buffermode = obuffermode;
-
     }
-    debugger;
 }
 
 // 7978
@@ -993,6 +990,7 @@ function nextpage() {
 
     beforedrawrooms = 1;
     numframes++;
+    console.log("numframes: %i", numframes);
 }
 
 //8034
@@ -1026,8 +1024,6 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
         doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2);
     }
 
-    debugger;
-
     if ((dastat & 64) && (cx1 <= 0) && (cy1 <= 0) && (cx2 >= xdim - 1) && (cy2 >= ydim - 1) &&
         (sx == (160 << 16)) && (sy == (100 << 16)) && (z == 65536) && (a == 0) && ((dastat & 1) == 0)) {
         permhead = permtail = 0;
@@ -1036,6 +1032,8 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
     if ((dastat & 128) == 0) {
         return;
     }
+
+    throw new Error("TODO");
 }
 
 //8193
@@ -1103,6 +1101,7 @@ function clearView(dacol) {
     //p = frameplace + ylookup[windowy1] + windowx1;
     // todo: check this is right
 
+    console.log("clearview: frameplace.clearRect etc");
     frameplace.clearRect(0, 0, surface.width, surface.height);
 
     faketimerhandler();

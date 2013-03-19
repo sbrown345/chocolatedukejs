@@ -150,3 +150,12 @@ function TILE_MakeAvailable( picId){
         loadTile(picId);
     }
 }
+
+
+/*
+ FCS:   If a texture is animated, this will return the offset to add to tilenum
+ in order to retrieve the texture to display.
+ */
+function animateoffs(tilenum) {
+    throw new Error("todo");
+}

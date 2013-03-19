@@ -13,6 +13,17 @@ function palto(r, g, b, e) {
     setBrightness(ud.brightness >> 2, tempArray);
 }
 
+function logoanimsounds(fr) {
+    switch (fr) {
+        case 1:
+            sound(FLY_BY);
+            break;
+        case 19:
+            sound(PIPEBOMB_EXPLODE);
+            break;
+    }
+}
+
 // 4602
 var lastanimhack = 0;
 function playanm(fn, t) {

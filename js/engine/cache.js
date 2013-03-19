@@ -7,3 +7,7 @@ function initCache() {
 function allocache(newhandle, newbytes, newlockptr) {
     console.warn("allocache todo");
 }
+
+function agecache() {
+    console.log("todo agecache??")
+}
