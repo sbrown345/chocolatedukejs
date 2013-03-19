@@ -27,7 +27,7 @@ function getPackets() {
     //short other, packbufleng;
     //input *osyn, *nsyn;
 
-    //sampletimer();
+    sampleTimer();
     //if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
     //{
     //    qe = 1;
@@ -57,24 +57,8 @@ function faketimerhandler() {
     if ((totalclock < ototalclock + TICSPERFRAME) || (ready2send === 0)) {
         return; // Returns here when playing a demo.
     }
-
-    if (ud.showcinematics && numplayers < 2) {
-        // This plays the explosion from the nuclear sign at the beginning.
-        if (!VOLUME()) {
-            if (KB.keyWaiting() && nomorelogohack == 0) {
-                getpackets();
-
-                playanm("logo.anm", 5);
-                palto(0, 0, 0, 63);
-                KB.flushKeyboardQueue();
-            }
-            
-            clearView(0);
-            nextpage();
-        }
-        throw new Error("todo")
-    }
-    throw new Error("todo")
+    
+    throw new Error("todo");
 }
 
 function logo() {
@@ -93,9 +77,24 @@ function logo() {
 
     Music.stopSong();
     
+    if (ud.showcinematics && numplayers < 2) {
+        // This plays the explosion from the nuclear sign at the beginning.
+        if (!VOLUMEONE()) {
+            if (!KB.keyWaiting() && nomorelogohack == 0) {
+                getPackets();
 
-    throw new Error("todo")
+                playanm("logo.anm", 5);
+                palto(0, 0, 0, 63);
+                KB.flushKeyboardQueue();
+            }
 
+            clearView(0);
+            nextpage();
+        }
+        throw new Error("todo");
+    }
+
+    throw new Error("todo");
 }
 
 //7655
@@ -292,7 +291,7 @@ function main(argc, argv) {
         throw new Error("todo");
     }
 
-    console.log("genSpriteRemaps()")
+    console.log("genSpriteRemaps()");
     genSpriteRemaps();
 
     setBrightness(ud.brightness >> 2, ps[myconnectindex].palette);

@@ -157,13 +157,13 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     j = ydim * 4 * 4;
 
     if (horizlookup) {
-        throw  new Error("todo");
+        throw new Error("todo");
     }
-    
+
     if (horizlookup2) {
-        throw  new Error("todo");
+        throw new Error("todo");
     }
-    
+
     //horizlookup = (int32_t*)malloc(j);
     //horizlookup2 = (int32_t*)malloc(j);
 
@@ -174,9 +174,9 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
         ylookup[i] = j;
         j += bytesperline;
     }
-    
+
     horizycent = ((ydim * 4) >> 1);
-    
+
     /* Force drawrooms to call dosetaspect & recalculate stuff */
     oxyaspect = oxdimen = oviewingrange = -1;
 
@@ -184,7 +184,7 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     setBytesPerLine(bytesperline);
 
     setView(0, 0, xdim - 1, ydim - 1);
-    
+
     setBrightness(curbrightness, palette);
 
     if (searchx < 0) {
@@ -218,13 +218,13 @@ function VBE_setPalette(paletteBuffer) {
 
 function _nextpage() {
     var ticks;
-    
+
     console.log("todo: _nextpage: handle_events");
     //handle_events();
-    
+
     console.log("todo: SDL_UpdateRect. perhaps need to put pixels?");
 
-    ticks = getTicks();
+    ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);
     if (total_render_time > 1000) {
         total_rendered_frames = 0;
@@ -251,13 +251,42 @@ function initTimer(ticksPerSecond) {
 
     timerFreq = 1000;
     timerTicsPerSec = ticksPerSecond;
-    timerLastSample = (getTicks() * timerTicsPerSec / timerFreq) | 0;
+    timerLastSample = (Timer.getPlatformTicks() * timerTicsPerSec / timerFreq) | 0;
     userTimerCallback = null;
 
     return 0;
 }
 
-var initTime = Date.now();
+function sampleTimer() {
+    var i, n;
+
+    if (!timerFreq) {
+        return;
+    }
+
+    i = Timer.getPlatformTicks();
+
+    n = ((i * timerLastSample / timerFreq) | 0) - timerLastSample;
+
+    if (n > 0) {
+        totalclock += n;
+        timerLastSample += n;
+    }
+
+    if (userTimerCallback) {
+        for (; n > 0; n--) {
+            userTimerCallback();
+        }
+    }
+}
+
 function getTicks() {
-    return Date.now() - initTime;
+    var i = Timer.getPlatformTicks();
+    return (i * (1000) / timerFreq) | 0;
+}
+
+var Timer = { initTime: Date.now(), ticksInOneSecond: 1000 };
+
+Timer.getPlatformTicks = function () {
+    return Date.now() - Timer.initTime;
 }
