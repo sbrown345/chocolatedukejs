@@ -51,7 +51,7 @@ function divScale(i1, i2, i3) {
     //var i1Hi = 0; // todo: faster using bitshift?? (google's Long class didn't work)
     // This Math.pow MUCH slower than bitshift (google - math.pow vs shift performance)
     // maybe this is faster: http://stackoverflow.com/questions/3323633/efficient-way-of-doing-64-bit-rotate-using-32-bit-values
-    return ((i1 * Math.pow(2, i3)) / i2) | 0;
+    return Math.floor((i1 * Math.pow(2, i3)) / i2);
 }
 
 function clearbuf(buffer, start, end) {

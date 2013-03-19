@@ -172,7 +172,7 @@ var pageoffset, ydim16, qsetmode = 0;
 //int32_t startposx, startposy, startposz;
 //int16_t startang, startsectnum;
 var pointhighlight, linehighlight, highlightcnt;
-//static int32_t lastx[MAXYDIM];
+var lastx = new Int32Array(MAXYDIM);
 var paletteloaded = false;
 
 var FASTPALGRIDSIZ = 8;
@@ -629,7 +629,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     TILE_MakeAvailable(picnum);
 
     setgotpic(picnum);
-    bufplc = tiles[picnum].data;
+    bufplc = new DataStream(tiles[picnum].data);
 
     palookupoffs = palookup[dapalnum] + (getpalookup(0, dashade) << 8);
 
@@ -690,14 +690,223 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             else {
                 setuprmhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
             }
-            throw new Error("todo");
+            
+            y1 = uplc[x1];
+            if (((dastat&8) == 0) && (startumost[x1] > y1)) y1 = startumost[x1];
+            y2 = y1;
+            for(x=x1; x<x2; x++)
+            {
+                ny1 = uplc[x]-1;
+                ny2 = dplc[x];
+                if ((dastat&8) == 0)
+                {
+                    if (startumost[x]-1 > ny1) ny1 = startumost[x]-1;
+                    if (startdmost[x] < ny2) ny2 = startdmost[x];
+                }
+
+                if (ny1 < ny2-1)
+                {
+                    if (ny1 >= y2)
+                    {
+                        while (y1 < y2-1)
+                        {
+                            y1++;
+                            if ((y1&31) == 0) faketimerhandler();
+
+                            /* x,y1 */
+                            bx += xv*(y1-oy);
+                            by += yv*(y1-oy);
+                            oy = y1;
+                            if (dastat&64) {
+                                if (qlinemode)
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x+frameplace);
+                            else
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                            } else
+                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                        }
+                        y1 = ny1;
+                    }
+                    else
+                    {
+                        while (y1 < ny1)
+                        {
+                            y1++;
+                            if ((y1&31) == 0) faketimerhandler();
+
+                            /* x,y1 */
+                            bx += xv*(y1-oy);
+                            by += yv*(y1-oy);
+                            oy = y1;
+                            if (dastat&64) {
+                                if (qlinemode)
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0,by<<16,ylookup[y1]+x+frameplace);
+                            else
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                            } else
+                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                        }
+                        while (y1 > ny1) lastx[y1--] = x;
+                    }
+                    while (y2 > ny2)
+                    {
+                        y2--;
+                        if ((y2&31) == 0) faketimerhandler();
+
+                        /* x,y2 */
+                        bx += xv*(y2-oy);
+                        by += yv*(y2-oy);
+                        oy = y2;
+                        if (dastat&64) {
+                            if (qlinemode)
+                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y2]+x+frameplace);
+                        else
+                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y2]+x+frameplace);
+                        } else
+                            rmhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y2]+x+frameplace);
+                    }
+                    while (y2 < ny2) lastx[y2++] = x;
+                }
+                else
+                {
+                    while (y1 < y2-1)
+                    {
+                        y1++;
+                        if ((y1&31) == 0) faketimerhandler();
+
+                        /* x,y1 */
+                        bx += xv*(y1-oy);
+                        by += yv*(y1-oy);
+                        oy = y1;
+                        if (dastat&64)
+                        {
+                            if (qlinemode)
+                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x+frameplace);
+                        else
+                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                        }
+                        else
+                            rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                    }
+                    if (x == x2-1)
+                    {
+                        bx += xv2;
+                        by += yv2;
+                        break;
+                    }
+
+                    y1 = uplc[x+1];
+
+                    if (((dastat&8) == 0) && (startumost[x+1] > y1))
+                        y1 = startumost[x+1];
+
+                    y2 = y1;
+                }
+                bx += xv2;
+                by += yv2;
+            }
+            while (y1 < y2-1)
+            {
+                y1++;
+                if ((y1&31) == 0) faketimerhandler();
+
+                /* x2,y1 */
+                bx += xv*(y1-oy);
+                by += yv*(y1-oy);
+                oy = y1;
+                if (dastat&64) {
+                    if (qlinemode) {
+                        debugger;
+                        bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
+                        var tempFramePlaceThing = new DataStream(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
+                        tempFramePlaceThing.position = ylookup[y1] + x2;
+                        rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, tempFramePlaceThing);
+                        //rhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x2+frameplace);
+                    }
+                    else
+                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) + bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2 + frameplace);
+                } else
+                    rmhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x2+frameplace);
+            }
+        }
+    }
+    else
+    {
+        if ((dastat&1) == 0)
+        {
+            if (dastat&64)
+                setupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv,0);
+            else
+                msetupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv,0);
+        }
+        else
+        {
+            tsetupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv);
+
+            if (dastat&32) 
+                settrans(TRANS_REVERSE);
+            else 
+                settrans(TRANS_NORMAL);
         }
 
-        debugger;
-    } else {
-        throw new Error("todo");
+        for(x=x1; x<x2; x++)
+        {
+            bx += xv2;
+            by += yv2;
+
+            y1 = uplc[x];
+            y2 = dplc[x];
+            if ((dastat&8) == 0)
+            {
+                if (startumost[x] > y1) y1 = startumost[x];
+                if (startdmost[x] < y2) y2 = startdmost[x];
+            }
+            if (y2 <= y1) continue;
+
+            switch(y1-oy)
+            {
+                case -1:
+                    bx -= xv;
+                    by -= yv;
+                    oy = y1;
+                    break;
+                case 0:
+                    break;
+                case 1:
+                    bx += xv;
+                    by += yv;
+                    oy = y1;
+                    break;
+                default:
+                    bx += xv*(y1-oy);
+                    by += yv*(y1-oy);
+                    oy = y1;
+                    break;
+            }
+
+            p = ylookup[y1]+x+frameplace;
+
+            if ((dastat&1) == 0)
+            {
+                if (dastat&64)
+                    spritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+            else
+                    mspritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+            }
+            else
+            {
+                DrawSpriteVerticalLine(by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+                transarea += (y2-y1);
+            }
+            faketimerhandler();
+        }
     }
 
+    if ((vidoption == 1) && (dastat&128) && (origbuffermode == 0))
+    {
+        buffermode = obuffermode;
+
+    }
     debugger;
 }
 
