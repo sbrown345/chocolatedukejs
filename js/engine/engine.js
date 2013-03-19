@@ -820,6 +820,9 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
                         var tempFramePlaceThing = new DataStream(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
                         tempFramePlaceThing.position = ylookup[y1] + x2;
+
+                        console.log("texture ptr: %i", (bx >> 16) * tileHeight + (by >> 16));
+                        console.log("frameplace ptr: %i", ylookup[y1] + x2);
                         rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, tempFramePlaceThing);
                         //rhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x2+frameplace);
                     }
