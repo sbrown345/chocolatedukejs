@@ -99,8 +99,65 @@ function loadPage(pageNumber) {
     throw new Error("anim.curlpnum should not equal pageNumber");
 }
 
-function CPlayRunSkipDump(idx, buffer) {
-    debugger;
+function CPlayRunSkipDump(srcStream, destStream) {
+    var cnt = new Int8Array(1);
+    var wordCnt = new Uint16Array(1);
+    var pixel;
+
+    for (; ;) {
+        // nextOp
+        cnt[0] = srcStream.readInt8();
+        if (cnt[0] > 0) {
+            // dump
+            do {
+                destStream.writeUint8(srcStream.readUint8());
+            } while (--cnt[0]);
+        }
+        else if (cnt[0] == 0) {
+            //run
+            wordCnt[0] = srcStream.readUint8();                /* 8-bit unsigned count */
+            pixel = srcStream.readUint8();
+            do {
+                destStream.writeUint8(pixel);
+            } while (--wordCnt[0]);
+        }
+        else {
+            cnt[0] -= 0x80;
+            if (cnt[0] == 0) {
+                // longOp 
+                wordCnt[0] = srcStream.readUint16();
+                if ((((wordCnt[0] >> 15) * (-65536)) + wordCnt[0] /*signed*/) <= 0) {
+                    // notLongSkip
+                    if (wordCnt[0] == 0)
+                        break;
+
+                    wordCnt[0] -= 0x8000;              /* Remove sign bit. */
+                    if (wordCnt[0] >= 0x4000) {
+                        // longRun;
+                        wordCnt[0] -= 0x4000;              /* Clear "longRun" bit. */
+                        pixel = srcStream.readUint8();
+                        do {
+                            destStream.writeUint8(pixel);
+                        } while (--wordCnt[0]);
+                    }
+                    else {
+                        /* longDump. */
+                        do {
+                            destStream.writeUint8(srcStream.readUint8());
+                        } while (--wordCnt[0]);
+                    }
+                }
+                else {
+                    /* longSkip. */
+                    destStream.position += wordCnt[0];
+                }
+            }
+            else {
+                /* shortSkip */
+                destStream.position += cnt[0];                  /* adding 7-bit count to 32-bit pointer */
+            }
+        }
+    }
 }
 
 function renderFrame(frameNumber, buffer) {
@@ -116,19 +173,20 @@ function renderFrame(frameNumber, buffer) {
         offset += buffer[i];
     }
 
-    var ds = new DataStream(buffer);
-    ds.position += anim.curlp.nRecords * 2 + offset;
+    var sourceStream = new DataStream(buffer);
+    sourceStream.position += anim.curlp.nRecords * 2 + offset;
 
-    var nextBytes = ds.readUint8Array(2);
-    ds.position -= 2;
+    var nextBytes = sourceStream.readUint8Array(2);
+    sourceStream.position -= 2;
     console.log("ppointer[1] %i", nextBytes[1]);
     if (nextBytes[1]) {
         throw Error("todo");
     } else {
-        ds.position += 4;
+        sourceStream.position += 4;
     }
 
-    CPlayRunSkipDump(ds);
+    var desinationStream = new DataStream(anim.imagebuffer);
+    CPlayRunSkipDump(sourceStream, desinationStream);
 }
 
 function drawFrame(frameNumber) {
