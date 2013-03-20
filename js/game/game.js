@@ -100,17 +100,21 @@ function logo() {
             palto(0, 0, 0, i); // todo requestAnimationFrame
         }
         ps[myconnectindex].palette = drealms;
-        palto(0, 0, 0, 63);
-        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+        //palto(0, 0, 0, 63); //todo add this back in
+        palto(0, 0, 0, 0);//temp remove this line!!
+        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
         nextpage();
-        for (i = 63; i > 0; i -= 7) {
-            palto(0, 0, 0, i); // todo requestAnimationFrame
-        }
+        // TODO!
+        //
+        //for (i = 63; i > 0; i -= 7) {
+        //    palto(0, 0, 0, i); // todo requestAnimationFrame
+        //}
 
-        throw new Error("todo");
+
+        //throw new Error("todo");
     }
 
-    throw new Error("todo");
+    //throw new Error("todo");
 }
 
 //7655
@@ -339,7 +343,8 @@ function main(argc, argv) {
         vscrn();
     }
 
-    throw new Error("todo");
+    //throw new Error("todo");
+    console.warn("todo")
 }
 
 //10434

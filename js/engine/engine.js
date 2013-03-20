@@ -716,7 +716,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 }
 
                 p = frameplace;
-                p.position += x;
+                p.position = x; // could be dodgy sharing this position?
+                //updateCanvas();
 
                 u4 = Math.max(Math.max(y1ve[0], y1ve[1]), Math.max(y1ve[2], y1ve[3]));
                 d4 = Math.min(Math.min(y2ve[0], y2ve[1]),Math.min(y2ve[2],y2ve[3]));

@@ -57,7 +57,7 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
         ebp = ((((i4 + rmach_eax) >>> 0) < i4) ? -1 : 0);
         i5 -= rmach_ebx;
         i5 = i5 >>> 0;
-        
+
         if (((i5 + rmach_ebx) >>> 0) < i5)
             texture.position -= (rmach_ecx + 1);
         else
@@ -84,8 +84,6 @@ function setupvlineasm(i1) {
 }
 
 //FCS This is used to fill the inside of a wall (so it draws VERTICAL column, always).
-
-var vlineasm4Count =0;
 function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
     if (!RENDER_DRAW_WALL_INSIDE)
         return;
@@ -98,35 +96,22 @@ function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
 
     var i;
     var temp;
-    var loopCount=0;
 
     var index = (framebuffer.position + ylookup[columnIndex]);
     var dest = -ylookup[columnIndex];
-
     do {
         for (i = 0; i < 4; i++) {
-            temp = ((vplce[i] >>> 0) >> mach3_al) & 0xff;
-            if (isNaN(temp)) debugger;
-            temp = bufplc.array[bufplce[i] + temp]; // get texture
-            
-            temp = temp >>> 0;
-            //console.log("temp 2nd: %i", temp);
-            if (isNaN(temp)) debugger;
+            temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
+
+            temp = bufplc.array[bufplce[i] + temp] >>> 0; // get texture
 
             if (pixelsAllowed-- > 0) {
                 var val = palookup[palookupoffse[i] + temp];
                 framebuffer.array[dest + index + i] = val; // add texture to framebuffer
-                //console.log("new val: %i", val);
-                if (isNaN(val)) debugger;
             }
 
             vplce[i] += vince[i];
         }
         dest += bytesperline;
-        //console.log("dest: %i", dest);
-        loopCount++;
-        //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
     } while (typeof framebuffer.array[dest] !== "undefined");
-    //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
-    vlineasm4Count++;
 }
