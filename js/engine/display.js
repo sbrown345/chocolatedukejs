@@ -210,31 +210,30 @@ Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
 };
 
 
-function SdlColorTemp() {
+function Color() {
     this.r = 0;
     this.g = 0;
     this.b = 0;
-    this.unused = 0;
 }
 
 //1330
 var testPallete;
 function VBE_setPalette(paletteBuffer, debug) {
-/*
- * (From Ken's docs:)
- *   Set (num) palette palette entries starting at (start)
- *   palette entries are in a 4-byte format in this order:
- *       0: Blue (0-63)
- *       1: Green (0-63)
- *       2: Red (0-63)
- *       3: Reserved
- *
- * Naturally, the bytes are in the reverse order that SDL wants them...
- *  More importantly, SDL wants the color elements in a range from 0-255,
- *  so we do a conversion.
- */
+    /*
+     * (From Ken's docs:)
+     *   Set (num) palette palette entries starting at (start)
+     *   palette entries are in a 4-byte format in this order:
+     *       0: Blue (0-63)
+     *       1: Green (0-63)
+     *       2: Red (0-63)
+     *       3: Reserved
+     *
+     * Naturally, the bytes are in the reverse order that SDL wants them...
+     *  More importantly, SDL wants the color elements in a range from 0-255,
+     *  so we do a conversion.
+     */
 
-    var fmt_swap = new structArray(SdlColorTemp, 256);
+    var fmtSwap = structArray(Color, 256);
     var sdlp = 0;
     var p = 0;
 
@@ -243,20 +242,20 @@ function VBE_setPalette(paletteBuffer, debug) {
     //memcpy(lastPalette, palettebuffer, 768);
     var debugHtml = "";
     for (var i = 0; i < 256; i++) {
-        fmt_swap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        fmt_swap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        fmt_swap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        fmt_swap[sdlp].unused = paletteBuffer[p++]; /* This byte is unused in BUILD, too. */
-        debugHtml += "<span style='background:rgb(" + (fmt_swap[sdlp].r ) + "," + (fmt_swap[sdlp].g ) + "," + (fmt_swap[sdlp].b ) + ")'>" +
+        fmtSwap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        fmtSwap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        fmtSwap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        p++;
+        debugHtml += "<span style='background:rgb(" + (fmtSwap[sdlp].r) + "," + (fmtSwap[sdlp].g) + "," + (fmtSwap[sdlp].b) + ")'>" +
             sdlp + "&nbsp;</span>";
         sdlp++;
     }
 
-    if (debug|true) {
+    if (debug | true) {
         paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
     }
-    testPallete = fmt_swap;
-    console.warn("VBE_setPalette todo when there's something on the screen to test!");
+
+    testPallete = fmtSwap;
 }
 
 //1460
@@ -264,10 +263,10 @@ var tempFramePlaceThing;
 function PointerHelper(uint8Array, position) {
     this.array = uint8Array;
     this.position = position || 0;
-    this.setByte = function(v) {
+    this.setByte = function (v) {
         this.array[position] = -v;
     };
-    this.getByte = function(v) {
+    this.getByte = function (v) {
         return this.array[position];
     };
 }
@@ -279,17 +278,17 @@ function _nextpage() {
 
     // SDL_UpdateRect alternative
     if (tempFramePlaceThing) {
-        var imageData = frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight);
+        var imageData = frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight); // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
         var newImageData = tempFramePlaceThing.array;
-        for (var i = 0; i < imageData.data.length; i++) {
-            imageData.data[i] = newImageData[i];
-            if ((i+1) % 4 == 0) {
-                imageData.data[i] = 255;
-            }
+        for (var i = 0; i < newImageData.length; i++) {
+            imageData.data[i * 4] = testPallete[newImageData[i]].r;
+            imageData.data[i * 4 + 1] = testPallete[newImageData[i]].g;
+            imageData.data[i * 4 + 2] = testPallete[newImageData[i]].b;
+            imageData.data[i * 4 + 3] = 255;
         }
         frameplace.putImageData(imageData, 0, 0);
     }
-    tempFramePlaceThing = new PointerHelper(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
+    tempFramePlaceThing = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
 
     ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);

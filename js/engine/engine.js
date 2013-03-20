@@ -816,17 +816,9 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 oy = y1;
                 if (dastat&64) {
                     if (qlinemode) {
-                        // TODO: REMEMBER THE FIRST FRAME HAS COLOUR ON ,   
-						// TODO: REMMEBER THE PALLETE GENERATION METHOD ISN'T IMPLEMENTED??
-						
                         bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
-                       
                         tempFramePlaceThing.position = ylookup[y1] + x2;
-
-                        //console.log("texture ptr: %i", (bx >> 16) * tileHeight + (by >> 16));
-                        //console.log("frameplace ptr: %i", ylookup[y1] + x2);
                         rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, tempFramePlaceThing);
-                        //rhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x2+frameplace);
                     }
                     else
                         rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) + bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2 + frameplace);
