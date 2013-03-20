@@ -58,7 +58,7 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
 
         ebp &= rmach_esi;
         //console.log("numPixels = %i, ebp = %i", numPixels, ebp);
-        i1 = ((i1 & 0xffffff00) | 31); //  rhlineasm4Count == 48 && numPixels ==324 THIS NEEDS to be "38"
+        i1 = (i1 & 0xffffff00) | i3 + rmach_edx; //testPallete[i3 + rmach_edx]); //  rhlineasm4Count == 48 && numPixels ==324 THIS NEEDS to be "38"
         //i1 = ((i1 & 0xffffff00) | dest.array[i3 + rmach_edx]); //  rhlineasm4Count == 48 && numPixels ==324 THIS NEEDS to be "38"
         //i1 = ((i1&0xffffff00)|(((uint8_t *)i3)[rmach_edx]));
 

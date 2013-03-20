@@ -252,7 +252,7 @@ function VBE_setPalette(paletteBuffer, debug) {
         sdlp++;
     }
 
-    if (debug) {
+    if (debug|true) {
         paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
     }
     testPallete = fmt_swap;
