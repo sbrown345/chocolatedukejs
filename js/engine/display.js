@@ -347,7 +347,7 @@ function sampleTimer() {
 
     i = Timer.getPlatformTicks();
 
-    n = ((i * timerLastSample / timerFreq) | 0) - timerLastSample;
+    n = ((i * timerTicsPerSec / timerFreq) | 0) - timerLastSample;
 
     if (n > 0) {
         totalclock += n;
