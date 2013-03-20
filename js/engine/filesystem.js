@@ -6,6 +6,12 @@ var gameDir = "";
 
 var groupefil_crc32 = new Int32Array(MAXGROUPFILES);
 
+/* Seek method constants */
+
+var SEEK_CUR = 1;
+var SEEK_END = 2;
+var SEEK_SET = 0;
+
 function grpArchive_t() {
     this.numFiles = 0; //Number of files in the archive.
     this.gfilelist = null; //Array containing the filenames.
@@ -401,7 +407,7 @@ function kopen4load(filename, readfromGrp) {
 
 //function kreadtext(handle, leng) {
 //    var openFile = openFiles[handle];
-    
+
 //    if (!openFile.used) {
 //        throw new Error("Invalid handle. Unrecoverable error.");
 //    }
@@ -413,7 +419,7 @@ function kopen4load(filename, readfromGrp) {
 
 //function readText(openFile, length) {
 //    grpStream.position = grpSet.archives[openFile.grpID]
-       
+
 
 //    this.fileOffsets = 0; //Array containing the file offsets.
 //    this.filesizes = 0;
@@ -422,13 +428,13 @@ function kopen4load(filename, readfromGrp) {
 
 function kread(handle, buffer, leng) {
     var openFile = openFiles[handle];
-    
+
     if (!openFile.used) {
         throw new Error("Invalid handle. Unrecoverable error.");
     }
 
     var archive = grpSet.archives[openFile.grpID];
-    
+
     //Adjust leng so we cannot read more than filesystem-cursor location.
     leng = Math.min(leng, archive.filesizes[openFile.fd]);
     grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
@@ -484,13 +490,13 @@ function kread32(handle) {
 
 function kreadText(handle, leng) {
     var openFile = openFiles[handle];
-    
+
     if (!openFile.used) {
         throw new Error("Invalid handle. Unrecoverable error.");
     }
 
     var archive = grpSet.archives[openFile.grpID];
-    
+
     //Adjust leng so we cannot read more than filesystem-cursor location.
     leng = Math.min(leng, archive.filesizes[openFile.fd]);
     grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
@@ -505,13 +511,35 @@ function kreadText(handle, leng) {
 }
 
 
+
+function klseek(handle, offset, whence) {
+    if (!openFiles[handle].used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFiles[handle].grpID];
+    switch (whence) {
+        case 0: // SEEK_SET
+            openFiles[handle].cursor = offset;
+            break;
+        case 2: // SEEK_END
+            openFiles[handle].cursor = archive.filesizes[openFiles[handle].fd];
+            break;
+        case 1: // SEEK_CUR
+            openFiles[handle].cursor += offset;
+            break;
+    }
+
+    return openFiles[handle].cursor;
+}
+
 function kfilelength(handle) {
     var openFile = openFiles[handle];
-    
+
     if (!openFile.used) {
         throw new Error("Invalide handle. Unrecoverable error.");
     }
-    
+
     if (openFile.type = fileType.SYSTEM_FILE) {
         throw new Error("todo kfilelength SYSTEM_FILE");
     } else {

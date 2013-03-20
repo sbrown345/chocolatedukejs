@@ -33,22 +33,58 @@ function setgotpic(tileNume) {
 }
 
 // 108
+
 function loadTile(tileNume) {
     var i, tileFileSize;
-    
+
     if (tileNume >= MAXTILES) {
         return;
     }
 
     tileFileSize = tiles[tileNume].dim.width * tiles[tileNume].dim.height;
-    
+
     if (tileFileSize <= 0) {
         return;
     }
 
     i = tilefilenum[tileNume];
-    
-    throw new Error("todo loadTile");
+
+    if (i !== artfilnum) {
+        if (artfil !== -1) {
+            kclose(artfil);
+        }
+
+        artfilnum = i;
+        artfilplc = 0;
+
+        var artfilenameSplit = artfilename.split("");
+        artfilenameSplit[7] = String.fromCharCode((i % 10) + 48);
+        artfilenameSplit[6] = String.fromCharCode(((i / 10) % 10) + 48);
+        artfilenameSplit[5] = String.fromCharCode(((i / 100) % 10) + 48);
+        artfilename = artfilenameSplit.join("");
+        artfil = TCkopen4load(artfilename, false);
+
+        if (artfil === -1) {
+            throw new Error("Error, unable to load artfile:'" + artfilename + "'");
+        }
+
+        faketimerhandler();
+    }
+
+    if (!tiles[tileNume].data) {
+        // todo: check this works, this is some allocache stuff ??
+        tiles[tileNume].lock = 199;
+        tiles[tileNume].data = new Uint8Array(tileFileSize);
+    }
+
+    if (artfilplc != tilefileoffs[tileNume]) {
+        klseek(artfil, tilefileoffs[tileNume] - artfilplc, SEEK_CUR);
+        faketimerhandler();
+    }
+
+    kread(artfil, tiles[tileNume].data, tileFileSize);
+    faketimerhandler();
+    artfilplc = tilefileoffs[tileNume] + tileFileSize;
 }
 
 //197

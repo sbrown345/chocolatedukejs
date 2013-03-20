@@ -162,7 +162,6 @@ function renderFrame(frameNumber, buffer) {
     var offset = 0;
     var i;
     var destFrame;
-    var ppointer;
 
     checkAnimStarted("renderFrame");
     destFrame = frameNumber - anim.curlp.baseRecord;
@@ -176,7 +175,6 @@ function renderFrame(frameNumber, buffer) {
 
     var nextBytes = sourceStream.readUint8Array(2);
     sourceStream.position -= 2;
-    console.log("ppointer[1] %i", nextBytes[1]);
     if (nextBytes[1]) {
         throw Error("todo");
     } else {
