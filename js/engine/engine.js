@@ -816,9 +816,10 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 oy = y1;
                 if (dastat&64) {
                     if (qlinemode) {
-                        bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
-                        tempFramePlaceThing.position = ylookup[y1] + x2;
-                        rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, tempFramePlaceThing);
+                        //bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
+                        //framePlacePointerHelper.position = ylookup[y1] + x2;
+                        //rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, framePlacePointerHelper);
+                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x2,frameplace);
                     }
                     else
                         rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) + bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2 + frameplace);
@@ -1095,9 +1096,9 @@ function clearView(dacol) {
 
     //p = frameplace + ylookup[windowy1] + windowx1;
     // todo: check this is right
-
-    console.log("clearview: frameplace.clearRect etc");
-    frameplace.clearRect(0, 0, surface.width, surface.height);
+    console.log("clearview: does it work??");
+    surface.getContext("2d").fillStyle = colorPalette[dacol].cssColor;
+    surface.getContext("2d").clearRect(0, 0, surface.width, surface.height);
 
     faketimerhandler();
 }

@@ -23,8 +23,16 @@ function setuprhlineasm4(i1, i2, i3, i4, i5, i6) {
     rmach_esi = i5;
 }
 
-//var rhlineasm4Count = 0;
-function rhlineasm4(i1, texture, i3, i4, i5, dest) {
+function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest) {
+    texture.position = texturePosition;
+    dest.position = destPosition;
+    if (arguments.length != 8) {
+        throw new Error("todo: rhlineasm4 should have 8 arguments");
+    }
+    if (!(dest instanceof PointerHelper)) {
+        throw new Error("todo: the line that passed to this method (rhlineasm4) needs fixing");
+    }
+
     i4 = i4 >>> 0;
     i5 = i5 >>> 0;
 
@@ -51,7 +59,7 @@ function rhlineasm4(i1, texture, i3, i4, i5, dest) {
             texture.position -= rmach_ecx;
 
         ebp &= rmach_esi;
-        i1 = (i1 & 0xffffff00) | i3 + rmach_edx; // pointer to pallete e.g. testPallete[i3 + rmach_edx];
+        i1 = (i1 & 0xffffff00) | i3 + rmach_edx; // pointer to palette e.g. testPallete[i3 + rmach_edx];
 
         if (pixelsAllowed-- > 0) {
             dest.array[rmach6b + numPixels] = (i1 & 0xff);
@@ -60,5 +68,4 @@ function rhlineasm4(i1, texture, i3, i4, i5, dest) {
         texture.position -= ebp;
         numPixels--;
     } while (numPixels);
-    //rhlineasm4Count++;
 }

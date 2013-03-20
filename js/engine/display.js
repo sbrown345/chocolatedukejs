@@ -153,7 +153,10 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     qsetmode = surface.height;
     activepage = visualpage = 0;
 
-    frameoffset = frameplace = surface.getContext("2d");//.createImageData(screenWidth, screenHeight);
+    //frameoffset = surface.getContext("2d");//.createImageData(screenWidth, screenHeight);
+    setupFramePlace();
+    frameoffset = 0;
+
     j = ydim * 4 * 4;
 
     if (horizlookup) {
@@ -214,10 +217,15 @@ function Color() {
     this.r = 0;
     this.g = 0;
     this.b = 0;
+    Object.defineProperty(this, "cssColor", {
+        get: function() {
+            return "rgb(" + this.r + "," + this.g + "," + this.b + ");";
+        }
+    });
 }
 
 //1330
-var testPallete;
+var colorPalette;
 function VBE_setPalette(paletteBuffer, debug) {
     /*
      * (From Ken's docs:)
@@ -255,11 +263,11 @@ function VBE_setPalette(paletteBuffer, debug) {
         paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
     }
 
-    testPallete = fmtSwap;
+    colorPalette = fmtSwap;
 }
 
 //1460
-var tempFramePlaceThing;
+var framePlacePointerHelper;
 function PointerHelper(uint8Array, position) {
     this.array = uint8Array;
     this.position = position || 0;
@@ -270,6 +278,11 @@ function PointerHelper(uint8Array, position) {
         return this.array[position];
     };
 }
+
+function setupFramePlace() {
+    frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
+}
+
 function _nextpage() {
     var ticks;
 
@@ -277,18 +290,18 @@ function _nextpage() {
     //handle_events();
 
     // SDL_UpdateRect alternative
-    if (tempFramePlaceThing) {
-        var imageData = frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight); // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
-        var newImageData = tempFramePlaceThing.array;
+    if (frameplace) {
+        var imageData = surface.getContext("2d").getImageData(0, 0, ScreenWidth, ScreenHeight); // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
+        var newImageData = frameplace.array;
         for (var i = 0; i < newImageData.length; i++) {
-            imageData.data[i * 4] = testPallete[newImageData[i]].r;
-            imageData.data[i * 4 + 1] = testPallete[newImageData[i]].g;
-            imageData.data[i * 4 + 2] = testPallete[newImageData[i]].b;
+            imageData.data[i * 4] = colorPalette[newImageData[i]].r;
+            imageData.data[i * 4 + 1] = colorPalette[newImageData[i]].g;
+            imageData.data[i * 4 + 2] = colorPalette[newImageData[i]].b;
             imageData.data[i * 4 + 3] = 255;
         }
-        frameplace.putImageData(imageData, 0, 0);
+        surface.getContext("2d").putImageData(imageData, 0, 0);
     }
-    tempFramePlaceThing = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
+    setupFramePlace();
 
     ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);
