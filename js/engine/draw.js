@@ -1,8 +1,14 @@
 ﻿'use strict';
 
+var transluc = new Uint8Array(65536 / 4);
+
 var pixelsAllowed = 10000000000;
 
-var transluc = new Uint8Array(65536 / 4);
+var RENDER_DRAW_WALL_BORDERS = 1;
+var RENDER_DRAW_WALL_INSIDE = 1;
+var RENDER_DRAW_CEILING_AND_FLOOR = 1;
+var RENDER_DRAW_TOP_AND_BOTTOM_COLUMN = 1;
+var RENDER_SLOPPED_CEILING_AND_FLOOR = 1;
 
 var bytesperline = 0;
 function setBytesPerLine(_bytesPerLine) {
@@ -68,4 +74,63 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
         texture.position -= ebp;
         numPixels--;
     } while (numPixels);
+}
+
+// 220
+var mach3_al = 0;
+
+//410
+function setupvlineasm(i1) {
+    mach3_al = (i1 & 0x1f);
+}
+
+//FCS This is used to fill the inside of a wall (so it draws VERTICAL column, always).
+
+var vlineasm4Count =0;
+function vlineasm4(columnIndex, framebufferPosition, framebuffer) {
+    if (!RENDER_DRAW_WALL_INSIDE)
+        return;
+
+    if (arguments.length != 3) {
+        throw new Error("todo: vlineasm4 should have 3 arguments");
+    }
+
+    framebuffer.position += framebufferPosition;
+
+    var i;
+    var temp;
+    var loopCount=0;
+
+    var index = (framebuffer.position + ylookup[columnIndex]);
+    var dest = -ylookup[columnIndex];
+
+    do {
+        for (i = 0; i < 4; i++) {
+            temp = (vplce[i]) >> mach3_al;
+            //if (isNaN(temp)) debugger;
+            //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
+            //console.log("temp: %i, mach3_al: %i", temp, mach3_al);
+
+            //if (i + temp >= bufplce.length) debugger;
+            
+            temp = bufplce[i + temp];
+            //console.log("temp 2nd: %i", temp); // TODO MABYE THIS IS SSOME POINTER?
+            //if (isNaN(temp)) debugger;
+
+            if (pixelsAllowed-- > 0) {
+                var val = palookup[palookupoffse[i] + temp]; // TODO THEN CHECK  palookup AND palookupoffse
+                framebuffer.array[dest + index + i] = val;
+                //console.log("new val: %i", val);
+                //if (isNaN(val)) debugger;
+            }
+
+            vplce[i] += vince[i];
+        }
+        dest += bytesperline;
+        //console.log("dest: %i", dest);
+        loopCount++;
+    //} while (((dest - bytesperline) >>> 0) < (dest >>> 0)); //TODO fix this first....
+    } while (typeof framebuffer.array[dest] !== "undefined");
+    console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
+    vlineasm4Count++;
 }

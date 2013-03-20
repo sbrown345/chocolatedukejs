@@ -146,10 +146,10 @@ var xyaspect, viewingrangerecip;
 //int32_t asm1, asm2, asm3, asm4;
 
 
-//int32_t vplce[4], vince[4];
-//int32_t bufplce[4];
+var vplce = new Int32Array(4), vince = new Int32Array(4);
+var bufplce = new Int32Array(4);
 
-//uint8_t*  palookupoffse[4];
+var palookupoffse = new Uint8Array(4);
 
 //uint8_t  globalxshift, globalyshift;
 //int32_t globalxpanning, globalypanning, globalshade;
@@ -675,7 +675,117 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     if ((dastat & 1) == 0) {
         if (((a & 1023) == 0) && (tileHeight <= 256))  /* vlineasm4 has 256 high limit! */ {
 
-            throw new Error("todo");
+            if (dastat & 64) {
+                setupvlineasm(24);
+            } else {
+                setupmvlineasm(24);
+            }
+            
+            by <<= 8;
+            yv <<= 8;
+            yv2 <<= 8;
+
+            palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs;
+            vince[0] = vince[1] = vince[2] = vince[3] = yv;
+
+            for(x=x1; x<x2; x+=4)
+            {
+                bad = 15;
+                xend = Math.min(x2-x,4);
+                for(xx=0; xx<xend; xx++)
+                {
+                    bx += xv2;
+
+                    y1 = uplc[x+xx];
+                    y2 = dplc[x+xx];
+                    if ((dastat&8) == 0)
+                    {
+                        if (startumost[x+xx] > y1) y1 = startumost[x+xx];
+                        if (startdmost[x+xx] < y2) y2 = startdmost[x+xx];
+                    }
+                    if (y2 <= y1) continue;
+
+                    by += yv*(y1-oy);
+                    oy = y1;
+
+                    bufplce[xx] = (bx >> 16) * tileHeight + bufplc.position;
+                    vplce[xx] = by;
+                    y1ve[xx] = y1;
+                    y2ve[xx] = y2-1;
+                    bad &= ~pow2char[xx];
+                }
+
+                p = frameplace;
+                p.position += x;
+
+                u4 = Math.max(Math.max(y1ve[0], y1ve[1]), Math.max(y1ve[2], y1ve[3]));
+                d4 = Math.min(Math.min(y2ve[0], y2ve[1]),Math.min(y2ve[2],y2ve[3]));
+
+                if (dastat&64)
+                {
+                    if ((bad != 0) || (u4 >= d4))
+                    {
+                        if (!(bad&1)) 
+                            prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
+                        if (!(bad&2)) 
+                            prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
+                        if (!(bad&4)) 
+                            prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
+                        if (!(bad&8)) 
+                            prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                        continue;
+                    }
+
+                    if (u4 > y1ve[0]) 
+                        vplce[0] = prevlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
+                    if (u4 > y1ve[1]) 
+                        vplce[1] = prevlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
+                    if (u4 > y1ve[2]) 
+                        vplce[2] = prevlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
+                    if (u4 > y1ve[3]) 
+                        vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+
+                    if (d4 >= u4) {
+                        vlineasm4(d4 - u4 + 1, ylookup[u4], p);
+                    }
+
+                    i = p+ylookup[d4+1];
+                    if (y2ve[0] > d4) 
+                        prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
+                    if (y2ve[1] > d4) 
+                        prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
+                    if (y2ve[2] > d4) 
+                        prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
+                    if (y2ve[3] > d4) 
+                        prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+                }
+                else
+                {
+                    if ((bad != 0) || (u4 >= d4))
+                    {
+                        if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
+                        if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
+                        if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
+                        if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                        continue;
+                    }
+
+                    if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
+                    if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
+                    if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
+                    if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+
+                    if (d4 >= u4) mvlineasm4(d4-u4+1,ylookup[u4]+p);
+
+                    i = p+ylookup[d4+1];
+                    if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
+                    if (y2ve[1] > d4) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
+                    if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
+                    if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+                }
+
+                faketimerhandler();
+            }
         } else {
             if (dastat & 64) {
                 if ((xv2 & 0x0000ffff) == 0) {

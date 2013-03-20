@@ -285,10 +285,11 @@ function setupFramePlace() {
     frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
 }
 
+
 function _nextpage() {
     var ticks;
 
-    console.log("todo: _nextpage: handle_events");
+    // todo: handle_events
     //handle_events();
 
     // SDL_UpdateRect alternative
