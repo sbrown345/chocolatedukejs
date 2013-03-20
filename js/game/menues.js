@@ -26,7 +26,7 @@ function logoanimsounds(fr) {
 
 // 4602
 var lastanimhack = 0;
-function playanm(fn, t) {
+function playanm(fn, t, callback) {
     var animbuf, palptr;
     var i, j, k, length = 0, numframes = 0;
     var handle = -1;
@@ -81,14 +81,17 @@ function playanm(fn, t) {
 
     ototalclock = totalclock + 10;
 
-    for (i = 1; i < numframes; i++) {
-        while (totalclock < ototalclock) {
-            if (KB.keyWaiting()) {
-                //goto ENDOFANIMLOOP;
-                throw new Error("goto label todo");
-            }
-            getPackets();
-        }
+    i = 0;
+    animationFrame();
+    
+    function animationFrame() {
+        //while (totalclock < ototalclock) {
+        //    if (KB.keyWaiting()) {
+        //        //goto ENDOFANIMLOOP;
+        //        throw new Error("goto label todo");
+        //    }
+        //    getPackets();
+        //}
 
         if (t == 10) ototalclock += 14;
         else if (t == 9) ototalclock += 10;
@@ -112,10 +115,18 @@ function playanm(fn, t) {
         else if (t == 6) first4animsounds(i);
         else if (t == 5) logoanimsounds(i);
         else if (t < 4) endanimsounds(i);
+
+        if (i < numframes) {
+            requestAnimationFrame(function () {
+                animationFrame(i + 1, numframes);
+            });
+        } else {
+            Anim.freeAnim();
+            tiles[MAXTILES - 3 - t].lock = 1;
+            callback();
+        }
+
+        i++;
     }
-
-    //ENDOFANIMLOOP: //todo label
-
-    Anim.freeAnim();
-    tiles[MAXTILES - 3 - t].lock = 1;
 }
+
