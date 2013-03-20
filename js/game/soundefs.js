@@ -1,4 +1,6 @@
-﻿var SECTOREFFECTOR = 1;
+﻿'use strict';
+
+var SECTOREFFECTOR = 1;
 var ACTIVATOR = 2;
 var TOUCHPLATE = 3;
 var ACTIVATORLOCKED = 4;

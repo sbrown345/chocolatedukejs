@@ -219,7 +219,7 @@ function Color() {
     this.b = 0;
     Object.defineProperty(this, "cssColor", {
         get: function() {
-            return "rgb(" + this.r + "," + this.g + "," + this.b + ");";
+            return "rgba(" + this.r + "," + this.g + "," + this.b + ", 255);";
         }
     });
 }
@@ -264,6 +264,8 @@ function VBE_setPalette(paletteBuffer, debug) {
     }
 
     colorPalette = fmtSwap;
+    
+    // original sets palette immediately on display
 }
 
 //1460
@@ -290,17 +292,7 @@ function _nextpage() {
     //handle_events();
 
     // SDL_UpdateRect alternative
-    if (frameplace) {
-        var imageData = surface.getContext("2d").getImageData(0, 0, ScreenWidth, ScreenHeight); // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
-        var newImageData = frameplace.array;
-        for (var i = 0; i < newImageData.length; i++) {
-            imageData.data[i * 4] = colorPalette[newImageData[i]].r;
-            imageData.data[i * 4 + 1] = colorPalette[newImageData[i]].g;
-            imageData.data[i * 4 + 2] = colorPalette[newImageData[i]].b;
-            imageData.data[i * 4 + 3] = 255;
-        }
-        surface.getContext("2d").putImageData(imageData, 0, 0);
-    }
+    updateCanvas();
     setupFramePlace();
 
     ticks = Timer.getPlatformTicks();
@@ -313,7 +305,19 @@ function _nextpage() {
     total_rendered_frames++;
 }
 
-
+function updateCanvas() {
+    if (frameplace) {
+        var imageData = surface.getContext("2d").getImageData(0, 0, ScreenWidth, ScreenHeight); // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
+        var newImageData = frameplace.array;
+        for (var i = 0; i < newImageData.length; i++) {
+            imageData.data[i * 4] = colorPalette[newImageData[i]].r;
+            imageData.data[i * 4 + 1] = colorPalette[newImageData[i]].g;
+            imageData.data[i * 4 + 2] = colorPalette[newImageData[i]].b;
+            imageData.data[i * 4 + 3] = 255;
+        }
+        surface.getContext("2d").putImageData(imageData, 0, 0);
+    }
+}
 
 // 1769
 //-------------------------------------------------------------------------------------------------

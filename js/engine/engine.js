@@ -660,7 +660,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         by = (tileHeight << 16) - 1 - by;
     }
 
-    console.warn("should vidoption be 1??????????????");
+    // todo: check this vidoption is right
     if ((vidoption == 1) && (origbuffermode == 0)) {
         if (dastat & 128) {
             obuffermode = buffermode;
@@ -1093,9 +1093,8 @@ function clearView(dacol) {
 
     //p = frameplace.position + ylookup[windowy1] + windowx1;
     // todo: check this is right
-    console.log("clearview: does it work??");
     surface.getContext("2d").fillStyle = colorPalette[dacol].cssColor;
-    surface.getContext("2d").clearRect(0, 0, surface.width, surface.height);
+    surface.getContext("2d").fillRect(0, 0, surface.width, surface.height);
 
     faketimerhandler();
 }

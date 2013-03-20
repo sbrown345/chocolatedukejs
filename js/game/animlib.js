@@ -95,8 +95,6 @@ function loadPage(pageNumber) {
         ds.position += 2;
         return ds.readUint16Array(anim.curlp.nBytes + (anim.curlp.nRecords * 2));
     }
-
-    throw new Error("anim.curlpnum should not equal pageNumber");
 }
 
 function CPlayRunSkipDump(srcStream, destStream) {
@@ -191,7 +189,7 @@ function renderFrame(frameNumber, buffer) {
 
 function drawFrame(frameNumber) {
     checkAnimStarted("drawFrame");
-    anim.thepage = loadPage(findPage(frameNumber));
+    anim.thepage = loadPage(findPage(frameNumber)) || anim.thepage;
     renderFrame(frameNumber, anim.thepage);
 }
 
@@ -252,6 +250,12 @@ Anim.loadAnim = function (buffer) {
 
     for (i = 0; i < 256; i++) {
         anim.LpArray[i] = ds.readStruct(lpDescriptor);
+    }
+};
+
+Anim.freeAnim = function () {
+    if (Anim_Started) {
+        Anim_Started = faketimerhandler;
     }
 };
 

@@ -33,7 +33,7 @@ function getPackets() {
     //    qe = 1;
     //    gameexit("Quick Exit.");
     //}
-    
+
     // not a net game
     if (numplayers < 2) {
         return;
@@ -46,18 +46,18 @@ function getPackets() {
 function faketimerhandler() {
     var i, j, k;
     var osyn, nsyn;
-    
+
     ////Check if we should quit the game.
     //todo if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
     //{
     //    qe = 1;
     //    gameexit("Quick Exit.");
     //}
-    
+
     if ((totalclock < ototalclock + TICSPERFRAME) || (ready2send === 0)) {
         return; // Returns here when playing a demo.
     }
-    
+
     throw new Error("todo");
 }
 
@@ -76,14 +76,14 @@ function logo() {
     nextpage();
 
     Music.stopSong();
-    
+
     if (ud.showcinematics && numplayers < 2) {
         // This plays the explosion from the nuclear sign at the beginning.
         if (!VOLUMEONE()) {
             if (!KB.keyWaiting() && nomorelogohack == 0) {
                 getPackets();
 
-                playanm("logo.anm", 5);
+                playanm("logo.anm", 5); // todo: rewrite to use requestAnimationFrame
                 palto(0, 0, 0, 63);
                 KB.flushKeyboardQueue();
             }
@@ -91,6 +91,22 @@ function logo() {
             clearView(0);
             nextpage();
         }
+
+        //MIDI start here
+        playMusic(env_music_fn[0]);
+
+        //"REALITY IS OUR GAME" Screen
+        for (i = 0; i < 64; i += 7) {
+            palto(0, 0, 0, i); // todo requestAnimationFrame
+        }
+        ps[myconnectindex].palette = drealms;
+        palto(0, 0, 0, 63);
+        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+        nextpage();
+        for (i = 63; i > 0; i -= 7) {
+            palto(0, 0, 0, i); // todo requestAnimationFrame
+        }
+
         throw new Error("todo");
     }
 

@@ -3,15 +3,14 @@
 var KB = {};
 
 KB.startup = function () {
-    console.log("todo: KB.startup");
+    // todo
 };
 
 KB.keyWaiting = function () {
-    console.log("todo: KB.keyWaiting");
     //return keyIsWaiting;
-    return 0; //TODO FOR TEST
+    return 0; // TODO (this is just for test)
 };
 KB.flushKeyboardQueue = function () {
-    console.log("todo: KB.flushKeyboardQueue");
+    // todo
 };
 
