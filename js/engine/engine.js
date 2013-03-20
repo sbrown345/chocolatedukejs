@@ -629,7 +629,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     TILE_MakeAvailable(picnum);
 
     setgotpic(picnum);
-    bufplc = new DataStream(tiles[picnum].data);
+    bufplc = new PointerHelper(tiles[picnum].data);
 
     palookupoffs = palookup[dapalnum] + (getpalookup(0, dashade) << 8);
 
@@ -746,7 +746,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
 
                     if (d4 >= u4) {
-                        vlineasm4(d4 - u4 + 1, ylookup[u4], p);
+                        vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
                     }
 
                     i = p+ylookup[d4+1];

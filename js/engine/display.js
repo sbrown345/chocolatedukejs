@@ -274,10 +274,10 @@ function PointerHelper(uint8Array, position) {
     this.array = uint8Array;
     this.position = position || 0;
     this.setByte = function (v) {
-        this.array[position] = -v;
+        this.array[position] = v;
     };
-    this.getByte = function (v) {
-        return this.array[position];
+    this.getByte = function () {
+        return this.array[this.position];
     };
 }
 
