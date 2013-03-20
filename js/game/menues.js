@@ -77,7 +77,7 @@ function playanm(fn, t) {
         tempbuf[j + 3] = 0;
     }
 
-    VBE_setPalette(tempbuf);
+    VBE_setPalette(tempbuf, "debug");
 
     ototalclock = totalclock + 10;
 

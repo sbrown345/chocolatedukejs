@@ -816,6 +816,9 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 oy = y1;
                 if (dastat&64) {
                     if (qlinemode) {
+                        // TODO: REMEMBER THE FIRST FRAME HAS COLOUR ON ,   
+						// TODO: REMMEBER THE PALLETE GENERATION METHOD ISN'T IMPLEMENTED??
+						
                         bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
                        
                         tempFramePlaceThing.position = ylookup[y1] + x2;

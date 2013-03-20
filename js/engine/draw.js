@@ -23,6 +23,7 @@ function setuprhlineasm4(i1, i2, i3, i4, i5, i6) {
     rmach_esi = i5;
 }
 
+var rhlineasm4Count=0;
 function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
     i4 = i4 >>> 0;
     i5 = i5 >>> 0;
@@ -35,6 +36,9 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
 
     numPixels = i1;
     do {
+  
+
+
         //console.log("texture pos: %i", texture.position);
         //console.log("i1: %i, i3: %i, i4: %i, i5: %i, rmach_ebx: %i", i1, i3, i4, i5, rmach_ebx);
         //i3 = ((i3&0xffffff00)|(*texture));
@@ -54,17 +58,27 @@ function rhlineasm4(i1, texture /*bufplc*/, i3, i4, i5, dest /*frameplace?*/) {
 
         ebp &= rmach_esi;
         //console.log("numPixels = %i, ebp = %i", numPixels, ebp);
-        i1 = ((i1 & 0xffffff00) | dest[i3]);
+        i1 = ((i1 & 0xffffff00) | 31); //  rhlineasm4Count == 48 && numPixels ==324 THIS NEEDS to be "38"
+        //i1 = ((i1 & 0xffffff00) | dest.array[i3 + rmach_edx]); //  rhlineasm4Count == 48 && numPixels ==324 THIS NEEDS to be "38"
         //i1 = ((i1&0xffffff00)|(((uint8_t *)i3)[rmach_edx]));
 
         if (pixelsAllowed-- > 0) {
             //(rmach6b)[numPixels] = (i1 & 0xff);
-            dest[rmach6b + numPixels] = (i1 & 0xff); //guess..
+            dest.array[rmach6b + numPixels] = (i1 & 0xff); //guess..
+            if (rhlineasm4Count == 48) {
+                console.log("rhlineasm4Count: %i, dest[rmach6b (%i) + numPixels (%i)] = %i", rhlineasm4Count, rmach6b, numPixels, dest.array[rmach6b + numPixels]);
+            }
         }
 
         texture.position -= ebp;
         numPixels--;
     } while (numPixels);
+
+
+    if (rhlineasm4Count == 48) {
+        //throw new Error();
+    }
+    rhlineasm4Count++;
     
-    //throw new Error("todo")
+    
 }

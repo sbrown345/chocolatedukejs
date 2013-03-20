@@ -209,13 +209,68 @@ Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
     return 0;
 };
 
+
+function SdlColorTemp() {
+    this.r = 0;
+    this.g = 0;
+    this.b = 0;
+    this.unused = 0;
+}
+
 //1330
-function VBE_setPalette(paletteBuffer) {
+var testPallete;
+function VBE_setPalette(paletteBuffer, debug) {
+/*
+ * (From Ken's docs:)
+ *   Set (num) palette palette entries starting at (start)
+ *   palette entries are in a 4-byte format in this order:
+ *       0: Blue (0-63)
+ *       1: Green (0-63)
+ *       2: Red (0-63)
+ *       3: Reserved
+ *
+ * Naturally, the bytes are in the reverse order that SDL wants them...
+ *  More importantly, SDL wants the color elements in a range from 0-255,
+ *  so we do a conversion.
+ */
+
+    var fmt_swap = new structArray(SdlColorTemp, 256);
+    var sdlp = 0;
+    var p = 0;
+
+    ////CODE EXPLORATION
+    ////Used only to write the last palette to file.
+    //memcpy(lastPalette, palettebuffer, 768);
+    var debugHtml = "";
+    for (var i = 0; i < 256; i++) {
+        fmt_swap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        fmt_swap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        fmt_swap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        fmt_swap[sdlp].unused = paletteBuffer[p++]; /* This byte is unused in BUILD, too. */
+        debugHtml += "<span style='background:rgb(" + (fmt_swap[sdlp].r ) + "," + (fmt_swap[sdlp].g ) + "," + (fmt_swap[sdlp].b ) + ")'>" +
+            sdlp + "&nbsp;</span>";
+        sdlp++;
+    }
+
+    if (debug) {
+        paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
+    }
+    testPallete = fmt_swap;
     console.warn("VBE_setPalette todo when there's something on the screen to test!");
 }
 
 //1460
 var tempFramePlaceThing;
+function PointerHelper(uint8Array, position) {
+    this.array = uint8Array;
+    this.position = position || 0;
+    this.setByte = function(v) {
+        this.array[position] = -v;
+    };
+    this.getByte = function(v) {
+        return this.array[position];
+    };
+}
 function _nextpage() {
     var ticks;
 
@@ -225,7 +280,7 @@ function _nextpage() {
     // SDL_UpdateRect alternative
     if (tempFramePlaceThing) {
         var imageData = frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight);
-        var newImageData = new Uint8Array(tempFramePlaceThing.buffer);
+        var newImageData = tempFramePlaceThing.array;
         for (var i = 0; i < imageData.data.length; i++) {
             imageData.data[i] = newImageData[i];
             if ((i+1) % 4 == 0) {
@@ -234,7 +289,7 @@ function _nextpage() {
         }
         frameplace.putImageData(imageData, 0, 0);
     }
-    tempFramePlaceThing = new DataStream(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
+    tempFramePlaceThing = new PointerHelper(frameplace.getImageData(0, 0, ScreenWidth, ScreenHeight).data);
 
     ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);
