@@ -104,17 +104,17 @@ function logo() {
         palto(0, 0, 0, 0);//temp remove this line!!
         rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
         nextpage();
-        // TODO!
-        //
-        //for (i = 63; i > 0; i -= 7) {
-        //    palto(0, 0, 0, i); // todo requestAnimationFrame
-        //}
+        
+        for (i = 63; i > 0; i -= 7) {
+            palto(0, 0, 0, i); // todo requestAnimationFrame
+        }
 
+        totalclock = 0;
 
-        //throw new Error("todo");
+        // todo: finish start animation
     }
 
-    //throw new Error("todo");
+    // todo
 }
 
 //7655
@@ -341,10 +341,26 @@ function main(argc, argv) {
         throw new Error("todo");
     } else {
         vscrn();
+    }    
+    
+    
+    if( ud.warp_on == 0 && playback() )
+    {
+        //FX_StopAllSounds();
+        //clearsoundlocks();
+        //nomorelogohack = 1;
+        throw new Error("todo");
+        //goto MAIN_LOOP_RESTART;
     }
+
+    ud.warp_on = 0;
 
     //throw new Error("todo");
     console.warn("todo")
+}
+
+function playback() {
+    throw new Error("todo");
 }
 
 //10434

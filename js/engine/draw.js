@@ -102,7 +102,6 @@ function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
     do {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
-
             temp = bufplc.array[bufplce[i] + temp] >>> 0; // get texture
 
             if (pixelsAllowed-- > 0) {
