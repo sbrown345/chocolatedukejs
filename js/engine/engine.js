@@ -719,11 +719,11 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                             oy = y1;
                             if (dastat&64) {
                                 if (qlinemode)
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x+frameplace);
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y1]+x,frameplace);
                             else
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                             } else
-                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                         }
                         y1 = ny1;
                     }
@@ -740,11 +740,11 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                             oy = y1;
                             if (dastat&64) {
                                 if (qlinemode)
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0,by<<16,ylookup[y1]+x+frameplace);
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0,by<<16,ylookup[y1]+x,frameplace);
                             else
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                             } else
-                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                         }
                         while (y1 > ny1) lastx[y1--] = x;
                     }
@@ -759,11 +759,11 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         oy = y2;
                         if (dastat&64) {
                             if (qlinemode)
-                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y2]+x+frameplace);
+                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y2]+x,frameplace);
                         else
-                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y2]+x+frameplace);
+                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y2]+x,frameplace);
                         } else
-                            rmhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y2]+x+frameplace);
+                            rmhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y2]+x,frameplace);
                     }
                     while (y2 < ny2) lastx[y2++] = x;
                 }
@@ -781,12 +781,12 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         if (dastat&64)
                         {
                             if (qlinemode)
-                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,0    ,by<<16,ylookup[y1]+x+frameplace);
+                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y1]+x,frameplace);
                         else
-                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                         }
                         else
-                            rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x+frameplace);
+                            rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
                     }
                     if (x == x2-1)
                     {
@@ -816,15 +816,12 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 oy = y1;
                 if (dastat&64) {
                     if (qlinemode) {
-                        //bufplc.position = (bx >> 16) * tileHeight + (by >> 16);
-                        //framePlacePointerHelper.position = ylookup[y1] + x2;
-                        //rhlineasm4(x2 - lastx[y1], bufplc, 0, 0, by << 16, framePlacePointerHelper);
                         rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x2,frameplace);
                     }
                     else
-                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) + bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2 + frameplace);
+                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) ,bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2,frameplace);
                 } else
-                    rmhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16)+bufplc,0,bx<<16,by<<16,ylookup[y1]+x2+frameplace);
+                    rmhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x2,frameplace);
             }
         }
     }
@@ -882,18 +879,18 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     break;
             }
 
-            p = ylookup[y1]+x+frameplace;
+            p = ylookup[y1] + x + frameplace.position;
 
             if ((dastat&1) == 0)
             {
                 if (dastat&64)
-                    spritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+                    spritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
             else
-                    mspritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+                    mspritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
             }
             else
             {
-                DrawSpriteVerticalLine(by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16)+bufplc,p);
+                DrawSpriteVerticalLine(by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
                 transarea += (y2-y1);
             }
             faketimerhandler();
@@ -1094,7 +1091,7 @@ function clearView(dacol) {
     //dacol += (dacol << 8);
     //dacol += (dacol << 16);
 
-    //p = frameplace + ylookup[windowy1] + windowx1;
+    //p = frameplace.position + ylookup[windowy1] + windowx1;
     // todo: check this is right
     console.log("clearview: does it work??");
     surface.getContext("2d").fillStyle = colorPalette[dacol].cssColor;
