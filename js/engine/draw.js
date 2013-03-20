@@ -105,20 +105,17 @@ function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
 
     do {
         for (i = 0; i < 4; i++) {
-            temp = (vplce[i]) >> mach3_al;
+            temp = ((vplce[i] >>> 0) >> mach3_al) & 0xff;
             if (isNaN(temp)) debugger;
-            //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
-            //console.log("temp: %i, mach3_al: %i", temp, mach3_al);
-
-            //if (i + temp >= bufplce.length) debugger;
+            temp = bufplc.array[bufplce[i] + temp]; // get texture
             
-            temp = bufplc.array[ bufplce[i + temp]]; // get texture
-            //console.log("temp 2nd: %i", temp); // TODO MABYE THIS IS SSOME POINTER?
+            temp = temp >>> 0;
+            //console.log("temp 2nd: %i", temp);
             if (isNaN(temp)) debugger;
 
             if (pixelsAllowed-- > 0) {
-                var val = palookup[palookupoffse[i] + temp]; // TODO THEN CHECK  palookup AND palookupoffse
-                framebuffer.array[dest + index + i] = val; // add onto fraembuffer
+                var val = palookup[palookupoffse[i] + temp];
+                framebuffer.array[dest + index + i] = val; // add texture to framebuffer
                 //console.log("new val: %i", val);
                 if (isNaN(val)) debugger;
             }
@@ -128,6 +125,7 @@ function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
         dest += bytesperline;
         //console.log("dest: %i", dest);
         loopCount++;
+        //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
     } while (typeof framebuffer.array[dest] !== "undefined");
     //console.log("vlineasm4Count: %i, loopCount: %i", vlineasm4Count, loopCount);
     vlineasm4Count++;
