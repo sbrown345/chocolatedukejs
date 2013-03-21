@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Test Async Queue</title>
+    <script src="async.js"></script>
+</head>
+<body>
+    <div>
+        <span id="expectedResult">else|addIf|nestedTrue|while1|while2|extra</span> <small>(Expected)</small>
+    </div>
+    <div><span id="outputResult"></span> <small>(Actual)</small></div>
+    <div id="result" style="font-weight: bold; color: red;">Fail</div>
+    <div id="asyncDebug"></div>
+    <script>
+        var output = "";
+        var q = new Queue();
+
+
+
+
+
+        q.addIf(function () { return false; }, function () {
+        }).addElse(function () {
+            output += "else";
+        })
+            .endIf();
+
+        q.addIf(function () { return true; }, function () {
+            output += "|addIf";
+
+            // nested
+            q.setPositionAtStart()
+                .addIf(function () { return false; }, function () {
+                    throw new Error("Should not run");
+                })
+                .endIf();
+
+            q.addIf(function () { return true; }, function () {
+                    output += "|nestedTrue";
+                })
+                .endIf();
+
+            var i = 0;
+            q.addWhile(function () {
+                console.log("_______ while: %i", i);
+                var foo = i++ < 2;
+                console.log("_______ result: ", foo);
+                return foo;
+            }, function () {
+                output += "|while" + i;
+                console.log("exec WHILE")
+            });
+
+        }).addElseIf(function () { return false; }, function () {
+            throw new Error("Should not run");
+        }).addElse(function () {
+            throw new Error("Should not run");
+        })
+            .endIf()
+            .add(function () {
+                console.log("extra ");
+                output += "|extra";
+            })
+            .flush(function () {
+                outputResult.innerHTML = output;
+
+                if (output == expectedResult.innerHTML) {
+                    result.style.color = "green";
+                    result.innerHTML = "Success";
+                }
+
+            });
+
+    </script>
+</body>
+</html>

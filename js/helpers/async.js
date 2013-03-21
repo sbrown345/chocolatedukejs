@@ -4,6 +4,7 @@
 function Queue() {
     // store your callbacks
     this._methods = [];
+    this._branches = [];
     // keep a reference to your response
     this._response = null;
     // all queues start off unflushed
@@ -16,7 +17,7 @@ function Queue() {
 
 Queue.prototype = {
     // adds callbacks to your queue
-    insertAtStart: function () {
+    insertAtStart: function () { //named confusingly because it affeecst all other calls after it, maybe remove it...
         this.setInsertPosition(0);
         return this.add.apply(this, arguments);
     },
@@ -37,16 +38,85 @@ Queue.prototype = {
     },
 
     addWhile: function (testFn, loopFn) {
+        console.info("() addWhile");
+        
         var that = this;
         var newFn = function () {
-            console.info("() newFn %i", Date.now());
-            if (testFn()) {
-                that.insertAtStart(loopFn);
+            /* addWhile */
+            var testResult = testFn();
+            console.info("() while: ", testResult);
+            if (testResult) {
+                loopFn();
+                that.addWhile(testFn, loopFn);
+            }
+        };
+        return this.add(newFn);
+    },
+
+    // create branch?
+    addIf: function (testFn, fn) {
+        console.info("() addIf");
+        this._branches.unshift([]);
+        var that = this;
+        this.add(function () {
+            /* if */
+            console.log('addIf RUN');
+            var result = testFn();
+            if (result) {
+                console.log('%c addIf OK ', 'font-weight:bold; color: green');
+                that.insertAtStart(fn);
             }
 
-        };
+            that._branches[0].push(result);
+        });
+        return this;
+    },
+    
+    addElseIf: function (testFn, fn) {
+        var that = this;
+        console.info("() addElseIf");
+        return this.add(function () {
+            /* else if */
+            console.log('addElseIf RUN');
+            var result = testFn();
+            if (that.allCurrentBranchResultsAreFalse() && result) {
+                console.log('%c addElseIf OK ', 'font-weight:bold; color: green');
+                that.insertAtStart(fn);
+            }
+            that._branches[0].push(result);
+        });
+    },
 
-        return this.add(newFn);
+    // if all results false of last branch
+    addElse: function (fn) {
+        console.info("() addElse");
+        var that = this;
+        return this.add(function () {
+            /* else */
+            console.log('addElse RUN');
+            if (that.allCurrentBranchResultsAreFalse()) {//SHIFT/POP?
+                console.log('%c addElse OK ', 'font-weight:bold; color: green');
+                that.insertAtStart(fn);
+            }
+
+        });
+    },
+    
+    endIf: function () {
+        console.info("() endIf");
+        var that = this;
+        this.add(function () {
+            /* end if */
+            console.log("endIf RUN");
+            that._branches.shift();
+        });
+        return this;
+    },
+
+    allCurrentBranchResultsAreFalse: function () {
+        return this._branches[0].every(function (result) {
+            return !result;
+        });
     },
 
     setPositionAtStart: function () {
@@ -99,11 +169,13 @@ Queue.prototype = {
 
         for (var i = 0; i < this._methods.length; i++) {
             style = this._insertIndex === i ? "font-weight:strong;" : "";
-            html += "<div style='font-family:monospace;" + style +
+            html += "<div style='border-bottom:1px dashed black;font-family:monospace;" + style +
                 "'>" + this._methods[i] + "</div>";
         }
-        document.getElementById("asyncDebug").innerHTML = html;
 
+        if (document.getElementById("asyncDebug")) {
+            document.getElementById("asyncDebug").innerHTML = html;
+        }
         return this;
     }
 };
