@@ -121,9 +121,21 @@ function logo() {
                     palto(0, 0, 0, i);
                 });
             }
-            q.add(function () {
-                totalclock = 0;
 
+            q.add(i, function(cb, i) {
+                totalclock = 0;
+                //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
+            });
+
+            //FADE OUT
+            for(i=0;i<64;i+=7) {
+                q.add(i, function (cb, i) {
+                    palto(0, 0, 0, i);
+                });
+            }
+
+            q.add(function () {
+                clearView(0);
                 // todo: finish start animation
 
                 afterLogo();
