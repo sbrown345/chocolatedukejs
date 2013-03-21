@@ -145,9 +145,6 @@ function logo() {
                 q.flush("callback val (pointless?)");
             } else {
                 
-                //INSERT ANIMATINO FROM WITHIN!
-
-                
                 //"REALITY IS OUR GAME" Screen
                 for (i = 0; i < 64; i += 7) {
                     q.add(i, function (cb, i) {
@@ -156,12 +153,12 @@ function logo() {
                 }
                 q.add(function () {
                     ps[myconnectindex].palette = drealms;
-                    palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
+                    palto(0, 0, 0, 63);
                     rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
                     nextpage();
            
+                    q.setInsertPosition(0);
                     for (i = 63; i > 0; i -= 7) {
-                        q.setIndex(0);
                         q.add(i, function(cb, i) {
                             palto(0, 0, 0, i);
                         });
@@ -170,7 +167,14 @@ function logo() {
 
                 q.add(i, function (cb, i) {
                     totalclock = 0;
+                    
                     //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
+                    if (totalclock < (120 * 7)) {
+                        q.setInsertPosition(0);
+                        q.add(totalclock, function (cb, totalclock) {
+                            console.info("empty func to simuilate waiting, totalclock: %i", totalclock);
+                        });
+                    }
                 });
 
                 //FADE OUT

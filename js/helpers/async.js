@@ -1,44 +1,5 @@
 ﻿'use strict';
 
-//// http://www.dustindiaz.com/async-method-queues/
-//function Queue() {
-//    // store your callbacks
-//    this._methods = [];
-//    // keep a reference to your response
-//    this._response = null;
-//    // all queues start off unflushed
-//    this._flushed = false;
-//}
-
-//Queue.prototype = {
-//    // adds callbacks to your queue
-//    add: function(fn) {
-//        // if the queue had been flushed, return immediately
-//        if (this._flushed) {
-//            fn(this._response);
-//            // otherwise push it on the queue
-//        } else {
-//            this._methods.push(fn);
-//        }
-//    },
-//    flush: function(resp) {
-//        // note: flush only ever happens once
-//        if (this._flushed) {
-//            return;
-//        }
-//        // store your response for subsequent calls after flush()
-//        this._response = resp;
-//        // mark that it's been flushed
-//        this._flushed = true;
-//        // shift 'em out and call 'em back
-//        while (this._methods[0]) {
-//            this._methods.shift()(resp);
-//        }
-//    }
-//};
-
-'use strict';
-
 // http://www.dustindiaz.com/async-method-queues/
 function AnimationStack() {
     // store your callbacks
@@ -48,7 +9,7 @@ function AnimationStack() {
     // all queues start off unflushed
     this._flushed = false;
     // where thigns are added
-    this._index = 0;
+    this._insertIndex = 0;
 
     this._debug = true;
 }
@@ -68,7 +29,7 @@ AnimationStack.prototype = {
         //    // otherwise push it on the queue
         //} else {
             //this._methods.push([fn, args]);
-            this._methods.splice(this._index++, 0, [fn, args]);
+            this._methods.splice(this._insertIndex++, 0, [fn, args]);
         //}
 
         this.outputDebugInfo();
@@ -76,8 +37,8 @@ AnimationStack.prototype = {
         return this;
     },
 
-    setIndex: function (position) {
-        this._index = position;
+    setInsertPosition: function (position) {
+        this._insertIndex = position;
         this.outputDebugInfo();
     },
 
@@ -122,7 +83,7 @@ AnimationStack.prototype = {
         var html = "", style;
 
         for (var i = 0; i < this._methods.length; i++) {
-            style = this._index === i ? "font-weight:strong;" : "";
+            style = this._insertIndex === i ? "font-weight:strong;" : "";
             html += "<div style='font-family:monospace;" + style +
                 "'>" + this._methods[i] + "</div>";
         }
