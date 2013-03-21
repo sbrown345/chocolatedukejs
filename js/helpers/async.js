@@ -18,9 +18,9 @@ Queue.prototype = {
     // adds callbacks to your queue
     insertAtStart: function () {
         this.setInsertPosition(0);
-        this.add.apply(this, arguments);
+        return this.add.apply(this, arguments);
     },
-    
+
     // adds callbacks to your queue
     add: function () {
         var fn = arguments[arguments.length - 1];
@@ -29,46 +29,48 @@ Queue.prototype = {
             args.push(arguments[i]);
         }
 
-        // if the queue had been flushed, return immediately
-        //if (this._flushed) {
-        //    fn(this._response);
-        //    // otherwise push it on the queue
-        //} else {
-            //this._methods.push([fn, args]);
-            this._methods.splice(this._insertIndex++, 0, [fn, args]);
-        //}
+        this._methods.splice(this._insertIndex++, 0, [fn, args]);
 
         this.outputDebugInfo();
 
         return this;
     },
-    
-    "while": function() {
-        
+
+    addWhile: function (testFn, loopFn) {
+        var that = this;
+        var newFn = function () {
+            console.info("() newFn %i", Date.now());
+            if (testFn()) {
+                that.insertAtStart(loopFn);
+            }
+
+        };
+
+        return this.add(newFn);
+    },
+
+    setPositionAtStart: function () {
+        return this.setInsertPosition(0);
     },
 
     setInsertPosition: function (position) {
         this._insertIndex = position;
-        this.outputDebugInfo();
+        return this.outputDebugInfo();
     },
 
     flush: function (resp) {
-        // note: flush only ever happens once
         if (this._flushed) {
-            return;
+            throw new Error("Cannot flush twice");
         }
         // store your response for subsequent calls after flush()
         this._response = resp;
-        // mark that it's been flushed
         this._flushed = true;
-        // shift 'em out and call 'em back
 
         var that = this;
 
         requestAnimationFrame(shiftArg);
 
         function shiftArg() {
-            //console.log(Date.now())
             if (that._methods[0]) {
 
                 var fnAndArg = that._methods.shift();
@@ -81,14 +83,16 @@ Queue.prototype = {
             } else if (typeof resp === "function") {
                 resp();
             }
-            
+
             that.outputDebugInfo();
         }
+
+        return this;
     },
 
     outputDebugInfo: function () {
         if (!this._debug) {
-            return;
+            return this;
         }
 
         var html = "", style;
@@ -99,5 +103,7 @@ Queue.prototype = {
                 "'>" + this._methods[i] + "</div>";
         }
         document.getElementById("asyncDebug").innerHTML = html;
+
+        return this;
     }
 };
