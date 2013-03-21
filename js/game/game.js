@@ -83,7 +83,7 @@ function logo() {
             if (!KB.keyWaiting() && nomorelogohack == 0) {
                 getPackets();
 
-                playanm("logo.anm", 5, function() {
+                playanm("logo.anm", 5, function () {
                     palto(0, 0, 0, 63);
                     KB.flushKeyboardQueue();
                     afterAnm();
@@ -96,32 +96,31 @@ function logo() {
         function afterAnm() {
             clearView(0);
             nextpage();
-            
+
             //MIDI start here
             playMusic(env_music_fn[0]);
-            
+
+            //todo: make nextpage not clear buffer
+            //todo: make more complex q/stack thing
 
             var q = new AnimationStack();
             //"REALITY IS OUR GAME" Screen
             for (i = 0; i < 64; i += 7) {
                 q.add(i, function (cb, i) {
                     palto(0, 0, 0, i);
-                    nextpage();
                 });
             }
             q.add(function () {
                 ps[myconnectindex].palette = drealms;
-                palto(0, 0, 0, 63);
+                palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
                 rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
                 nextpage();
             });
             for (i = 63; i > 0; i -= 7) {
                 q.add(i, function (cb, i) {
                     palto(0, 0, 0, i);
-                    nextpage();
                 });
             }
-
             q.add(function () {
                 totalclock = 0;
 
@@ -130,7 +129,7 @@ function logo() {
                 afterLogo();
             });
 
-            q.flush("callabck");
+            q.flush("callback val (pointless?)");
         }
     }
     else if (numplayers > 1) {

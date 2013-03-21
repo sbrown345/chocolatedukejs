@@ -153,8 +153,10 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     qsetmode = surface.height;
     activepage = visualpage = 0;
 
-    //frameoffset = surface.getContext("2d");//.createImageData(screenWidth, screenHeight);
-    setupFramePlace();
+    console.assert(ScreenWidth == screenWidth, "todo, match up ScreenWidth and screenWidth");
+    console.assert(ScreenHeight == screenHeight, "todo, match up ScreenHeight and screenHeight");
+    frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
+
     frameoffset = 0;
 
     j = ydim * 4 * 4;
@@ -218,7 +220,7 @@ function Color() {
     this.g = 0;
     this.b = 0;
     Object.defineProperty(this, "cssColor", {
-        get: function() {
+        get: function () {
             return "rgba(" + this.r + "," + this.g + "," + this.b + ", 255);";
         }
     });
@@ -264,7 +266,8 @@ function VBE_setPalette(paletteBuffer, debug) {
     }
 
     colorPalette = fmtSwap;
-    
+
+    updateCanvas();
     // original sets palette immediately on display
 }
 
@@ -281,11 +284,6 @@ function PointerHelper(uint8Array, position) {
     };
 }
 
-function setupFramePlace() {
-    frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
-}
-
-
 function _nextpage() {
     var ticks;
 
@@ -294,7 +292,6 @@ function _nextpage() {
 
     // SDL_UpdateRect alternative
     updateCanvas();
-    setupFramePlace();
 
     ticks = Timer.getPlatformTicks();
     total_render_time = (ticks - last_render_ticks);

@@ -1163,7 +1163,7 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
         return;
     }
 
-    console.log("makepalookup todo!!!!!!"); // todo
+    console.warn("makepalookup todo!!!!!!"); // todo
     //if ((r | g | b) === 0) {
     //    for (i = 0; i < 256; i++) {
     //        //ptr=palookup[0]   
