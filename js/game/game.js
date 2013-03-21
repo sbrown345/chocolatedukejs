@@ -99,45 +99,38 @@ function logo() {
             
             //MIDI start here
             playMusic(env_music_fn[0]);
+            
 
-            // AN ARRAY OF FUNCS TO DO IN A QUEUE???? , promises?
-            var q = new Queue();
+            var q = new AnimationStack();
             //"REALITY IS OUR GAME" Screen
             for (i = 0; i < 64; i += 7) {
                 q.add(i, function (cb, i) {
                     palto(0, 0, 0, i);
+                    nextpage();
                 });
             }
-
             q.add(function () {
                 ps[myconnectindex].palette = drealms;
                 palto(0, 0, 0, 63);
                 rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
                 nextpage();
             });
-
-
             for (i = 63; i > 0; i -= 7) {
                 q.add(i, function (cb, i) {
                     palto(0, 0, 0, i);
+                    nextpage();
                 });
             }
 
-
             q.add(function () {
                 totalclock = 0;
-
-
-
-
-
 
                 // todo: finish start animation
 
                 afterLogo();
             });
 
-            q.flush("callabck"); // TODO: HOOOK UP WIHT ANM FRAME
+            q.flush("callabck");
         }
     }
     else if (numplayers > 1) {
@@ -391,7 +384,7 @@ function main(argc, argv) {
     ud.warp_on = 0;
 
     //throw new Error("todo");
-    console.warn("todo")
+    console.warn("todo");
 }
 
 function playback() {
