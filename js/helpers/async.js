@@ -1,7 +1,7 @@
 ﻿'use strict';
 
 // http://www.dustindiaz.com/async-method-queues/
-function AnimationStack() {
+function Queue() {
     // store your callbacks
     this._methods = [];
     // keep a reference to your response
@@ -14,7 +14,13 @@ function AnimationStack() {
     this._debug = true;
 }
 
-AnimationStack.prototype = {
+Queue.prototype = {
+    // adds callbacks to your queue
+    insertAtStart: function () {
+        this.setInsertPosition(0);
+        this.add.apply(this, arguments);
+    },
+    
     // adds callbacks to your queue
     add: function () {
         var fn = arguments[arguments.length - 1];
@@ -35,6 +41,10 @@ AnimationStack.prototype = {
         this.outputDebugInfo();
 
         return this;
+    },
+    
+    "while": function() {
+        
     },
 
     setInsertPosition: function (position) {
@@ -60,7 +70,6 @@ AnimationStack.prototype = {
         function shiftArg() {
             //console.log(Date.now())
             if (that._methods[0]) {
-                that.outputDebugInfo();
 
                 var fnAndArg = that._methods.shift();
                 var fn = fnAndArg[0];
@@ -72,6 +81,8 @@ AnimationStack.prototype = {
             } else if (typeof resp === "function") {
                 resp();
             }
+            
+            that.outputDebugInfo();
         }
     },
 

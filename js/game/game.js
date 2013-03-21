@@ -61,7 +61,7 @@ function faketimerhandler() {
     throw new Error("todo");
 }
 
-var q = new AnimationStack();
+var q = new Queue();
 function logo() {
     var i, soundanm = 0;
 
@@ -107,35 +107,35 @@ function logo() {
             if (false) {
                 //"REALITY IS OUR GAME" Screen
                 for (i = 0; i < 64; i += 7) {
-                    q.add(i, function(cb, i) {
+                    q.add(i, function (cb, i) {
                         palto(0, 0, 0, i);
                     });
                 }
-                q.add(function() {
+                q.add(function () {
                     ps[myconnectindex].palette = drealms;
                     palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
                     rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
                     nextpage();
                 });
                 for (i = 63; i > 0; i -= 7) {
-                    q.add(i, function(cb, i) {
+                    q.add(i, function (cb, i) {
                         palto(0, 0, 0, i);
                     });
                 }
 
-                q.add(i, function(cb, i) {
+                q.add(i, function (cb, i) {
                     totalclock = 0;
                     //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
                 });
 
                 //FADE OUT
                 for (i = 0; i < 64; i += 7) {
-                    q.add(i, function(cb, i) {
+                    q.add(i, function (cb, i) {
                         palto(0, 0, 0, i);
                     });
                 }
 
-                q.add(function() {
+                q.add(function () {
                     clearView(0);
                     // todo: finish start animation
 
@@ -144,22 +144,26 @@ function logo() {
 
                 q.flush("callback val (pointless?)");
             } else {
-                
+
                 //"REALITY IS OUR GAME" Screen
                 for (i = 0; i < 64; i += 7) {
                     q.add(i, function (cb, i) {
+                        console.log("(10)")
                         palto(0, 0, 0, i);
                     });
                 }
                 q.add(function () {
+
+                    console.log("(20)")
                     ps[myconnectindex].palette = drealms;
                     palto(0, 0, 0, 63);
                     rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
                     nextpage();
-           
+
                     q.setInsertPosition(0);
                     for (i = 63; i > 0; i -= 7) {
-                        q.add(i, function(cb, i) {
+                        q.add(i, function (cb, i) {
+                            console.log("(30)")
                             palto(0, 0, 0, i);
                         });
                     }
@@ -167,24 +171,41 @@ function logo() {
 
                 q.add(i, function (cb, i) {
                     totalclock = 0;
-                    
-                    //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
-                    if (totalclock < (120 * 7)) {
-                        q.setInsertPosition(0);
-                        q.add(totalclock, function (cb, totalclock) {
-                            console.info("empty func to simuilate waiting, totalclock: %i", totalclock);
-                        });
+
+                    //////TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
+                    //q.while(function () {
+                    //    return totalclock < (120 * 7);
+                    //}, function () {
+                    //    q.insertAtStart(totalclock, function (cb, totalclock) {
+                    //        console.info("empty func to simuilate waiting, totalclock: %i", totalclock);
+                    //        getPackets();
+                    //    });
+                    //});
+
+                    whileTest();
+
+                    function whileTest() {
+                        console.log("(40)")
+                        console.info("empty func to simuilate waiting, totalclock: %i", totalclock);
+                        if (totalclock < (120 * 7)) {
+                            q.insertAtStart(totalclock, function(cb, totalclock) {
+                                getPackets();
+                                whileTest();
+                            });
+                        }
                     }
                 });
 
                 //FADE OUT
                 for (i = 0; i < 64; i += 7) {
                     q.add(i, function (cb, i) {
+                        console.log("(50)")
                         palto(0, 0, 0, i);
                     });
                 }
 
                 q.add(function () {
+                    console.log("(60)")
                     clearView(0);
                     // todo: finish start animation
 
@@ -205,6 +226,7 @@ function logo() {
     }
 
     function afterLogo() {
+        console.log("(70)")
         // todo
     }
 }
