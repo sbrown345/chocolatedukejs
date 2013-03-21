@@ -26,10 +26,10 @@ function logoanimsounds(fr) {
 
 // 4602
 var lastanimhack = 0;
-function playanm(fn, t, callback) {
+function playanm(filename, t) {
     var animbuf, palptr;
-    var i, j, k, length = 0, numframes = 0;
-    var handle = -1;
+    var i, j, k, length, numframes;
+    var handle;
 
     if (t != 7 && t != 9 && t != 10 && t != 11) {
         KB.flushKeyboardQueue();
@@ -40,7 +40,7 @@ function playanm(fn, t, callback) {
         throw new Error("todo");
     }
 
-    handle = TCkopen4load(fn, false);
+    handle = TCkopen4load(filename, false);
 
     if (handle === -1) {
         return;
@@ -81,52 +81,49 @@ function playanm(fn, t, callback) {
 
     ototalclock = totalclock + 10;
 
-    i = 0;
-    animationFrame();
-    
-    function animationFrame() {
-        //while (totalclock < ototalclock) {
-        //    if (KB.keyWaiting()) {
-        //        //goto ENDOFANIMLOOP;
-        //        throw new Error("goto label todo");
-        //    }
-        //    getPackets();
-        //}
+    i = 1;
+    q.setPositionAtStart()
+    q.addWhile(function () {
+        return i++ < numframes;
+    }, function () {
+        q.setPositionAtStart()
+        .addWhile(function () {
+            return totalclock < ototalclock;
+        }, function () {
+            if (KB.keyWaiting()) {
+                //goto ENDOFANIMLOOP;
+                throw new Error("goto label todo");
+            }
+            getPackets();
+        }).add(function () {
+            if (t == 10) ototalclock += 14;
+            else if (t == 9) ototalclock += 10;
+            else if (t == 7) ototalclock += 18;
+            else if (t == 6) ototalclock += 14;
+            else if (t == 5) ototalclock += 9;
+            else if (ud.volume_number == 3) ototalclock += 10;
+            else if (ud.volume_number == 2) ototalclock += 10;
+            else if (ud.volume_number == 1) ototalclock += 18;
+            else ototalclock += 10;
 
-        if (t == 10) ototalclock += 14;
-        else if (t == 9) ototalclock += 10;
-        else if (t == 7) ototalclock += 18;
-        else if (t == 6) ototalclock += 14;
-        else if (t == 5) ototalclock += 9;
-        else if (ud.volume_number == 3) ototalclock += 10;
-        else if (ud.volume_number == 2) ototalclock += 10;
-        else if (ud.volume_number == 1) ototalclock += 18;
-        else ototalclock += 10;
+            tiles[MAXTILES - 3 - t].data = Anim.drawFrame(i);
+            rotateSprite(0 << 16, 0 << 16, 65536, 512, MAXTILES - 3 - t, 0, 0, 2 + 4 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+            nextpage();
 
-        tiles[MAXTILES - 3 - t].data = Anim.drawFrame(i);
-        rotateSprite(0 << 16, 0 << 16, 65536, 512, MAXTILES - 3 - t, 0, 0, 2 + 4 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
-        nextpage();
+            if (t == 8) endanimvol41(i);
+            else if (t == 10) endanimvol42(i);
+            else if (t == 11) endanimvol43(i);
+            else if (t == 9) intro42animsounds(i);
+            else if (t == 7) intro4animsounds(i);
+            else if (t == 6) first4animsounds(i);
+            else if (t == 5) logoanimsounds(i);
+            else if (t < 4) endanimsounds(i);
 
-        if (t == 8) endanimvol41(i);
-        else if (t == 10) endanimvol42(i);
-        else if (t == 11) endanimvol43(i);
-        else if (t == 9) intro42animsounds(i);
-        else if (t == 7) intro4animsounds(i);
-        else if (t == 6) first4animsounds(i);
-        else if (t == 5) logoanimsounds(i);
-        else if (t < 4) endanimsounds(i);
-
-        if (i < numframes) {
-            requestAnimationFrame(function () {
-                animationFrame(i + 1, numframes);
-            });
-        } else {
-            Anim.freeAnim();
-            tiles[MAXTILES - 3 - t].lock = 1;
-            callback();
-        }
-
-        i++;
-    }
+            i++;
+        });
+    }).add(function () {
+        Anim.freeAnim();
+        tiles[MAXTILES - 3 - t].lock = 1;
+    });
 }
 

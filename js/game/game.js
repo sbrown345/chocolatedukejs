@@ -78,126 +78,109 @@ function logo() {
 
     Music.stopSong();
 
-    //numplayers > 10;
-    
-    // ROUGH STRUCTURE:
-
     q.addIf(function () { return ud.showcinematics && numplayers < 2; }, function () {
         console.log("(10) play logo anm");
 
-        //TEST NESTED
+        // This plays the explosion from the nuclear sign at the beginning.
         q.setPositionAtStart()
-            .addIf(function () { return false; }, function () {
-                console.log("(20) nested");
+            .addIf(function () {
+                return !VOLUMEONE();
+            }, function () {
+                // todo: it skips a frame here, how to fix this? addIfExecNow()? or rewrite into one if
+                q.setPositionAtStart()
+                    .addIf(function () { return !KB.keyWaiting() && nomorelogohack == 0; },
+                        function () {
+                            getPackets();
+
+                            q.setPositionAtStart()
+                                .add(function () {
+                                    playanm("logo.anm", 5);
+                                }).add(function () {
+                                    palto(0, 0, 0, 63);
+                                    KB.flushKeyboardQueue();
+                                });
+                        })
+                    .endIf();
+                q.add(function () {
+                    console.log("(20) REALITY IS OUR GAME Screen");
+                    clearView(0);
+                    nextpage();
+
+                    //MIDI start here
+                    playMusic(env_music_fn[0]);
+
+
+                    // "REALITY IS OUR GAME" Screen
+                    for (i = 0; i < 64; i += 7) {
+                        q.add(i, function (cb, i) {
+                            console.log("(10)");
+                            palto(0, 0, 0, i);
+                        });
+                    }
+                    q.add(function () {
+                        console.log("(20)");
+                        ps[myconnectindex].palette = drealms;
+                        palto(0, 0, 0, 63);
+                        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                        nextpage();
+
+                        q.setInsertPosition(0);
+                        for (i = 63; i > 0; i -= 7) {
+                            q.add(i, function (cb, i) {
+                                console.log("(30)");
+                                palto(0, 0, 0, i);
+                            });
+                        }
+                    });
+
+                    q.add(i, function (cb, i) {
+                        totalclock = 0;
+
+                        q.setPositionAtStart().addWhile(function () {
+                            return totalclock < (120 * 7);
+                        }, function () {
+                            console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
+                            getPackets();
+                        });
+                    });
+
+                    //FADE OUT
+                    for (i = 0; i < 64; i += 7) {
+                        q.add(i, function (cb, i) {
+                            console.log("(50)");
+                            palto(0, 0, 0, i);
+                        });
+                    }
+
+                    q.add(function () {
+                        console.log("(60)");
+                        clearView(0);
+                        // todo: finish start animation
+                    });
+
+                });
             })
+            .addElse()
             .endIf();
-
-
     }).addElseIf(function () { return numplayers > 1; }, function () {
         console.log("(10)  numplayers > 1");
-        //throw new Error("todo");
+        throw new Error("todo");
     }).addElse(function () {
         console.log("(10)  else SP");
-        //throw new Error("todo");
+        throw new Error("todo");
     })
         .endIf()
-        .add(afterLogo)
-        .flush();
+        .add(function () {
+            console.log("(70) todo"); // todo
+            waitforeverybody();
 
-
-    return;
-
-    if (ud.showcinematics && numplayers < 2) {
-        // This plays the explosion from the nuclear sign at the beginning.
-        if (!VOLUMEONE()) {
-            if (!KB.keyWaiting() && nomorelogohack == 0) {
-                getPackets();
-
-                playanm("logo.anm", 5, function () {
-                    palto(0, 0, 0, 63);
-                    KB.flushKeyboardQueue();
-                    afterAnm();
-                });
-            }
-        } else {
-            afterAnm();
-        }
-
-        function afterAnm() {
             clearView(0);
             nextpage();
-
-            //MIDI start here
-            playMusic(env_music_fn[0]);
-
-
-            //"REALITY IS OUR GAME" Screen
-            for (i = 0; i < 64; i += 7) {
-                q.add(i, function (cb, i) {
-                    console.log("(10)");
-                    palto(0, 0, 0, i);
-                });
-            }
-            q.add(function () {
-
-                console.log("(20)");
-                ps[myconnectindex].palette = drealms;
-                palto(0, 0, 0, 63);
-                rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
-                nextpage();
-
-                q.setInsertPosition(0);
-                for (i = 63; i > 0; i -= 7) {
-                    q.add(i, function (cb, i) {
-                        console.log("(30)");
-                        palto(0, 0, 0, i);
-                    });
-                }
-            });
-
-            q.add(i, function (cb, i) {
-                totalclock = 0;
-
-                q.setPositionAtStart().addWhile(function () {
-                    return totalclock < (120 * 7);
-                }, function () {
-                    console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
-                    getPackets();
-                });
-            });
-
-            //FADE OUT
-            for (i = 0; i < 64; i += 7) {
-                q.add(i, function (cb, i) {
-                    console.log("(50)");
-                    palto(0, 0, 0, i);
-                });
-            }
-
-            q.add(function () {
-                console.log("(60)");
-                clearView(0);
-                // todo: finish start animation
-
-                afterLogo();
-            });
-
-            q.flush("callback val (pointless?)");
-
-
-        }
-    }
-    else if (numplayers > 1) {
-        throw new Error("todo");
-        afterLogo();
-    } else {
-        throw new Error("todo");
-        afterLogo();
-    }
-
-    function afterLogo() {
-        console.log("(70)"); // todo
-    }
+            ps[myconnectindex].palette = palette;
+            palto(0, 0, 0, 0);
+            clearView(0);
+        })
+        .flush();
 }
 
 //7655

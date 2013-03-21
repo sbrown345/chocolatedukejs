@@ -12,7 +12,7 @@ function Queue() {
     // where thigns are added
     this._insertIndex = 0;
 
-    this._debug = true;
+    this._debug = false;
 }
 
 Queue.prototype = {
@@ -119,6 +119,8 @@ Queue.prototype = {
         });
     },
 
+    // gotcha, easy to forget to set this at the start of an inner statement!
+    // todo: use better name
     setPositionAtStart: function () {
         return this.setInsertPosition(0);
     },

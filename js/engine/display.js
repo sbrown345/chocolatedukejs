@@ -256,14 +256,14 @@ function VBE_setPalette(paletteBuffer, debug) {
         fmtSwap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
         fmtSwap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
         p++;
-        debugHtml += "<span style='background:rgb(" + (fmtSwap[sdlp].r) + "," + (fmtSwap[sdlp].g) + "," + (fmtSwap[sdlp].b) + ")'>" +
-            sdlp + "&nbsp;</span>";
+        //debugHtml += "<span style='background:rgb(" + (fmtSwap[sdlp].r) + "," + (fmtSwap[sdlp].g) + "," + (fmtSwap[sdlp].b) + ")'>" +
+        //    sdlp + "&nbsp;</span>";
         sdlp++;
     }
 
-    if (debug | true) {
-        paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
-    }
+    //if (debug) {
+    //    paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
+    //}
 
     colorPalette = fmtSwap;
 
