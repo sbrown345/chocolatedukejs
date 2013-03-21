@@ -61,6 +61,7 @@ function faketimerhandler() {
     throw new Error("todo");
 }
 
+var q = new AnimationStack();
 function logo() {
     var i, soundanm = 0;
 
@@ -103,45 +104,92 @@ function logo() {
             //todo: make nextpage not clear buffer
             //todo: make more complex q/stack thing
 
-            var q = new AnimationStack();
-            //"REALITY IS OUR GAME" Screen
-            for (i = 0; i < 64; i += 7) {
-                q.add(i, function (cb, i) {
-                    palto(0, 0, 0, i);
+            if (false) {
+                //"REALITY IS OUR GAME" Screen
+                for (i = 0; i < 64; i += 7) {
+                    q.add(i, function(cb, i) {
+                        palto(0, 0, 0, i);
+                    });
+                }
+                q.add(function() {
+                    ps[myconnectindex].palette = drealms;
+                    palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
+                    rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                    nextpage();
                 });
-            }
-            q.add(function () {
-                ps[myconnectindex].palette = drealms;
-                palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
-                rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
-                nextpage();
-            });
-            for (i = 63; i > 0; i -= 7) {
-                q.add(i, function (cb, i) {
-                    palto(0, 0, 0, i);
+                for (i = 63; i > 0; i -= 7) {
+                    q.add(i, function(cb, i) {
+                        palto(0, 0, 0, i);
+                    });
+                }
+
+                q.add(i, function(cb, i) {
+                    totalclock = 0;
+                    //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
                 });
-            }
 
-            q.add(i, function(cb, i) {
-                totalclock = 0;
-                //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
-            });
+                //FADE OUT
+                for (i = 0; i < 64; i += 7) {
+                    q.add(i, function(cb, i) {
+                        palto(0, 0, 0, i);
+                    });
+                }
 
-            //FADE OUT
-            for(i=0;i<64;i+=7) {
-                q.add(i, function (cb, i) {
-                    palto(0, 0, 0, i);
+                q.add(function() {
+                    clearView(0);
+                    // todo: finish start animation
+
+                    afterLogo();
                 });
+
+                q.flush("callback val (pointless?)");
+            } else {
+                
+                //INSERT ANIMATINO FROM WITHIN!
+
+                
+                //"REALITY IS OUR GAME" Screen
+                for (i = 0; i < 64; i += 7) {
+                    q.add(i, function (cb, i) {
+                        palto(0, 0, 0, i);
+                    });
+                }
+                q.add(function () {
+                    ps[myconnectindex].palette = drealms;
+                    palto(0, 0, 0, 63); //TODO ADD BACK IN- SETS IT BLACK
+                    rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                    nextpage();
+           
+                    for (i = 63; i > 0; i -= 7) {
+                        q.setIndex(0);
+                        q.add(i, function(cb, i) {
+                            palto(0, 0, 0, i);
+                        });
+                    }
+                }); // these added will then be played now
+
+                q.add(i, function (cb, i) {
+                    totalclock = 0;
+                    //TODO: WAITING.................. totalclock < (120*7) && !KB_KeyWaiting() 
+                });
+
+                //FADE OUT
+                for (i = 0; i < 64; i += 7) {
+                    q.add(i, function (cb, i) {
+                        palto(0, 0, 0, i);
+                    });
+                }
+
+                q.add(function () {
+                    clearView(0);
+                    // todo: finish start animation
+
+                    afterLogo();
+                });
+
+                q.flush("callback val (pointless?)");
+
             }
-
-            q.add(function () {
-                clearView(0);
-                // todo: finish start animation
-
-                afterLogo();
-            });
-
-            q.flush("callback val (pointless?)");
         }
     }
     else if (numplayers > 1) {
