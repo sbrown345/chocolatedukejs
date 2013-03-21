@@ -1204,7 +1204,7 @@ function clearView(dacol) {
 
     //p = frameplace.position + ylookup[windowy1] + windowx1;
     // todo: check this is right
-    surface.getContext("2d").fillStyle = colorPalette[dacol].cssColor;
+    surface.getContext("2d").fillStyle = colorPaletteRrb[dacol].cssColor;
     surface.getContext("2d").fillRect(0, 0, surface.width, surface.height);
 
     faketimerhandler();

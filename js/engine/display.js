@@ -229,6 +229,7 @@ function Color() {
 }
 
 //1330
+var colorPaletteRrb = structArray(Color, 256);
 var colorPalette;
 function VBE_setPalette(paletteBuffer, debug) {
     /*
@@ -245,7 +246,7 @@ function VBE_setPalette(paletteBuffer, debug) {
      *  so we do a conversion.
      */
 
-    var fmtSwap = structArray(Color, 256);
+    var fmtSwap = new Array(256); // faster than Uint32Array by 2ms each read???
     var sdlp = 0;
     var p = 0;
 
@@ -254,16 +255,16 @@ function VBE_setPalette(paletteBuffer, debug) {
     //memcpy(lastPalette, palettebuffer, 768);
     var debugHtml = "";
     for (var i = 0; i < 256; i++) {
-        fmtSwap[sdlp].all = (255 << 24) | // alpha
+        fmtSwap[sdlp] = (255 << 24) | // alpha
             ((paletteBuffer[p] / 63.0) * 255.0) << 16 | // blue
             ((paletteBuffer[p + 1] / 63.0) * 255.0) << 8 | // green
             ((paletteBuffer[p + 2] / 63.0) * 255.0); // red
 
-        //fmtSwap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        //fmtSwap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        //fmtSwap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        //p++;
-        //debugHtml += "<span style='background:rgb(" + (fmtSwap[sdlp].r) + "," + (fmtSwap[sdlp].g) + "," + (fmtSwap[sdlp].b) + ")'>" +
+        colorPaletteRrb[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0; // just used for clearing screen
+        colorPaletteRrb[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        colorPaletteRrb[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        p++;
+        //debugHtml += "<span style='background:rgb(" + (colorPaletteRrb[sdlp].r) + "," + (colorPaletteRrb[sdlp].g) + "," + (colorPaletteRrb[sdlp].b) + ")'>" +
         //    sdlp + "&nbsp;</span>";
         sdlp++;
     }
@@ -272,6 +273,7 @@ function VBE_setPalette(paletteBuffer, debug) {
     //    paletteDebug.innerHTML += "<div>" + debugHtml + "</div>"; // could do console.log styles!
     //}
 
+    colorPaletteRrb = colorPaletteRrb;
     colorPalette = fmtSwap;
 
     updateCanvas();
@@ -320,14 +322,17 @@ function updateCanvas() {
         if (!imageData) {
             imageData = surfaceContext.getImageData(0, 0, ScreenWidth, ScreenHeight);
         }
+
         var buf = new ArrayBuffer(imageData.data.length);
         var buf8 = new Uint8ClampedArray(buf);
         var data = new Uint32Array(buf);
         
         var newImageData = frameplace.array;
-        for (var i = 0; i < newImageData.length; i++) {
-            data[i] = colorPalette[newImageData[i]].all; //TODO: JUST HAVE A SIMPLE ARRAY FOR COLORPALLET (Uint32????)
-        } // todo: change to do while loop . e.g. var x = 9; do { } while (x--);
+        var len = newImageData.length;
+        // chrome: a for loop with the length saved as a variable seemed to be the fastest (do while: slow, for with a i++ < len also slow) 
+        for (var i = 0; i < len; i++) {
+            data[i] = colorPalette[newImageData[i]]; 
+        } 
         
         imageData.data.set(buf8);
         surfaceContext.putImageData(imageData, 0, 0);

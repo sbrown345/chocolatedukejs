@@ -17,7 +17,7 @@ function Queue() {
 
 Queue.prototype = {
     // adds callbacks to your queue
-    insertAtStart: function () { //named confusingly because it affeecst all other calls after it, maybe remove it...
+    insertAtStart: function () { //named confusingly because it affects all other calls after it, maybe remove it...
         this.setInsertPosition(0);
         return this.add.apply(this, arguments);
     },
