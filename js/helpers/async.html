@@ -2,31 +2,38 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>Test Async Queue</title>
-    <script src="async.js"></script>
+    <script src="async.js"> </script>
 </head>
 <body>
+    <p>This mini library is for rewriting synchronous code asynchronously.</p>
     <div>
-        <span id="expectedResult">else|addIf|nestedTrue|while1|while2|extra</span> <small>(Expected)</small>
+        <span id="expectedResult"></span><small>&nbsp;(Expected)</small>
     </div>
-    <div><span id="outputResult"></span> <small>(Actual)</small></div>
-    <div id="result" style="font-weight: bold; color: red;">Fail</div>
+    <div><span id="outputResult"></span><small>&nbsp;(Actual)</small></div>
+    <div id="result" style="color: red; font-weight: bold;">Fail</div>
     <div id="asyncDebug"></div>
     <script>
         var output = "";
         var q = new Queue();
 
-
-
-
-
         q.addIf(function () { return false; }, function () {
         }).addElse(function () {
-            output += "else";
+            output += "10 else";
+        })
+            .endIf();
+
+        q.addIf(function () { return false; }, function () {
+        }).addElseIf(function () {
+            return true;
+        }, function () {
+            output += "|20 elseIf";
+        }).addElse(function () {
+            throw new Error("Should not run");
         })
             .endIf();
 
         q.addIf(function () { return true; }, function () {
-            output += "|addIf";
+            output += "|30 addIf";
 
             // nested
             q.setPositionAtStart()
@@ -36,8 +43,8 @@
                 .endIf();
 
             q.addIf(function () { return true; }, function () {
-                    output += "|nestedTrue";
-                })
+                output += "|40 nestedTrue";
+            })
                 .endIf();
 
             var i = 0;
@@ -47,8 +54,15 @@
                 console.log("_______ result: ", foo);
                 return foo;
             }, function () {
-                output += "|while" + i;
-                console.log("exec WHILE")
+                output += "|50 " + "while" + i;
+                console.log("exec WHILE");
+
+                if (i == 1) {
+                    q.add(function () {
+                        output += "|55 while nested";
+                    });
+                }
+
             });
 
         }).addElseIf(function () { return false; }, function () {
@@ -59,9 +73,10 @@
             .endIf()
             .add(function () {
                 console.log("extra ");
-                output += "|extra";
+                output += "|60 extra";
             })
             .flush(function () {
+                expectedResult.innerHTML = "10 else|20 elseIf|30 addIf|40 nestedTrue|50 while1|55 while nested|50 while2|60 extra";
                 outputResult.innerHTML = output;
 
                 if (output == expectedResult.innerHTML) {
