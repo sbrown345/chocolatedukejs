@@ -1094,7 +1094,7 @@ function nextpage() {
 
     beforedrawrooms = 1;
     numframes++;
-    console.log("numframes: %i", numframes);
+    //console.log("numframes: %i", numframes);
 }
 
 //8034

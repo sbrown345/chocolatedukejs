@@ -38,13 +38,13 @@ Queue.prototype = {
     },
 
     addWhile: function (testFn, loopFn) {
-        console.info("() addWhile");
+        //console.info("() addWhile");
         
         var that = this;
         var newFn = function () {
             /* addWhile */
             var testResult = testFn();
-            console.info("() while: ", testResult);
+            //console.log("() while: ", testResult);
             if (testResult) {
                 loopFn();
                 that.addWhile(testFn, loopFn);
@@ -55,15 +55,15 @@ Queue.prototype = {
 
     // create branch?
     addIf: function (testFn, fn) {
-        console.info("() addIf");
+        //console.log("() addIf");
         this._branches.unshift([]);
         var that = this;
         this.add(function () {
             /* if */
-            console.log('addIf RUN');
+            //console.log('addIf RUN');
             var result = testFn();
             if (result) {
-                console.log('%c addIf OK ', 'font-weight:bold; color: green');
+                //console.log('%c addIf OK ', 'font-weight:bold; color: green');
                 that.insertAtStart(fn);
             }
 
@@ -74,13 +74,13 @@ Queue.prototype = {
     
     addElseIf: function (testFn, fn) {
         var that = this;
-        console.info("() addElseIf");
+        //console.log("() addElseIf");
         return this.add(function () {
             /* else if */
-            console.log('addElseIf RUN');
+            //console.log('addElseIf RUN');
             var result = testFn();
             if (that.allCurrentBranchResultsAreFalse() && result) {
-                console.log('%c addElseIf OK ', 'font-weight:bold; color: green');
+                //console.log('%c addElseIf OK ', 'font-weight:bold; color: green');
                 that.insertAtStart(fn);
             }
             that._branches[0].push(result);
@@ -89,13 +89,13 @@ Queue.prototype = {
 
     // if all results false of last branch
     addElse: function (fn) {
-        console.info("() addElse");
+        //console.log("() addElse");
         var that = this;
         return this.add(function () {
             /* else */
-            console.log('addElse RUN');
+            //console.log('addElse RUN');
             if (that.allCurrentBranchResultsAreFalse()) {//SHIFT/POP?
-                console.log('%c addElse OK ', 'font-weight:bold; color: green');
+                //console.log('%c addElse OK ', 'font-weight:bold; color: green');
                 that.insertAtStart(fn);
             }
 
@@ -103,11 +103,11 @@ Queue.prototype = {
     },
     
     endIf: function () {
-        console.info("() endIf");
+        //console.log("() endIf");
         var that = this;
         this.add(function () {
             /* end if */
-            console.log("endIf RUN");
+            //console.log("endIf RUN");
             that._branches.shift();
         });
         return this;

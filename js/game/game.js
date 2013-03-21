@@ -172,7 +172,7 @@ function logo() {
         .endIf()
         .add(function () {
             console.log("(70) todo"); // todo
-            waitforeverybody();
+            preMap.waitForEverybody();
 
             clearView(0);
             nextpage();

@@ -1,5 +1,8 @@
 ﻿'use strict';
 
+var preMap = {};
+
+//1286
 function genSpriteRemaps() {
     var fp = TCkopen4load("lookup.dat", false);
     var lookpos;
@@ -28,3 +31,12 @@ function genSpriteRemaps() {
 
     kclose(fp);
 }
+
+//1322
+preMap.waitForEverybody = function() {
+    if (numplayers < 2) {
+        return;
+    }
+
+    throw new Error("todo");
+};
