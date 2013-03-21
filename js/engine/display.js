@@ -15,6 +15,7 @@ var buffermode, origbuffermode, linearmode;
 var permanentupdate = 0, vgacompatible;
 
 var surface = document.getElementById("gameCanvas");
+var surfaceContext = document.getElementById("gameCanvas").getContext("2d");
 
 
 var last_render_ticks = 0;
@@ -258,10 +259,10 @@ function VBE_setPalette(paletteBuffer, debug) {
             ((paletteBuffer[p + 1] / 63.0) * 255.0) << 8 | // green
             ((paletteBuffer[p + 2] / 63.0) * 255.0); // red
 
-        fmtSwap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        fmtSwap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        fmtSwap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
-        p++;
+        //fmtSwap[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        //fmtSwap[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        //fmtSwap[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
+        //p++;
         //debugHtml += "<span style='background:rgb(" + (fmtSwap[sdlp].r) + "," + (fmtSwap[sdlp].g) + "," + (fmtSwap[sdlp].b) + ")'>" +
         //    sdlp + "&nbsp;</span>";
         sdlp++;
@@ -311,44 +312,11 @@ function _nextpage() {
 var imageData;
 //var buf = new ArrayBuffer(imageData.data.length);
 function updateCanvas() {
-    // http://ajaxian.com/archives/canvas-image-data-optimization-tip ??
-    // faster:? https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/  
+    // https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/  
     if (frameplace) {
         if (!imageData) {
-            imageData = surface.getContext("2d").getImageData(0, 0, ScreenWidth, ScreenHeight);
+            imageData = surfaceContext.getImageData(0, 0, ScreenWidth, ScreenHeight);
         }
-        console.time("update canvas 1");
-        var newImageData = frameplace.array;
-        var data = imageData.data;
-        for (var i = 0; i < newImageData.length; i++) {
-            data[i * 4] = colorPalette[newImageData[i]].r;
-            data[i * 4 + 1] = colorPalette[newImageData[i]].g;
-            data[i * 4 + 2] = colorPalette[newImageData[i]].b;
-            data[i * 4 + 3] = 255;
-        }
-        surface.getContext("2d").putImageData(imageData, 0, 0);
-        console.timeEnd("update canvas 1");
-        
-        console.time("update canvas 2"); // 2MS FASTER
-        var buf = new ArrayBuffer(imageData.data.length);
-        var buf8 = new Uint8ClampedArray(buf);
-        var data = new Uint32Array(buf);
-        
-        var newImageData = frameplace.array;
-        for (var i = 0; i < newImageData.length; i++) {
-            // TODO WE COULD SET THE COLOR ONCE IN THE COLOR PALLET.......
-            data[i] =
-                    (255 << 24) |    // alpha
-                    (colorPalette[newImageData[i]].b << 16) |    // blue
-                    (colorPalette[newImageData[i]].g << 8) |    // green
-                     colorPalette[newImageData[i]].r;            // red
-        }
-        imageData.data.set(buf8);
-        surface.getContext("2d").putImageData(imageData, 0, 0);
-        console.timeEnd("update canvas 2");
-        
-
-        console.time("update canvas 3"); //~11ms
         var buf = new ArrayBuffer(imageData.data.length);
         var buf8 = new Uint8ClampedArray(buf);
         var data = new Uint32Array(buf);
@@ -357,9 +325,9 @@ function updateCanvas() {
         for (var i = 0; i < newImageData.length; i++) {
             data[i] = colorPalette[newImageData[i]].all;
         }
+        
         imageData.data.set(buf8);
-        surface.getContext("2d").putImageData(imageData, 0, 0);
-        console.timeEnd("update canvas 3");
+        surfaceContext.putImageData(imageData, 0, 0);
     }
 }
 
