@@ -6,6 +6,7 @@
 </head>
 <body>
     <p>This mini library is for rewriting synchronous code asynchronously.</p>
+    <p>setPositionAtStart() and endIf() functions are critical for controlling flow. However, I guess it's possible to automate these!</p>
     <div>
         <span id="expectedResult"></span><small>&nbsp;(Expected)</small>
     </div>
@@ -13,8 +14,11 @@
     <div id="result" style="color: red; font-weight: bold;">Fail</div>
     <div id="asyncDebug"></div>
     <script>
+        // todo: check for misses frames when something is false
+
         var output = "";
         var q = new Queue();
+        q._debug = true;
 
         q.addIf(function () { return false; }, function () {
         }).addElse(function () {
@@ -22,12 +26,12 @@
         })
             .endIf();
 
-        q.addIf(function () { return false; }, function () {
-        }).addElseIf(function () {
+        q.addIf(function() { return false; }, function() {
+        }).addElseIf(function() {
             return true;
-        }, function () {
+        }, function() {
             output += "|20 elseIf";
-        }).addElse(function () {
+        }).addElse(function() {
             throw new Error("Should not run");
         })
             .endIf();
@@ -50,7 +54,7 @@
             var i = 0;
             q.addWhile(function () {
                 console.log("_______ while: %i", i);
-                var foo = i++ < 2;
+                var foo = i++ < 3;
                 console.log("_______ result: ", foo);
                 return foo;
             }, function () {
@@ -58,6 +62,7 @@
                 console.log("exec WHILE");
 
                 if (i == 1) {
+                    q.setPositionAtStart(); // important!
                     q.add(function () {
                         output += "|55 while nested";
                     });
@@ -72,11 +77,10 @@
         })
             .endIf()
             .add(function () {
-                console.log("extra ");
                 output += "|60 extra";
             })
             .flush(function () {
-                expectedResult.innerHTML = "10 else|20 elseIf|30 addIf|40 nestedTrue|50 while1|55 while nested|50 while2|60 extra";
+                expectedResult.innerHTML = "10 else|20 elseIf|30 addIf|40 nestedTrue|50 while1|55 while nested|50 while2|50 while3|60 extra";
                 outputResult.innerHTML = output;
 
                 if (output == expectedResult.innerHTML) {

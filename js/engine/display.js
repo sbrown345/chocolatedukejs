@@ -313,6 +313,9 @@ var imageData;
 //var buf = new ArrayBuffer(imageData.data.length);
 function updateCanvas() {
     // https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/  
+    // todo: watch https://www.youtube.com/watch?feature=player_detailpage&v=XAqIpGU8ZZk#t=994s
+    // possible palette tips: http://www.effectgames.com/effect/article.psp.html/joe/Old_School_Color_Cycling_with_HTML5
+    // http://www.effectgames.com/demos/canvascycle/palette.js
     if (frameplace) {
         if (!imageData) {
             imageData = surfaceContext.getImageData(0, 0, ScreenWidth, ScreenHeight);
@@ -323,8 +326,8 @@ function updateCanvas() {
         
         var newImageData = frameplace.array;
         for (var i = 0; i < newImageData.length; i++) {
-            data[i] = colorPalette[newImageData[i]].all;
-        }
+            data[i] = colorPalette[newImageData[i]].all; //TODO: JUST HAVE A SIMPLE ARRAY FOR COLORPALLET (Uint32????)
+        } // todo: change to do while loop . e.g. var x = 9; do { } while (x--);
         
         imageData.data.set(buf8);
         surfaceContext.putImageData(imageData, 0, 0);

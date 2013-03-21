@@ -1,5 +1,7 @@
 ﻿//'use strict';
 
+var Game = {};
+
 var nHostForceDisableAutoaim = 0;
 
 // Game play speed
@@ -43,6 +45,7 @@ function getPackets() {
 }
 
 //784
+
 function faketimerhandler() {
     var i, j, k;
     var osyn, nsyn;
@@ -61,8 +64,8 @@ function faketimerhandler() {
     throw new Error("todo");
 }
 
-var q = new Queue();
 function logo() {
+    console.log("(9) logo");
     var i, soundanm = 0;
 
     ready2send = 0;
@@ -78,97 +81,98 @@ function logo() {
 
     Music.stopSong();
 
-    q.addIf(function () { return ud.showcinematics && numplayers < 2; }, function () {
-        console.log("(10) play logo anm");
+    q.setPositionAtStart()
+        .addIf(function () { return ud.showcinematics && numplayers < 2; }, function () {
+            console.log("(10) play logo anm");
 
-        // This plays the explosion from the nuclear sign at the beginning.
-        q.setPositionAtStart()
-            .addIf(function () {
-                return !VOLUMEONE();
-            }, function () {
-                // todo: it skips a frame here, how to fix this? addIfExecNow()? or rewrite into one if
-                q.setPositionAtStart()
-                    .addIf(function () { return !KB.keyWaiting() && nomorelogohack == 0; },
-                        function () {
-                            getPackets();
+            // This plays the explosion from the nuclear sign at the beginning.
+            q.setPositionAtStart()
+                .addIf(function () {
+                    return !VOLUMEONE();
+                }, function () {
+                    // todo: it skips a frame here, how to fix this? addIfExecNow()? or rewrite into one if
+                    q.setPositionAtStart()
+                        .addIf(function () { return !KB.keyWaiting() && nomorelogohack == 0; },
+                            function () {
+                                getPackets();
 
-                            q.setPositionAtStart()
-                                .add(function () {
-                                    playanm("logo.anm", 5);
-                                }).add(function () {
-                                    palto(0, 0, 0, 63);
-                                    KB.flushKeyboardQueue();
-                                });
-                        })
-                    .endIf();
-                q.add(function () {
-                    console.log("(20) REALITY IS OUR GAME Screen");
-                    clearView(0);
-                    nextpage();
-
-                    //MIDI start here
-                    playMusic(env_music_fn[0]);
-
-
-                    // "REALITY IS OUR GAME" Screen
-                    for (i = 0; i < 64; i += 7) {
-                        q.add(i, function (cb, i) {
-                            console.log("(10)");
-                            palto(0, 0, 0, i);
-                        });
-                    }
+                                q.setPositionAtStart()
+                                    .add(function () {
+                                        playanm("logo.anm", 5);
+                                    }).add(function () {
+                                        palto(0, 0, 0, 63);
+                                        KB.flushKeyboardQueue();
+                                    });
+                            })
+                        .endIf();
                     q.add(function () {
-                        console.log("(20)");
-                        ps[myconnectindex].palette = drealms;
-                        palto(0, 0, 0, 63);
-                        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                        console.log("(20) REALITY IS OUR GAME Screen");
+                        clearView(0);
                         nextpage();
 
-                        q.setInsertPosition(0);
-                        for (i = 63; i > 0; i -= 7) {
+                        //MIDI start here
+                        playMusic(env_music_fn[0]);
+
+
+                        // "REALITY IS OUR GAME" Screen
+                        for (i = 0; i < 64; i += 7) {
                             q.add(i, function (cb, i) {
-                                console.log("(30)");
+                                console.log("(10)");
                                 palto(0, 0, 0, i);
                             });
                         }
-                    });
+                        q.add(function () {
+                            console.log("(20)");
+                            ps[myconnectindex].palette = drealms;
+                            palto(0, 0, 0, 63);
+                            rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                            nextpage();
 
-                    q.add(i, function (cb, i) {
-                        totalclock = 0;
-
-                        q.setPositionAtStart().addWhile(function () {
-                            return totalclock < (120 * 7);
-                        }, function () {
-                            console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
-                            getPackets();
+                            q.setInsertPosition(0);
+                            for (i = 63; i > 0; i -= 7) {
+                                q.add(i, function (cb, i) {
+                                    console.log("(30)");
+                                    palto(0, 0, 0, i);
+                                });
+                            }
                         });
-                    });
 
-                    //FADE OUT
-                    for (i = 0; i < 64; i += 7) {
                         q.add(i, function (cb, i) {
-                            console.log("(50)");
-                            palto(0, 0, 0, i);
+                            totalclock = 0;
+
+                            q.setPositionAtStart().addWhile(function () {
+                                return totalclock < (120 * 7);
+                            }, function () {
+                                console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
+                                getPackets();
+                            });
                         });
-                    }
 
-                    q.add(function () {
-                        console.log("(60)");
-                        clearView(0);
-                        // todo: finish start animation
+                        //FADE OUT
+                        for (i = 0; i < 64; i += 7) {
+                            q.add(i, function (cb, i) {
+                                console.log("(50)");
+                                palto(0, 0, 0, i);
+                            });
+                        }
+
+                        q.add(function () {
+                            console.log("(60)");
+                            clearView(0);
+                            // todo: finish start animation
+                        });
+
                     });
-
-                });
-            })
-            .addElse()
-            .endIf();
-    }).addElseIf(function () { return numplayers > 1; }, function () {
-        console.log("(10)  numplayers > 1");
-        throw new Error("todo");
-    }).addElse(function () {
-        console.log("(10)  else SP");
-        throw new Error("todo");
-    })
+                })
+                .addElse()
+                .endIf();
+        }).addElseIf(function () { return numplayers > 1; }, function () {
+            console.log("(10)  numplayers > 1");
+            throw new Error("todo");
+        }).addElse(function () {
+            console.log("(10)  else SP");
+            throw new Error("todo");
+        })
         .endIf()
         .add(function () {
             console.log("(70) todo"); // todo
@@ -179,11 +183,11 @@ function logo() {
             ps[myconnectindex].palette = palette;
             palto(0, 0, 0, 0);
             clearView(0);
-        })
-        .flush();
+        });
 }
 
 //7655
+
 function loadTmb() {
     var tmb = new Uint8Array(8000);
 
@@ -202,6 +206,7 @@ function loadTmb() {
 }
 
 // 7695
+
 function compilecons() {
     var userconfilename = confilename;
 
@@ -275,6 +280,7 @@ function Startup() {
 
 
 //7803
+
 function getNames() {
     var i, j, l;
 
@@ -302,11 +308,13 @@ function getNames() {
 }
 
 // 7977
+
 function findGRPToUse() {
     return "DUKE3D.GRP";
 }
 
 // 8082
+
 function load_duke3d_groupfile() {
     var groupfilefullpath = findGRPToUse();
 
@@ -314,10 +322,12 @@ function load_duke3d_groupfile() {
 }
 
 /// 8100
+var q = new Queue();
+
 function main(argc, argv) {
     console.log("*** Chocolate DukeNukem3D JavaScript v" + CHOCOLATE_DUKE_REV_X + "." + CHOCOLATE_DUKE_REV_DOT_Y + " ***");
 
-    ud.multimode = 1;  // xduke: must be done before checkcommandline or that will prevent Fakeplayer and AI
+    ud.multimode = 1; // xduke: must be done before checkcommandline or that will prevent Fakeplayer and AI
 
     if (!load_duke3d_groupfile()) {
         throw new Error("Could not initialize any original BASE duke3d*.grp file\n" +
@@ -395,40 +405,79 @@ function main(argc, argv) {
     // MAIN_LOOP_RESTART:
 
     // if game is loaded without /V or /L cmd arguments.{
-    if (ud.warp_on === 0) {
-        if (numplayers > 1 && boardfilename[0] != 0) //check if a user map is loaded and in multiplayer.
-        {
+    //if (ud.warp_on === 0) {
+    //    if (numplayers > 1 && boardfilename[0] != 0) //check if a user map is loaded and in multiplayer.
+    //    {
+    //        throw new Error("todo");
+    //    } else {
+    //        logo(); //play logo, (game must be started via menus).
+    //    }
+    //}
+    //else if (ud.warp_on == 1) {
+    //    throw new Error("todo");
+    //} else {
+    //    vscrn();
+    //}
+
+
+    q.addIf(function () {
+        return ud.warp_on == 0;
+    }, function () {
+        q.setPositionAtStart()
+            .addIf(function () { return numplayers > 1 && boardfilename; },
+                function () {
+                    throw new Error("todo");
+                }).addElse(function () {
+                    logo();
+                })
+            .endIf();
+
+    }).addElseIf(function () {
+        return ud.warp_on === 1;
+    }, function () {
+        throw new Error("todo");
+    })
+        .addElse(function () {
+            vscrn();
+        })
+        .endIf()
+        .addWhile(function () {
+            return ud.warp_on == 0 && isPlayingBack;
+        }, function () {
+            Game.playBack();
+            //console.log("Demo loop");
+        })
+        .add(function () {
+            console.log("EO demo loop");
             throw new Error("todo");
-        } else {
-            logo(); //play logo, (game must be started via menus).
-        }
-    }
-    else if (ud.warp_on == 1) {
-        throw new Error("todo");
-    } else {
-        vscrn();
-    }
+            //if (just played back)
+            //FX_StopAllSounds();
+            //clearsoundlocks();
+            //nomorelogohack = 1;
+            //goto MAIN_LOOP_RESTART;
+        })
+        .add(function () {
+            ud.warp_on = 0;
+            console.log("Start game loop");
+            q.setPositionAtStart()
+                .addWhile(function () {
+                    return !(ps[myconnectindex].gm & MODE_END);
+                }, function () {
+                    throw new Error("todo");
+                });
+        })
+        .flush();
+    // don't put code outside async loop
+}
 
-
-    if (ud.warp_on == 0 && playback()) {
-        //FX_StopAllSounds();
-        //clearsoundlocks();
-        //nomorelogohack = 1;
-        throw new Error("todo");
-        //goto MAIN_LOOP_RESTART;
-    }
-
-    ud.warp_on = 0;
-
+var isPlayingBack = true; // set to false later to simulate returning 0
+Game.playBack = function () {
+    q.setPositionAtStart();
     //throw new Error("todo");
-    console.warn("todo");
-}
-
-function playback() {
-    throw new Error("todo");
-}
+};
 
 //10434
+
 function setupGameButtons() {
     console.log("todo setupGameButtons");
 }

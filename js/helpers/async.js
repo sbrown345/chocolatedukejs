@@ -37,7 +37,7 @@ Queue.prototype = {
         return this;
     },
 
-    addWhile: function (testFn, loopFn) {
+    addWhile: function (testFn, loopFn, notFirstTime) {
         //console.info("() addWhile");
         
         var that = this;
@@ -47,9 +47,13 @@ Queue.prototype = {
             //console.log("() while: ", testResult);
             if (testResult) {
                 loopFn();
-                that.addWhile(testFn, loopFn);
+
+                that.addWhile(testFn, loopFn, true);
+            } else {
+                // todo: go to next frame because it's false... (same goes for others?)
             }
         };
+        
         return this.add(newFn);
     },
 
@@ -78,10 +82,12 @@ Queue.prototype = {
         return this.add(function () {
             /* else if */
             //console.log('addElseIf RUN');
-            var result = testFn();
-            if (that.allCurrentBranchResultsAreFalse() && result) {
-                //console.log('%c addElseIf OK ', 'font-weight:bold; color: green');
-                that.insertAtStart(fn);
+            if (that.allCurrentBranchResultsAreFalse()) {
+                var result = testFn();
+                if (result) {
+                    //console.log('%c addElseIf OK ', 'font-weight:bold; color: green');
+                    that.insertAtStart(fn);
+                }
             }
             that._branches[0].push(result);
         });
