@@ -2,6 +2,7 @@
 
 var preMap = {};
 
+//990
 preMap.newGame = function (vn, ln, sk) {
     var p = ps[0];
     var i;
@@ -109,7 +110,7 @@ preMap.doFrontScreens = function () {
         ps[myconnectindex].palette = palette;
         palto(0, 0, 0, 0);
         rotateSprite(320 << 15, 200 << 15, 65536, 0, LOADSCREEN, 0, 0, 2 + 8 + 64, 0, 0, xdim - 1, ydim - 1);
-        //menuText(160, 105, 0, 0, "LOADING...");
+        menutext(160, 105, 0, 0, "LOADING...");
         nextpage();
         
     }
@@ -148,8 +149,21 @@ preMap.enterLevel = function (g) {
 
     i = ud.screen_size;
     preMap.doFrontScreens();
-    vscrn();
-    ud.screen_size = i;
+    
+
+
+
+
+
+
+
+
+
+
+
+    // TODO!!!!!!!!!
+    //vscrn();
+    //ud.screen_size = i;
 
     debugger;
 };

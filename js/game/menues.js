@@ -7,7 +7,123 @@ var probey = 0, lastprobey = 0, last_menu, globalskillsound = -1;
 //var  menuname[256][17];
 
 function menutext(x, y, s, p, t) {
-    
+    var i, ac, centre;
+
+    var letter, letterCh;
+    y -= 12;
+
+    i = centre = 0;
+
+    if (x === (320 >> 1)) {
+        for (i = 0; i < t.length; i++) {
+            letter = t[i];
+            letterCh = t.charCodeAt(i);
+            if (letter === ' ') {
+                centre += 5;
+                i++;
+                continue;
+            }
+            ac = 0;
+            if (letterCh >= '0'.charCodeAt(0) && letterCh <= '9'.charCodeAt(0)) {
+                ac = letterCh - '0'.charCodeAt(0) + BIGALPHANUM - 10;
+            } else if (letterCh >= 'a'.charCodeAt(0) && letterCh <= 'z'.charCodeAt(0)) {
+                ac = (letter.toUpperCase().charCodeAt(0)) - 'A'.charCodeAt(0) + BIGALPHANUM;
+            } else if (letterCh >= 'A'.charCodeAt(0) && letterCh <= 'Z'.charCodeAt(0)) {
+                ac = letterCh - 'A'.charCodeAt(0) + BIGALPHANUM;
+            } else {
+                switch (letter) {
+                    case '-':
+                        ac = BIGALPHANUM - 11;
+                        break;
+                    case '.':
+                        ac = BIGPERIOD;
+                        break;
+                    case '\'':
+                        ac = BIGAPPOS;
+                        break;
+                    case ',':
+                        ac = BIGCOMMA;
+                        break;
+                    case '!':
+                        ac = BIGX;
+                        break;
+                    case '?':
+                        ac = BIGQ;
+                        break;
+                    case ';':
+                        ac = BIGSEMI;
+                        break;
+                    case ':':
+                        ac = BIGSEMI;
+                        break;
+                    default:
+                        centre += 5;
+                        i++;
+                        continue;
+                }
+            }
+
+            centre += tiles[ac].dim.width - 1;
+        }
+    }
+
+    if (centre) {
+        x = (320 - centre - 10) >> 1;
+    }
+
+    for (i = 0; i < t.length; i++) {
+        letter = t[i];
+        letterCh = t.charCodeAt(i);
+        if (letter === ' ') {
+            x += 5;
+            i++;
+            continue;
+        }
+        ac = 0;
+        if (letterCh >= '0'.charCodeAt(0) && letterCh <= '9'.charCodeAt(0)) {
+            ac = letterCh - '0'.charCodeAt(0) + BIGALPHANUM - 10;
+        } else if (letterCh >= 'a'.charCodeAt(0) && letterCh <= 'z'.charCodeAt(0)) {
+            ac = (letter.toUpperCase().charCodeAt(0)) - 'A'.charCodeAt(0) + BIGALPHANUM;
+        } else if (letterCh >= 'A'.charCodeAt(0) && letterCh <= 'Z'.charCodeAt(0)) {
+            ac = letterCh - 'A'.charCodeAt(0) + BIGALPHANUM;
+        } else {
+            switch (letter) {
+                case '-':
+                    ac = BIGALPHANUM - 11;
+                    break;
+                case '.':
+                    ac = BIGPERIOD;
+                    break;
+                case ',':
+                    ac = BIGCOMMA;
+                    break;
+                case '!':
+                    ac = BIGX;
+                    break;
+                case '\'':
+                    ac = BIGAPPOS;
+                    break;
+                case '?':
+                    ac = BIGQ;
+                    break;
+                case ';':
+                    ac = BIGSEMI;
+                    break;
+                case ':':
+                    ac = BIGCOLIN;
+                    break;
+                default:
+                    x += 5;
+                    i++;
+                    continue;
+            }
+        }
+        rotateSprite(x << 16, y << 16, 65536, 0, ac, s, p, 10 + 16, 0, 0, xdim - 1, ydim - 1);
+
+        x += tiles[ac].dim.width;
+    }
+
+    return x;
 }
 
 // 1208
@@ -97,7 +213,7 @@ function playanm(filename, t) {
     ototalclock = totalclock + 10;
 
     i = 1;
-    q.setPositionAtStart()
+    q.setPositionAtStart();
     q.addWhile(function () {
         return i++ < numframes;
     }, function () {

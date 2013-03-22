@@ -493,7 +493,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         xoff = 0;
         yoff = 0;
     } else {
-        throw new Error("todo");
+        xoff = ((tiles[picnum].animFlags >> 8) & 255) + (tileWidht >> 1);
+        yoff = ((tiles[picnum].animFlags >> 16) & 255) + (tileHeight >> 1);
     }
 
     if (dastat & 4) {
@@ -609,14 +610,14 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             yinc = divScale16(y2 - y1, x2 - x1);
             if (dax2 > dax1) {
                 yplc = y1 + mulscale16((dax1 << 16) + 65535 - x1, yinc);
-                if (dax1 != 0) {
-                    throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
+                if (typeof dax1 != "number") {
+                        throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
                 }
                 //qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
                 qinterpolatedown16short(uplc, dax2 - dax1, yplc, yinc);
             } else {
                 yplc = y2 + mulscale16((dax2 << 16) + 65535 - x2, yinc);
-                if (dax2 != 0) {
+                if (typeof dax2 != "number") {
                     throw new Error("need to set start pointer for array, note: (& dplc[dax2])");
                 }
                 //qinterpolatedown16short((int32_t * )( & dplc[dax2]), dax1 - dax2, yplc, yinc);

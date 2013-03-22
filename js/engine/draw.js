@@ -79,6 +79,10 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
 // 220
 var mach3_al = 0;
 
+//386
+var machmv;
+
+
 //410
 function setupvlineasm(i1) {
     mach3_al = (i1 & 0x1f);
@@ -111,3 +115,38 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
         }
     }
 }
+
+// 451
+function setupmvlineasm(i1) {
+    //Only keep 5 first bits
+    machmv = (i1 & 0x1f);
+}
+
+function (int32_t column, int32_t framebufferOffset)
+{
+    int i;
+    uint32_t temp;
+    uint32_t index = (framebufferOffset + ylookup[column]);
+    uint8_t  *dest = (uint8_t *)(-ylookup[column]);
+
+    do {
+
+        if (pixelsAllowed <= 0)
+            return;
+
+        for (i = 0; i < 4; i++)
+        {
+			
+            temp = (((uint32_t)vplce[i]) >> machmv);
+            temp = (((uint8_t *)(bufplce[i]))[temp]);
+            if (temp != 255)
+            {
+                if (pixelsAllowed-- > 0)
+                    dest[index+i] = palookupoffse[i][temp];
+            }
+            vplce[i] += vince[i];
+        }
+        dest += bytesperline;
+
+    } while (((uint32_t)dest - bytesperline) < ((uint32_t)dest));
+} 
