@@ -445,7 +445,7 @@ function kread(handle, buffer, leng) {
     openFile.cursor += leng;
 }
 
-function kreadUint8(handle) {
+function kread8(handle) {
     var openFile = openFiles[handle];
 
     if (!openFile.used) {

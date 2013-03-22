@@ -421,7 +421,7 @@ function main(argc, argv) {
     //else if (ud.warp_on == 1) {
     //    throw new Error("todo");
     //} else {
-    //    vscrn();
+    //    preMap.vscrn();
     //}
 
 
@@ -443,7 +443,7 @@ function main(argc, argv) {
         throw new Error("todo");
     })
         .addElse(function () {
-            vscrn();
+            preMap.vscrn();
         })
         .endIf()
         .addWhile(function () {
@@ -503,7 +503,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     }
 
     ud.reccnt = kread32(recfilep);
-    ver = kreadUint8(recfilep);
+    ver = kread8(recfilep);
 
     console.log("%s has version = %d", fname, ver);
 
@@ -511,17 +511,17 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 
     ud.playing_demo_rev = ver;
 
-    ud.volume_number = kreadUint8(recfilep);
-    ud.level_number = kreadUint8(recfilep);
-    ud.player_skill = kreadUint8(recfilep);
-    ud.m_coop = kreadUint8(recfilep);
-    ud.m_ffire = kreadUint8(recfilep);
-    ud.multimode = kreadUint8(recfilep);
-    ud.m_monsters_off = kreadUint8(recfilep);
-    ud.m_respawn_monsters = kreadUint8(recfilep);
-    ud.m_respawn_items = kreadUint8(recfilep);
-    ud.m_respawn_inventory = kreadUint8(recfilep);
-    ud.playerai = kreadUint8(recfilep);
+    ud.volume_number = kread8(recfilep);
+    ud.level_number = kread8(recfilep);
+    ud.player_skill = kread8(recfilep);
+    ud.m_coop = kread8(recfilep);
+    ud.m_ffire = kread8(recfilep);
+    ud.multimode = kread8(recfilep);
+    ud.m_monsters_off = kread8(recfilep);
+    ud.m_respawn_monsters = kread8(recfilep);
+    ud.m_respawn_items = kread8(recfilep);
+    ud.m_respawn_inventory = kread8(recfilep);
+    ud.playerai = kread8(recfilep);
     ud.user_name[0] = kreadText(recfilep, 32);
     // FIX_00034: Demos do not turn your run mode off anymore:
     kread32(recfilep); // dummy
@@ -532,7 +532,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     }
 
     for (var i = 0; i < ud.multimode; i++) {
-        ps[i].aim_mode = kreadUint8(recfilep);
+        ps[i].aim_mode = kread8(recfilep);
         
         // FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
         if (ver === BYTEVERSION) {

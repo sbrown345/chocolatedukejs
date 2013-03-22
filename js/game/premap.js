@@ -2,6 +2,58 @@
 
 var preMap = {};
 
+//357
+preMap.vscrn = function() {
+    var ss, x1, x2, y1, y2;
+
+    if (ud.screen_size < 0) {
+        ud.screen_size = 0;
+    } else if (ud.screen_size > 63) {
+        ud.screen_size = 64;
+    }
+
+    if (ud.screen_size == 0) {
+        flushperms();
+    }
+
+    ss = Math.max(ud.screen_size - 8, 0);
+
+    x1 = scale(ss, xdim, 160);
+    x2 = xdim - x1;
+
+    y1 = ss;
+    y2 = 200;
+    y1 += preMap.countFragBars();
+
+    if (ud.screen_size >= 8)
+        y2 -= (ss + 34);
+
+    y1 = scale(y1, ydim, 200);
+    y2 = scale(y2, ydim, 200);
+
+    setView(x1, y1, x2 - 1, y2 - 1);
+
+    pub = NUMPAGES;
+    pus = NUMPAGES;
+};
+
+//386
+preMap.countFragBars = function() {
+    var i, j, y = 0;
+    if (ud.screen_size > 0 && ud.coop != 1 && ud.multimode > 1) {
+        j = 0;
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
+            if (i > j) j = i;
+
+        if (j >= 1) y += 8;
+        if (j >= 4) y += 8;
+        if (j >= 8) y += 8;
+        if (j >= 12) y += 8;
+    }
+
+    return y;
+};
+
 //990
 preMap.newGame = function (vn, ln, sk) {
     var p = ps[0];
@@ -67,13 +119,13 @@ function genSpriteRemaps() {
     var lookpos;
     var numl;
     if (fp != -1) {
-        numl = kreadUint8(fp, 1);
+        numl = kread8(fp, 1);
     } else {
         throw new Error("ERROR: File 'LOOKUP.DAT' not found.");
     }
 
     for (var j = 0; j < numl; j++) {
-        lookpos = kreadUint8(fp);
+        lookpos = kread8(fp);
         kread(fp, tempbuf, 256);
         makepalookup(lookpos, tempbuf, 0, 0, 0, 1);
     }
@@ -112,10 +164,7 @@ preMap.doFrontScreens = function () {
         rotateSprite(320 << 15, 200 << 15, 65536, 0, LOADSCREEN, 0, 0, 2 + 8 + 64, 0, 0, xdim - 1, ydim - 1);
         menutext(160, 105, 0, 0, "LOADING...");
         nextpage();
-        
     }
-
-    debugger;
 };
 
 //1451
@@ -148,22 +197,27 @@ preMap.enterLevel = function (g) {
     FX.setReverb(0);
 
     i = ud.screen_size;
+    ud.screen_size = 0;
     preMap.doFrontScreens();
-    
+    preMap.vscrn();
+    ud.screen_size = i;
 
+    if (!VOLUMEONE()) {
+        if (boardfilename && ud.m_level_number == 7 && ud.m_volume_number == 0) {
+            throw new Error("todo");
+        } else {
+            //fulllevelfilename = getGameDir() + "\\" + level_file_names[(ud.volume_number * 11) + ud.level_number];
+            // todo SafeFileExists??? - it checks in game dir first??
+            
+            fulllevelfilename = level_file_names[(ud.volume_number * 11) + ud.level_number];
 
-
-
-
-
-
-
-
-
-
-    // TODO!!!!!!!!!
-    //vscrn();
-    //ud.screen_size = i;
+            if (Engine.loadBoard(fulllevelfilename, ps[0].posx, ps[0].posy, ps[0].posz, ps[0].ang, ps[0].cursectnum) == -1) {
+                throw new Error("Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found! Not using the right grp file?");
+            }
+        }
+    } else {
+        throw new Error("todo: test with shareware grp?");
+    }
 
     debugger;
 };

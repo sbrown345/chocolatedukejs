@@ -1,5 +1,7 @@
 ﻿'use strict';
 
+var Engine = {};
+
 //int32_t stereowidth = 23040, stereopixelwidth = 28, ostereopixelwidth = -1;
 var stereomode = 0, visualpage, activepage, whiteband, blackband;
 //uint8_t  oa1, o3c2, ortca, ortcb, overtbits, laststereoint;
@@ -22,6 +24,7 @@ var curbrightness = 0;
 
 var picsiz = new Uint8Array(MAXTILES), tilefilenum = new Uint8Array(MAXTILES);
 var lastageclock = 0;
+var mapversion = 0;
 var tilefileoffs = new Int32Array(MAXTILES);
 
 var artsize = 0, cachesize = 0;
@@ -69,7 +72,7 @@ var VEC_X = 0, VEC_Y = 1;
 var VEC_COL = 0, VEC_DIST = 1;
 // This is the structure emitted for each wall that is potentially visible.
 // A stack of those is populated when the sectors are scanned.
-function Wall() {
+function PvWall() {
     this.cameraSpaceCoo = [new Int32Array(2), new Int32Array(2)]; //Camera space coordinates of the wall endpoints. Access with vector_index_e.
     this.sectorId = 0; //The index of the sector this wall belongs to in the map database.
     this.worldWallId = 0; //The index of the wall in the map database.
@@ -77,7 +80,7 @@ function Wall() {
 }
 
 // Potentially Visible walls are stored in this stack.
-var pvWalls = structArray(Wall, MAXWALLSB);
+var pvWalls = structArray(PvWall, MAXWALLSB);
 
 
 
@@ -200,7 +203,7 @@ var searchsector, searchwall, searchstat;     /* search output */
 var numtilefiles, artfil = -1, artfilnum, artfilplc;
 
 
-function initKSqrt() {
+Engine.initKSqrt = function () {
     var i, j, k;
     j = 1;
     k = 0;
@@ -216,18 +219,144 @@ function initKSqrt() {
             shLookup[i + 4096] = ((k + 6) << 1) + ((10 - (k + 6)) << 8);
         }
     }
-}
+};
 
 //658
-function getpalookup(davis, dashade) {
-    return (Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1));
-}
+Engine.getpalookup = function (davis, dashade) {
+    return Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1);
+};
+
+Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectnum) {
+    var x = 0;
+    var fil, i, numsprites;
+    var sect;
+    var s;
+    var w;
+
+    // FIX_00058: Save/load game crash in both single and multiplayer
+    // We have to reset those arrays since the same
+    // arrays are used as temporary space in the
+    // compilecons() function like "label = (uint8_t  *)&sprite[0];"
+    // to save memory space I guess.
+    // Not reseting the array will leave dumps fooling
+    // the function saveplayer(), eg at if(actorscrptr[PN] == 0)
+    // where PN is sprite[i].picnum was beyong actorscrptr[] size)
+
+    if ((fil = kopen4load(filename, false)) === -1) {
+        mapversion = 7;
+        return -1;
+    }
+
+    mapversion = kread32(fil);
+    if (mapversion !== 7) {
+        return -1;
+    }
+
+    Engine.initSpriteLists();
+
+
+    daposx = kread32(fil);
+    daposy = kread32(fil);
+    daposz = kread32(fil);
+    daang = kread16(fil);
+    dacursectnum = kread16(fil);
+    numsectors = kread16(fil);
+
+    for (x = 0; x < numsectors; x++) {
+        sect = sector[x];
+        sect.wallptr = kread16(fil);
+        sect.wallnum = kread16(fil);
+        sect.ceilingz = kread32(fil);
+        sect.floorz = kread32(fil);
+        sect.ceilingstat = kread16(fil);
+        sect.floorstat = kread16(fil);
+        sect.ceilingpicnum = kread16(fil);
+        sect.ceilingheinum = kread16(fil);
+        sect.ceilingshade = kread8(fil);
+        sect.ceilingpal = kread8(fil);
+        sect.ceilingxpanning = kread8(fil);
+        sect.ceilingypanning = kread8(fil);
+        sect.floorpicnum = kread16(fil);
+        sect.floorheinum = kread16(fil);
+        sect.floorshade = kread8(fil);
+        sect.floorpal = kread8(fil);
+        sect.floorxpanning = kread8(fil);
+        sect.floorypanning = kread8(fil);
+        sect.visibility = kread8(fil);
+        sect.filler = kread8(fil);
+        sect.lotag = kread16(fil);
+        sect.hitag = kread16(fil);
+        sect.extra = kread16(fil);
+    }
+
+    numwalls = kread16(fil);
+    for (x = 0 ; x < numwalls; x++) {
+        w = wall[x];
+        w.x = kread32(fil);
+        w.y = kread32(fil);
+        w.point2 = kread16(fil);
+        w.nextwall = kread16(fil);
+        w.nextsector = kread16(fil);
+        w.cstat = kread16(fil);
+        w.picnum = kread16(fil);
+        w.overpicnum = kread16(fil);
+        w.shade = kread8(fil);
+        w.pal = kread8(fil);
+        w.xrepeat = kread8(fil);
+        w.yrepeat = kread8(fil);
+        w.xpanning = kread8(fil);
+        w.ypanning = kread8(fil);
+        w.lotag = kread16(fil);
+        w.hitag = kread16(fil);
+        w.extra = kread16(fil);
+    }
+
+    numsprites = kread16(fil);
+    for (x = 0; x < numsprites; x++) {
+        s = sprite[x];
+        s.x = kread32(fil);
+        s.y = kread32(fil);
+        s.z = kread32(fil);
+        s.cstat = kread16(fil);
+        s.picnum = kread16(fil);
+        s.shade = kread8(fil);
+        s.pal = kread8(fil);
+        s.clipdist = kread8(fil);
+        s.filler = kread8(fil);
+        s.xrepeat = kread8(fil);
+        s.yrepeat = kread8(fil);
+        s.xoffset = kread8(fil);
+        s.yoffset = kread8(fil);
+        s.sectnum = kread16(fil);
+        s.statnum = kread16(fil);
+        s.ang = kread16(fil);
+        s.owner = kread16(fil);
+        s.xvel = kread16(fil);
+        s.yvel = kread16(fil);
+        s.zvel = kread16(fil);
+        s.lotag = kread16(fil);
+        s.hitag = kread16(fil);
+        s.extra = kread16(fil);
+    }
+
+    for (i = 0; i < numsprites; i++) {
+        Engine.insertSprite(sprite[i].sectnum, sprite[i].statnum);
+    }
+    
+    /* Must be after loading sectors, etc! */
+    updatesector(daposx, daposy, dacursectnum);
+    
+
+    kclose(fil);
+
+    debugger;
+};
 
 //3488
-function loadTables() {
+Engine.loadTables = function () {
     var i, file;
     if (!tablesLoaded) {
-        initKSqrt();
+        Engine.initKSqrt();
 
         for (i = 0; i < 2048; i++) {
             recipTable[i] = divScale30(2048, i + 2048);
@@ -260,9 +389,10 @@ function loadTables() {
 
         tablesLoaded = true;
     }
-}
+};
 
-function initFastColorLookup(rScale, gScale, bScale) {
+//3519
+Engine.initFastColorLookup = function (rScale, gScale, bScale) {
     var i, j, x, y, z;
 
     j = 0;
@@ -296,8 +426,9 @@ function initFastColorLookup(rScale, gScale, bScale) {
     i = colscan[13];
     colscan[13] = colscan[26];
     colscan[26] = i;
-}
+};
 
+//3558
 function loadPalette() {
     var file;
 
@@ -324,7 +455,7 @@ function loadPalette() {
 
     kclose(file);
 
-    initFastColorLookup(30, 59, 11);
+    Engine.initFastColorLookup(30, 59, 11);
 
     paletteloaded = true;
 }
@@ -338,7 +469,7 @@ function setGameMode(screenMode, screenWidth, screenHeight) {
 function initEngine() {
     var i;
 
-    loadTables();
+    Engine.loadTables();
 
     pskyoff[0] = 0;
     pskybits = 0;
@@ -632,7 +763,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     setgotpic(picnum);
     bufplc = new PointerHelper(tiles[picnum].data);
 
-    palookupoffs = palookup[dapalnum] + (getpalookup(0, dashade) << 8);
+    palookupoffs = palookup[dapalnum] + (Engine.getpalookup(0, dashade) << 8);
 
     i = divScale32(1, z);
     xv = mulscale14(sinang, i);
@@ -681,7 +812,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             } else {
                 setupmvlineasm(24);
             }
-            
+
             by <<= 8;
             yv <<= 8;
             yv2 <<= 8;
@@ -689,106 +820,98 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs;
             vince[0] = vince[1] = vince[2] = vince[3] = yv;
 
-            for(x=x1; x<x2; x+=4)
-            {
+            for (x = x1; x < x2; x += 4) {
                 bad = 15;
-                xend = Math.min(x2-x,4);
-                for(xx=0; xx<xend; xx++)
-                {
+                xend = Math.min(x2 - x, 4);
+                for (xx = 0; xx < xend; xx++) {
                     bx += xv2;
 
-                    y1 = uplc[x+xx];
-                    y2 = dplc[x+xx];
-                    if ((dastat&8) == 0)
-                    {
-                        if (startumost[x+xx] > y1) y1 = startumost[x+xx];
-                        if (startdmost[x+xx] < y2) y2 = startdmost[x+xx];
+                    y1 = uplc[x + xx];
+                    y2 = dplc[x + xx];
+                    if ((dastat & 8) == 0) {
+                        if (startumost[x + xx] > y1) y1 = startumost[x + xx];
+                        if (startdmost[x + xx] < y2) y2 = startdmost[x + xx];
                     }
                     if (y2 <= y1) continue;
 
-                    by += yv*(y1-oy);
+                    by += yv * (y1 - oy);
                     oy = y1;
 
                     bufplce[xx] = (bx >> 16) * tileHeight + bufplc.position;
                     vplce[xx] = by;
                     y1ve[xx] = y1;
-                    y2ve[xx] = y2-1;
+                    y2ve[xx] = y2 - 1;
                     bad &= ~pow2char[xx];
                 }
 
                 p = frameplace;
                 p.position = x; // could be dodgy sharing this position?
-                
+
                 //if (ud.playing_demo_rev == 117) {
                 //    updateCanvas();
                 //    var img = document.createElement("img");
                 //    img.src = surface.toDataURL("image/png");
                 //    document.getElementById("canvasDebug").appendChild(img);
                 //}
-                
 
                 u4 = Math.max(Math.max(y1ve[0], y1ve[1]), Math.max(y1ve[2], y1ve[3]));
-                d4 = Math.min(Math.min(y2ve[0], y2ve[1]),Math.min(y2ve[2],y2ve[3]));
+                d4 = Math.min(Math.min(y2ve[0], y2ve[1]), Math.min(y2ve[2], y2ve[3]));
 
-                if (dastat&64)
-                {
-                    if ((bad != 0) || (u4 >= d4))
-                    {
-                        if (!(bad&1)) 
-                            prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
-                        if (!(bad&2)) 
-                            prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
-                        if (!(bad&4)) 
-                            prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
-                        if (!(bad&8)) 
-                            prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                if (dastat & 64) {
+                    if ((bad != 0) || (u4 >= d4)) {
+                        if (!(bad & 1))
+                            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
+                        if (!(bad & 2))
+                            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
+                        if (!(bad & 4))
+                            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
+                        if (!(bad & 8))
+                            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
                         continue;
                     }
 
-                    if (u4 > y1ve[0]) 
-                        vplce[0] = prevlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
-                    if (u4 > y1ve[1]) 
-                        vplce[1] = prevlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
-                    if (u4 > y1ve[2]) 
-                        vplce[2] = prevlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
-                    if (u4 > y1ve[3]) 
-                        vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                    if (u4 > y1ve[0])
+                        vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
+                    if (u4 > y1ve[1])
+                        vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
+                    if (u4 > y1ve[2])
+                        vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
+                    if (u4 > y1ve[3])
+                        vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
 
                     if (d4 >= u4) vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
 
-                    i = p.position+ylookup[d4+1];
-                    if (y2ve[0] > d4) 
-                        prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
-                    if (y2ve[1] > d4) 
-                        prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
-                    if (y2ve[2] > d4) 
-                        prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
-                    if (y2ve[3] > d4) 
-                        prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+                    i = p.position + ylookup[d4 + 1];
+                    if (y2ve[0] > d4)
+                        prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], bufplce[0], i + 0);
+                    if (y2ve[1] > d4)
+                        prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], bufplce[1], i + 1);
+                    if (y2ve[2] > d4)
+                        prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], bufplce[2], i + 2);
+                    if (y2ve[3] > d4)
+                        prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], bufplce[3], i + 3);
                 }
-                else
-                {
-                    if ((bad != 0) || (u4 >= d4))
-                    {
-                        if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplc,bufplce[0],ylookup[y1ve[0]]+0,p);
-                        if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplc,bufplce[1],ylookup[y1ve[1]]+1,p);
-                        if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplc,bufplce[2],ylookup[y1ve[2]]+2,p);
-                        if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplc,bufplce[3],ylookup[y1ve[3]]+3,p);
+                else {
+                    if ((bad != 0) || (u4 >= d4)) {
+                        if (!(bad & 1)) mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], bufplc, bufplce[0], ylookup[y1ve[0]] + 0, p);
+                        if (!(bad & 2)) mvlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], bufplc, bufplce[1], ylookup[y1ve[1]] + 1, p);
+                        if (!(bad & 4)) mvlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], bufplc, bufplce[2], ylookup[y1ve[2]] + 2, p);
+                        if (!(bad & 8)) mvlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], bufplc, bufplce[3], ylookup[y1ve[3]] + 3, p);
                         continue;
                     }
 
-                    if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
-                    if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
-                    if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
-                    if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                    if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
+                    if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
+                    if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
+                    if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
 
                     if (d4 >= u4) mvlineasm4(d4 - u4 + 1, bufplc, ylookup[u4] + p.position, p);
 
-                    i = p.position+ylookup[d4+1];
-                    if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
-                    if (y2ve[1] > d4) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
-                    if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
-                    if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+                    i = p.position + ylookup[d4 + 1];
+                    if (y2ve[0] > d4) mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], bufplce[0], i + 0);
+                    if (y2ve[1] > d4) mvlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], bufplce[1], i + 1);
+                    if (y2ve[2] > d4) mvlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], bufplce[2], i + 2);
+                    if (y2ve[3] > d4) mvlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], bufplce[3], i + 3);
                 }
 
                 faketimerhandler();
@@ -807,176 +930,157 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             else {
                 setuprmhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
             }
-            
+
             y1 = uplc[x1];
-            if (((dastat&8) == 0) && (startumost[x1] > y1)) y1 = startumost[x1];
+            if (((dastat & 8) == 0) && (startumost[x1] > y1)) y1 = startumost[x1];
             y2 = y1;
-            for(x=x1; x<x2; x++)
-            {
-                ny1 = uplc[x]-1;
+            for (x = x1; x < x2; x++) {
+                ny1 = uplc[x] - 1;
                 ny2 = dplc[x];
-                if ((dastat&8) == 0)
-                {
-                    if (startumost[x]-1 > ny1) ny1 = startumost[x]-1;
+                if ((dastat & 8) == 0) {
+                    if (startumost[x] - 1 > ny1) ny1 = startumost[x] - 1;
                     if (startdmost[x] < ny2) ny2 = startdmost[x];
                 }
 
-                if (ny1 < ny2-1)
-                {
-                    if (ny1 >= y2)
-                    {
-                        while (y1 < y2-1)
-                        {
+                if (ny1 < ny2 - 1) {
+                    if (ny1 >= y2) {
+                        while (y1 < y2 - 1) {
                             y1++;
-                            if ((y1&31) == 0) faketimerhandler();
+                            if ((y1 & 31) == 0) faketimerhandler();
 
                             /* x,y1 */
-                            bx += xv*(y1-oy);
-                            by += yv*(y1-oy);
+                            bx += xv * (y1 - oy);
+                            by += yv * (y1 - oy);
                             oy = y1;
-                            if (dastat&64) {
+                            if (dastat & 64) {
                                 if (qlinemode)
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y1]+x,frameplace);
-                            else
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                                    rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x, frameplace);
+                                else
+                                    rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                             } else
-                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                                rmhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                         }
                         y1 = ny1;
                     }
-                    else
-                    {
-                        while (y1 < ny1)
-                        {
+                    else {
+                        while (y1 < ny1) {
                             y1++;
-                            if ((y1&31) == 0) faketimerhandler();
+                            if ((y1 & 31) == 0) faketimerhandler();
 
                             /* x,y1 */
-                            bx += xv*(y1-oy);
-                            by += yv*(y1-oy);
+                            bx += xv * (y1 - oy);
+                            by += yv * (y1 - oy);
                             oy = y1;
-                            if (dastat&64) {
+                            if (dastat & 64) {
                                 if (qlinemode)
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0,by<<16,ylookup[y1]+x,frameplace);
-                            else
-                                    rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                                    rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x, frameplace);
+                                else
+                                    rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                             } else
-                                rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                                rmhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                         }
                         while (y1 > ny1) lastx[y1--] = x;
                     }
-                    while (y2 > ny2)
-                    {
+                    while (y2 > ny2) {
                         y2--;
-                        if ((y2&31) == 0) faketimerhandler();
+                        if ((y2 & 31) == 0) faketimerhandler();
 
                         /* x,y2 */
-                        bx += xv*(y2-oy);
-                        by += yv*(y2-oy);
+                        bx += xv * (y2 - oy);
+                        by += yv * (y2 - oy);
                         oy = y2;
-                        if (dastat&64) {
+                        if (dastat & 64) {
                             if (qlinemode)
-                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y2]+x,frameplace);
-                        else
-                                rhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y2]+x,frameplace);
+                                rhlineasm4(x - lastx[y2], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y2] + x, frameplace);
+                            else
+                                rhlineasm4(x - lastx[y2], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y2] + x, frameplace);
                         } else
-                            rmhlineasm4(x-lastx[y2],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y2]+x,frameplace);
+                            rmhlineasm4(x - lastx[y2], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y2] + x, frameplace);
                     }
                     while (y2 < ny2) lastx[y2++] = x;
                 }
-                else
-                {
-                    while (y1 < y2-1)
-                    {
+                else {
+                    while (y1 < y2 - 1) {
                         y1++;
-                        if ((y1&31) == 0) faketimerhandler();
+                        if ((y1 & 31) == 0) faketimerhandler();
 
                         /* x,y1 */
-                        bx += xv*(y1-oy);
-                        by += yv*(y1-oy);
+                        bx += xv * (y1 - oy);
+                        by += yv * (y1 - oy);
                         oy = y1;
-                        if (dastat&64)
-                        {
+                        if (dastat & 64) {
                             if (qlinemode)
-                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,0    ,by<<16,ylookup[y1]+x,frameplace);
-                        else
-                                rhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                                rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x, frameplace);
+                            else
+                                rhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                         }
                         else
-                            rmhlineasm4(x-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x,frameplace);
+                            rmhlineasm4(x - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x, frameplace);
                     }
-                    if (x == x2-1)
-                    {
+                    if (x == x2 - 1) {
                         bx += xv2;
                         by += yv2;
                         break;
                     }
 
-                    y1 = uplc[x+1];
+                    y1 = uplc[x + 1];
 
-                    if (((dastat&8) == 0) && (startumost[x+1] > y1))
-                        y1 = startumost[x+1];
+                    if (((dastat & 8) == 0) && (startumost[x + 1] > y1))
+                        y1 = startumost[x + 1];
 
                     y2 = y1;
                 }
                 bx += xv2;
                 by += yv2;
             }
-            while (y1 < y2-1)
-            {
+            while (y1 < y2 - 1) {
                 y1++;
-                if ((y1&31) == 0) faketimerhandler();
+                if ((y1 & 31) == 0) faketimerhandler();
 
                 /* x2,y1 */
-                bx += xv*(y1-oy);
-                by += yv*(y1-oy);
+                bx += xv * (y1 - oy);
+                by += yv * (y1 - oy);
                 oy = y1;
-                if (dastat&64) {
+                if (dastat & 64) {
                     if (qlinemode) {
-                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x2,frameplace);
+                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, 0, by << 16, ylookup[y1] + x2, frameplace);
                     }
                     else
-                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16) ,bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2,frameplace);
+                        rhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2, frameplace);
                 } else
-                    rmhlineasm4(x2-lastx[y1],(bx>>16)*tileHeight+(by>>16),bufplc,0,bx<<16,by<<16,ylookup[y1]+x2,frameplace);
+                    rmhlineasm4(x2 - lastx[y1], (bx >> 16) * tileHeight + (by >> 16), bufplc, 0, bx << 16, by << 16, ylookup[y1] + x2, frameplace);
             }
         }
     }
-    else
-    {
-        if ((dastat&1) == 0)
-        {
-            if (dastat&64)
-                setupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv,0);
+    else {
+        if ((dastat & 1) == 0) {
+            if (dastat & 64)
+                setupspritevline(palookupoffs, (xv >> 16) * tileHeight, xv << 16, tileHeight, yv, 0);
             else
-                msetupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv,0);
+                msetupspritevline(palookupoffs, (xv >> 16) * tileHeight, xv << 16, tileHeight, yv, 0);
         }
-        else
-        {
-            tsetupspritevline(palookupoffs,(xv>>16)*tileHeight,xv<<16,tileHeight,yv);
+        else {
+            tsetupspritevline(palookupoffs, (xv >> 16) * tileHeight, xv << 16, tileHeight, yv);
 
-            if (dastat&32) 
+            if (dastat & 32)
                 settrans(TRANS_REVERSE);
-            else 
+            else
                 settrans(TRANS_NORMAL);
         }
 
-        for(x=x1; x<x2; x++)
-        {
+        for (x = x1; x < x2; x++) {
             bx += xv2;
             by += yv2;
 
             y1 = uplc[x];
             y2 = dplc[x];
-            if ((dastat&8) == 0)
-            {
+            if ((dastat & 8) == 0) {
                 if (startumost[x] > y1) y1 = startumost[x];
                 if (startdmost[x] < y2) y2 = startdmost[x];
             }
             if (y2 <= y1) continue;
 
-            switch(y1-oy)
-            {
+            switch (y1 - oy) {
                 case -1:
                     bx -= xv;
                     by -= yv;
@@ -990,34 +1094,206 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     oy = y1;
                     break;
                 default:
-                    bx += xv*(y1-oy);
-                    by += yv*(y1-oy);
+                    bx += xv * (y1 - oy);
+                    by += yv * (y1 - oy);
                     oy = y1;
                     break;
             }
 
             p = ylookup[y1] + x + frameplace.position;
 
-            if ((dastat&1) == 0)
-            {
-                if (dastat&64)
-                    spritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
-            else
-                    mspritevline(0,by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
+            if ((dastat & 1) == 0) {
+                if (dastat & 64)
+                    spritevline(0, by << 16, y2 - y1 + 1, bx << 16, (bx >> 16) * tileHeight + (by >> 16), bufplc, p);
+                else
+                    mspritevline(0, by << 16, y2 - y1 + 1, bx << 16, (bx >> 16) * tileHeight + (by >> 16), bufplc, p);
             }
-            else
-            {
-                DrawSpriteVerticalLine(by<<16,y2-y1+1,bx<<16,(bx>>16)*tileHeight+(by>>16),bufplc,p);
-                transarea += (y2-y1);
+            else {
+                DrawSpriteVerticalLine(by << 16, y2 - y1 + 1, bx << 16, (bx >> 16) * tileHeight + (by >> 16), bufplc, p);
+                transarea += (y2 - y1);
             }
             faketimerhandler();
         }
     }
 
-    if ((vidoption == 1) && (dastat&128) && (origbuffermode == 0))
-    {
+    if ((vidoption == 1) && (dastat & 128) && (origbuffermode == 0)) {
         buffermode = obuffermode;
     }
+}
+
+//5867
+Engine.initSpriteLists = function () {
+    var i;
+
+    for (i = 0; i < MAXSECTORS; i++) {
+        headspritesect[i] = -1;
+    }
+    headspritesect[MAXSECTORS] = 0;
+
+    for (i = 0; i < MAXSPRITES; i++) {
+        prevspritesect[i] = i - 1;
+        nextspritesect[i] = i + 1;
+        sprite[i].sectnum = MAXSECTORS;
+    }
+    prevspritesect[0] = -1;
+    nextspritesect[MAXSPRITES - 1] = -1;
+
+
+    for (i = 0; i < MAXSTATUS; i++)    /* Init doubly-linked sprite status lists */
+        headspritestat[i] = -1;
+    headspritestat[MAXSTATUS] = 0;
+    for (i = 0; i < MAXSPRITES; i++) {
+        prevspritestat[i] = i - 1;
+        nextspritestat[i] = i + 1;
+        sprite[i].statnum = MAXSTATUS;
+    }
+    prevspritestat[0] = -1;
+    nextspritestat[MAXSPRITES - 1] = -1;
+};
+
+//4541
+/*
+ FCS: Return true if the point (x,Y) is inside the sector sectnum.
+ Note that a sector is closed (but can be concave) so the answer is always 0 or 1.
+
+ Algorithm: This is an optimized raycasting inside polygon test:
+ http://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
+ The goal is to follow an ***horizontal*** ray passing by (x,y) and count how many
+ wall are being crossed.
+ If it is an odd number of time: (x,y) is inside the sector.
+ If it is an even nymber of time:(x,y) is outside the sector.
+ */
+
+function inside(x, y, sectnum) {
+    var wal;
+    var i, x1, y1, x2, y2;
+    var wallCrossed;
+
+    //Quick check if the sector ID is valid.
+    if ((sectnum < 0) || (sectnum >= numsectors)) {
+        return -1;
+    }
+
+    wallCrossed = 0;
+    var wallPos = sector[sectnum].wallptr;
+    i = sector[sectnum].wallnum;
+    do {
+        wal = wall[wallPos];
+        y1 = wal.y - y;
+        y2 = wall[wal.point2].y - y;
+
+        // Compare the sign of y1 and y2.
+        // If (y1^y2) < 0 : y1 and y2 have different sign bit:  y is between wal.y and wall[wal.point2].y.
+        // The goal is to not take into consideration any wall that is totally above or totally under the point [x,y].
+        if ((y1 ^ y2) < 0) {
+            x1 = wal.x - x;
+            x2 = wall[wal.point2].x - x;
+
+            //If (x1^x2) >= 0 x1 and x2 have identic sign bit: x is on the left or the right of both wal.x and wall[wal.point2].x.
+            if ((x1 ^ x2) >= 0) {
+                // If (x,y) is totally on the left or on the right, just count x1 (which indicate if we are on
+                // on the left or on the right.
+                wallCrossed ^= x1;
+            } else {
+                // This is the most complicated case: X is between x1 and x2, we need a fine grained test.
+                // We need to know exactly if it is on the left or on the right in order to know if the ray
+                // is crossing the wall or not,
+                // The sign of the Cross-Product can answer this case :) !
+                wallCrossed ^= (x1 * y2 - x2 * y1) ^ y2;
+            }
+
+            wallCrossed = wallCrossed >>> 0;
+        }
+
+        wallPos++;
+        i--;
+
+    } while (i);
+
+    //Just return the sign. If the position vector cut the sector walls an odd number of time
+    //it is inside. Otherwise (even) it is outside.
+    console.log("wallCrossed >> 31 = %i", (wallCrossed >>> 31));
+    return wallCrossed >>> 31; //todo in maths too?
+}
+
+//5899
+Engine.insertSprite = function(sectNum, statNum) {
+    Engine.insertSpriteStat(statNum);
+    return Engine.insertSpriteSect(sectNum);
+};
+
+Engine.insertSpriteSect = function (sectnum) {
+    var blanktouse;
+
+    if ((sectnum >= MAXSECTORS) || (headspritesect[MAXSECTORS] == -1))
+        return(-1);  /* list full */
+
+    blanktouse = headspritesect[MAXSECTORS];
+
+    headspritesect[MAXSECTORS] = nextspritesect[blanktouse];
+    if (headspritesect[MAXSECTORS] >= 0)
+        prevspritesect[headspritesect[MAXSECTORS]] = -1;
+
+    prevspritesect[blanktouse] = -1;
+    nextspritesect[blanktouse] = headspritesect[sectnum];
+    if (headspritesect[sectnum] >= 0)
+        prevspritesect[headspritesect[sectnum]] = blanktouse;
+    headspritesect[sectnum] = blanktouse;
+
+    sprite[blanktouse].sectnum = sectnum;
+
+    return(blanktouse);
+};
+
+Engine.insertSpriteStat = function (statnum) {
+    var blanktouse;
+
+    if ((statnum >= MAXSTATUS) || (headspritestat[MAXSTATUS] == -1))
+        return(-1);  /* list full */
+
+    blanktouse = headspritestat[MAXSTATUS];
+
+    headspritestat[MAXSTATUS] = nextspritestat[blanktouse];
+    if (headspritestat[MAXSTATUS] >= 0)
+        prevspritestat[headspritestat[MAXSTATUS]] = -1;
+
+    prevspritestat[blanktouse] = -1;
+    nextspritestat[blanktouse] = headspritestat[statnum];
+    if (headspritestat[statnum] >= 0)
+        prevspritestat[headspritestat[statnum]] = blanktouse;
+    headspritestat[statnum] = blanktouse;
+
+    sprite[blanktouse].statnum = statnum;
+
+    return(blanktouse);
+};
+
+//
+//7344
+/*
+ FCS:  x and y are the new position of the entity that has just moved:
+ lastKnownSector is an hint (the last known sectorID of the entity).
+
+ Thanks to the "hint", the algorithm check:
+ 1. Is (x,y) inside sectors[sectnum].
+ 2. Flood in sectnum portal and check again if (x,y) is inside.
+ 3. Do a linear search on sectors[sectnum] from 0 to numSectors.
+
+ Note: Inside uses cross_product and return as soon as the point switch
+ from one side to the other.
+ */
+function updatesector(x, y, lastKnownSector) {
+    var wal;
+    var i, j;
+
+    //First check the last sector where (old_x,old_y) was before being updated to (x,y)
+    if (inside(x,y,lastKnownSector) == 1)
+    {
+        //We found it and (x,y) is still in the same sector: nothing to update !
+        return;
+    }
+    
+    throw new Error("todo")
 }
 
 // 7978

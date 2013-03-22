@@ -1097,7 +1097,7 @@ function parseCommand(readFromGrp) {
                     break;
                 }
             }
-            levelFileName[j * 11 + k] = levelFileName; // todo: cannot set this
+            level_file_names[j * 11 + k] = levelFileName; // todo: cannot set this
 
             while (textptr[textptrIdx] == ' ') {
                 textptrIdx++;
