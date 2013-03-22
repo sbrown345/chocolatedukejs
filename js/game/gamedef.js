@@ -356,7 +356,7 @@ function transNumber() {
         return;
     }
 
-    script[scriptPtr] = parseInt(tempBufStr);
+    script[scriptPtr] = parseInt(tempBufStr, 10);
     //console.log("transNumber:", script[scriptPtr]);
     scriptPtr++;
 

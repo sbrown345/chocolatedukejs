@@ -323,7 +323,7 @@ function updateCanvas() {
             imageData = surfaceContext.getImageData(0, 0, ScreenWidth, ScreenHeight);
         }
 
-        var buf = new ArrayBuffer(imageData.data.length);
+        var buf = new ArrayBuffer(imageData.data.length); // creating new ones like this is faster than having them premade
         var buf8 = new Uint8ClampedArray(buf);
         var data = new Uint32Array(buf);
         

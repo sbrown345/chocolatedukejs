@@ -70,6 +70,6 @@ CvarDefs.DefaultFunction = function ($var) {
         return;
     }
 
-    binding.variable = parseInt(console.getArgv(0));
+    binding.variable = parseInt(console.getArgv(0), 10);
 };
 
