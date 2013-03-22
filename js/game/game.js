@@ -512,11 +512,11 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 
     ud.playing_demo_rev = ver;
 
-    ud.volume_number = kreadUint8(recfilep);
-    ud.level_number = kreadUint8(recfilep);
-    ud.player_skill = kreadUint8(recfilep);
-    ud.m_coop = kreadUint8(recfilep);
-    ud.m_ffire = kreadUint8(recfilep);
+    ud.volume_number = kread8(recfilep);
+    ud.level_number = kread8(recfilep);
+    ud.player_skill = kread8(recfilep);
+    ud.m_coop = kread8(recfilep);
+    ud.m_ffire = kread8(recfilep);
     ud.multimode = kread16(recfilep);
     ud.m_monsters_off = kread16(recfilep);
     ud.m_respawn_monsters = kread32(recfilep);
@@ -531,9 +531,9 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
         ud.m_level_number = 7;
         ud.m_volume_number = 0;
     }
-
+    debugger;
     for (var i = 0; i < ud.multimode; i++) {
-        ps[i].aim_mode = kreadUint8(recfilep);
+        ps[i].aim_mode = kread8(recfilep);
         
         // FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
         if (ver === BYTEVERSION) {
