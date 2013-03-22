@@ -376,7 +376,7 @@ function genSpriteRemaps() {
     } else {
         throw new Error("ERROR: File 'LOOKUP.DAT' not found.");
     }
-    debugger;
+    
     for (var j = 0; j < numl; j++) {
         lookpos = kread8(fp);
         kread(fp, tempbuf, 256);
