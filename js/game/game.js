@@ -531,7 +531,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
         ud.m_level_number = 7;
         ud.m_volume_number = 0;
     }
-    debugger;
+    
     for (var i = 0; i < ud.multimode; i++) {
         ps[i].aim_mode = kread8(recfilep);
         

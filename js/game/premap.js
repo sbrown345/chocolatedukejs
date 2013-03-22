@@ -223,7 +223,7 @@ preMap.preLevel = function (g) {
     }
     
     i = headspritestat[0];
-
+    
     while (i >= 0) {
         nexti = nextspritestat[i];
 
