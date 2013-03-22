@@ -1,5 +1,19 @@
 ﻿'use strict';
 
+var probey = 0, lastprobey = 0, last_menu, globalskillsound = -1;
+//var sh, onbar, buttonstat, deletespot;
+//var last_zero, last_fifty, last_threehundred = 0;
+//var fileselect = 1, menunamecnt;
+//var  menuname[256][17];
+
+function menutext(x, y, s, p, t) {
+    
+}
+
+// 1208
+var volnum, levnum, plrskl, numplr;
+var lastsavedpos = -1;
+
 // 4152
 function palto(r, g, b, e) {
     var i, tempArray = new Uint8Array(768);
@@ -13,6 +27,7 @@ function palto(r, g, b, e) {
     setBrightness(ud.brightness >> 2, tempArray);
 }
 
+//4490
 function logoanimsounds(fr) {
     switch (fr) {
         case 1:

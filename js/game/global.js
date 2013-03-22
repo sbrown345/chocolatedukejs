@@ -146,7 +146,7 @@ var killit_flag;
 var music_pointer;
 var actortype = new Uint8Array(MAXTILES);
 
-//uint8_t  display_mirror,typebuflen;
+var display_mirror = 0, typebuflen = 0;
 //char typebuf[41];
 
 var music_fn = [new Array(11), new Array(11), new Array(11), new Array(11)];

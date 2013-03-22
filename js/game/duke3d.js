@@ -30,6 +30,8 @@ function VOLUMEONE() {
 var mymembuf;
 
 function Player() {
+    this.ammo_amount = new Uint8Array(MAX_WEAPONS);
+    this.gotweapon = new Uint8Array(MAX_WEAPONS);
 }
 
 var NUMPAGES = 1;

@@ -400,8 +400,8 @@ function main(argc, argv) {
     // todo:   if(KB_KeyPressed( sc_Escape ) )  
     //gameexit(" ");
 
-    // todo: FX.StopAllSounds();
-    //clearsoundlocks();
+    FX.stopAllSounds();
+    clearsoundlocks();
 
     if (ud.warp_on > 1 && ud.multimode < 2) {
         throw new Error("todo");
@@ -456,8 +456,8 @@ function main(argc, argv) {
             console.log("EO demo loop");
             throw new Error("todo");
             //if (just played back)
-            //FX_StopAllSounds();
-            //clearsoundlocks();
+            FX.stopAllSounds();
+            clearsoundlocks();
             //nomorelogohack = 1;
             //goto MAIN_LOOP_RESTART;
         })
@@ -547,7 +547,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     /* ud.showweapons =  */ ud.pause_on /*= ud.auto_run */ = 0; // makes no sense to reset those 2 value!
 
     preMap.newGame(ud.volume_number, ud.level_number, ud.player_skill);
-    return 0;
+    return 1;
 };
 
 var isPlayingBack = true; // set to false later to simulate returning 0
@@ -575,6 +575,18 @@ Game.playBack = function () {
         foundDemo = Game.openDemoRead(Game.whichDemo);
     }
 
+
+    if (foundDemo === 0) {
+        throw new Error("todo");
+    } else {
+        ud.recstat = 2;
+        Game.whichDemo++;
+        if (Game.whichDemo === 10) {
+            Game.whichDemo = 1;
+        }
+        
+        preMap.enterLevel(MODE_DEMO);
+    }
 
     throw new Error("todo");
 };

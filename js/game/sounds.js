@@ -10,3 +10,7 @@ function playMusic(filename) {
 function sound() {
     // todo!
 }
+
+function clearsoundlocks() {
+    // todo!
+}
