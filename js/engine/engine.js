@@ -345,11 +345,17 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     
     /* Must be after loading sectors, etc! */
     updatesector(daposx, daposy, dacursectnum);
-    
 
     kclose(fil);
+    
+    // FIX_00009: Show map CRC and GRP file version of each player in case of Out Of Synch
 
-    debugger;
+    // todo:
+    //mapCRC = crc16(sector, numsectors * 40);
+    //mapCRC += crc16(sector, numsectors * 32);
+    //mapCRC += crc16(sector, numsectors * 44);
+
+    return 0;
 };
 
 //3488

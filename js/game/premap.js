@@ -54,6 +54,11 @@ preMap.countFragBars = function() {
     return y;
 };
 
+//670
+preMap.preLevel = function (g) {
+    debugger;
+};
+
 //990
 preMap.newGame = function (vn, ln, sk) {
     var p = ps[0];
@@ -218,6 +223,8 @@ preMap.enterLevel = function (g) {
     } else {
         throw new Error("todo: test with shareware grp?");
     }
+
+    preMap.preLevel(g);
 
     debugger;
 };
