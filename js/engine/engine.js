@@ -1125,7 +1125,11 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
     }
 
     if (((dastat & 128) == 0) || (numpages < 2) || (beforedrawrooms != 0)) {
+        console.time("doRotateSprite")
+        //console.profile("doRotateSprite")
         doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2);
+        //console.profileEnd("doRotateSprite")
+        console.timeEnd("doRotateSprite")
     }
 
     if ((dastat & 64) && (cx1 <= 0) && (cy1 <= 0) && (cx2 >= xdim - 1) && (cy2 >= ydim - 1) &&

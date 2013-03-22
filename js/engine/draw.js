@@ -30,7 +30,6 @@ function setuprhlineasm4(i1, i2, i3, i4, i5, i6) {
 }
 
 function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest) {
-    texture.position = texturePosition;
     dest.position = destPosition;
     if (arguments.length != 8) {
         throw new Error("todo: rhlineasm4 should have 8 arguments");
@@ -45,12 +44,13 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
     var ebp = dest.position - i1;
     var rmach6b = ebp - 1;
     var numPixels;
+    var destArray = dest.array;
+    var textureArray = texture.array;
 
     if (i1 <= 0) return;
 
-    numPixels = i1;
-    do {
-        i3 = ((i3 & 0xffffff00) | texture.getByte());
+    for (numPixels = i1; numPixels; numPixels--) {
+        i3 = (/*(i3 & 0xffffff00) |  not sure what this is? */textureArray[texturePosition]);
 
         i4 -= rmach_eax;
         i4 = i4 >>> 0;
@@ -59,20 +59,21 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
         i5 = i5 >>> 0;
 
         if (((i5 + rmach_ebx) >>> 0) < i5)
-            texture.position -= (rmach_ecx + 1);
+            texturePosition -= (rmach_ecx + 1);
         else
-            texture.position -= rmach_ecx;
+            texturePosition -= rmach_ecx;
 
         ebp &= rmach_esi;
-        i1 = (i1 & 0xffffff00) | i3 + rmach_edx; // pointer to palette e.g. testPallete[i3 + rmach_edx];
+        i1 = /*(i1 & 0xffffff00) | not sure what this is?  */ i3 + rmach_edx; // pointer to palette e.g. testPallete[i3 + rmach_edx];
 
-        if (pixelsAllowed-- > 0) {
-            dest.array[rmach6b + numPixels] = (i1 & 0xff);
-        }
+        //if (pixelsAllowed-- > 0) {
+        destArray[rmach6b + numPixels] = (i1 & 0xff);
+        //}
 
-        texture.position -= ebp;
-        numPixels--;
-    } while (numPixels);
+        texturePosition -= ebp;
+    }
+
+    texture.position = texturePosition;
 }
 
 // 220
@@ -84,7 +85,7 @@ function setupvlineasm(i1) {
 }
 
 //FCS This is used to fill the inside of a wall (so it draws VERTICAL column, always).
-function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
+function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
     if (!RENDER_DRAW_WALL_INSIDE)
         return;
 
@@ -92,25 +93,28 @@ function vlineasm4(columnIndex, bufplc, framebufferPosition, framebuffer) {
         throw new Error("todo: vlineasm4 should have 4 arguments");
     }
 
-    framebuffer.position += framebufferPosition;
+    frameBuffer.position += frameBufferPosition;
 
     var i;
     var temp;
 
-    var index = (framebuffer.position + ylookup[columnIndex]);
+    var index = (frameBuffer.position + ylookup[columnIndex]);
     var dest = -ylookup[columnIndex];
+    var frameBufferArray = frameBuffer.array;
+    var bufplcArray = bufplc.array;
+    var udf = undefined;
     do {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
-            temp = bufplc.array[bufplce[i] + temp] >>> 0; // get texture
+            temp = bufplcArray[bufplce[i] + temp] ; // get texture
 
-            if (pixelsAllowed-- > 0) {
+            //if (pixelsAllowed-- > 0) {
                 var val = palookup[palookupoffse[i] + temp];
-                framebuffer.array[dest + index + i] = val; // add texture to framebuffer
-            }
+                frameBufferArray[dest + index + i] = val; // add texture to framebuffer
+            //}
 
             vplce[i] += vince[i];
         }
         dest += bytesperline;
-    } while (typeof framebuffer.array[dest] !== "undefined");
+    } while (frameBufferArray[dest] !== udf);
 }
