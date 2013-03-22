@@ -102,19 +102,12 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
     var dest = -ylookup[columnIndex];
     var frameBufferArray = frameBuffer.array;
     var bufplcArray = bufplc.array;
-    var udf = undefined;
-    do {
+    for (var numBytesOnScreen = ScreenWidth * ScreenHeight; dest <= numBytesOnScreen; dest += bytesperline) {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
-            temp = bufplcArray[bufplce[i] + temp] ; // get texture
-
-            //if (pixelsAllowed-- > 0) {
-                var val = palookup[palookupoffse[i] + temp];
-                frameBufferArray[dest + index + i] = val; // add texture to framebuffer
-            //}
-
+            temp = bufplcArray[bufplce[i] + temp]; // get texture
+            frameBufferArray[dest + index + i] = palookup[palookupoffse[i] + temp]; // add texture to framebuffer
             vplce[i] += vince[i];
         }
-        dest += bytesperline;
-    } while (frameBufferArray[dest] !== udf);
+    }
 }
