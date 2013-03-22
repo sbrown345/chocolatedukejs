@@ -66,10 +66,10 @@ function clearbufbyte(buffer, start, end) {
     }
 }
 
-function qinterpolatedown16short(buffer, num, val, add) {
+function qinterpolatedown16short(buffer, bufferOffset, num, val, add) {
     // ...maybe the same person who provided this too?
     for (var i = 0; i < num; i++) {
-        buffer[i] = (val >> 16);
+        buffer[bufferOffset + i] = (val >> 16);
         //console.log("buffer[%i] = %i", i, buffer[i]);
         val += add;
     }

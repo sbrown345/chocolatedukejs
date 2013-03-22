@@ -610,18 +610,18 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             yinc = divScale16(y2 - y1, x2 - x1);
             if (dax2 > dax1) {
                 yplc = y1 + mulscale16((dax1 << 16) + 65535 - x1, yinc);
-                if (typeof dax1 != "number") {
-                        throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
-                }
-                //qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
-                qinterpolatedown16short(uplc, dax2 - dax1, yplc, yinc);
+                //if (typeof dax1 != 0) {
+                //        throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
+                //}
+                ////qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
+                qinterpolatedown16short(uplc, dax1, dax2 - dax1, yplc, yinc);
             } else {
                 yplc = y2 + mulscale16((dax2 << 16) + 65535 - x2, yinc);
-                if (typeof dax2 != "number") {
-                    throw new Error("need to set start pointer for array, note: (& dplc[dax2])");
-                }
-                //qinterpolatedown16short((int32_t * )( & dplc[dax2]), dax1 - dax2, yplc, yinc);
-                qinterpolatedown16short(dplc, dax1 - dax2, yplc, yinc);
+                //if (typeof dax2 != 0) {
+                //    throw new Error("need to set start pointer for array, note: (& dplc[dax2])");
+                //}
+                ////qinterpolatedown16short((int32_t * )( & dplc[dax2]), dax1 - dax2, yplc, yinc);
+                qinterpolatedown16short(dplc, dax2, dax1 - dax2, yplc, yinc);
             }
         }
         nextv = v;
@@ -747,9 +747,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[3]) 
                         vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
 
-                    if (d4 >= u4) {
-                        vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
-                    }
+                    if (d4 >= u4) vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
 
                     i = p.position+ylookup[d4+1];
                     if (y2ve[0] > d4) 
@@ -765,10 +763,10 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 {
                     if ((bad != 0) || (u4 >= d4))
                     {
-                        if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+p+0);
-                        if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+p+1);
-                        if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
-                        if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
+                        if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplc,bufplce[0],ylookup[y1ve[0]]+0,p);
+                        if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplc,bufplce[1],ylookup[y1ve[1]]+1,p);
+                        if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplc,bufplce[2],ylookup[y1ve[2]]+2,p);
+                        if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplc,bufplce[3],ylookup[y1ve[3]]+3,p);
                         continue;
                     }
 
@@ -777,7 +775,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+p+2);
                     if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+p+3);
 
-                    if (d4 >= u4) mvlineasm4(d4-u4+1,ylookup[u4]+p);
+                    if (d4 >= u4) mvlineasm4(d4 - u4 + 1, bufplc, ylookup[u4] + p.position, p);
 
                     i = p.position+ylookup[d4+1];
                     if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
