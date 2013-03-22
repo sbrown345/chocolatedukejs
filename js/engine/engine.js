@@ -272,18 +272,18 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
         sect.floorstat = kread16(fil);
         sect.ceilingpicnum = kread16(fil);
         sect.ceilingheinum = kread16(fil);
-        sect.ceilingshade = kread8(fil);
-        sect.ceilingpal = kread8(fil);
-        sect.ceilingxpanning = kread8(fil);
-        sect.ceilingypanning = kread8(fil);
+        sect.ceilingshade = kreadUint8(fil);
+        sect.ceilingpal = kreadUint8(fil);
+        sect.ceilingxpanning = kreadUint8(fil);
+        sect.ceilingypanning = kreadUint8(fil);
         sect.floorpicnum = kread16(fil);
         sect.floorheinum = kread16(fil);
-        sect.floorshade = kread8(fil);
-        sect.floorpal = kread8(fil);
-        sect.floorxpanning = kread8(fil);
-        sect.floorypanning = kread8(fil);
-        sect.visibility = kread8(fil);
-        sect.filler = kread8(fil);
+        sect.floorshade = kreadUint8(fil);
+        sect.floorpal = kreadUint8(fil);
+        sect.floorxpanning = kreadUint8(fil);
+        sect.floorypanning = kreadUint8(fil);
+        sect.visibility = kreadUint8(fil);
+        sect.filler = kreadUint8(fil);
         sect.lotag = kread16(fil);
         sect.hitag = kread16(fil);
         sect.extra = kread16(fil);
@@ -300,7 +300,7 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
         w.cstat = kread16(fil);
         w.picnum = kread16(fil);
         w.overpicnum = kread16(fil);
-        w.shade = kread8(fil);
+        w.shade = kreadUint8(fil);
         w.pal = kread8(fil);
         w.xrepeat = kread8(fil);
         w.yrepeat = kread8(fil);
@@ -319,14 +319,14 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
         s.z = kread32(fil);
         s.cstat = kread16(fil);
         s.picnum = kread16(fil);
-        s.shade = kread8(fil);
-        s.pal = kread8(fil);
-        s.clipdist = kread8(fil);
-        s.filler = kread8(fil);
-        s.xrepeat = kread8(fil);
-        s.yrepeat = kread8(fil);
-        s.xoffset = kread8(fil);
-        s.yoffset = kread8(fil);
+        s.shade = kreadUint8(fil);
+        s.pal = kreadUint8(fil);
+        s.clipdist = kreadUint8(fil);
+        s.filler = kreadUint8(fil);
+        s.xrepeat = kreadUint8(fil);
+        s.yrepeat = kreadUint8(fil);
+        s.xoffset = kreadUint8(fil);
+        s.yoffset = kreadUint8(fil);
         s.sectnum = kread16(fil);
         s.statnum = kread16(fil);
         s.ang = kread16(fil);
@@ -1127,36 +1127,6 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     }
 }
 
-//5867
-Engine.initSpriteLists = function () {
-    var i;
-
-    for (i = 0; i < MAXSECTORS; i++) {
-        headspritesect[i] = -1;
-    }
-    headspritesect[MAXSECTORS] = 0;
-
-    for (i = 0; i < MAXSPRITES; i++) {
-        prevspritesect[i] = i - 1;
-        nextspritesect[i] = i + 1;
-        sprite[i].sectnum = MAXSECTORS;
-    }
-    prevspritesect[0] = -1;
-    nextspritesect[MAXSPRITES - 1] = -1;
-
-
-    for (i = 0; i < MAXSTATUS; i++)    /* Init doubly-linked sprite status lists */
-        headspritestat[i] = -1;
-    headspritestat[MAXSTATUS] = 0;
-    for (i = 0; i < MAXSPRITES; i++) {
-        prevspritestat[i] = i - 1;
-        nextspritestat[i] = i + 1;
-        sprite[i].statnum = MAXSTATUS;
-    }
-    prevspritestat[0] = -1;
-    nextspritestat[MAXSPRITES - 1] = -1;
-};
-
 //4541
 /*
  FCS: Return true if the point (x,Y) is inside the sector sectnum.
@@ -1219,8 +1189,38 @@ function inside(x, y, sectnum) {
     //Just return the sign. If the position vector cut the sector walls an odd number of time
     //it is inside. Otherwise (even) it is outside.
     console.log("wallCrossed >> 31 = %i", (wallCrossed >>> 31));
-    return wallCrossed >>> 31; //todo in maths too?
+    return wallCrossed >>> 31;
 }
+
+//5867
+Engine.initSpriteLists = function () {
+    var i;
+
+    for (i = 0; i < MAXSECTORS; i++) {
+        headspritesect[i] = -1;
+    }
+    headspritesect[MAXSECTORS] = 0;
+
+    for (i = 0; i < MAXSPRITES; i++) {
+        prevspritesect[i] = i - 1;
+        nextspritesect[i] = i + 1;
+        sprite[i].sectnum = MAXSECTORS;
+    }
+    prevspritesect[0] = -1;
+    nextspritesect[MAXSPRITES - 1] = -1;
+
+
+    for (i = 0; i < MAXSTATUS; i++)    /* Init doubly-linked sprite status lists */
+        headspritestat[i] = -1;
+    headspritestat[MAXSTATUS] = 0;
+    for (i = 0; i < MAXSPRITES; i++) {
+        prevspritestat[i] = i - 1;
+        nextspritestat[i] = i + 1;
+        sprite[i].statnum = MAXSTATUS;
+    }
+    prevspritestat[0] = -1;
+    nextspritestat[MAXSPRITES - 1] = -1;
+};
 
 //5899
 Engine.insertSprite = function(sectNum, statNum) {
@@ -1231,8 +1231,9 @@ Engine.insertSprite = function(sectNum, statNum) {
 Engine.insertSpriteSect = function (sectnum) {
     var blanktouse;
 
-    if ((sectnum >= MAXSECTORS) || (headspritesect[MAXSECTORS] == -1))
-        return(-1);  /* list full */
+    if ((sectnum >= MAXSECTORS) || (headspritesect[MAXSECTORS] == -1)) {
+        return -1; /* list full */
+    }
 
     blanktouse = headspritesect[MAXSECTORS];
 
@@ -1254,8 +1255,9 @@ Engine.insertSpriteSect = function (sectnum) {
 Engine.insertSpriteStat = function (statnum) {
     var blanktouse;
 
-    if ((statnum >= MAXSTATUS) || (headspritestat[MAXSTATUS] == -1))
-        return(-1);  /* list full */
+    if ((statnum >= MAXSTATUS) || (headspritestat[MAXSTATUS] == -1)) {
+        return -1; /* list full */
+    }
 
     blanktouse = headspritestat[MAXSTATUS];
 
@@ -1272,6 +1274,52 @@ Engine.insertSpriteStat = function (statnum) {
     sprite[blanktouse].statnum = statnum;
 
     return(blanktouse);
+};
+
+function deletesprite(spriteNum) {
+    Engine.deleteSpriteStat(spriteNum);
+    return Engine.deleteSpriteSect(spriteNum);
+}
+
+// 5985
+Engine.deleteSpriteSect = function(deleteme) {
+    if (sprite[deleteme].statnum == MAXSTATUS) {
+        return -1;
+    }
+
+    if (headspritestat[sprite[deleteme].statnum] == deleteme)
+        headspritestat[sprite[deleteme].statnum] = nextspritestat[deleteme];
+
+    if (prevspritestat[deleteme] >= 0) nextspritestat[prevspritestat[deleteme]] = nextspritestat[deleteme];
+    if (nextspritestat[deleteme] >= 0) prevspritestat[nextspritestat[deleteme]] = prevspritestat[deleteme];
+
+    if (headspritestat[MAXSTATUS] >= 0) prevspritestat[headspritestat[MAXSTATUS]] = deleteme;
+    prevspritestat[deleteme] = -1;
+    nextspritestat[deleteme] = headspritestat[MAXSTATUS];
+    headspritestat[MAXSTATUS] = deleteme;
+
+    sprite[deleteme].statnum = MAXSTATUS;
+    return 0;
+};
+
+Engine.deleteSpriteStat = function (deleteme) {
+    if (sprite[deleteme].sectnum == MAXSECTORS) {
+        return -1;
+    }
+
+    if (headspritesect[sprite[deleteme].sectnum] == deleteme)
+        headspritesect[sprite[deleteme].sectnum] = nextspritesect[deleteme];
+
+    if (prevspritesect[deleteme] >= 0) nextspritesect[prevspritesect[deleteme]] = nextspritesect[deleteme];
+    if (nextspritesect[deleteme] >= 0) prevspritesect[nextspritesect[deleteme]] = prevspritesect[deleteme];
+
+    if (headspritesect[MAXSECTORS] >= 0) prevspritesect[headspritesect[MAXSECTORS]] = deleteme;
+    prevspritesect[deleteme] = -1;
+    nextspritesect[deleteme] = headspritesect[MAXSECTORS];
+    headspritesect[MAXSECTORS] = deleteme;
+
+    sprite[deleteme].sectnum = MAXSECTORS;
+    return 0;
 };
 
 //

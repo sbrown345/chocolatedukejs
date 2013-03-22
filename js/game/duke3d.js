@@ -30,8 +30,66 @@ function VOLUMEONE() {
 var mymembuf;
 
 function Player() {
-    this.ammo_amount = new Uint8Array(MAX_WEAPONS);
-    this.gotweapon = new Uint8Array(MAX_WEAPONS);
+    this.zoom = 0; this.exitx = 0; this.exity = 0; this.loogiex = new Int32Array(64); this.loogiey = new Int32Array(64); this.numloogs = 0; this.loogcnt = 0;
+    this.posx = 0; this.posy = 0; this.posz = 0; this.horiz = 0; this.ohoriz = 0; this.ohorizoff = 0; this.invdisptime = 0;
+    this.bobposx = 0; this.bobposy = 0; this.oposx = 0; this.oposy = 0; this.oposz = 0; this.pyoff = 0; this.opyoff = 0;
+    this.posxv = 0; this.posyv = 0; this.poszv = 0; this.last_pissed_time = 0; this.truefz = 0; this.truecz = 0;
+    this.player_par = 0; this.visibility = 0;
+    this.bobcounter = 0; this.weapon_sway = 0;
+    this.pals_time = 0; this.randomflamex = 0; this.crack_time = 0;
+
+    this.aim_mode = 0;
+
+    this.ang = 0; this.oang = 0; this.angvel = 0; this.cursectnum = 0; this.look_ang = 0; this.last_extra = 0; this.subweapon = 0;
+    this.ammo_amount = new Int16Array(MAX_WEAPONS); this.wackedbyactor = 0; this.frag = 0; this.fraggedself = 0;
+
+    this.curr_weapon = 0; this.last_weapon = 0; this.tipincs = 0; this.horizoff = 0; this.wantweaponfire = 0;
+    this.holoduke_amount = 0; this.newowner = 0; this.hurt_delay = 0; this.hbomb_hold_delay = 0;
+    this.jumping_counter = 0; this.airleft = 0; this.knee_incs = 0; this.access_incs = 0;
+    this.fta = 0; this.ftq = 0; this.access_wallnum = 0; this.access_spritenum = 0;
+    this.kickback_pic = 0; this.got_access = 0; this.weapon_ang = 0; this.firstaid_amount = 0;
+    this.somethingonplayer = 0; this.on_crane = 0; this.i = 0; this.one_parallax_sectnum = 0;
+    this.over_shoulder_on = 0; this.random_club_frame = 0; this.fist_incs = 0;
+    this.one_eighty_count = 0; this.cheat_phase = 0;
+    this.dummyplayersprite = 0; this.extra_extra8 = 0; this.quick_kick = 0;
+    this.heat_amount = 0; this.actorsqu = 0; this.timebeforeexit = 0; this.customexitsound = 0;
+
+    this.weaprecs = new Int16Array(MAX_WEAPONS); this.weapreccnt = 0;
+    this.interface_toggle_flag = 0;
+
+    this.rotscrnang = 0; this.dead_flag = 0; this.show_empty_weapon = 0;
+    this.scuba_amount = 0; this.jetpack_amount = 0; this.steroids_amount = 0; this.shield_amount = 0;
+    this.holoduke_on = 0; this.pycount = 0; this.weapon_pos = 0; this.frag_ps = 0;
+    this.transporter_hold = 0; this.last_full_weapon = 0; this.footprintshade = 0; this.boot_amount = 0;
+
+    this.scream_voice = 0;
+
+    this.gm = 0; this.on_warping_sector = 0; this.footprintcount = 0;
+    this.hbomb_on = 0; this.jumping_toggle = 0; this.rapid_fire_hold = 0; this.on_ground = 0;
+    this.name = ""; this.inven_icon = 0; this.buttonpalette = 0;
+
+    this.jetpack_on = 0; this.spritebridge = 0; this.lastrandomspot = 0;
+    this.scuba_on = 0; this.footprintpal = 0; this.heat_on = 0;
+
+    this.holster_weapon = 0; this.falling_counter = 0;
+    this.gotweapon = new Uint8Array(MAX_WEAPONS); this.refresh_inventory = 0; this.palette = null;
+
+    this.toggle_key_flag = 0; this.knuckle_incs = 0; //select_dir;
+    this.walking_snd_toggle = 0; this.palookup = 0; this.hard_landing = 0;
+    this.max_secret_rooms = 0; this.secret_rooms = 0; this./*fire_flag=0;this.*/pals = new Uint8Array(3);
+    this.max_actors_killed = 0; this.actors_killed = 0; this.return_to_center = 0;
+
+    // local but synch variables (ud is local but not synch):
+
+    // FIX_00023: Moved Addfaz's autoaim handler to synch variables (to avoid out of synch)
+    this.auto_aim = 0; //AutoAim toggle variable.
+
+    // FIX_00012: added "weapon autoswitch" toggle allowing to turn the autoswitch off
+    //            when picking up new weapons. The weapon sound on pickup will remain on=0;this. to not 
+    //           affect the opponent's gameplay (so he can still hear you picking up new weapons)
+    this.weaponautoswitch = 0;
+
+    this.fakeplayer = 0;
 }
 
 var NUMPAGES = 1;

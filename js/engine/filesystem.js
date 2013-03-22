@@ -501,6 +501,20 @@ function kread8(handle) {
     return grpStream.readInt8();
 }
 
+function kreadUint8(handle) {
+    var openFile = openFiles[handle];
+
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFile.grpID];
+
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    openFile.cursor += 1;
+    return grpStream.readUint8();
+}
+
 function kread16(handle) {
     var openFile = openFiles[handle];
 

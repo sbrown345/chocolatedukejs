@@ -69,6 +69,9 @@ function faketimerhandler() {
     throw new Error("todo");
 }
 
+var tempwallptr;
+
+//7486
 function logo() {
     console.log("(9) logo");
     var i, soundanm = 0;
@@ -118,7 +121,6 @@ function logo() {
                         //MIDI start here
                         playMusic(env_music_fn[0]);
 
-
                         // "REALITY IS OUR GAME" Screen
                         for (i = 0; i < 64; i += 7) {
                             q.add(i, function (cb, i) {
@@ -153,7 +155,6 @@ function logo() {
                             });
                         });
 
-                        //FADE OUT
                         for (i = 0; i < 64; i += 7) {
                             q.add(i, function (cb, i) {
                                 console.log("(50)");
@@ -503,7 +504,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     }
 
     ud.reccnt = kread32(recfilep);
-    ver = kread8(recfilep);
+    ver = kreadUint8(recfilep);
 
     console.log("%s has version = %d", fname, ver);
 
@@ -511,18 +512,18 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 
     ud.playing_demo_rev = ver;
 
-    ud.volume_number = kread8(recfilep);
-    ud.level_number = kread8(recfilep);
-    ud.player_skill = kread8(recfilep);
-    ud.m_coop = kread8(recfilep);
-    ud.m_ffire = kread8(recfilep);
-    ud.multimode = kread8(recfilep);
-    ud.m_monsters_off = kread8(recfilep);
-    ud.m_respawn_monsters = kread8(recfilep);
-    ud.m_respawn_items = kread8(recfilep);
-    ud.m_respawn_inventory = kread8(recfilep);
-    ud.playerai = kread8(recfilep);
-    ud.user_name[0] = kreadText(recfilep, 32);
+    ud.volume_number = kreadUint8(recfilep);
+    ud.level_number = kreadUint8(recfilep);
+    ud.player_skill = kreadUint8(recfilep);
+    ud.m_coop = kreadUint8(recfilep);
+    ud.m_ffire = kreadUint8(recfilep);
+    ud.multimode = kread16(recfilep);
+    ud.m_monsters_off = kread16(recfilep);
+    ud.m_respawn_monsters = kread32(recfilep);
+    ud.m_respawn_items = kread32(recfilep);
+    ud.m_respawn_inventory = kread32(recfilep);
+    ud.playerai = kread32(recfilep);
+    ud.user_name[0] = kreadText(recfilep, 512);
     // FIX_00034: Demos do not turn your run mode off anymore:
     kread32(recfilep); // dummy
     boardfilename = kreadText(recfilep, 128);
@@ -532,7 +533,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     }
 
     for (var i = 0; i < ud.multimode; i++) {
-        ps[i].aim_mode = kread8(recfilep);
+        ps[i].aim_mode = kreadUint8(recfilep);
         
         // FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
         if (ver === BYTEVERSION) {

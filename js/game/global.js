@@ -19,7 +19,7 @@ var BYTEVERSION_118 = 118; // 1.5 Atomic under xDuke v19.6.
 
 var BYTEVERSION_1_3 = 1; // for 1.3 demos (Not compatible)
 
-var BYTEVERSION	= 119; // xDuke v19.7
+var BYTEVERSION = 119; // xDuke v19.7
 
 var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_ammo_amount = new Int32Array(MAX_WEAPONS);
 
@@ -28,10 +28,6 @@ var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_amm
 var spriteq = new Int16Array(1024), spriteqloc, spriteqamount = 64;
 
 var ps = structArray(Player, MAXPLAYERS);
-//var ps = new Array(MAXPLAYERS);
-//for (var i = 0; i < ps.length; i++) {
-//    ps[i] = new Player();
-//}
 
 var ud = {
     god: 0,
@@ -49,25 +45,25 @@ var ud = {
     pwlockout: new Array(128),
     rtsname: "",
 
-    overhead_on: 0,last_overhead: 0,
+    overhead_on: 0, last_overhead: 0,
 
-    pause_on: 0,from_bonus: 0,
-    camerasprite: 0,last_camsprite: 0,
-    last_level: 0,secretlevel: 0,
+    pause_on: 0, from_bonus: 0,
+    camerasprite: 0, last_camsprite: 0,
+    last_level: 0, secretlevel: 0,
 
-    const_visibility: 0,uw_framerate: 0,
-    camera_time: 0,folfvel: 0,folavel: 0,folx: 0,foly: 0,fola: 0,
+    const_visibility: 0, uw_framerate: 0,
+    camera_time: 0, folfvel: 0, folavel: 0, folx: 0, foly: 0, fola: 0,
     reccnt: 0,
 
-    entered_name: 0,screen_tilting: 0,shadows: 0,fta_on: 0,executions: 0,auto_run: 0,
-    coords: 0,tickrate: 0,m_coop: 0,coop: 0,screen_size: 0,extended_screen_size: 0,lockout: 0,crosshair: 0,showweapons: 0,
+    entered_name: 0, screen_tilting: 0, shadows: 0, fta_on: 0, executions: 0, auto_run: 0,
+    coords: 0, tickrate: 0, m_coop: 0, coop: 0, screen_size: 0, extended_screen_size: 0, lockout: 0, crosshair: 0, showweapons: 0,
     //mywchoice[MAX_WEAPONS]: 0,wchoice[MAXPLAYERS][MAX_WEAPONS]: 0,playerai: 0,
 
-    respawn_monsters: 0,respawn_items: 0,respawn_inventory: 0,recstat: 0,monsters_off: 0,brightness: 0,
-    m_respawn_items: 0,m_respawn_monsters: 0,m_respawn_inventory: 0,m_recstat: 0,m_monsters_off: 0,detail: 0,
+    respawn_monsters: 0, respawn_items: 0, respawn_inventory: 0, recstat: 0, monsters_off: 0, brightness: 0,
+    m_respawn_items: 0, m_respawn_monsters: 0, m_respawn_inventory: 0, m_recstat: 0, m_monsters_off: 0, detail: 0,
     // FIX_00082: /q option taken off when playing a demo (multimode_bot)    
-    m_ffire: 0,ffire: 0,m_player_skill: 0,m_level_number: 0,m_volume_number: 0,multimode: 0,multimode_bot: 0,
-    player_skill: 0,level_number: 0,volume_number: 0,m_marker: 0,marker: 0,mouseflip: 0,
+    m_ffire: 0, ffire: 0, m_player_skill: 0, m_level_number: 0, m_volume_number: 0, multimode: 0, multimode_bot: 0,
+    player_skill: 0, level_number: 0, volume_number: 0, m_marker: 0, marker: 0, mouseflip: 0,
 
     showcinematics: 0, hideweapon: 0,
     auto_aim: 0, gitdat_mdk: 0, //AutoAim toggle variable.
@@ -83,10 +79,27 @@ var ud = {
     conCRC: new Uint32Array(MAXPLAYERS),
 };
 
+//struct animwalltype animwall[MAXANIMWALLS];
+var numanimwalls;
+var /**animateptr[MAXANIMATES], animategoal[MAXANIMATES], animatevel[MAXANIMATES], */animatecnt;
+//// int32_t oanimateval[MAXANIMATES];
+//short animatesect[MAXANIMATES];
+//int32_t msx[2048],msy[2048];
+var cyclers = multiDimArray(Int16Array, MAXCYCLERS, 6), numcyclers;
+
 var fta_quotes = new Array(NUMOFFIRSTTIMEACTIVE);
 
 var tempbuf = new Uint8Array(2048);
 var packbuf = new Uint8Array(576);
+
+//char  buf[80];
+
+var camsprite;
+//short mirrorwall[64], mirrorsector[64], mirrorcnt;
+
+//var current_menu;
+
+//uint8_t  betaname[80];
 
 var level_names = new Array(44);
 var level_file_names = new Array(44);
@@ -108,7 +121,7 @@ var sounds = new Array(NUM_SOUNDS);
 //SAMPLE Sound[ NUM_SOUNDS ];
 //SOUNDOWNER SoundOwner[NUM_SOUNDS][4];
 
-//uint8_t  numplayersprites,earthquaketime;
+var numplayersprites, earthquaketime;
 
 //int32_t fricxv,fricyv;
 //struct player_orig po[MAXPLAYERS];
@@ -129,8 +142,8 @@ var pus, pub;
 
 //int32_t movefifosendplc;
 
-////Multiplayer syncing variables
-//short screenpeek;
+//Multiplayer syncing variables
+var screenpeek;
 //int32_t movefifoend[MAXPLAYERS];
 
 //Game recording variables
@@ -198,9 +211,9 @@ var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradi
 //STATUSBARTYPE sbar;
 
 //int32_t myminlag[MAXPLAYERS], mymaxlag, otherminlag, bufferjitter = 1;
-//short numclouds,clouds[128],cloudx[128],cloudy[128];
+var numclouds, clouds = new Int16Array(128), cloudx = new Int16Array(128), cloudy = new Int16Array(128);
 //int32_t cloudtotalclock = 0,totalmemory = 0;
-//int32_t numinterpolations = 0, startofdynamicinterpolations = 0;
+var numinterpolations = 0, startofdynamicinterpolations = 0;
 //int32_t oldipos[MAXINTERPOLATIONS];
 //int32_t bakipos[MAXINTERPOLATIONS];
 //int32_t *curipos[MAXINTERPOLATIONS];

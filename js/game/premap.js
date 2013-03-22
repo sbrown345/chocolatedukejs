@@ -2,8 +2,12 @@
 
 var preMap = {};
 
+function tloadtile(tileNumber) {
+    gotpic[tileNumber >> 3] |= (1 << (tileNumber & 7));
+}
+
 //357
-preMap.vscrn = function() {
+preMap.vscrn = function () {
     var ss, x1, x2, y1, y2;
 
     if (ud.screen_size < 0) {
@@ -38,7 +42,7 @@ preMap.vscrn = function() {
 };
 
 //386
-preMap.countFragBars = function() {
+preMap.countFragBars = function () {
     var i, j, y = 0;
     if (ud.screen_size > 0 && ud.coop != 1 && ud.multimode > 1) {
         j = 0;
@@ -55,8 +59,252 @@ preMap.countFragBars = function() {
 };
 
 //670
+preMap.resetPreStat = function (snum, g) {
+    var p;
+    var i;
+
+    p = ps[snum];
+
+    spriteqloc = 0;
+    for (i = 0; i < spriteqamount; i++) {
+        spriteq[i] = -1;
+    }
+
+    p.hbomb_on          = 0;
+    p.cheat_phase       = 0;
+    p.pals_time         = 0;
+    p.toggle_key_flag   = 0;
+    p.secret_rooms      = 0;
+    p.max_secret_rooms  = 0;
+    p.actors_killed     = 0;
+    p.max_actors_killed = 0;
+    p.lastrandomspot = 0;
+    p.weapon_pos = 6;
+    p.kickback_pic = 5;
+    p.last_weapon = -1;
+    p.weapreccnt = 0;
+    p.show_empty_weapon= 0;
+    p.holster_weapon = 0;
+    p.last_pissed_time = 0;
+
+    p.one_parallax_sectnum = -1;
+    p.visibility = ud.const_visibility;
+
+    screenpeek              = myconnectindex;
+    numanimwalls            = 0;
+    numcyclers              = 0;
+    animatecnt              = 0;
+    parallaxtype            = 0;
+    randomseed              = 17;
+    ud.pause_on             = 0;
+    ud.camerasprite         =-1;
+    ud.eog                  = 0;
+    tempwallptr             = 0;
+    camsprite               =-1;
+    earthquaketime          = 0;
+
+    numinterpolations = 0;
+    startofdynamicinterpolations = 0;
+
+    if( ( (g&MODE_EOL) != MODE_EOL && numplayers < 2) || (ud.coop != 1 && numplayers > 1) )
+    {
+        preMap.resetWeapons(snum);
+        preMap.resetIinventory(snum);
+    }
+    else if(p.curr_weapon == HANDREMOTE_WEAPON)
+    {
+        p.ammo_amount[HANDBOMB_WEAPON]++;
+        p.curr_weapon = HANDBOMB_WEAPON;
+    }
+
+    p.timebeforeexit   = 0;
+    p.customexitsound  = 0;
+};
+
+preMap.resetWeapons = function(snum) {
+    var weapon;
+    var p;
+
+    p = ps[snum];
+
+    for (weapon = PISTOL_WEAPON; weapon < MAX_WEAPONS; weapon++) {
+        p.gotweapon[weapon] = 0;
+    }
+    for (weapon = PISTOL_WEAPON; weapon < MAX_WEAPONS; weapon++) {
+        p.ammo_amount[weapon] = 0;
+    }
+
+    p.weapon_pos = 6;
+    p.kickback_pic = 5;
+    p.curr_weapon = PISTOL_WEAPON;
+    p.gotweapon[PISTOL_WEAPON] = 1;
+    p.gotweapon[KNEE_WEAPON] = 1;
+    p.ammo_amount[PISTOL_WEAPON] = 48;
+    p.gotweapon[HANDREMOTE_WEAPON] = 1;
+    p.last_weapon = -1;
+
+    p.show_empty_weapon = 0;
+    p.last_pissed_time = 0;
+    p.holster_weapon = 0;
+};
+
+preMap.resetIinventory = function(snum) {
+    var p;
+
+    p = ps[snum];
+
+    p.inven_icon = 0;
+    p.boot_amount = 0;
+    p.scuba_on = 0;
+    p.scuba_amount = 0;
+    p.heat_amount = 0;
+    p.heat_on = 0;
+    p.jetpack_on = 0;
+    p.jetpack_amount = 0;
+    p.shield_amount = max_armour_amount;
+    p.holoduke_on = -1;
+    p.holoduke_amount = 0;
+    p.firstaid_amount = 0;
+    p.steroids_amount = 0;
+    p.inven_icon = 0;
+};
+
+//670
 preMap.preLevel = function (g) {
+    var i, nexti, j, startwall, endwall, lotaglist;
+    var lotags = new Int16Array(65);
+
+    show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
+    show2dwallnew = new Uint8Array((MAXWALLS + 7) >> 3);
+    show2dspritenew = new Uint8Array((MAXSPRITES + 7) >> 3);
+
+    preMap.resetPreStat(0, g);
+    numclouds = 0;
+
+    for (i = 0; i < numsectors; i++) {
+        console.log("i: %i", i);
+        sector[i].extra = 256;
+
+        switch (sector[i].lotag) {
+            case 20:
+            case 22:
+                if (sector[i].floorz > sector[i].ceilingz)
+                    sector[i].lotag |= 32768;
+                continue;
+        }
+
+        if (sector[i].ceilingstat & 1) {
+            if (!tiles[sector[i].ceilingpicnum].data) {
+                if (sector[i].ceilingpicnum == LA)
+                    for (j = 0; j < 5; j++)
+                        if (!tiles[sector[i].ceilingpicnum + j].data)
+                            tloadtile(sector[i].ceilingpicnum + j);
+            }
+            preMap.setupBackdrop(sector[i].ceilingpicnum);
+
+            if (sector[i].ceilingpicnum == CLOUDYSKIES && numclouds < 127)
+                clouds[numclouds++] = i;
+
+            if (ps[0].one_parallax_sectnum == -1)
+                ps[0].one_parallax_sectnum = i;
+        }
+
+        if (sector[i].lotag == 32767) //Found a secret room
+        {
+            ps[0].max_secret_rooms++;
+            continue;
+        }
+
+        if (sector[i].lotag == -1) {
+            ps[0].exitx = wall[sector[i].wallptr].x;
+            ps[0].exity = wall[sector[i].wallptr].y;
+            continue;
+        }
+    }
+    
+    i = headspritestat[0];
+
+    while (i >= 0) {
+        nexti = nextspritestat[i];
+
+        if (sprite[i].lotag == -1 && (sprite[i].cstat & 16)) {
+            ps[0].exitx = sprite[i].x;
+            ps[0].exity = sprite[i].y;
+        }
+        else switch (sprite[i].picnum) {
+            case 10://GPSPEED:
+                sector[sprite[i].sectnum].extra = sprite[i].y;
+                deletesprite(i);
+                break;
+
+            case 7://CYCLER:
+                if (numcyclers >= MAXCYCLERS) {
+                    throw new Error("\nToo many cycling sectors.");
+                }
+                cyclers[numcyclers][0] = sprite[i].sectnum;
+                cyclers[numcyclers][1] = sprite[i].lotag;
+                cyclers[numcyclers][2] = sprite[i].shade;
+                cyclers[numcyclers][3] = sector[sprite[i].sectnum].floorshade;
+                cyclers[numcyclers][4] = sprite[i].hitag;
+                cyclers[numcyclers][5] = (sprite[i].ang == 1536);
+                numcyclers++;
+                deletesprite(i);
+                break;
+        }
+        i = nexti;
+    }
+
+    for (i = 0; i < MAXSPRITES; i++) {
+        if (sprite[i].statnum < MAXSTATUS) {
+            if (sprite[i].picnum == SECTOREFFECTOR && sprite[i].lotag == 14)
+                continue;
+            spawn(-1, i);
+        }
+    }
+
+    for (i = 0; i < MAXSPRITES; i++)
+        if (sprite[i].statnum < MAXSTATUS) {
+            if (sprite[i].picnum == SECTOREFFECTOR && sprite[i].lotag == 14)
+                spawn(-1, i);
+        }
+
+    lotaglist = 0;
+
+    i = headspritestat[0];
     debugger;
+};
+
+//640
+preMap.setupBackdrop = function(sky) {
+    var i;
+
+    for (i = 0; i < MAXPSKYTILES; i++) {
+        pskyoff[i] = 0;
+    }
+
+    if (parallaxyscale != 65536) {
+        parallaxyscale = 32768;
+    }
+
+    switch(sky)
+    {
+        case 78: //CLOUDYOCEAN:
+            parallaxyscale = 65536;
+            break;
+        case 80: //MOONSKY1 :
+            pskyoff[6]=1; pskyoff[1]=2; pskyoff[4]=2; pskyoff[2]=3;
+            break;
+        case 84: //BIGORBIT1: // orbit
+            pskyoff[5]=1; pskyoff[6]=2; pskyoff[7]=3; pskyoff[2]=4;
+            break;
+        case 89: //LA:
+            parallaxyscale = 16384+1024;
+            pskyoff[0]=1; pskyoff[1]=2; pskyoff[2]=1; pskyoff[3]=3;
+            pskyoff[4]=4; pskyoff[5]=0; pskyoff[6]=2; pskyoff[7]=3;
+            break;
+    }
+
+    pskybits=3;
 };
 
 //990
@@ -124,11 +372,11 @@ function genSpriteRemaps() {
     var lookpos;
     var numl;
     if (fp != -1) {
-        numl = kread8(fp, 1);
+        numl = kreadUint8(fp, 1);
     } else {
         throw new Error("ERROR: File 'LOOKUP.DAT' not found.");
     }
-
+    debugger;
     for (var j = 0; j < numl; j++) {
         lookpos = kread8(fp);
         kread(fp, tempbuf, 256);
@@ -213,7 +461,7 @@ preMap.enterLevel = function (g) {
         } else {
             //fulllevelfilename = getGameDir() + "\\" + level_file_names[(ud.volume_number * 11) + ud.level_number];
             // todo SafeFileExists??? - it checks in game dir first??
-            
+
             fulllevelfilename = level_file_names[(ud.volume_number * 11) + ud.level_number];
 
             if (Engine.loadBoard(fulllevelfilename, ps[0].posx, ps[0].posy, ps[0].posz, ps[0].ang, ps[0].cursectnum) == -1) {
