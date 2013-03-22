@@ -3,6 +3,24 @@
 var conVersion = 13;
 var grpVersion = 0;
 
+// FIX_00015: Backward compliance with older demos (down to demos v27, 28, 116 and 117 only)
+
+// For BYTEVERSION diff, 27/116 vs 28/117 see extras\duke3d.h vs source\duke3d.h
+// from the official source code release. 
+
+var BYTEVERSION_27 = 27; // 1.3 under 1.4 Plutonium. Not supported anymore
+var BYTEVERSION_116 = 116; // 1.4 Plutonium. Not supported anymore
+
+var BYTEVERSION_28 = 28; // 1.3 under 1.5 engine
+var BYTEVERSION_117 = 117; // 1.5 Atomic
+
+var BYTEVERSION_29 = 29; // 1.3 under xDuke v19.6.
+var BYTEVERSION_118 = 118; // 1.5 Atomic under xDuke v19.6.
+
+var BYTEVERSION_1_3 = 1; // for 1.3 demos (Not compatible)
+
+var BYTEVERSION	= 119; // xDuke v19.7
+
 var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_ammo_amount = new Int32Array(MAX_WEAPONS);
 
 // int32_t temp_data[MAXSPRITES][6];
@@ -25,14 +43,41 @@ var ud = {
     scrollmode: 0,
     clipping: 0,
 
+    user_name: new Array(MAXPLAYERS),
     ridecule: new Array(10),
     savegame: new Array(10),
     pwlockout: new Array(128),
-    last_level: 0,
-    secretlevel: 0,
-    rtsname: new Array(10),
-    rev: multiDimArray(Uint8Array, MAXPLAYERS, 10),
+    rtsname: "",
+
+    overhead_on: 0,last_overhead: 0,
+
+    pause_on: 0,from_bonus: 0,
+    camerasprite: 0,last_camsprite: 0,
+    last_level: 0,secretlevel: 0,
+
+    const_visibility: 0,uw_framerate: 0,
+    camera_time: 0,folfvel: 0,folavel: 0,folx: 0,foly: 0,fola: 0,
+    reccnt: 0,
+
+    entered_name: 0,screen_tilting: 0,shadows: 0,fta_on: 0,executions: 0,auto_run: 0,
+    coords: 0,tickrate: 0,m_coop: 0,coop: 0,screen_size: 0,extended_screen_size: 0,lockout: 0,crosshair: 0,showweapons: 0,
+    //mywchoice[MAX_WEAPONS]: 0,wchoice[MAXPLAYERS][MAX_WEAPONS]: 0,playerai: 0,
+
+    respawn_monsters: 0,respawn_items: 0,respawn_inventory: 0,recstat: 0,monsters_off: 0,brightness: 0,
+    m_respawn_items: 0,m_respawn_monsters: 0,m_respawn_inventory: 0,m_recstat: 0,m_monsters_off: 0,detail: 0,
+    // FIX_00082: /q option taken off when playing a demo (multimode_bot)    
+    m_ffire: 0,ffire: 0,m_player_skill: 0,m_level_number: 0,m_volume_number: 0,multimode: 0,multimode_bot: 0,
+    player_skill: 0,level_number: 0,volume_number: 0,m_marker: 0,marker: 0,mouseflip: 0,
+
+    showcinematics: 0, hideweapon: 0,
+    auto_aim: 0, gitdat_mdk: 0, //AutoAim toggle variable.
+    weaponautoswitch: 0,
+
+    // FIX_00015: Backward compliance with older demos (down to demos v27: 0, 28: 0, 116 and 117 only)
+    playing_demo_rev: 0,
+
     conSize: new Uint32Array(MAXPLAYERS),
+    rev: multiDimArray(Uint8Array, MAXPLAYERS, 10),
     mapCRC: new Uint32Array(MAXPLAYERS),
     // exeCRC is meaningless here
     conCRC: new Uint32Array(MAXPLAYERS),
@@ -57,6 +102,36 @@ var soundm = new Uint8Array(NUM_SOUNDS), soundpr = new Uint8Array(NUM_SOUNDS);
 var sounds = new Array(NUM_SOUNDS);
 
 //short title_zoom;
+
+//fx_device device;
+
+//SAMPLE Sound[ NUM_SOUNDS ];
+//SOUNDOWNER SoundOwner[NUM_SOUNDS][4];
+
+//uint8_t  numplayersprites,earthquaketime;
+
+//int32_t fricxv,fricyv;
+//struct player_orig po[MAXPLAYERS];
+//struct player_struct ps[MAXPLAYERS];
+//struct user_defs ud;
+
+var pus, pub;
+//uint8_t  syncstat, syncval[MAXPLAYERS][MOVEFIFOSIZ];
+//int32_t syncvalhead[MAXPLAYERS], syncvaltail, syncvaltottail;
+
+//input sync[MAXPLAYERS], loc;
+//input recsync[RECSYNCBUFSIZ];
+//int32_t avgfvel, avgsvel, avgavel, avghorz, avgbits;
+
+
+//input inputfifo[MOVEFIFOSIZ][MAXPLAYERS];
+//input recsync[RECSYNCBUFSIZ];
+
+//int32_t movefifosendplc;
+
+////Multiplayer syncing variables
+//short screenpeek;
+//int32_t movefifoend[MAXPLAYERS];
 
 //Game recording variables
 

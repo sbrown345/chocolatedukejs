@@ -16,9 +16,14 @@ var CommandMusicToggleOff = 0;
 var confilename = "GAME.CON";
 var boardfilename = null;
 var waterpal = new Uint8Array(768), slimepal = new Uint8Array(768), titlepal = new Uint8Array(768), drealms = new Uint8Array(768), endingpal = new Uint8Array(768);
+var firstdemofile;
 
+var recfilep, totalreccnt;
+//uint8_t  debug_on = 0,actor_tog = 0,memorycheckoveride=0;
+//uint8_t *rtsptr;
 
-//numlumps (points to nlumps in rts.js ?)
+//extern uint8_t  syncstate;
+//extern int32 numlumps; (in rts.js)
 
 
 var restorepalette, screencapt, nomorelogohack = 0;
@@ -117,12 +122,12 @@ function logo() {
                         // "REALITY IS OUR GAME" Screen
                         for (i = 0; i < 64; i += 7) {
                             q.add(i, function (cb, i) {
-                                console.log("(10)");
+                                console.log("(22)");
                                 palto(0, 0, 0, i);
                             });
                         }
                         q.add(function () {
-                            console.log("(20)");
+                            console.log("(25)");
                             ps[myconnectindex].palette = drealms;
                             palto(0, 0, 0, 63);
                             rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
@@ -470,10 +475,108 @@ function main(argc, argv) {
     // don't put code outside async loop
 }
 
+// 0 = mine
+Game.openDemoRead = function (whichDemo /* 0 = mine */) {
+    var d = "demo_.dmo".split("");
+    var fname;
+    var ver;
+
+    if (whichDemo === 10) {
+        d[4] = 'x';
+    } else {
+        d[4] = whichDemo.toString();
+    }
+
+    fname = d.join("");
+
+    ud.reccnt = 0;
+
+    if (whichDemo === 1 && firstdemofile) {
+        fname = firstdemofile;
+        if ((recfilep = TCkopen4load(firstdemofile, 0)) == -1) {
+            return 0;
+        }
+    } else {
+        if ((recfilep = TCkopen4load(fname, 0)) == -1) {
+            return 0;
+        }
+    }
+
+    ud.reccnt = kread32(recfilep);
+    ver = kreadUint8(recfilep);
+
+    console.log("%s has version = %d", fname, ver);
+
+    // todo: version if stuff!!
+
+    ud.playing_demo_rev = ver;
+
+    ud.volume_number = kreadUint8(recfilep);
+    ud.level_number = kreadUint8(recfilep);
+    ud.player_skill = kreadUint8(recfilep);
+    ud.m_coop = kreadUint8(recfilep);
+    ud.m_ffire = kreadUint8(recfilep);
+    ud.multimode = kreadUint8(recfilep);
+    ud.m_monsters_off = kreadUint8(recfilep);
+    ud.m_respawn_monsters = kreadUint8(recfilep);
+    ud.m_respawn_items = kreadUint8(recfilep);
+    ud.m_respawn_inventory = kreadUint8(recfilep);
+    ud.playerai = kreadUint8(recfilep);
+    ud.user_name[0] = kreadText(recfilep, 32);
+    // FIX_00034: Demos do not turn your run mode off anymore:
+    kread32(recfilep); // dummy
+    boardfilename = kreadText(recfilep, 128);
+    if (!boardfilename) {
+        ud.m_level_number = 7;
+        ud.m_volume_number = 0;
+    }
+
+    for (var i = 0; i < ud.multimode; i++) {
+        ps[i].aim_mode = kreadUint8(recfilep);
+        
+        // FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
+        if (ver === BYTEVERSION) {
+            throw new Error("todo");
+            // todo:   //ud.wchoice[i] =kread(recfilep, ud.wchoice[i], sizeof(ud.wchoice[0]))
+        }
+    }
+
+    ud.god = ud.cashman = ud.eog = ud.showallmap = 0;
+    ud.clipping = ud.scrollmode = ud.overhead_on = 0;
+    // FIX_00034: Demos do not turn your run mode off anymore:
+    /* ud.showweapons =  */ ud.pause_on /*= ud.auto_run */ = 0; // makes no sense to reset those 2 value!
+
+    preMap.newGame(ud.volume_number, ud.level_number, ud.player_skill);
+    return 0;
+};
+
 var isPlayingBack = true; // set to false later to simulate returning 0
+Game.inMenu = 0;
+Game.whichDemo = 1;
 Game.playBack = function () {
     q.setPositionAtStart();
-    //throw new Error("todo");
+
+    var i, j, k, l, t;
+    var foundDemo;
+
+    if (ready2send) {
+        return false;
+    }
+
+    Game.inMenu = ps[myconnectindex].gm & MODE_MENU;
+
+    pub = NUMPAGES;
+    pus = NUMPAGES;
+
+    flushperms();
+
+
+    if (numplayers < 2 && ud.multimode_bot < 2) {
+        foundDemo = Game.openDemoRead(Game.whichDemo);
+    }
+
+
+    throw new Error("todo");
 };
 
 //10434

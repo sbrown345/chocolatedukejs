@@ -2,19 +2,25 @@
 
 var preMap = {};
 
+preMap.newGame = function(vn, ln, sk) {
+
+
+    debugger;
+};
+
 //1286
 function genSpriteRemaps() {
     var fp = TCkopen4load("lookup.dat", false);
     var lookpos;
     var numl;
     if (fp != -1) {
-        numl = kreaduint8(fp, 1);
+        numl = kreadUint8(fp, 1);
     } else {
         throw new Error("ERROR: File 'LOOKUP.DAT' not found.");
     }
 
     for (var j = 0; j < numl; j++) {
-        lookpos = kreaduint8(fp);
+        lookpos = kreadUint8(fp);
         kread(fp, tempbuf, 256);
         makepalookup(lookpos, tempbuf, 0, 0, 0, 1);
     }
