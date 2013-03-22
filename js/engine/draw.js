@@ -151,27 +151,24 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
         throw new Error("todo: mvlineasm4 should have 4 arguments");
     }
 
-
     var i;
     var temp;
-    var index = (framebufferOffset + ylookup[column]) >>> 0;
-    var dest = ylookup[column];
+    var index = (framebufferOffset + ylookup[column]);
+    var dest = -ylookup[column];
     var frameBufferArray = frameBuffer.array;
     var bufplcArray = bufplc.array;
-    do {
-        //for (var numBytesOnScreen = ScreenWidth * ScreenHeight; dest <= numBytesOnScreen; dest += bytesperline) {
+    //do {
+    for (; dest !== 0; dest += bytesperline) {
         for (i = 0; i < 4; i++) {
             temp = ((vplce[i] >>> 0) >> machmv) >>> 0;
-            //console.log("temp1 : %i", temp)
             temp = bufplcArray[bufplce[i] + temp]; // get texture
-            if (temp == undefined ) break; // EO Texture
             if (temp !== 255) {
                 //if (pixelsAllowed-- > 0)
-                var val = palookup[palookupoffse[i] + temp];
-                frameBufferArray[dest + index + i] = val;
+                frameBufferArray[dest + index + i] = palookup[palookupoffse[i] + temp];
             }
             vplce[i] += vince[i];
         }
-        dest += bytesperline;
-    } while (frameBufferArray[dest] !== undefined);
+        //    dest += bytesperline;
+        //} while (dest);
+    }
 }
