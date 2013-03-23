@@ -178,6 +178,7 @@ function spawn(j, pn) {
     var sp;
     var text = "";
 
+    console.log("spawn j: %i, pn: %i", j, pn);
     if (j >= 0) {
         throw new Error("TODO");
         //i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
@@ -520,7 +521,6 @@ function spawn(j, pn) {
         case BLOODSPLAT2:
         case BLOODSPLAT3:
         case BLOODSPLAT4:
-            throw new Error("todo");
             sp.cstat |= 16;
             sp.xrepeat = 7 + (krand() & 7);
             sp.yrepeat = 7 + (krand() & 7);
@@ -1906,6 +1906,7 @@ function spawn(j, pn) {
             break;
     }
 
+    console.log("cstat: %i", sp.cstat);
     console.log("cstat: %i", sp.cstat);
     //console.log("sect: %i", sect); //todo: CHECK sect and all objects
     // todo check all... spritetype (Sprite)

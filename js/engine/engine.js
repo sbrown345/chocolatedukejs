@@ -186,7 +186,7 @@ var colnext = new Int32Array(256);
 //static uint8_t  coldist[8] = {0,1,2,3,4,3,2,1};
 var colscan = new Int32Array(27);
 
-var clipnum, hitwalls = new Int16Array(4)
+var clipnum, hitwalls = new Int16Array(4);
 //int32_t hitscangoalx = (1<<29)-1, hitscangoaly = (1<<29)-1;
 
 function LineType() {
@@ -1507,8 +1507,7 @@ Engine.deleteSpriteStat = function (deleteme) {
 
 // 6084
 function changespritesect(spritenum, newsectnum) {
-    throw new Error("todo")
-    //    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
+    throw new Error("todo"); //    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
     //if (sprite[spritenum].sectnum == newsectnum) return(0);
     //if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
     //if (deletespritesect(spritenum) < 0) return(-1);
@@ -2064,13 +2063,13 @@ function updatesector(x, y, lastKnownSector) {
         return;
     }
 
-    throw new Error("todo")
+    throw new Error("todo");
 }
 
 //7795
 function krand() {
-    randomseed = (randomseed * 27584621) + 1;
-    return ((randomseed >> 0) >> 16);
+    randomseed = (mul32(randomseed, 27584621) + 1) | 0;
+    return randomseed >>> 16;
 }
 
 function GetZRangeRefObj(ceilz, ceilhit, florz, florhit) {
@@ -2090,7 +2089,7 @@ function getzrange(x, y, z, sectnum, refObj, walldist, cliptype) {
     var x1, y1, x2, y2, x3, y3, x4, y4, ang, cosang, sinang;
     var xspan, yspan, xrepeat, yrepeat, dasprclipmask, dawalclipmask;
     var cstat;
-    var clipyou;
+    var clipyou = 0;
 
     if (sectnum < 0) {
         refObj.ceilz = 0x80000000;

@@ -54,6 +54,22 @@ function divScale(i1, i2, i3) {
     return Math.floor((i1 * Math.pow(2, i3)) / i2);
 }
 
+// todo: use where required here
+function mul32(n, m) {
+    n = n | 0;
+    m = m | 0;
+    var nlo = n & 0xffff;
+    var nhi = n >> 16; // Sign extending.
+    var res = ((nlo * m) + (((nhi * m) & 0xffff) << 16)) | 0;
+    return res;
+}
+
+//function multiply_uint32(a, b) {
+//    var ah = (a >> 16) & 0xffff, al = a & 0xffff;
+//    var bh = (b >> 16) & 0xffff, bl = b & 0xffff;
+//    var high = ((ah * bl) + (al * bh)) & 0xffff;
+//    return ((high << 16) >>> 0) + (al * bl);
+//}
 
 function ksgn(i1) {
     if (i1 < 0) return -1;
@@ -63,7 +79,7 @@ function ksgn(i1) {
 
 function klabs(i1) {
     if (i1 < 0) {
-        i1 = -1;
+        i1 = -i1;
     }
     
     return i1;

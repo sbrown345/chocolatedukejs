@@ -153,6 +153,16 @@ function ssp(i, cliptype)
     return (movetype == 0);
 }
 
+//728
+function insertspriteq(i) {
+    if (spriteqamount > 0) {
+        if (spriteq[spriteqloc] >= 0)
+            sprite[spriteq[spriteqloc]].xrepeat = 0;
+        spriteq[spriteqloc] = i;
+        spriteqloc = (spriteqloc + 1) % spriteqamount;
+    } else sprite[i].xrepeat = sprite[i].yrepeat = 0;
+}
+
 //836
 function setsectinterpolate(i) {
     var j, k, startwall, endwall;

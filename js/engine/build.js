@@ -174,7 +174,7 @@ var validmodecnt;
 
 var numsectors, numwalls;
 var totalclock;
-var numframes = 0, randomseed;
+var numframes = 0, randomseed = 0;
 
 var sinTable = new Int16Array(2048);
 var palette = new Uint8Array(2048);
