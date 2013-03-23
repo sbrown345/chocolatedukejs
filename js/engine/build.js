@@ -34,7 +34,7 @@ var CLIPMASK1 = (((256) << 16) + 64);
  */
 
 /* 40 bytes */
-function Sector() {
+function SectorType() {
     this.wallptr = 0;
     this.wallnum = 0;
     this.ceilingz = 0;
@@ -151,7 +151,7 @@ function Sprite() {
     this.extra = 0;
 }
 
-var sector = structArray(Sector, MAXSECTORS);
+var sector = structArray(SectorType, MAXSECTORS);
 var wall = structArray(Wall, MAXSPRITES);
 var sprite = structArray(Sprite, MAXSPRITES);
 

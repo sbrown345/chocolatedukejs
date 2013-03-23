@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var preMap = {};
+var preMap = {}; // todo rename PreMap
 
 function tloadtile(tileNumber) {
     gotpic[tileNumber >> 3] |= (1 << (tileNumber & 7));
@@ -271,8 +271,205 @@ preMap.preLevel = function (g) {
 
     i = headspritestat[0];
 
+    while (i >= 0) {
+        switch (sprite[i].picnum) {
+            case DIPSWITCH:
+            case DIPSWITCH2:
+            case ACCESSSWITCH:
+            case PULLSWITCH:
+            case HANDSWITCH:
+            case SLOTDOOR:
+            case LIGHTSWITCH:
+            case SPACELIGHTSWITCH:
+            case SPACEDOORSWITCH:
+            case FRANKENSTINESWITCH:
+            case LIGHTSWITCH2:
+            case POWERSWITCH1:
+            case LOCKSWITCH1:
+            case POWERSWITCH2:
+                break;
+            case DIPSWITCH + 1:
+            case DIPSWITCH2 + 1:
+            case PULLSWITCH + 1:
+            case HANDSWITCH + 1:
+            case SLOTDOOR + 1:
+            case LIGHTSWITCH + 1:
+            case SPACELIGHTSWITCH + 1:
+            case SPACEDOORSWITCH + 1:
+            case FRANKENSTINESWITCH + 1:
+            case LIGHTSWITCH2 + 1:
+            case POWERSWITCH1 + 1:
+            case LOCKSWITCH1 + 1:
+            case POWERSWITCH2 + 1:
+                for (j = 0; j < lotaglist; j++)
+                    if (sprite[i].lotag == lotags[j])
+                        break;
 
-    throw new Error("todo...");
+                if (j == lotaglist) {
+                    lotags[lotaglist] = sprite[i].lotag;
+                    lotaglist++;
+                    if (lotaglist > 64)
+                        throw new Error("Too many switches (64 max).");
+
+                    j = headspritestat[3];
+                    while (j >= 0) {
+                        if (sprite[j].lotag == 12 && sprite[j].hitag == sprite[i].lotag)
+                            hittype[j].temp_data[0] = 1;
+                        j = nextspritestat[j];
+                    }
+                }
+                break;
+        }
+        i = nextspritestat[i];
+    }
+
+    mirrorcnt = 0;
+    
+    for( i = 0; i < numwalls; i++ )
+    {
+        var wal = wall[i];
+
+        if(wal.overpicnum == MIRROR && (wal.cstat&32) != 0)
+        {
+            j = wal.nextsector;
+
+            if(mirrorcnt > 63)
+                throw new Error("Too many mirrors (64 max.)");
+            if ( (j >= 0) && sector[j].ceilingpicnum != MIRROR )
+            {
+                sector[j].ceilingpicnum = MIRROR;
+                sector[j].floorpicnum = MIRROR;
+                mirrorwall[mirrorcnt] = i;
+                mirrorsector[mirrorcnt] = j;
+                mirrorcnt++;
+                continue;
+            }
+        }
+
+        if(numanimwalls >= MAXANIMWALLS)
+            throw new Error("Too many 'anim' walls (max 512.)");
+
+        animwall[numanimwalls].tag = 0;
+        animwall[numanimwalls].wallnum = 0;
+
+        switch(wal.overpicnum)
+        {
+            case FANSHADOW:
+            case FANSPRITE:
+                wall.cstat |= 65;
+                animwall[numanimwalls].wallnum = i;
+                numanimwalls++;
+                break;
+
+            case W_FORCEFIELD:
+                if(!tiles[W_FORCEFIELD].data)
+                    for(j=0;j<3;j++)
+                        tloadtile(W_FORCEFIELD+j);
+            case W_FORCEFIELD+1:
+            case W_FORCEFIELD+2:
+                if(wal.shade > 31)
+                    wal.cstat = 0;
+                else wal.cstat |= 85+256;
+
+
+                if(wal.lotag && wal.nextwall >= 0)
+                    wall[wal.nextwall].lotag =
+                        wal.lotag;
+
+            case BIGFORCE:
+
+                animwall[numanimwalls].wallnum = i;
+                numanimwalls++;
+
+                continue;
+        }
+
+        wal.extra = -1;
+
+        switch(wal.picnum)
+        {
+            case WATERTILE2:
+                for(j=0;j<3;j++)
+                    if(!tiles[wal.picnum+j].data)
+                        tloadtile(wal.picnum+j);
+                break;
+
+            case TECHLIGHT2:
+            case TECHLIGHT4:
+                if(tiles[wal.picnum].data == null)
+                    tloadtile(wal.picnum);
+                break;
+            case W_TECHWALL1:
+            case W_TECHWALL2:
+            case W_TECHWALL3:
+            case W_TECHWALL4:
+                animwall[numanimwalls].wallnum = i;
+                //                animwall[numanimwalls].tag = -1;
+                numanimwalls++;
+                break;
+            case SCREENBREAK6:
+            case SCREENBREAK7:
+            case SCREENBREAK8:
+                if(!tiles[SCREENBREAK6].data)
+                    for(j=SCREENBREAK6;j<SCREENBREAK9;j++)
+                        tloadtile(j);
+                animwall[numanimwalls].wallnum = i;
+                animwall[numanimwalls].tag = -1;
+                numanimwalls++;
+                break;
+
+            case FEMPIC1:
+            case FEMPIC2:
+            case FEMPIC3:
+
+                wal.extra = wal.picnum;
+                animwall[numanimwalls].tag = -1;
+                if(ud.lockout)
+                {
+                    if(wal.picnum == FEMPIC1)
+                        wal.picnum = BLANKSCREEN;
+                    else wal.picnum = SCREENBREAK6;
+                }
+
+                animwall[numanimwalls].wallnum = i;
+                animwall[numanimwalls].tag = wal.picnum;
+                numanimwalls++;
+                break;
+
+            case SCREENBREAK1:
+            case SCREENBREAK2:
+            case SCREENBREAK3:
+            case SCREENBREAK4:
+            case SCREENBREAK5:
+
+            case SCREENBREAK9:
+            case SCREENBREAK10:
+            case SCREENBREAK11:
+            case SCREENBREAK12:
+            case SCREENBREAK13:
+            case SCREENBREAK14:
+            case SCREENBREAK15:
+            case SCREENBREAK16:
+            case SCREENBREAK17:
+            case SCREENBREAK18:
+            case SCREENBREAK19:
+
+                animwall[numanimwalls].wallnum = i;
+                animwall[numanimwalls].tag = wal.picnum;
+                numanimwalls++;
+                break;
+        }
+    }
+
+    //Invalidate textures in sector behind mirror
+    for (i = 0; i < mirrorcnt; i++) {
+        startwall = sector[mirrorsector[i]].wallptr;
+        endwall = startwall + sector[mirrorsector[i]].wallnum;
+        for (j = startwall; j < endwall; j++) {
+            wall[j].picnum = MIRROR;
+            wall[j].overpicnum = MIRROR;
+        }
+    }
 };
 
 //640
@@ -365,6 +562,204 @@ preMap.newGame = function (vn, ln, sk) {
         connecthead = 0;
         connectpoint2[0] = -1;
     }
+};
+
+//1071
+preMap.resetpSpriteVars = function(g) {
+    var i, j, nexti,circ;
+    var firstx,firsty;
+    var s;
+    var aimmode = new Uint8Array(MAXPLAYERS);
+    var tsbar = structArray(StatusBar, MAXPLAYERS);
+
+    var BOT_MAX_NAME = 20;
+    var bot_used = new Array(BOT_MAX_NAME);
+    for (var k = 0; k < bot_used.length; k++) {
+        bot_used[k] = false;
+    }
+    
+    var bot_names = ["* ELASTI",
+        "* ^ZookeM^",
+        "* DOOM",
+        "* DRO",
+        "* NOX",
+        "* EXP",
+        "* SKIPPY",
+        "* BRYZIAN",
+        "* ALI-GUN",
+        "* ADDFAZ",
+        "* TURRICAN",
+        "* PODA",
+        "* EWOLF",
+        "* SOULIANE",
+        "* SPANATOR",
+        "* OVERLORD",
+        "* COWBOYUK",
+        "* JAKS",
+        "* BLUEDRAG",
+        "* MOE{GER}"];
+
+
+    EGS(ps[0].cursectnum,ps[0].posx,ps[0].posy,ps[0].posz,
+        APLAYER,0,0,0,ps[0].ang,0,0,0,10);
+    throw "todo"
+    //if(ud.recstat != 2) for(i=0;i<MAXPLAYERS;i++)
+    //    {
+    //    aimmode[i] = ps[i].aim_mode;
+    //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
+    //    {
+    //        for(j=0;j<MAX_WEAPONS;j++)
+    //        {
+    //            tsbar[i].ammo_amount[j] = ps[i].ammo_amount[j];
+    //            tsbar[i].gotweapon[j] = ps[i].gotweapon[j];
+    //        }
+
+    //        tsbar[i].shield_amount = ps[i].shield_amount;
+    //        tsbar[i].curr_weapon = ps[i].curr_weapon;
+    //        tsbar[i].inven_icon = ps[i].inven_icon;
+
+    //        tsbar[i].firstaid_amount = ps[i].firstaid_amount;
+    //        tsbar[i].steroids_amount = ps[i].steroids_amount;
+    //        tsbar[i].holoduke_amount = ps[i].holoduke_amount;
+    //        tsbar[i].jetpack_amount = ps[i].jetpack_amount;
+    //        tsbar[i].heat_amount = ps[i].heat_amount;
+    //        tsbar[i].scuba_amount = ps[i].scuba_amount;
+    //        tsbar[i].boot_amount = ps[i].boot_amount;
+    //    }
+    //}
+
+    //resetplayerstats(0); // reset a player 
+
+    //for(i=1;i<MAXPLAYERS;i++) // reset all the others
+    //    memcpy(&ps[i],&ps[0],sizeof(ps[0]));
+
+    //// FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
+    //if(numplayers<2 && !(g&MODE_DEMO))
+    //    memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice)); 
+
+    //if(g&MODE_DEMO &&	(ud.playing_demo_rev == BYTEVERSION_27 ||
+    //					ud.playing_demo_rev == BYTEVERSION_28 || 
+    //					ud.playing_demo_rev == BYTEVERSION_29 ||
+    //					ud.playing_demo_rev == BYTEVERSION_116 ||
+    //					ud.playing_demo_rev == BYTEVERSION_117 ||
+    //					ud.playing_demo_rev == BYTEVERSION_118 ))
+    //    for(i=0; i<ud.multimode; i++)
+    //        memcpy(ud.wchoice[i],ud.mywchoice,sizeof(ud.mywchoice)); // assuming.... :-(
+
+    //// FIX_00076: Added default names for bots + fixed a "killed <name>" bug in Fakeplayers with AI
+    //if(!(g&MODE_DEMO) && numplayers<2 && ud.multimode > 1)
+    //    for(i=connecthead;i>=0;i=connectpoint2[i])
+    //        if (i!=myconnectindex)
+    //        {
+    //            memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice));
+
+    //            //	add bot's names
+    //            do 
+    //            { 
+    //                j = rand()%BOT_MAX_NAME; 
+    //            } 
+    //            while(bot_used[j]);
+
+    //            strcpy(ud.user_name[i], bot_names[j]);
+    //            bot_used[j] = true;
+    //            ps[i].fakeplayer = 1 + ud.playerai;  // = true if fakerplayer. (==2 if AI)
+    //        }
+
+    //if(ud.recstat != 2) for(i=0;i<MAXPLAYERS;i++)
+    //    {
+    //    ps[i].aim_mode = aimmode[i];
+    //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
+    //    {
+    //        for(j=0;j<MAX_WEAPONS;j++)
+    //        {
+    //            ps[i].ammo_amount[j] = tsbar[i].ammo_amount[j];
+    //            ps[i].gotweapon[j] = tsbar[i].gotweapon[j];
+    //        }
+    //        ps[i].shield_amount = tsbar[i].shield_amount;
+    //        ps[i].curr_weapon = tsbar[i].curr_weapon;
+    //        ps[i].inven_icon = tsbar[i].inven_icon;
+
+    //        ps[i].firstaid_amount = tsbar[i].firstaid_amount;
+    //        ps[i].steroids_amount= tsbar[i].steroids_amount;
+    //        ps[i].holoduke_amount = tsbar[i].holoduke_amount;
+    //        ps[i].jetpack_amount = tsbar[i].jetpack_amount;
+    //        ps[i].heat_amount = tsbar[i].heat_amount;
+    //        ps[i].scuba_amount= tsbar[i].scuba_amount;
+    //        ps[i].boot_amount = tsbar[i].boot_amount;
+    //    }
+    //}
+
+    //numplayersprites = 0;
+    //circ = 2048/ud.multimode;
+
+    //which_palookup = 9;
+    //j = connecthead;
+    //i = headspritestat[10];
+    //while(i >= 0)
+    //{
+    //    nexti = nextspritestat[i];
+    //    s = &sprite[i];
+
+    //    if( numplayersprites == MAXPLAYERS)
+    //        gameexit("\nToo many player sprites (max 16.)");
+
+    //    if(numplayersprites == 0)
+    //    {
+    //        firstx = ps[0].posx;
+    //        firsty = ps[0].posy;
+    //    }
+
+    //    po[numplayersprites].ox = s.x;
+    //    po[numplayersprites].oy = s.y;
+    //    po[numplayersprites].oz = s.z;
+    //    po[numplayersprites].oa = s.ang;
+    //    po[numplayersprites].os = s.sectnum;
+
+    //    numplayersprites++;
+    //    if(j >= 0)
+    //    {
+    //        s.owner = i;
+    //        s.shade = 0;
+    //        s.xrepeat = 42;
+    //        s.yrepeat = 36;
+    //        s.cstat = 1+256;
+    //        s.xoffset = 0;
+    //        s.clipdist = 64;
+
+    //        if( (g&MODE_EOL) != MODE_EOL || ps[j].last_extra == 0)
+    //        {
+    //            ps[j].last_extra = max_player_health;
+    //            s.extra = max_player_health;
+    //        }
+    //        else s.extra = ps[j].last_extra;
+
+    //        s.yvel = j;
+
+    //        if(s.pal == 0)
+    //        {
+    //            s.pal = ps[j].palookup = which_palookup;
+    //            which_palookup++;
+    //            if( which_palookup >= 17 ) which_palookup = 9;
+    //        }
+    //        else ps[j].palookup = s.pal;
+
+    //        ps[j].i = i;
+    //        ps[j].frag_ps = j;
+    //        hittype[i].owner = i;
+
+    //        hittype[i].bposx = ps[j].bobposx = ps[j].oposx = ps[j].posx =        s.x;
+    //        hittype[i].bposy = ps[j].bobposy = ps[j].oposy = ps[j].posy =        s.y;
+    //        hittype[i].bposz = ps[j].oposz = ps[j].posz =        s.z;
+    //        ps[j].oang  = ps[j].ang  =        s.ang;
+
+    //        updatesector(s.x,s.y,&ps[j].cursectnum);
+
+    //        j = connectpoint2[j];
+
+    //    }
+    //    else deletesprite(i);
+    //    i = nexti;
+    //}
 };
 
 //1286
@@ -475,5 +870,8 @@ preMap.enterLevel = function (g) {
 
     preMap.preLevel(g);
 
+    Sector.allignWarpElevators();
+    preMap.resetpSpriteVars(g);
+    
     debugger;
 };

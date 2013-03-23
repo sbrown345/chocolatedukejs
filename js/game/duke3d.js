@@ -27,6 +27,80 @@ function VOLUMEONE() {
     getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
 }
 
+//152
+var NUMPAGES = 1;
+
+var AUTO_AIM_ANGLE = 48;
+var RECSYNCBUFSIZ = 2520;   //2520 is the (LCM of 1-8)*3
+var MOVEFIFOSIZ = 256;
+
+var FOURSLEIGHT = (1 << 8);
+
+//var TICRATE = g_iTickRate; // put in game.js instead
+//var TICSPERFRAME = (TICRATE / g_iTicksPerFrame);
+
+//195
+var NUM_SOUNDS = 450;
+
+
+//224
+var MODE_MENU = 1;
+var MODE_DEMO = 2;
+var MODE_GAME = 4;
+var MODE_EOL = 8;
+var MODE_TYPE = 16;
+var MODE_RESTART = 32;
+var MODE_SENDTOWHOM = 64;
+var MODE_END = 128;
+
+var MAXANIMWALLS = 512;
+var MAXINTERPOLATIONS = 2048;
+var NUMOFFIRSTTIMEACTIVE = 192;
+
+var MAXCYCLERS = 256;
+var MAXSCRIPTSIZE = 20460;
+var MAXANIMATES = 64;
+
+//279
+var MAX_WEAPONS = 12;
+
+var KNEE_WEAPON = 0;
+var PISTOL_WEAPON = 1;
+var SHOTGUN_WEAPON = 2;
+var CHAINGUN_WEAPON = 3;
+var RPG_WEAPON = 4;
+var HANDBOMB_WEAPON = 5;
+var SHRINKER_WEAPON = 6;
+var DEVISTATOR_WEAPON = 7;
+var TRIPBOMB_WEAPON = 8;
+var FREEZE_WEAPON = 9;
+var HANDREMOTE_WEAPON = 10;
+var GROW_WEAPON = 11;
+
+
+
+///* !!! FIXME: "sync" is defined in unistd.h ... :(  --ryan. */
+//#define sync duke_sync
+//extern input inputfifo[MOVEFIFOSIZ][MAXPLAYERS], sync[MAXPLAYERS];
+//extern input recsync[RECSYNCBUFSIZ];
+
+//extern int32_t movefifosendplc;
+
+//typedef struct
+//{
+//    uint8_t  *ptr;
+//    uint8_t  lock;
+//    int  length, num;
+//} SAMPLE;
+
+function AnimWall() {
+    this.wallnum = 0;
+    this.tag = 0;
+}
+
+//extern struct animwalltype animwall[MAXANIMWALLS]; //these are in global
+//extern short numanimwalls,probey,lastprobey;
+//373
 var mymembuf;
 
 function Player() {
@@ -92,47 +166,46 @@ function Player() {
     this.fakeplayer = 0;
 }
 
-var NUMPAGES = 1;
+//653
+function StatusBar() {
+    this.frag = new Int16Array(MAXPLAYERS); this.got_access = 0; this.last_extra = 0; this.shield_amount = 0; this.curr_weapon = 0;
+    this.ammo_amount = new Int16Array(MAXPLAYERS); this.holoduke_on = 0;
+    this.gotweapon = new Uint8Array(MAX_WEAPONS); this.inven_icon = 0; this.jetpack_on = 0; this.heat_on = 0;
+    this.firstaid_amount = 0; this.steroids_amount = 0; this.holoduke_amount = 0; this.jetpack_amount = 0;
+    this.heat_amount = 0; this.scuba_amount = 0; this.boot_amount = 0;
+    this.last_weapon = 0; this.weapon_pos = 0; this.kickback_pic = 0;
+}
 
-var AUTO_AIM_ANGLE = 48;
-var RECSYNCBUFSIZ = 2520;   //2520 is the (LCM of 1-8)*3
-var MOVEFIFOSIZ = 256;
+//extern STATUSBARTYPE sbar;
+//extern short frags[MAXPLAYERS][MAXPLAYERS];
+//extern int32_t cameradist, cameraclock, dukefriction,show_shareware;
+//extern uint8_t  networkmode, movesperpacket;
+//extern uint8_t  gamequit;
 
-var FOURSLEIGHT = (1 << 8);
+//extern uint8_t  pus,pub,camerashitable,freezerhurtowner,lasermode;
+//extern uint8_t  syncstat, syncval[MAXPLAYERS][MOVEFIFOSIZ];
+//extern int8_t multiwho, multipos, multiwhat, multiflag;
+//extern int32_t syncvalhead[MAXPLAYERS], syncvaltail, syncvaltottail;
+//extern int32_t numfreezebounces,rpgblastradius,pipebombblastradius,tripbombblastradius,shrinkerblastradius,morterblastradius,bouncemineblastradius,seenineblastradius;
+//// CTW - MODIFICATION
+//// extern uint8_t  stereo,eightytwofifty,playerswhenstarted,playonten,everyothertime;
+//extern uint8_t  stereo,eightytwofifty,playerswhenstarted,everyothertime;
+//// CTW END - MODIFICATION
+//extern int32_t myminlag[MAXPLAYERS], mymaxlag, otherminlag, bufferjitter;
 
-//var TICRATE = g_iTickRate; // put in game.js instead
-//var TICSPERFRAME = (TICRATE / g_iTicksPerFrame);
+//extern int32_t numinterpolations, startofdynamicinterpolations;
+//extern int32_t oldipos[MAXINTERPOLATIONS];
+//extern int32_t bakipos[MAXINTERPOLATIONS];
+//extern int32_t *curipos[MAXINTERPOLATIONS];
 
-var NUM_SOUNDS = 450;
+//extern short numclouds,clouds[128],cloudx[128],cloudy[128];
+//extern int32_t cloudtotalclock,totalmemory;
 
-var MODE_MENU = 1;
-var MODE_DEMO = 2;
-var MODE_GAME = 4;
-var MODE_EOL = 8;
-var MODE_TYPE = 16;
-var MODE_RESTART = 32;
-var MODE_SENDTOWHOM = 64;
-var MODE_END = 128;
 
-var MAXANIMWALLS = 512;
-var MAXINTERPOLATIONS = 2048;
-var NUMOFFIRSTTIMEACTIVE = 192;
 
-var MAXCYCLERS = 256;
-var MAXSCRIPTSIZE = 20460;
-var MAXANIMATES = 64;
+//extern int32_t myaimmode, myaimstat, omyaimstat;
 
-var MAX_WEAPONS = 12;
+//extern uint8_t  nHostForceDisableAutoaim;
 
-var KNEE_WEAPON = 0;
-var PISTOL_WEAPON = 1;
-var SHOTGUN_WEAPON = 2;
-var CHAINGUN_WEAPON = 3;
-var RPG_WEAPON = 4;
-var HANDBOMB_WEAPON = 5;
-var SHRINKER_WEAPON = 6;
-var DEVISTATOR_WEAPON = 7;
-var TRIPBOMB_WEAPON = 8;
-var FREEZE_WEAPON = 9;
-var HANDREMOTE_WEAPON = 10;
-var GROW_WEAPON = 11;
+//#endif  // include-once header.
+

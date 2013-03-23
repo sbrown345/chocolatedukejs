@@ -122,6 +122,89 @@ function badguy(s) {
     return 0;
 }
 
+//3472
+function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss)
+{
+    var i;
+    var s;
+
+    i = Engine.insertSprite(whatsect, s_ss);
+
+    if( i < 0 )
+        throw new Error(" Too many sprites spawned. This may happen (for any duke port) if you have hacked the steroids trail in the *.con files. If so, delete your *.con files to use the internal ones and try again.");
+
+    hittype[i].bposx = s_x;
+    hittype[i].bposy = s_y;
+    hittype[i].bposz = s_z;
+
+    s = sprite[i];
+
+    s.x = s_x;
+    s.y = s_y;
+    s.z = s_z;
+    s.cstat = 0;
+    s.picnum = s_pn;
+    s.shade = s_s;
+    s.xrepeat = s_xr;
+    s.yrepeat = s_yr;
+    s.pal = 0;
+
+    s.ang = s_a;
+    s.xvel = s_ve;
+    s.zvel = s_zv;
+    s.owner = s_ow;
+    s.xoffset = 0;
+    s.yoffset = 0;
+    s.yvel = 0;
+    s.clipdist = 0;
+    s.pal = 0;
+    s.lotag = 0;
+
+    hittype[i].picnum = sprite[s_ow].picnum;
+
+    hittype[i].lastvx = 0;
+    hittype[i].lastvy = 0;
+
+    hittype[i].timetosleep = 0;
+    hittype[i].actorstayput = -1;
+    hittype[i].extra = -1;
+    hittype[i].owner = s_ow;
+    hittype[i].cgg = 0;
+    hittype[i].movflag = 0;
+    hittype[i].tempang = 0;
+    hittype[i].dispicnum = 0;
+    hittype[i].floorz = hittype[s_ow].floorz;
+    hittype[i].ceilingz = hittype[s_ow].ceilingz;
+
+    hittype[i].temp_data[0]=hittype[i].temp_data[2]=hittype[i].temp_data[3]=hittype[i].temp_data[5]=0;
+    if( actorscrptr[s_pn] )
+    {
+        s.extra = script[actorscrptr[s_pn]];
+        hittype[i].temp_data[4] =  script[actorscrptr[s_pn]+1];
+        hittype[i].temp_data[1] =  script[actorscrptr[s_pn]+2];
+        s.hitag = script[actorscrptr[s_pn] + 3];
+        throw new Error("bug here, the first value is ok but then temp_data isn't     maybe use ((int)  &actorscrptr[s_pn]) - ((int)&actorscrptr[0])    to compare the addreses")
+        debugger;
+    }
+    else
+    {
+        hittype[i].temp_data[1]=hittype[i].temp_data[4]=0;
+        s.extra = 0;
+        s.hitag = 0;
+    }
+
+    if (show2dsector[sprite[i].sectnum>>3]&(1<<(sprite[i].sectnum&7))) show2dsprite[i>>3] |= (1<<(i&7));
+    else show2dsprite[i>>3] &= ~(1<<(i&7));
+    /*
+        if(s.sectnum < 0)
+        {
+            s.xrepeat = s.yrepeat = 0;
+            changespritestat(i,5);
+        }
+    */
+    return(i);
+}
+
 //3552
 Game.wallSwitchCheck = function (i) {
     switch (sprite[i].picnum) {

@@ -90,7 +90,7 @@ var ud = {
     conCRC: new Uint32Array(MAXPLAYERS),
 };
 
-//struct animwalltype animwall[MAXANIMWALLS];
+var animwall = structArray(AnimWall, MAXANIMWALLS);
 var numanimwalls;
 var /**animateptr[MAXANIMATES], animategoal[MAXANIMATES], animatevel[MAXANIMATES], */animatecnt;
 //// int32_t oanimateval[MAXANIMATES];
@@ -106,7 +106,7 @@ var packbuf = new Uint8Array(576);
 //char  buf[80];
 
 var camsprite;
-//short mirrorwall[64], mirrorsector[64], mirrorcnt;
+var mirrorwall = new Int16Array(64), mirrorsector = new Int16Array(64), mirrorcnt = 0;
 
 //var current_menu;
 
