@@ -271,7 +271,9 @@ preMap.preLevel = function (g) {
     lotaglist = 0;
 
     i = headspritestat[0];
-    debugger;
+
+
+    throw new Error("todo...");
 };
 
 //640

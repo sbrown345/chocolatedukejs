@@ -24,11 +24,22 @@ var BYTEVERSION = 119; // xDuke v19.7
 var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_ammo_amount = new Int32Array(MAX_WEAPONS);
 
 // int32_t temp_data[MAXSPRITES][6];
-//struct weaponhit hittype[MAXSPRITES];
+function weaponhit() {
+    this.cgg = 0;
+    this.picnum = 0; this.ang = 0; this.extra = 0; this.owner = 0; this.movflag = 0;
+    this.tempang = 0; this.actorstayput = 0; this.dispicnum = 0;
+    this.timetosleep = 0;
+    this.floorz = 0; this.ceilingz = 0; this.lastvx = 0; this.lastvy = 0; this.bposx = 0; this.bposy = 0; this.bposz = 0;
+    this.temp_data = new Int32Array(6);
+}
+
+var hittype = structArray(weaponhit, MAXSPRITES);
 var spriteq = new Int16Array(1024), spriteqloc, spriteqamount = 64;
 
 var ps = structArray(Player, MAXPLAYERS);
 
+// todo: change to class?
+// and/or less than 30 properties?
 var ud = {
     god: 0,
     warp_on: 0,
