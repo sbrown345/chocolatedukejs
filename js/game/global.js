@@ -95,7 +95,7 @@ var numanimwalls;
 var /**animateptr[MAXANIMATES], animategoal[MAXANIMATES], animatevel[MAXANIMATES], */animatecnt;
 //// int32_t oanimateval[MAXANIMATES];
 //short animatesect[MAXANIMATES];
-//int32_t msx[2048],msy[2048];
+var msx = new Int32Array(2048), msy = new Int32Array(2048);
 var cyclers = multiDimArray(Int16Array, MAXCYCLERS, 6), numcyclers;
 
 var fta_quotes = new Array(NUMOFFIRSTTIMEACTIVE);
