@@ -186,6 +186,25 @@ var colnext = new Int32Array(256);
 //static uint8_t  coldist[8] = {0,1,2,3,4,3,2,1};
 var colscan = new Int32Array(27);
 
+//static int16_t clipnum, hitwalls[4];
+//int32_t hitscangoalx = (1<<29)-1, hitscangoaly = (1<<29)-1;
+
+//typedef struct {
+//    int32_t x1, y1, x2, y2;
+//} linetype;
+//static linetype clipit[MAXCLIPNUM];
+var clipsectorlist = new Int16Array(MAXCLIPNUM), clipsectnum = 0;
+//static short clipobjectval[MAXCLIPNUM];
+
+//typedef struct
+//{
+//    int32_t sx, sy, z;
+//    short a, picnum;
+//    int8_t dashade;
+//    uint8_t  dapalnum, dastat, pagesleft;
+//    int32_t cx1, cy1, cx2, cy2;
+//} permfifotype;
+//static permfifotype permfifo[MAXPERMS];
 var permhead = 0, permtail = 0;
 
 ////FCS: Num walls to potentially render.
@@ -195,37 +214,49 @@ var permhead = 0, permtail = 0;
 
 //short numhits;
 
-//short editstatus = 0;
+var editstatus = 0;
 var searchit;
 var searchx = -1, searchy;                     /* search input  */
 var searchsector, searchwall, searchstat;     /* search output */
 
 var numtilefiles, artfil = -1, artfilnum, artfilplc;
 
+//278
+function nsqrtasm(param) {
+    var shlookup_a = shLookup;
+    var sqrtable_a = sqrTable;
+    var cx;
 
-Engine.initKSqrt = function () {
-    var i, j, k;
-    j = 1;
-    k = 0;
-    for (i = 0; i < 4096; i++) {
-        if (i >= j) {
-            j <<= 2;
-            k++;
-        }
+    if (param & 0xff000000)
+        cx = shlookup_a[(param >> 24) + 4096];
+    else
+        cx = shlookup_a[param >> 12];
 
-        sqrTable[i] = Math.sqrt((i << 18) + 131072) << 1;
-        shLookup[i] = (k << 1) + ((10 - k) << 8);
-        if (i < 256) {
-            shLookup[i + 4096] = ((k + 6) << 1) + ((10 - (k + 6)) << 8);
-        }
-    }
-};
+    param = param >> (cx & 0xff);
+    param = ((param & 0xffff0000) | sqrtable_a[param]);
+    param = param >> ((cx & 0xff00) >> 8);
+
+    console.log("nsqrtasm: %i", param);;
+    return param;
+}
 
 //658
 Engine.getpalookup = function (davis, dashade) {
     return Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1);
 };
 
+//2593
+function setAspect(daxrange, daaspect) {
+    viewingrange = daxrange;
+    viewingrangerecip = divScale32(1, daxrange);
+
+    yxaspect = daaspect;
+    xyaspect = divScale32(1, yxaspect);
+    xdimenscale = scale(xdimen, yxaspect, 320);
+    xdimscale = scale(320, xyaspect, xdimen);
+}
+
+//3179
 Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectnum) {
     var x = 0;
     var fil, i, numsprites;
@@ -287,29 +318,29 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
         sect.lotag = kread16(fil);
         sect.hitag = kread16(fil);
         sect.extra = kread16(fil);
-    //    console.log("x: %i", x);
-    //    console.log("wallptr: %i", sect.wallptr);
-    //    console.log("wallnum: %i", sect.wallnum);
-    //    console.log("ceilingz: %i", sect.ceilingz);
-    //    console.log("ceilingstat: %i", sect.ceilingstat);
-    //    console.log("ceilingpicnum: %i", sect.ceilingpicnum);
-    //    console.log("ceilingheinum: %i", sect.ceilingheinum);
-    //    console.log("ceilingshade: %i", sect.ceilingshade);
-    //    console.log("ceilingpal: %i", sect.ceilingpal);
-    //    console.log("ceilingxpanning: %i", sect.ceilingxpanning);
-    //    console.log("ceilingypanning: %i", sect.ceilingypanning);
-    //    console.log("floorpicnum: %i", sect.floorpicnum);
-    //    console.log("floorheinum: %i", sect.floorheinum);
-    //    console.log("floorshade: %i", sect.floorshade);
-    //    console.log("floorpal: %i", sect.floorpal);
-    //    console.log("floorxpanning: %i", sect.floorxpanning);
-    //    console.log("floorypanning: %i", sect.floorypanning);
-    //    console.log("floorypanning: %i", sect.floorypanning);
-    //    console.log("visibility: %i", sect.visibility);
-    //    console.log("filler: %i", sect.filler);
-    //    console.log("lotag: %i", sect.lotag);
-    //    console.log("hitag: %i", sect.hitag);
-    //    console.log("extra: %i", sect.extra);
+        //    console.log("x: %i", x);
+        //    console.log("wallptr: %i", sect.wallptr);
+        //    console.log("wallnum: %i", sect.wallnum);
+        //    console.log("ceilingz: %i", sect.ceilingz);
+        //    console.log("ceilingstat: %i", sect.ceilingstat);
+        //    console.log("ceilingpicnum: %i", sect.ceilingpicnum);
+        //    console.log("ceilingheinum: %i", sect.ceilingheinum);
+        //    console.log("ceilingshade: %i", sect.ceilingshade);
+        //    console.log("ceilingpal: %i", sect.ceilingpal);
+        //    console.log("ceilingxpanning: %i", sect.ceilingxpanning);
+        //    console.log("ceilingypanning: %i", sect.ceilingypanning);
+        //    console.log("floorpicnum: %i", sect.floorpicnum);
+        //    console.log("floorheinum: %i", sect.floorheinum);
+        //    console.log("floorshade: %i", sect.floorshade);
+        //    console.log("floorpal: %i", sect.floorpal);
+        //    console.log("floorxpanning: %i", sect.floorxpanning);
+        //    console.log("floorypanning: %i", sect.floorypanning);
+        //    console.log("floorypanning: %i", sect.floorypanning);
+        //    console.log("visibility: %i", sect.visibility);
+        //    console.log("filler: %i", sect.filler);
+        //    console.log("lotag: %i", sect.lotag);
+        //    console.log("hitag: %i", sect.hitag);
+        //    console.log("extra: %i", sect.extra);
     }
 
     numwalls = kread16(fil);
@@ -406,12 +437,12 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     for (i = 0; i < numsprites; i++) {
         Engine.insertSprite(sprite[i].sectnum, sprite[i].statnum);
     }
-    
+
     /* Must be after loading sectors, etc! */
     updatesector(daposx, daposy, dacursectnum);
 
     kclose(fil);
-    
+
     // FIX_00009: Show map CRC and GRP file version of each player in case of Out Of Synch
 
     // todo:
@@ -421,6 +452,57 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
 
     return 0;
 };
+
+//3534
+Engine.initKSqrt = function () {
+    var i, j, k;
+    j = 1;
+    k = 0;
+    for (i = 0; i < 4096; i++) {
+        if (i >= j) {
+            j <<= 2;
+            k++;
+        }
+
+        sqrTable[i] = Math.sqrt((i << 18) + 131072) << 1;
+        shLookup[i] = (k << 1) + ((10 - k) << 8);
+        if (i < 256) {
+            shLookup[i + 4096] = ((k + 6) << 1) + ((10 - (k + 6)) << 8);
+        }
+    }
+};
+
+//4332
+function nextpage() {
+    var i, per;
+
+    if (qsetmode === 200) {
+        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
+            throw new Error("todo"); //per = &permfifo[i];
+            //if ((per->pagesleft > 0) && (per->pagesleft <= numpages))
+            //    dorotatesprite(per->sx,per->sy,per->z,per->a,per->picnum,per->dashade,per->dapalnum,per->dastat,per->cx1,per->cy1,per->cx2,per->cy2);
+        }
+    }
+
+    _nextpage();
+
+    if (qsetmode === 200) {
+        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
+            throw new Error("todo");
+        }
+    }
+
+    faketimerhandler();
+
+    if ((totalclock >= lastageclock + 8) || (totalclock < lastageclock)) {
+        lastageclock = totalclock;
+        agecache();
+    }
+
+    beforedrawrooms = 1;
+    numframes++;
+    //console.log("numframes: %i", numframes);
+}
 
 //3488
 Engine.loadTables = function () {
@@ -1287,7 +1369,7 @@ Engine.initSpriteLists = function () {
 };
 
 //5899
-Engine.insertSprite = function(sectNum, statNum) {
+Engine.insertSprite = function (sectNum, statNum) {
     Engine.insertSpriteStat(statNum);
     return Engine.insertSpriteSect(sectNum);
 };
@@ -1313,7 +1395,7 @@ Engine.insertSpriteSect = function (sectnum) {
 
     sprite[blanktouse].sectnum = sectnum;
 
-    return(blanktouse);
+    return (blanktouse);
 };
 
 Engine.insertSpriteStat = function (statnum) {
@@ -1337,7 +1419,7 @@ Engine.insertSpriteStat = function (statnum) {
 
     sprite[blanktouse].statnum = statnum;
 
-    return(blanktouse);
+    return (blanktouse);
 };
 
 function deletesprite(spriteNum) {
@@ -1346,56 +1428,60 @@ function deletesprite(spriteNum) {
 }
 
 // 5985
-Engine.deleteSpriteSect = function(deleteme) {
-    if (sprite[deleteme].statnum == MAXSTATUS) {
-        return -1;
-    }
-
-    if (headspritestat[sprite[deleteme].statnum] == deleteme)
-        headspritestat[sprite[deleteme].statnum] = nextspritestat[deleteme];
-
-    if (prevspritestat[deleteme] >= 0) nextspritestat[prevspritestat[deleteme]] = nextspritestat[deleteme];
-    if (nextspritestat[deleteme] >= 0) prevspritestat[nextspritestat[deleteme]] = prevspritestat[deleteme];
-
-    if (headspritestat[MAXSTATUS] >= 0) prevspritestat[headspritestat[MAXSTATUS]] = deleteme;
-    prevspritestat[deleteme] = -1;
-    nextspritestat[deleteme] = headspritestat[MAXSTATUS];
-    headspritestat[MAXSTATUS] = deleteme;
-
-    sprite[deleteme].statnum = MAXSTATUS;
-    return 0;
-};
-
-Engine.deleteSpriteStat = function (deleteme) {
-    if (sprite[deleteme].sectnum == MAXSECTORS) {
-        return -1;
-    }
+Engine.deleteSpriteSect = function (deleteme) {
+    if (sprite[deleteme].sectnum == MAXSECTORS)
+        return (-1);
 
     if (headspritesect[sprite[deleteme].sectnum] == deleteme)
         headspritesect[sprite[deleteme].sectnum] = nextspritesect[deleteme];
 
-    if (prevspritesect[deleteme] >= 0) nextspritesect[prevspritesect[deleteme]] = nextspritesect[deleteme];
-    if (nextspritesect[deleteme] >= 0) prevspritesect[nextspritesect[deleteme]] = prevspritesect[deleteme];
+    if (prevspritesect[deleteme] >= 0)
+        nextspritesect[prevspritesect[deleteme]] = nextspritesect[deleteme];
+    if (nextspritesect[deleteme] >= 0)
+        prevspritesect[nextspritesect[deleteme]] = prevspritesect[deleteme];
 
-    if (headspritesect[MAXSECTORS] >= 0) prevspritesect[headspritesect[MAXSECTORS]] = deleteme;
+    if (headspritesect[MAXSECTORS] >= 0)
+        prevspritesect[headspritesect[MAXSECTORS]] = deleteme;
     prevspritesect[deleteme] = -1;
     nextspritesect[deleteme] = headspritesect[MAXSECTORS];
     headspritesect[MAXSECTORS] = deleteme;
 
     sprite[deleteme].sectnum = MAXSECTORS;
-    return 0;
+    return (0);
+};
+
+Engine.deleteSpriteStat = function (deleteme) {
+    if (sprite[deleteme].statnum == MAXSTATUS)
+        return (-1);
+
+    if (headspritestat[sprite[deleteme].statnum] == deleteme)
+        headspritestat[sprite[deleteme].statnum] = nextspritestat[deleteme];
+
+    if (prevspritestat[deleteme] >= 0)
+        nextspritestat[prevspritestat[deleteme]] = nextspritestat[deleteme];
+    if (nextspritestat[deleteme] >= 0)
+        prevspritestat[nextspritestat[deleteme]] = prevspritestat[deleteme];
+
+    if (headspritestat[MAXSTATUS] >= 0)
+        prevspritestat[headspritestat[MAXSTATUS]] = deleteme;
+
+    prevspritestat[deleteme] = -1;
+    nextspritestat[deleteme] = headspritestat[MAXSTATUS];
+    headspritestat[MAXSTATUS] = deleteme;
+
+    sprite[deleteme].statnum = MAXSTATUS;
+    return (0);
 };
 
 // 6084
-function changespritesect(spritenum, newsectnum)
-{
+function changespritesect(spritenum, newsectnum) {
     throw new Error("todo")
-//    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
-//if (sprite[spritenum].sectnum == newsectnum) return(0);
-//if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
-//if (deletespritesect(spritenum) < 0) return(-1);
-//insertspritesect(newsectnum);
-//return(0);
+    //    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
+    //if (sprite[spritenum].sectnum == newsectnum) return(0);
+    //if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
+    //if (deletespritesect(spritenum) < 0) return(-1);
+    //insertspritesect(newsectnum);
+    //return(0);
 }
 
 
@@ -1427,13 +1513,261 @@ function updatesector(x, y, lastKnownSector) {
     var i, j;
 
     //First check the last sector where (old_x,old_y) was before being updated to (x,y)
-    if (inside(x,y,lastKnownSector) == 1)
-    {
+    if (inside(x, y, lastKnownSector) == 1) {
         //We found it and (x,y) is still in the same sector: nothing to update !
         return;
     }
-    
+
     throw new Error("todo")
+}
+
+function GetZRangeRefObj(ceilz, ceilhit, florz, florhit) {
+    this.ceilz = ceilz || 0;
+    this.ceilhit = ceilhit || 0;
+    this.floorz = florz || 0;
+    this.florhit = florhit || 0;
+}
+
+function getzrange(x, y, z, sectnum, refObj, walldist, cliptype) {
+    var sec;
+    var wal, wal2;
+    var spr;
+    var clipsectcnt, startwall, endwall, tilenum, xoff, yoff, dax, day;
+    var xmin, ymin, xmax, ymax, i, j, k, l, daz, daz2, dx, dy;
+    var x1, y1, x2, y2, x3, y3, x4, y4, ang, cosang, sinang;
+    var xspan, yspan, xrepeat, yrepeat, dasprclipmask, dawalclipmask;
+    var cstat;
+    var clipyou;
+
+    if (sectnum < 0) {
+        refObj.ceilz = 0x80000000;
+        refObj.ceilhit = -1;
+        refObj.florz = 0x7fffffff;
+        refObj.florhit = -1;
+        return;
+    }
+
+    /* Extra walldist for sprites on sector lines */
+    i = walldist + MAXCLIPDIST + 1;
+    xmin = x - i;
+    ymin = y - i;
+    xmax = x + i;
+    ymax = y + i;
+
+    getzsofslope(sectnum, x, y, refObj);
+    refObj.ceilhit = sectnum + 16384;
+    refObj.florhit = sectnum + 16384;
+
+    dawalclipmask = (cliptype & 65535);
+    dasprclipmask = (cliptype >> 16);
+
+    clipsectorlist[0] = sectnum;
+    clipsectcnt = 0;
+    clipsectnum = 1;
+
+    do  /* Collect sectors inside your square first */ {
+        sec = sector[clipsectorlist[clipsectcnt]];
+        startwall = sec.wallptr;
+        endwall = startwall + sec.wallnum;
+        for (j = startwall; j < endwall; j++) {
+            wal = wall[startwall];
+            k = wal.nextsector;
+            if (k >= 0) {
+                wal2 = wall[wal.point2];
+                x1 = wal.x;
+                x2 = wal2.x;
+                if ((x1 < xmin) && (x2 < xmin)) continue;
+                if ((x1 > xmax) && (x2 > xmax)) continue;
+                y1 = wal.y;
+                y2 = wal2.y;
+                if ((y1 < ymin) && (y2 < ymin)) continue;
+                if ((y1 > ymax) && (y2 > ymax)) continue;
+
+                dx = x2 - x1;
+                dy = y2 - y1;
+                if (dx * (y - y1) < (x - x1) * dy) continue; /* back */
+                if (dx > 0) dax = dx * (ymin - y1);
+                else dax = dx * (ymax - y1);
+                if (dy > 0) day = dy * (xmax - x1);
+                else day = dy * (xmin - x1);
+                if (dax >= day) continue;
+
+                if (wal.cstat & dawalclipmask) continue;
+                sec = sector[k];
+                if (editstatus == 0) {
+                    if (((sec.ceilingstat & 1) == 0) && (z <= sec.ceilingz + (3 << 8))) continue;
+                    if (((sec.floorstat & 1) == 0) && (z >= sec.floorz - (3 << 8))) continue;
+                }
+
+                for (i = clipsectnum - 1; i >= 0; i--) if (clipsectorlist[i] == k) break;
+                if (i < 0) clipsectorlist[clipsectnum++] = k;
+
+                if ((x1 < xmin + MAXCLIPDIST) && (x2 < xmin + MAXCLIPDIST)) continue;
+                if ((x1 > xmax - MAXCLIPDIST) && (x2 > xmax - MAXCLIPDIST)) continue;
+                if ((y1 < ymin + MAXCLIPDIST) && (y2 < ymin + MAXCLIPDIST)) continue;
+                if ((y1 > ymax - MAXCLIPDIST) && (y2 > ymax - MAXCLIPDIST)) continue;
+                if (dx > 0) dax += dx * MAXCLIPDIST;
+                else dax -= dx * MAXCLIPDIST;
+                if (dy > 0) day -= dy * MAXCLIPDIST;
+                else day += dy * MAXCLIPDIST;
+                if (dax >= day) continue;
+
+                /* It actually got here, through all the continue's! */
+                throw new Error("todo: !");
+                //getzsofslope((short)k,x,y,&daz,&daz2);
+                //if (daz > refObj.ceilz) {
+                //    refObj.ceilz = daz;
+                //    refObj.ceilhit = k+16384;
+                //}
+                //if (daz2 < refObj.florz) {
+                //    refObj.florz = daz2;
+                //   refObj.florhit = k+16384;
+                //}
+                startwall++;
+            }
+        }
+        clipsectcnt++;
+    } while (clipsectcnt < clipsectnum);
+
+    for (i = 0; i < clipsectnum; i++) {
+        for (j = headspritesect[clipsectorlist[i]]; j >= 0; j = nextspritesect[j]) {
+            spr = sprite[j];
+            cstat = spr.cstat;
+            if (cstat & dasprclipmask) {
+                x1 = spr.x;
+                y1 = spr.y;
+
+                clipyou = 0;
+                switch (cstat & 48) {
+                    case 0:
+                        k = walldist + (spr.clipdist << 2) + 1;
+                        if ((klabs(x1 - x) <= k) && (klabs(y1 - y) <= k)) {
+                            daz = spr.z;
+                            k = ((tiles[spr.picnum].dim.height * spr.yrepeat) << 1);
+                            if (cstat & 128)
+                                daz += k;
+                            //if (tiles[spr.picnum].animFlags & 0x00ff0000) daz -=
+                            //    ((int32_t)((int8_t)((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
+                            if (tiles[spr.picnum].animFlags & 0x00ff0000) daz -=
+                                (/*(int32_t)*/(/*(int8_t)*/((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
+                            daz2 = daz - (k << 1);
+                            clipyou = 1;
+                        }
+                        break;
+                    case 16:
+                        throw new Error("todo");
+                        //tilenum = spr.picnum;
+                        //xoff = (int32_t)((int8_t  )((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
+                        //if ((cstat&4) > 0) xoff = -xoff;
+                        //k = spr.ang;
+                        //l = spr.xrepeat;
+                        //dax = sintable[k&2047]*l;
+                        //day = sintable[(k+1536)&2047]*l;
+                        //l = tiles[tilenum].dim.width;
+                        //k = (l>>1)+xoff;
+                        //x1 -= mulscale16(dax,k);
+                        //x2 = x1+mulscale16(dax,l);
+                        //y1 -= mulscale16(day,k);
+                        //y2 = y1+mulscale16(day,l);
+                        //if (clipinsideboxline(x,y,x1,y1,x2,y2,walldist+1) != 0)
+                        //{
+                        //    daz = spr.z;
+                        //    k = ((tiles[spr.picnum].dim.height*spr.yrepeat)<<1);
+                        //    if (cstat&128)
+                        //        daz += k;
+
+                        //    if (tiles[spr.picnum].animFlags&0x00ff0000) 
+                        //        daz -= ((int32_t)((int8_t  )((tiles[spr.picnum].animFlags>>16)&255))*spr.yrepeat<<2);
+
+                        //    daz2 = daz-(k<<1);
+                        //    clipyou = 1;
+                        //}
+                        break;
+                    case 32:
+                        throw new Error("todo");
+                        //daz = spr.z;
+                        //daz2 = daz;
+
+                        //if ((cstat&64) != 0)
+                        //    if ((z > daz) == ((cstat&8)==0)) continue;
+
+                        //tilenum = spr.picnum;
+                        //xoff = (int32_t)((int8_t  )((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
+                        //yoff = (int32_t)((int8_t  )((tiles[tilenum].animFlags>>16)&255))+((int32_t)spr.yoffset);
+                        //if ((cstat&4) > 0) xoff = -xoff;
+                        //if ((cstat&8) > 0) yoff = -yoff;
+
+                        //ang = spr.ang;
+                        //cosang = sintable[(ang+512)&2047];
+                        //sinang = sintable[ang];
+                        //xspan = tiles[tilenum].dim.width;
+                        //xrepeat = spr.xrepeat;
+                        //yspan = tiles[tilenum].dim.height;
+                        //yrepeat = spr.yrepeat;
+
+                        //dax = ((xspan>>1)+xoff)*xrepeat;
+                        //day = ((yspan>>1)+yoff)*yrepeat;
+                        //x1 += dmulscale16(sinang,dax,cosang,day)-x;
+                        //y1 += dmulscale16(sinang,day,-cosang,dax)-y;
+                        //l = xspan*xrepeat;
+                        //x2 = x1 - mulscale16(sinang,l);
+                        //y2 = y1 + mulscale16(cosang,l);
+                        //l = yspan*yrepeat;
+                        //k = -mulscale16(cosang,l);
+                        //x3 = x2+k;
+                        //x4 = x1+k;
+                        //k = -mulscale16(sinang,l);
+                        //y3 = y2+k;
+                        //y4 = y1+k;
+
+                        //dax = mulscale14(sintable[(spr.ang-256+512)&2047],walldist+4);
+                        //day = mulscale14(sintable[(spr.ang-256)&2047],walldist+4);
+                        //x1 += dax;
+                        //x2 -= day;
+                        //x3 -= dax;
+                        //x4 += day;
+                        //y1 += day;
+                        //y2 += dax;
+                        //y3 -= day;
+                        //y4 -= dax;
+
+                        //if ((y1^y2) < 0)
+                        //{
+                        //    if ((x1^x2) < 0) clipyou ^= (x1*y2<x2*y1)^(y1<y2);
+                        //    else if (x1 >= 0) clipyou ^= 1;
+                        //}
+                        //if ((y2^y3) < 0)
+                        //{
+                        //    if ((x2^x3) < 0) clipyou ^= (x2*y3<x3*y2)^(y2<y3);
+                        //    else if (x2 >= 0) clipyou ^= 1;
+                        //}
+                        //if ((y3^y4) < 0)
+                        //{
+                        //    if ((x3^x4) < 0) clipyou ^= (x3*y4<x4*y3)^(y3<y4);
+                        //    else if (x3 >= 0) clipyou ^= 1;
+                        //}
+                        //if ((y4^y1) < 0)
+                        //{
+                        //    if ((x4^x1) < 0) clipyou ^= (x4*y1<x1*y4)^(y4<y1);
+                        //    else if (x4 >= 0) clipyou ^= 1;
+                        //}
+                        //break;
+                }
+
+                if (clipyou != 0) {
+                    throw new Error("todo");
+                    //if ((z > daz) && (daz > *ceilz)) {
+                    //    *ceilz = daz;
+                    //    *ceilhit = j+49152;
+                    //}
+                    //if ((z < daz2) && (daz2 < *florz)) {
+                    //    *florz = daz2;
+                    //    *florhit = j+49152;
+                    //}
+                }
+            }
+        }
+    }
 }
 
 // 7978
@@ -1475,53 +1809,47 @@ function setView(x1, y1, x2, y2) {
         throw new Error("todo"); // todo
     }
 }
+/*
+ FCS:
+ 
+ Output the ceiling and floor Z coordinate in the two last parameters for given:
+ sectorNumber and worldspace (coordinate X,Y).
+ 
+ If the sector is flat, this is jsut a lookup. But if either the floor/ceiling have
+ a slope it requires more calculation
+ 
+ */
 
-//2593
-function setAspect(daxrange, daaspect) {
-    viewingrange = daxrange;
-    viewingrangerecip = divScale32(1, daxrange);
+function getzsofslope(sectnum, dax, day, refObj) {
+    var dx, dy, i, j;
+    var wal, wal2;
+    var sec;
 
-    yxaspect = daaspect;
-    xyaspect = divScale32(1, yxaspect);
-    xdimenscale = scale(xdimen, yxaspect, 320);
-    xdimscale = scale(320, xyaspect, xdimen);
+    sec = sector[sectnum];
+    refObj.ceilz = sec.ceilingz;
+    refObj.florz = sec.floorz;
+
+    //If the sector has a slopped ceiling or a slopped floor then it needs more calculation.
+    if ((sec.ceilingstat | sec.floorstat) & 2) {
+        wal = wall[sec.wallptr];
+        wal2 = wall[wal.point2];
+        dx = wal2.x - wal.x;
+        dy = wal2.y - wal.y;
+        i = (nsqrtasm(dx * dx + dy * dy) << 5);
+        if (i == 0) return;
+        j = dmulscale3(dx, day - wal.y, -dy, dax - wal.x);
+
+        if (sec.ceilingstat & 2)
+            refObj.ceilz = (refObj.ceilz) + scale(sec.ceilingheinum, j, i);
+        if (sec.floorstat & 2)
+            refObj.florz = (refObj.florz) + scale(sec.floorheinum, j, i);
+    }
 }
 
-//4332
-function nextpage() {
-    var i, per;
-
-    if (qsetmode === 200) {
-        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
-            throw new Error("todo"); //per = &permfifo[i];
-            //if ((per->pagesleft > 0) && (per->pagesleft <= numpages))
-            //    dorotatesprite(per->sx,per->sy,per->z,per->a,per->picnum,per->dashade,per->dapalnum,per->dastat,per->cx1,per->cy1,per->cx2,per->cy2);
-        }
-    }
-
-    _nextpage();
-
-    if (qsetmode === 200) {
-        for (i = permtail; i != permhead; i = ((i + 1) & (MAXPERMS - 1))) {
-            throw new Error("todo");
-        }
-    }
-
-    faketimerhandler();
-
-    if ((totalclock >= lastageclock + 8) || (totalclock < lastageclock)) {
-        lastageclock = totalclock;
-        agecache();
-    }
-
-    beforedrawrooms = 1;
-    numframes++;
-    //console.log("numframes: %i", numframes);
-}
 
 //7795
 function krand() {
-    randomseed = (randomseed*27584621)+1;
+    randomseed = (randomseed * 27584621) + 1;
     return ((randomseed >> 0) >> 16);
 }
 

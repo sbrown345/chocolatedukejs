@@ -54,6 +54,15 @@ function divScale(i1, i2, i3) {
     return Math.floor((i1 * Math.pow(2, i3)) / i2);
 }
 
+
+function klabs(i1) {
+    if (i1 < 0) {
+        i1 = -1;
+    }
+    
+    return i1;
+}
+
 function clearbuf(buffer, start, end) {
     for (var i = start; i < end; i++) {
         buffer[i] = 0;

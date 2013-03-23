@@ -217,8 +217,46 @@ function isaltok(c) {
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
 
-function name(parameters) {
+function makeitfall(i) {
+    var s = sprite[i];
+    var hz, lz, c;
     
+    if( floorspace(s.sectnum) )
+        c = 0;
+    else {
+        if (ceilingspace(s.sectnum) || sector[s.sectnum].lotag === 2) {
+            c = (gc / 6) | 0;
+        } else {
+            c = gc;
+        }
+    }
+
+    if ((s.statnum === 1 || s.statnum === 10 || s.statnum === 2 || s.statnum === 6)) {
+        var refObj = new GetZRangeRefObj(hittype[i].ceilingz, hz, hittype[i].floorz, lz);
+        getzrange(s.x, s.y, s.z - (FOURSLEIGHT), s.sectnum, refObj, 127, CLIPMASK0);
+        hittype[i].ceilingz = refObj.ceilz;
+        hz = refObj.ceilhit;
+        hittype[i].floorz = refObj.florz;
+        lz = refObj.florhit;
+    } else {
+        hittype[i].ceilingz = sector[s.sectnum].ceilingz;
+        hittype[i].floorz = sector[s.sectnum].floorz;
+    }
+
+    if( s.z < hittype[i].floorz-(FOURSLEIGHT) )
+    {
+        if( sector[s.sectnum].lotag == 2 && s.zvel > 3122 )
+            s.zvel = 3144;
+        if(s.zvel < 6144)
+            s.zvel += c;
+        else s.zvel = 6144;
+        s.z += s.zvel;
+    }
+    if( s.z >= hittype[i].floorz-(FOURSLEIGHT) )
+    {
+        s.z = hittype[i].floorz - FOURSLEIGHT;
+        s.zvel = 0;
+    }
 }
 
 function getLabel() {
