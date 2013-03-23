@@ -124,18 +124,17 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
         dasectnum = refSectnum.$;
     }
 
-    throw "todo"
-    //if( dasectnum >= 0)
-    //    if ( (dasectnum != sprite[spritenum].sectnum) )
-    //        changespritesect(spritenum,dasectnum);
-    //daz = sprite[spritenum].z + ((zchange*TICSPERFRAME)>>3);
-    //if ((daz > hittype[spritenum].ceilingz) && (daz <= hittype[spritenum].floorz))
-    //    sprite[spritenum].z = daz;
-    //else
-    //    if (retval == 0)
-    //        return(16384+dasectnum);
+    if( dasectnum >= 0)
+        if ( (dasectnum != sprite[spritenum].sectnum) )
+            changespritesect(spritenum,dasectnum);
+    daz = sprite[spritenum].z + ((zchange*TICSPERFRAME)>>3);
+    if ((daz > hittype[spritenum].ceilingz) && (daz <= hittype[spritenum].floorz))
+        sprite[spritenum].z = daz;
+    else
+        if (retval == 0)
+            return(16384+dasectnum);
 
-    //return(retval);
+    return(retval);
 }
 
 

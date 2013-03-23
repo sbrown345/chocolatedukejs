@@ -240,13 +240,14 @@ function spawn(j, pn) {
         if (sprite[i].cstat & 1) sprite[i].cstat |= 256;
 
         if (actorscrptr[s]) {
-            // remember stuff from gamedefs
-            console.log("todo        if (actorscrptr[s])")
-            /*sprite[i].extra = actorscrptr[s]*//*address???,,,*/;  //sprite[i].extra = *(actorscrptr[s]);
-            //hittype[i].temp_data[4] = *(actorscrptr[s]+1);
-            //hittype[i].temp_data[1] = *(actorscrptr[s]+2);
-            //if( *(actorscrptr[s]+3) && sprite[i].hitag == 0 )
-            //    sprite[i].hitag = *(actorscrptr[s]+3);
+            // script/actorscrptr is set originally in gamedefs
+            sprite[i].extra = script[actorscrptr[s]]; //sprite[i].extra = *(actorscrptr[s]);
+            console.log("sprite[%i].extra = %i", i, sprite[i].extra);
+            hittype[i].temp_data[4] = script[actorscrptr[s] + 1]; // *(actorscrptr[s]+1);
+            hittype[i].temp_data[1] = script[actorscrptr[s]+2]; // *(actorscrptr[s]+2);
+            if (script[actorscrptr[s] + 3] && sprite[i].hitag === 0) {
+                sprite[i].hitag = script[actorscrptr[s] + 3]; //*(actorscrptr[s]+3);
+            }
         } else {
             hittype[i].temp_data[1] = hittype[i].temp_data[4] = 0;
         }
@@ -257,8 +258,8 @@ function spawn(j, pn) {
 
     switch (sp.picnum) {
         default:
+            // actorscrptr[sp.picnum] points to script[actorscrptr[sp.picnum]]
             if (actorscrptr[sp.picnum]) {
-                throw new Error("todo")
                 if (j == -1 && sp.lotag > ud.player_skill) {
                     sp.xrepeat = sp.yrepeat = 0;
                     changespritestat(i, 5);
@@ -311,9 +312,9 @@ function spawn(j, pn) {
             throw new Error("todo");
             if (j >= 0) {
                 setsprite(i, sprite[j].x, sprite[j].y, sprite[j].z);
-                sp.xrepeat = sp.yrepeat = 8 + (TRAND & 7);
+                sp.xrepeat = sp.yrepeat = 8 + (krand() & 7);
             }
-            else sp.xrepeat = sp.yrepeat = 16 + (TRAND & 15);
+            else sp.xrepeat = sp.yrepeat = 16 + (krand() & 15);
 
             sp.shade = -16;
             sp.cstat |= 128;
@@ -336,12 +337,10 @@ function spawn(j, pn) {
         case NEON5:
         case NEON6:
         case DOMELITE:
-            throw new Error("todo");
-            if (sp.picnum != WATERSPLASH2)
+            if (sp.picnum !== WATERSPLASH2)
                 sp.cstat |= 257;
         case NUKEBUTTON:
-            throw new Error("todo");
-            if (sp.picnum == DOMELITE)
+            if (sp.picnum === DOMELITE)
                 sp.cstat |= 257;
         case JIBS1:
         case JIBS2:
@@ -358,7 +357,6 @@ function spawn(j, pn) {
         case DUKETORSO:
         case DUKEGUN:
         case DUKELEG:
-            throw new Error("todo");
             changespritestat(i, 5);
             break;
         case TONGUE:
@@ -366,8 +364,8 @@ function spawn(j, pn) {
             if (j >= 0)
                 sp.ang = sprite[j].ang;
             sp.z -= 38 << 8;
-            sp.zvel = 256 - (TRAND & 511);
-            sp.xvel = 64 - (TRAND & 127);
+            sp.zvel = 256 - (krand() & 511);
+            sp.xvel = 64 - (krand() & 127);
             changespritestat(i, 4);
             break;
         case NATURALLIGHTNING:
@@ -524,8 +522,8 @@ function spawn(j, pn) {
         case BLOODSPLAT4:
             throw new Error("todo");
             sp.cstat |= 16;
-            sp.xrepeat = 7 + (TRAND & 7);
-            sp.yrepeat = 7 + (TRAND & 7);
+            sp.xrepeat = 7 + (krand() & 7);
+            sp.yrepeat = 7 + (krand() & 7);
             sp.z -= (16 << 8);
             if (j >= 0 && sprite[j].pal == 6)
                 sp.pal = 6;
@@ -786,17 +784,17 @@ function spawn(j, pn) {
         case BULLETHOLE:
             throw new Error("todo");
             sp.xrepeat = sp.yrepeat = 3;
-            sp.cstat = 16 + (TRAND & 12);
+            sp.cstat = 16 + (krand() & 12);
             insertspriteq(i);
         case MONEY:
         case MAIL:
         case PAPER:
             throw new Error("todo");
             if (sp.picnum == MONEY || sp.picnum == MAIL || sp.picnum == PAPER) {
-                hittype[i].temp_data[0] = TRAND & 2047;
-                sp.cstat = TRAND & 12;
+                hittype[i].temp_data[0] = krand() & 2047;
+                sp.cstat = krand() & 12;
                 sp.xrepeat = sp.yrepeat = 8;
-                sp.ang = TRAND & 2047;
+                sp.ang = krand() & 2047;
             }
             changespritestat(i, 5);
             break;
@@ -817,13 +815,13 @@ function spawn(j, pn) {
 
                 if (sprite[j].picnum == APLAYER) {
                     snum = sprite[j].yvel;
-                    a = ps[snum].ang - (TRAND & 63) + 8;  //Fine tune
+                    a = ps[snum].ang - (krand() & 63) + 8;  //Fine tune
 
-                    hittype[i].temp_data[0] = TRAND & 1;
+                    hittype[i].temp_data[0] = krand() & 1;
                     if (sp.picnum == SHOTGUNSHELL)
                         sp.z = (6 << 8) + ps[snum].pyoff + ps[snum].posz - ((ps[snum].horizoff + ps[snum].horiz - 100) << 4);
                     else sp.z = (3 << 8) + ps[snum].pyoff + ps[snum].posz - ((ps[snum].horizoff + ps[snum].horiz - 100) << 4);
-                    sp.zvel = -(TRAND & 255);
+                    sp.zvel = -(krand() & 255);
                 }
                 else {
                     a = sp.ang;
@@ -869,7 +867,7 @@ function spawn(j, pn) {
             if (j >= 0) {
                 sp.ang = sprite[j].ang;
                 sp.shade = -64;
-                sp.cstat = 128 | (TRAND & 4);
+                sp.cstat = 128 | (krand() & 4);
             }
 
             if (sp.picnum == EXPLOSION2 || sp.picnum == EXPLOSION2BOT) {
@@ -991,19 +989,19 @@ function spawn(j, pn) {
                 }
                 else sp.z -= (13 << 8);
                 sp.ang = getangle(ps[connecthead].posx - sp.x, ps[connecthead].posy - sp.y);
-                sp.xvel = 48 - (TRAND & 31);
+                sp.xvel = 48 - (krand() & 31);
                 ssp(i, CLIPMASK0);
             }
             else if (j == -1) {
                 sp.z += (4 << 8);
                 hittype[i].temp_data[0] = sp.z;
-                hittype[i].temp_data[1] = TRAND & 127;
+                hittype[i].temp_data[1] = krand() & 127;
             }
         case TRASH:
 
             throw new Error("todo");
             if (sp.picnum != WATERDRIP)
-                sp.ang = TRAND & 2047;
+                sp.ang = krand() & 2047;
 
         case WATERDRIPSPLASH:
 
@@ -1144,7 +1142,7 @@ function spawn(j, pn) {
                 makeitfall(i);
 
                 if (sp.picnum == RAT) {
-                    sp.ang = TRAND & 2047;
+                    sp.ang = krand() & 2047;
                     sp.xrepeat = sp.yrepeat = 48;
                     sp.cstat = 0;
                 }
@@ -1210,12 +1208,11 @@ function spawn(j, pn) {
 
             sp.yrepeat = j;
             sp.xrepeat = 25 - (j >> 1);
-            sp.cstat |= (TRAND & 4);
+            sp.cstat |= (krand() & 4);
 
             break;
 
         case HEAVYHBOMB:
-            throw new Error("todo");
             if (j >= 0)
                 sp.owner = j;
             else sp.owner = i;
@@ -1335,7 +1332,6 @@ function spawn(j, pn) {
             break;
 
         case WATERFOUNTAIN:
-            throw new Error("todo");
             sprite[i].lotag = 1;
 
         case TREE1:
@@ -1343,20 +1339,17 @@ function spawn(j, pn) {
         case TIRE:
         case CONE:
         case BOX:
-            throw new Error("todo");
             sprite[i].cstat = 257; // Make it hitable
             sprite[i].extra = 1;
             changespritestat(i, 6);
             break;
 
         case FLOORFLAME:
-            throw new Error("todo");
             sp.shade = -127;
             changespritestat(i, 6);
             break;
 
         case BOUNCEMINE:
-            throw new Error("todo");
             sp.owner = i;
             sp.cstat |= 1 + 256; //Make it hitable
             sp.xrepeat = sp.yrepeat = 24;
@@ -1391,7 +1384,6 @@ function spawn(j, pn) {
             changespritestat(i, 1);
             break;
         case STEAM:
-            throw new Error("todo");
             if (j >= 0) {
                 sp.ang = sprite[j].ang;
                 sp.cstat = 16 + 128 + 2;
@@ -1400,7 +1392,6 @@ function spawn(j, pn) {
                 ssp(i, CLIPMASK0);
             }
         case CEILINGSTEAM:
-            throw new Error("todo");
             changespritestat(i, 6);
             break;
 
@@ -1415,7 +1406,6 @@ function spawn(j, pn) {
                     break;
                 case 7: // Transporters!!!!
                 case 23:// XPTR END
-                    throw new Error("todo")
                     if (sp.lotag != 23) {
                         for (j = 0; j < MAXSPRITES; j++)
                             if (sprite[j].statnum < MAXSTATUS && sprite[j].picnum == SECTOREFFECTOR && (sprite[j].lotag == 7 || sprite[j].lotag == 23) && i != j && sprite[j].hitag == sprite[i].hitag) {
@@ -1547,8 +1537,7 @@ function spawn(j, pn) {
                     //        break;
 
                 case 24:
-                    throw new Error("todo")
-                    //        sp.yvel <<= 1;
+                    sp.yvel <<= 1;
                 case 36:
                     break;
                 case 20:
@@ -1598,45 +1587,43 @@ function spawn(j, pn) {
                     //        break;
 
                 case 3:
-                    throw new Error("todo")
 
-                    //        hittype[i].temp_data[3]=sector[sect].floorshade;
+                    hittype[i].temp_data[3]=sector[sect].floorshade;
 
-                    //        sector[sect].floorshade = sp.shade;
-                    //        sector[sect].ceilingshade = sp.shade;
+                    sector[sect].floorshade = sp.shade;
+                    sector[sect].ceilingshade = sp.shade;
 
-                    //        sp.owner = sector[sect].ceilingpal<<8;
-                    //        sp.owner |= sector[sect].floorpal;
+                    sp.owner = sector[sect].ceilingpal<<8;
+                    sp.owner |= sector[sect].floorpal;
 
-                    //        //fix all the walls;
+                    //fix all the walls;
 
-                    //        startwall = sector[sect].wallptr;
-                    //        endwall = startwall+sector[sect].wallnum;
+                    startwall = sector[sect].wallptr;
+                    endwall = startwall+sector[sect].wallnum;
 
-                    //        for(s=startwall;s<endwall;s++)
-                    //        {
-                    //            if(!(wall[s].hitag&1))
-                    //                wall[s].shade=sp.shade;
-                    //            if( (wall[s].cstat&2) && wall[s].nextwall >= 0)
-                    //                wall[wall[s].nextwall].shade = sp.shade;
-                    //        }
-                    //        break;
+                    for(s=startwall;s<endwall;s++)
+                    {
+                        if(!(wall[s].hitag&1))
+                            wall[s].shade=sp.shade;
+                        if( (wall[s].cstat&2) && wall[s].nextwall >= 0)
+                            wall[wall[s].nextwall].shade = sp.shade;
+                    }
+                    break;
 
                 case 31:
-                    throw new Error("todo")
-                    //        hittype[i].temp_data[1] = sector[sect].floorz;
-                    //        //    hittype[i].temp_data[2] = sp.hitag;
-                    //        if(sp.ang != 1536) sector[sect].floorz = sp.z;
+                    hittype[i].temp_data[1] = sector[sect].floorz;
+                    //    hittype[i].temp_data[2] = sp.hitag;
+                    if(sp.ang != 1536) sector[sect].floorz = sp.z;
 
-                    //        startwall = sector[sect].wallptr;
-                    //        endwall = startwall+sector[sect].wallnum;
+                    startwall = sector[sect].wallptr;
+                    endwall = startwall+sector[sect].wallnum;
 
-                    //        for(s=startwall;s<endwall;s++)
-                    //            if(wall[s].hitag === 0) wall[s].hitag = 9999;
+                    for(s=startwall;s<endwall;s++)
+                        if(wall[s].hitag === 0) wall[s].hitag = 9999;
 
-                    //        setinterpolation(&sector[sect].floorz);
+                    setinterpolation(sector[sect].floorz);
 
-                    //        break;
+                    break;
                 case 32:
                     hittype[i].temp_data[1] = sector[sect].ceilingz;
                     hittype[i].temp_data[2] = sp.hitag;
@@ -1653,44 +1640,41 @@ function spawn(j, pn) {
                     break;
 
                 case 4: //Flashing lights
-                    throw new Error("todo")
 
-                    //        hittype[i].temp_data[2] = sector[sect].floorshade;
+                    hittype[i].temp_data[2] = sector[sect].floorshade;
 
-                    //        startwall = sector[sect].wallptr;
-                    //        endwall = startwall+sector[sect].wallnum;
+                    startwall = sector[sect].wallptr;
+                    endwall = startwall+sector[sect].wallnum;
 
-                    //        sp.owner = sector[sect].ceilingpal<<8;
-                    //        sp.owner |= sector[sect].floorpal;
+                    sp.owner = sector[sect].ceilingpal<<8;
+                    sp.owner |= sector[sect].floorpal;
 
-                    //        for(s=startwall;s<endwall;s++)
-                    //            if(wall[s].shade > hittype[i].temp_data[3])
-                    //                hittype[i].temp_data[3] = wall[s].shade;
+                    for(s=startwall;s<endwall;s++)
+                        if(wall[s].shade > hittype[i].temp_data[3])
+                            hittype[i].temp_data[3] = wall[s].shade;
 
-                    //        break;
+                    break;
 
                 case 9:
-                    throw new Error("todo")
-                    //        if( sector[sect].lotag &&
-                    //            labs(sector[sect].ceilingz-sp.z) > 1024)
-                    //            sector[sect].lotag |= 32768; //If its open
+                    if( sector[sect].lotag &&
+                        labs(sector[sect].ceilingz-sp.z) > 1024)
+                        sector[sect].lotag |= 32768; //If its open
                 case 8:
-                    throw new Error("todo")
-                    //        //First, get the ceiling-floor shade
+                    //First, get the ceiling-floor shade
 
-                    //        hittype[i].temp_data[0] = sector[sect].floorshade;
-                    //        hittype[i].temp_data[1] = sector[sect].ceilingshade;
+                    hittype[i].temp_data[0] = sector[sect].floorshade;
+                    hittype[i].temp_data[1] = sector[sect].ceilingshade;
 
-                    //        startwall = sector[sect].wallptr;
-                    //        endwall = startwall+sector[sect].wallnum;
+                    startwall = sector[sect].wallptr;
+                    endwall = startwall+sector[sect].wallnum;
 
-                    //        for(s=startwall;s<endwall;s++)
-                    //            if(wall[s].shade > hittype[i].temp_data[2])
-                    //                hittype[i].temp_data[2] = wall[s].shade;
+                    for(s=startwall;s<endwall;s++)
+                        if(wall[s].shade > hittype[i].temp_data[2])
+                            hittype[i].temp_data[2] = wall[s].shade;
 
-                    //        hittype[i].temp_data[3] = 1; //Take Out;
+                    hittype[i].temp_data[3] = 1; //Take Out;
 
-                    //        break;
+                    break;
 
                 case 11://Pivitor rotater
                     throw new Error("todo")
@@ -1888,7 +1872,6 @@ function spawn(j, pn) {
         case CANWITHSOMETHING3:
         case CANWITHSOMETHING4:
         case RUBBERCAN:
-            throw new Error("todo");
             sp.extra = 0;
         case EXPLODINGBARREL:
         case HORSEONSIDE:
@@ -1898,8 +1881,6 @@ function spawn(j, pn) {
         case NUKEBARRELDENTED:
         case NUKEBARRELLEAKED:
         case WOODENHORSE:
-
-            throw new Error("todo");
             if (j >= 0)
                 sp.xrepeat = sp.yrepeat = 32;
             sp.clipdist = 72;
@@ -1908,15 +1889,14 @@ function spawn(j, pn) {
                 sp.owner = j;
             else sp.owner = i;
         case EGG:
-            throw new Error("todo");
-            if (ud.monsters_off == 1 && sp.picnum == EGG) {
+            if (ud.monsters_off === 1 && sp.picnum === EGG) {
                 sp.xrepeat = sp.yrepeat = 0;
                 changespritestat(i, 5);
             }
             else {
                 if (sp.picnum == EGG)
                     sp.clipdist = 24;
-                sp.cstat = 257 | (TRAND & 4);
+                sp.cstat = 257 | (krand() & 4);
                 changespritestat(i, 2);
             }
             break;

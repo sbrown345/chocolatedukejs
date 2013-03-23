@@ -55,6 +55,12 @@ function divScale(i1, i2, i3) {
 }
 
 
+function ksgn(i1) {
+    if (i1 < 0) return -1;
+    else if (i1 > 0) return 1;
+    else return 0;
+}
+
 function klabs(i1) {
     if (i1 < 0) {
         i1 = -1;
