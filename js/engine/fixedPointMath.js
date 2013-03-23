@@ -54,7 +54,6 @@ function divScale(i1, i2, i3) {
     return Math.floor((i1 * Math.pow(2, i3)) / i2);
 }
 
-// todo: use where required here
 function mul32(n, m) {
     n = n | 0;
     m = m | 0;
@@ -70,6 +69,12 @@ function mul32(n, m) {
 //    var high = ((ah * bl) + (al * bh)) & 0xffff;
 //    return ((high << 16) >>> 0) + (al * bl);
 //}
+
+toInt8. toInt8Helper = new Int8Array(1);
+function toInt8(v) {
+    toInt8.toInt8Helper[0] = v;
+    return toInt8.toInt8Helper[0];
+}
 
 function ksgn(i1) {
     if (i1 < 0) return -1;

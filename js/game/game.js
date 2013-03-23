@@ -1169,7 +1169,6 @@ function spawn(j, pn) {
             break;
 
         case LOCATORS:
-            throw new Error("todo");
             sp.cstat |= 32768;
             changespritestat(i, 7);
             break;
@@ -1183,7 +1182,6 @@ function spawn(j, pn) {
             break;
 
         case DOORSHOCK:
-            throw new Error("todo");
             sp.cstat |= 1 + 256;
             sp.shade = -12;
             changespritestat(i, 6);
@@ -1191,7 +1189,6 @@ function spawn(j, pn) {
 
         case OOZ:
         case OOZ2:
-            throw new Error("todo");
             sp.shade = -12;
 
             if (j >= 0) {
@@ -1222,7 +1219,6 @@ function spawn(j, pn) {
         case REACTOR:
         case RECON:
 
-            throw new Error("todo");
             if (sp.picnum == RECON) {
                 if (sp.lotag > ud.player_skill) {
                     sp.xrepeat = sp.yrepeat = 0;
@@ -1364,7 +1360,6 @@ function spawn(j, pn) {
         case CAMERA1 + 3:
         case CAMERA1 + 4:
         case CAMERAPOLE:
-            throw new Error("todo");
             sp.extra = 1;
 
             if (camerashitable) sp.cstat = 257;
@@ -1372,7 +1367,6 @@ function spawn(j, pn) {
 
         case GENERICPOLE:
 
-            throw new Error("todo");
             if (ud.multimode < 2 && sp.pal != 0) {
                 sp.xrepeat = sp.yrepeat = 0;
                 changespritestat(i, 5);
@@ -1424,44 +1418,42 @@ function spawn(j, pn) {
                     hittype[i].temp_data[0] = 1;
                     break;
                 case 18:
-                    throw new Error("todo")
 
-                    //        if(sp.ang == 512)
-                    //        {
-                    //            hittype[i].temp_data[1] = sector[sect].ceilingz;
-                    //            if(sp.pal)
-                    //                sector[sect].ceilingz = sp.z;
-                    //        }
-                    //        else
-                    //        {
-                    //            hittype[i].temp_data[1] = sector[sect].floorz;
-                    //            if(sp.pal)
-                    //                sector[sect].floorz = sp.z;
-                    //        }
+                    if(sp.ang == 512)
+                    {
+                        hittype[i].temp_data[1] = sector[sect].ceilingz;
+                        if(sp.pal)
+                            sector[sect].ceilingz = sp.z;
+                    }
+                    else
+                    {
+                        hittype[i].temp_data[1] = sector[sect].floorz;
+                        if(sp.pal)
+                            sector[sect].floorz = sp.z;
+                    }
 
-                    //        sp.hitag <<= 2;
-                    //        break;
+                    sp.hitag <<= 2;
+                    break;
 
                 case 19:
-                    //        sp.owner = -1;
-                    //        break;
+                    sp.owner = -1;
+                    break;
                 case 25: // Pistons
-                    //        hittype[i].temp_data[3] = sector[sect].ceilingz;
-                    //        hittype[i].temp_data[4] = 1;
-                    //        sector[sect].ceilingz = sp.z;
-                    //        setinterpolation(&sector[sect].ceilingz);
-                    //        break;
+                    hittype[i].temp_data[3] = sector[sect].ceilingz;
+                    hittype[i].temp_data[4] = 1;
+                    sector[sect].ceilingz = sp.z;
+                    setinterpolation(sector[sect].ceilingz);
+                    break;
                 case 35:
-                    //        sector[sect].ceilingz = sp.z;
-                    //        break;
+                    sector[sect].ceilingz = sp.z;
+                    break;
                 case 27:
-                    throw new Error("todo")
-                    //        if(ud.recstat == 1)
-                    //        {
-                    //            sp.xrepeat=sp.yrepeat=64;
-                    //            sp.cstat &= 32767;
-                    //        }
-                    //        break;
+                    if(ud.recstat == 1)
+                    {
+                        sp.xrepeat=sp.yrepeat=64;
+                        sp.cstat &= 32767;
+                    }
+                    break;
                 case 12:
 
                     hittype[i].temp_data[1] = sector[sect].floorshade;

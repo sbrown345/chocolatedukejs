@@ -2198,42 +2198,39 @@ function getzrange(x, y, z, sectnum, refObj, walldist, cliptype) {
                             k = ((tiles[spr.picnum].dim.height * spr.yrepeat) << 1);
                             if (cstat & 128)
                                 daz += k;
-                            //if (tiles[spr.picnum].animFlags & 0x00ff0000) daz -=
-                            //    ((int32_t)((int8_t)((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
                             if (tiles[spr.picnum].animFlags & 0x00ff0000) daz -=
-                                (/*(int32_t)*/(/*(int8_t)*/((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
+                                ((toInt8((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
                             daz2 = daz - (k << 1);
                             clipyou = 1;
                         }
                         break;
                     case 16:
-                        throw new Error("todo");
-                        //tilenum = spr.picnum;
-                        //xoff =/* (int32_t)*/(/*(int8_t  )*/((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
-                        //if ((cstat&4) > 0) xoff = -xoff;
-                        //k = spr.ang;
-                        //l = spr.xrepeat;
-                        //dax = sinTable[k&2047]*l;
-                        //day = sinTable[(k+1536)&2047]*l;
-                        //l = tiles[tilenum].dim.width;
-                        //k = (l>>1)+xoff;
-                        //x1 -= mulscale16(dax,k);
-                        //x2 = x1+mulscale16(dax,l);
-                        //y1 -= mulscale16(day,k);
-                        //y2 = y1+mulscale16(day,l);
-                        //if (clipinsideboxline(x,y,x1,y1,x2,y2,walldist+1) != 0)
-                        //{
-                        //    daz = spr.z;
-                        //    k = ((tiles[spr.picnum].dim.height*spr.yrepeat)<<1);
-                        //    if (cstat&128)
-                        //        daz += k;
+                        tilenum = spr.picnum;
+                        xoff =(((tiles[tilenum].animFlags>>8)&255))+(spr.xoffset);
+                        if ((cstat&4) > 0) xoff = -xoff;
+                        k = spr.ang;
+                        l = spr.xrepeat;
+                        dax = sinTable[k&2047]*l;
+                        day = sinTable[(k+1536)&2047]*l;
+                        l = tiles[tilenum].dim.width;
+                        k = (l>>1)+xoff;
+                        x1 -= mulscale16(dax,k);
+                        x2 = x1+mulscale16(dax,l);
+                        y1 -= mulscale16(day,k);
+                        y2 = y1+mulscale16(day,l);
+                        if (clipinsideboxline(x,y,x1,y1,x2,y2,walldist+1) != 0)
+                        {
+                            daz = spr.z;
+                            k = ((tiles[spr.picnum].dim.height*spr.yrepeat)<<1);
+                            if (cstat&128)
+                                daz += k;
 
-                        //    if (tiles[spr.picnum].animFlags&0x00ff0000) 
-                        //        daz -= ((int32_t)(/*(int8_t  )*/((tiles[spr.picnum].animFlags>>16)&255))*spr.yrepeat<<2);
+                            if (tiles[spr.picnum].animFlags&0x00ff0000) 
+                                daz -= ((toInt8((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
 
-                        //    daz2 = daz-(k<<1);
-                        //    clipyou = 1;
-                        //}
+                            daz2 = daz-(k<<1);
+                            clipyou = 1;
+                        }
                         break;
                     case 32:
                         throw new Error("todo");
@@ -2244,8 +2241,8 @@ function getzrange(x, y, z, sectnum, refObj, walldist, cliptype) {
                         //    if ((z > daz) == ((cstat&8)==0)) continue;
 
                         //tilenum = spr.picnum;
-                        //xoff =/* (int32_t)*/(/*(int8_t  )*/((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
-                        //yoff =/* (int32_t)*/(/*(int8_t  )*/((tiles[tilenum].animFlags>>16)&255))+((int32_t)spr.yoffset);
+                        //xoff =/* (int32_t)*/(int8_t /*use toInt8*/ )((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
+                        //yoff =/* (int32_t)*/((int8_t /*use toInt8*/ )((tiles[tilenum].animFlags>>16)&255))+((int32_t)spr.yoffset);
                         //if ((cstat&4) > 0) xoff = -xoff;
                         //if ((cstat&8) > 0) yoff = -yoff;
 
