@@ -13,6 +13,9 @@ var MAXPALOOKUPS = 256;
 var MAXPSKYTILES = 256;
 var MAXSPRITESONSCREEN = 1024;
 
+var CLIPMASK0 = (((1) << 16) + 1);
+var CLIPMASK1 = (((256) << 16) + 64);
+
 /*
  * ceilingstat/floorstat:
  *   bit 0: 1 = parallaxing, 0 = not                                 "P"
@@ -115,7 +118,18 @@ function Sprite() {
     this.x = 0;
     this.y = 0;
     this.z = 0;
-    this.cstat = 0;
+    
+    //this.cstat = 0; //???
+    // TODO: PERF MUST BE AWFUL!!
+    var _cstat = new Int16Array(1);
+    this.__defineGetter__("cstat", function () {
+        return _cstat[0];
+    });
+
+    this.__defineSetter__("cstat", function (val) {
+        _cstat[0] = val;
+    });
+    
     this.picnum = 0;
     this.shade = 0;
     this.pal = 0;

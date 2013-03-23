@@ -217,6 +217,10 @@ function isaltok(c) {
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
 
+function name(parameters) {
+    
+}
+
 function getLabel() {
     while (!isalnum(textptr[textptrIdx])) {
         if (textptr.charCodeAt(textptrIdx) == 0x0a) line_number++;

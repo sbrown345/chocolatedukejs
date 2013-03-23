@@ -182,7 +182,6 @@ preMap.preLevel = function (g) {
     numclouds = 0;
 
     for (i = 0; i < numsectors; i++) {
-        console.log("i: %i", i);
         sector[i].extra = 256;
 
         switch (sector[i].lotag) {

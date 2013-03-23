@@ -1386,6 +1386,28 @@ Engine.deleteSpriteStat = function (deleteme) {
     return 0;
 };
 
+// 6084
+function changespritesect(spritenum, newsectnum)
+{
+    throw new Error("todo")
+//    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
+//if (sprite[spritenum].sectnum == newsectnum) return(0);
+//if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
+//if (deletespritesect(spritenum) < 0) return(-1);
+//insertspritesect(newsectnum);
+//return(0);
+}
+
+
+function changespritestat(spritenum, newstatnum) {
+    if ((newstatnum < 0) || (newstatnum > MAXSTATUS)) return (-1);
+    if (sprite[spritenum].statnum == newstatnum) return (0);
+    if (sprite[spritenum].statnum == MAXSTATUS) return (-1);
+    if (Engine.deleteSpriteStat(spritenum) < 0) return (-1);
+    Engine.insertSpriteStat(newstatnum);
+    return (0);
+}
+
 //
 //7344
 /*
@@ -1495,6 +1517,12 @@ function nextpage() {
     beforedrawrooms = 1;
     numframes++;
     //console.log("numframes: %i", numframes);
+}
+
+//7795
+function krand() {
+    randomseed = (randomseed*27584621)+1;
+    return ((randomseed >> 0) >> 16);
 }
 
 //8034

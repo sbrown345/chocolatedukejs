@@ -225,6 +225,6 @@ var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradi
 var numclouds, clouds = new Int16Array(128), cloudx = new Int16Array(128), cloudy = new Int16Array(128);
 //int32_t cloudtotalclock = 0,totalmemory = 0;
 var numinterpolations = 0, startofdynamicinterpolations = 0;
-//int32_t oldipos[MAXINTERPOLATIONS];
-//int32_t bakipos[MAXINTERPOLATIONS];
-//int32_t *curipos[MAXINTERPOLATIONS];
+var oldipos = new Int32Array(MAXINTERPOLATIONS);
+var bakipos = new Int32Array(MAXINTERPOLATIONS);
+var curipos = new Int32Array(MAXINTERPOLATIONS);
