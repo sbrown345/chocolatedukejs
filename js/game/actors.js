@@ -71,7 +71,7 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
 
         if (sprite[spritenum].xrepeat > 60) {
             throw "todo ref obj"
-            var refObj = null;
+            var refObj = new R;
             //retval = clipmove(&sprite[spritenum].x,&sprite[spritenum].y,&daz,&dasectnum,((xchange*TICSPERFRAME)<<11),((ychange*TICSPERFRAME)<<11),1024L,(4<<8),(4<<8),cliptype);
         } else {
             if (sprite[spritenum].picnum == LIZMAN)
@@ -106,13 +106,22 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
             sprite[spritenum].ang += 768;
         }
     } else {
+        var refX = new Ref(sprite[spritenum].x),
+            refY = new Ref(sprite[spritenum].y),
+            refZ = new Ref(daz),
+            refSectnum = new Ref(dasectnum);
         if (sprite[spritenum].statnum == 4) {
             retval =
-                clipmove(sprite[spritenum].x, sprite[spritenum].y, daz, dasectnum, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), 8, (4 << 8), (4 << 8), cliptype);
+                clipmove(refX, refY, refZ, refSectnum, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), 8, (4 << 8), (4 << 8), cliptype);
         } else {
             retval =
-                clipmove(sprite[spritenum].x, sprite[spritenum].y, daz, dasectnum, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), (sprite[spritenum].clipdist << 2), (4 << 8), (4 << 8), cliptype);
+                clipmove(refX, refY, refZ, refSectnum, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), (sprite[spritenum].clipdist << 2), (4 << 8), (4 << 8), cliptype);
         }
+
+        sprite[spritenum].x = refX.$;
+        sprite[spritenum].y = refY.$;
+        daz = refZ.$;
+        dasectnum = refSectnum.$;
     }
 
     throw "todo"

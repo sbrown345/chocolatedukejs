@@ -15,3 +15,7 @@ function multiDimArray($class, num, arrLength) {
     }
     return multiDimArray;
 }
+
+function Ref(val) {
+    this.$ = val;
+}
