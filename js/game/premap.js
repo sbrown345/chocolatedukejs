@@ -963,7 +963,19 @@ preMap.enterLevel = function (g) {
 
             fulllevelfilename = level_file_names[(ud.volume_number * 11) + ud.level_number];
 
-            if (Engine.loadBoard(fulllevelfilename, ps[0].posx, ps[0].posy, ps[0].posz, ps[0].ang, ps[0].cursectnum) == -1) {
+            var posxRef = new Ref(ps[0].posx);
+            var posyRef = new Ref(ps[0].posy);
+            var poszRef = new Ref(ps[0].posz);
+            var angRef = new Ref(ps[0].ang);
+            var cursectnumRef = new Ref(ps[0].cursectnum);
+            var loadBoardResult = Engine.loadBoard(fulllevelfilename, posxRef, posyRef, poszRef, angRef, cursectnumRef);
+            ps[0].posx = posxRef.$;
+            ps[0].posy = posyRef.$;
+            ps[0].posz = poszRef.$;
+            ps[0].ang = angRef.$;
+            ps[0].cursectnum = cursectnumRef.$;
+            
+            if (loadBoardResult === -1) {
                 throw new Error("Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found! Not using the right grp file?");
             }
         }

@@ -289,11 +289,11 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     Engine.initSpriteLists();
 
 
-    daposx = kread32(fil);
-    daposy = kread32(fil);
-    daposz = kread32(fil);
-    daang = kread16(fil);
-    dacursectnum = kread16(fil);
+    daposx.$ = kread32(fil);
+    daposy.$ = kread32(fil);
+    daposz.$ = kread32(fil);
+    daang.$ = kread16(fil);
+    dacursectnum.$ = kread16(fil);
     numsectors = kread16(fil);
 
     for (x = 0; x < numsectors; x++) {
@@ -442,9 +442,7 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     }
 
     /* Must be after loading sectors, etc! */
-    var dacursectnumRef = new Ref(dacursectnum);
-    updatesector(daposx, daposy, dacursectnumRef);
-    dacursectnum = dacursectnumRef.$;
+    updatesector(daposx.$, daposy.$, dacursectnum);
 
     kclose(fil);
 
