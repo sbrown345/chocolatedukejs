@@ -129,7 +129,16 @@ var keyw =
     "ifangdiffl" // 111
 ];
 
+//var _scriptPtr = 0;
+//window.__defineSetter__("scriptPtr", function (v) {
+//    if (v === 1405)
+//        debugger;
+//    _scriptPtr = v;
+//});
 
+//window.__defineGetter__("scriptPtr", function() {
+//    return _scriptPtr;
+//});
 
 //****************************************************************************
 //

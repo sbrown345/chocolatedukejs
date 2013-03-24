@@ -103,7 +103,9 @@ function AnimWall() {
 //373
 var mymembuf;
 
-function Player() {
+
+//451
+function PlayerType() {
     this.zoom = 0; this.exitx = 0; this.exity = 0; this.loogiex = new Int32Array(64); this.loogiey = new Int32Array(64); this.numloogs = 0; this.loogcnt = 0;
     this.posx = 0; this.posy = 0; this.posz = 0; this.horiz = 0; this.ohoriz = 0; this.ohorizoff = 0; this.invdisptime = 0;
     this.bobposx = 0; this.bobposy = 0; this.oposx = 0; this.oposy = 0; this.oposz = 0; this.pyoff = 0; this.opyoff = 0;
@@ -164,6 +166,12 @@ function Player() {
     this.weaponautoswitch = 0;
 
     this.fakeplayer = 0;
+}
+
+//527
+function PlayerOrig() {
+    this.ox = 0; this.oy = 0; this.oz = 0;
+    this.oa = 0; this.os = 0;
 }
 
 //653

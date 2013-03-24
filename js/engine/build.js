@@ -118,7 +118,7 @@ function Sprite() {
     this.x = 0;
     this.y = 0;
     this.z = 0;
-    
+
     //this.cstat = 0; //???
     // TODO: PERF MUST BE AWFUL!!
     var _cstat = new Int16Array(1);
@@ -129,7 +129,7 @@ function Sprite() {
     this.__defineSetter__("cstat", function (val) {
         _cstat[0] = val;
     });
-    
+
     this.picnum = 0;
     this.shade = 0;
     this.pal = 0;
@@ -213,6 +213,6 @@ var nextspritesect = new Int16Array(MAXSPRITES), nextspritestat = new Int16Array
  *    next time you flip to 2D mode.
  */
 var show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
-var show2dwallnew = new Uint8Array((MAXWALLS + 7) >> 3);
-var show2dspritenew = new Uint8Array((MAXSPRITES + 7) >> 3);
+var show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
+var show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
 var automapping = 0;

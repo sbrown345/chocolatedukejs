@@ -57,17 +57,36 @@ Config.getSetupFilename = function () {
 };
 
 Config.readSetup = function () {
-    console.log("Config.readSetup...");
+    console.log("Config.readSetup... todo");
 
     Config.setDefaults();
 
     scriptHandle = Script.load(setupFilename);
 
-    //var dummy = 0;
-    //for (var dummmy = 0; dummmy < 10; dummmy++) {
-    //    var commmacro = 
-    //}
-    
+    //..
+    if(ud.mywchoice[0] == 0 && ud.mywchoice[1] == 0)
+    {
+        ud.mywchoice[0] = 3;
+        ud.mywchoice[1] = 4;
+        ud.mywchoice[2] = 5;
+        ud.mywchoice[3] = 7;
+        ud.mywchoice[4] = 8;
+        ud.mywchoice[5] = 6;
+        ud.mywchoice[6] = 0;
+        ud.mywchoice[7] = 2;
+        ud.mywchoice[8] = 9;
+        ud.mywchoice[9] = 1;
+
+        //todo:
+        //for(dummy=0;dummy<10;dummy++)
+        //{
+        //    sprintf(buf,"WeaponChoice%d",dummy);
+        //    SCRIPT_GetNumber( scripthandle, "Misc", buf, &ud.mywchoice[dummy]);
+        //}
+    }
+
+    //..
+
     // todo: Config.readSetup
 };
 

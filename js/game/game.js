@@ -183,8 +183,6 @@ function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s
         hittype[i].temp_data[4] =  script[actorscrptr[s_pn]+1];
         hittype[i].temp_data[1] =  script[actorscrptr[s_pn]+2];
         s.hitag = script[actorscrptr[s_pn] + 3];
-        throw new Error("bug here, the first value is ok but then temp_data isn't     maybe use ((int)  &actorscrptr[s_pn]) - ((int)&actorscrptr[0])    to compare the addreses")
-        debugger;
     }
     else
     {
@@ -193,8 +191,11 @@ function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s
         s.hitag = 0;
     }
 
-    if (show2dsector[sprite[i].sectnum>>3]&(1<<(sprite[i].sectnum&7))) show2dsprite[i>>3] |= (1<<(i&7));
-    else show2dsprite[i>>3] &= ~(1<<(i&7));
+    if (show2dsector[sprite[i].sectnum >> 3] & (1 << (sprite[i].sectnum & 7))) {
+        show2dsprite[i >> 3] |= (1 << (i & 7));
+    } else {
+        show2dsprite[i >> 3] &= ~(1 << (i & 7));
+    }
     /*
         if(s.sectnum < 0)
         {

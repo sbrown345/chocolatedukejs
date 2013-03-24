@@ -36,7 +36,6 @@ function weaponhit() {
 var hittype = structArray(weaponhit, MAXSPRITES);
 var spriteq = new Int16Array(1024), spriteqloc, spriteqamount = 64;
 
-var ps = structArray(Player, MAXPLAYERS);
 
 // todo: change to class?
 // and/or less than 30 properties?
@@ -68,7 +67,7 @@ var ud = {
 
     entered_name: 0, screen_tilting: 0, shadows: 0, fta_on: 0, executions: 0, auto_run: 0,
     coords: 0, tickrate: 0, m_coop: 0, coop: 0, screen_size: 0, extended_screen_size: 0, lockout: 0, crosshair: 0, showweapons: 0,
-    //mywchoice[MAX_WEAPONS]: 0,wchoice[MAXPLAYERS][MAX_WEAPONS]: 0,playerai: 0,
+    mywchoice: new Int32Array(MAX_WEAPONS), wchoice: multiDimArray(Int32Array, MAXPLAYERS, MAX_WEAPONS), playerai: 0,
 
     respawn_monsters: 0, respawn_items: 0, respawn_inventory: 0, recstat: 0, monsters_off: 0, brightness: 0,
     m_respawn_items: 0, m_respawn_monsters: 0, m_respawn_inventory: 0, m_recstat: 0, m_monsters_off: 0, detail: 0,
@@ -134,12 +133,12 @@ var sounds = new Array(NUM_SOUNDS);
 
 var numplayersprites, earthquaketime;
 
-//int32_t fricxv,fricyv;
-//struct player_orig po[MAXPLAYERS];
-//struct player_struct ps[MAXPLAYERS];
+var fricxv = 0, fricyv = 0;
+var po = structArray(PlayerOrig, MAXPLAYERS);
+var ps = structArray(PlayerType, MAXPLAYERS);
 //struct user_defs ud;
 
-var pus, pub;
+var pus = 0, pub = 0;
 //uint8_t  syncstat, syncval[MAXPLAYERS][MOVEFIFOSIZ];
 //int32_t syncvalhead[MAXPLAYERS], syncvaltail, syncvaltottail;
 

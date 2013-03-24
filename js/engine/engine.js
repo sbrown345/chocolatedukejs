@@ -442,7 +442,9 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     }
 
     /* Must be after loading sectors, etc! */
-    updatesector(daposx, daposy, dacursectnum);
+    var dacursectnumRef = new Ref(dacursectnum);
+    updatesector(daposx, daposy, dacursectnumRef);
+    dacursectnum = dacursectnumRef.$;
 
     kclose(fil);
 
@@ -648,8 +650,8 @@ function initEngine() {
     }
 
     show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
-    show2dwallnew = new Uint8Array((MAXWALLS + 7) >> 3);
-    show2dspritenew = new Uint8Array((MAXSPRITES + 7) >> 3);
+    show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
+    show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
     automapping = 0;
 
     validmodecnt = 0;
@@ -1964,9 +1966,10 @@ function clipmove(x, y, z, sectnum,
             {
                 j = hitwalls[i];
                 templong2 = dmulscale6(clipit[j].x2-clipit[j].x1,oxvect,clipit[j].y2-clipit[j].y1,oyvect);
-                if ((templong1^templong2) < 0)
-                {
-                    updatesector(x.$,y.$,sectnum);
+                if ((templong1^templong2) < 0) {
+                    var sectnumRef = new Ref(sectnum);
+                    updatesector(x.$, y.$, sectnumRef);
+                    sectnum = sectnumRef.$;
                     return(retval);
                 }
             }
@@ -2058,12 +2061,35 @@ function updatesector(x, y, lastKnownSector) {
     var i, j;
 
     //First check the last sector where (old_x,old_y) was before being updated to (x,y)
-    if (inside(x, y, lastKnownSector) == 1) {
+    if (inside(x, y, lastKnownSector.$) == 1) {
         //We found it and (x,y) is still in the same sector: nothing to update !
         return;
     }
+    // Seems (x,y) moved into an other sector....hopefully one connected via a portal. Let's flood in each portal.
+    if ((lastKnownSector.$ >= 0) && (lastKnownSector.$ < numsectors)) {
+        wal = wall[sector[lastKnownSector.$].wallptr];
+        j = sector[lastKnownSector.$].wallnum;
+        do {
+            i = wal.nextsector;
+            if (i >= 0)
+                if (inside(x, y, i) == 1) {
+                    lastKnownSector.$ = i;
+                    return;
+                }
+            wal++;
+            j--;
+        } while (j != 0);
+    }
 
-    throw new Error("todo");
+    //Damn that is a BIG move, still cannot find which sector (x,y) belongs to. Let's search via linear search.
+    for (i = numsectors - 1; i >= 0; i--) {
+        if (inside(x, y, i) == 1) {
+            lastKnownSector.$ = i;
+            return;
+        }
+    }
+    // (x,y) is contained in NO sector. (x,y) is likely out of the map.
+    lastKnownSector.$ = -1;
 }
 
 //7795

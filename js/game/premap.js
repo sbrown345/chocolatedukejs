@@ -2,6 +2,8 @@
 
 var preMap = {}; // todo rename PreMap
 
+var which_palookup = 9;
+
 function tloadtile(tileNumber) {
     gotpic[tileNumber >> 3] |= (1 << (tileNumber & 7));
 }
@@ -58,70 +60,110 @@ preMap.countFragBars = function () {
     return y;
 };
 
-//670
-preMap.resetPreStat = function (snum, g) {
-    var p;
-    var i;
+//425
+preMap.resetPlayerStats = function (snum) {
+    var p = ps[snum];
 
-    p = ps[snum];
-
-    spriteqloc = 0;
-    for (i = 0; i < spriteqamount; i++) {
-        spriteq[i] = -1;
-    }
-
-    p.hbomb_on          = 0;
-    p.cheat_phase       = 0;
-    p.pals_time         = 0;
-    p.toggle_key_flag   = 0;
-    p.secret_rooms      = 0;
-    p.max_secret_rooms  = 0;
-    p.actors_killed     = 0;
-    p.max_actors_killed = 0;
-    p.lastrandomspot = 0;
-    p.weapon_pos = 6;
-    p.kickback_pic = 5;
-    p.last_weapon = -1;
-    p.weapreccnt = 0;
-    p.show_empty_weapon= 0;
-    p.holster_weapon = 0;
+    ud.show_help = 0;
+    ud.showallmap = 0;
+    p.dead_flag = 0;
+    p.wackedbyactor = -1;
+    p.falling_counter = 0;
+    p.quick_kick = 0;
+    p.subweapon = 0;
+    p.last_full_weapon = 0;
+    p.ftq = 0;
+    p.fta = 0;
+    p.tipincs = 0;
+    p.buttonpalette = 0;
+    p.actorsqu = -1;
+    p.invdisptime = 0;
+    p.refresh_inventory = 0;
     p.last_pissed_time = 0;
+    p.holster_weapon = 0;
+    p.pycount = 0;
+    p.pyoff = 0;
+    p.opyoff = 0;
+    p.loogcnt = 0;
+    p.angvel = 0;
+    p.weapon_sway = 0;
+    //    p.select_dir       = 0;
+    p.extra_extra8 = 0;
+    p.show_empty_weapon = 0;
+    p.dummyplayersprite = -1;
+    p.crack_time = 0;
+    p.hbomb_hold_delay = 0;
+    p.transporter_hold = 0;
+    p.wantweaponfire = -1;
+    p.hurt_delay = 0;
+    p.footprintcount = 0;
+    p.footprintpal = 0;
+    p.footprintshade = 0;
+    p.jumping_toggle = 0;
+    p.ohoriz = p.horiz = 140;
+    p.horizoff = 0;
+    p.bobcounter = 0;
+    p.on_ground = 0;
+    p.player_par = 0;
+    p.return_to_center = 9;
+    p.airleft = 15 * 26;
+    p.rapid_fire_hold = 0;
+    p.toggle_key_flag = 0;
+    p.access_spritenum = -1;
+    if (ud.multimode > 1 && ud.coop != 1)
+        p.got_access = 7;
+    else p.got_access = 0;
+    p.random_club_frame = 0;
+    pus = 1;
+    p.on_warping_sector = 0;
+    p.spritebridge = 0;
+    p.palette = palette[0];
 
-    p.one_parallax_sectnum = -1;
-    p.visibility = ud.const_visibility;
-
-    screenpeek              = myconnectindex;
-    numanimwalls            = 0;
-    numcyclers              = 0;
-    animatecnt              = 0;
-    parallaxtype            = 0;
-    randomseed              = 17;
-    ud.pause_on             = 0;
-    ud.camerasprite         =-1;
-    ud.eog                  = 0;
-    tempwallptr             = 0;
-    camsprite               =-1;
-    earthquaketime          = 0;
-
-    numinterpolations = 0;
-    startofdynamicinterpolations = 0;
-
-    if( ( (g&MODE_EOL) != MODE_EOL && numplayers < 2) || (ud.coop != 1 && numplayers > 1) )
-    {
-        preMap.resetWeapons(snum);
-        preMap.resetIinventory(snum);
+    if (p.steroids_amount < 400) {
+        p.steroids_amount = 0;
+        p.inven_icon = 0;
     }
-    else if(p.curr_weapon == HANDREMOTE_WEAPON)
-    {
-        p.ammo_amount[HANDBOMB_WEAPON]++;
-        p.curr_weapon = HANDBOMB_WEAPON;
-    }
+    p.heat_on = 0;
+    p.jetpack_on = 0;
+    p.holoduke_on = -1;
 
-    p.timebeforeexit   = 0;
-    p.customexitsound  = 0;
+    p.look_ang = 512 - ((ud.level_number & 1) << 10);
+
+    p.rotscrnang = 0;
+    p.newowner = -1;
+    p.jumping_counter = 0;
+    p.hard_landing = 0;
+    p.posxv = 0;
+    p.posyv = 0;
+    p.poszv = 0;
+    fricxv = 0;
+    fricyv = 0;
+    p.somethingonplayer = -1;
+    p.one_eighty_count = 0;
+    p.cheat_phase = 0;
+
+    p.on_crane = -1;
+
+    if (p.curr_weapon == PISTOL_WEAPON)
+        p.kickback_pic = 5;
+    else p.kickback_pic = 0;
+
+    p.weapon_pos = 6;
+    p.walking_snd_toggle = 0;
+    p.weapon_ang = 0;
+
+    p.knuckle_incs = 1;
+    p.fist_incs = 0;
+    p.knee_incs = 0;
+    p.jetpack_on = 0;
+    Player.setPal(p);
+    p.weaponautoswitch = 0;
+    p.auto_aim = 2;
+    p.fakeplayer = 0;
 };
 
-preMap.resetWeapons = function(snum) {
+//532
+preMap.resetWeapons = function (snum) {
     var weapon;
     var p;
 
@@ -147,8 +189,8 @@ preMap.resetWeapons = function(snum) {
     p.last_pissed_time = 0;
     p.holster_weapon = 0;
 };
-
-preMap.resetIinventory = function(snum) {
+//558
+preMap.resetIinventory = function (snum) {
     var p;
 
     p = ps[snum];
@@ -169,14 +211,75 @@ preMap.resetIinventory = function(snum) {
     p.inven_icon = 0;
 };
 
+//578
+preMap.resetPreStat = function (snum, g) {
+    var p;
+    var i;
+
+    p = ps[snum];
+
+    spriteqloc = 0;
+    for (i = 0; i < spriteqamount; i++) {
+        spriteq[i] = -1;
+    }
+
+    p.hbomb_on = 0;
+    p.cheat_phase = 0;
+    p.pals_time = 0;
+    p.toggle_key_flag = 0;
+    p.secret_rooms = 0;
+    p.max_secret_rooms = 0;
+    p.actors_killed = 0;
+    p.max_actors_killed = 0;
+    p.lastrandomspot = 0;
+    p.weapon_pos = 6;
+    p.kickback_pic = 5;
+    p.last_weapon = -1;
+    p.weapreccnt = 0;
+    p.show_empty_weapon = 0;
+    p.holster_weapon = 0;
+    p.last_pissed_time = 0;
+
+    p.one_parallax_sectnum = -1;
+    p.visibility = ud.const_visibility;
+
+    screenpeek = myconnectindex;
+    numanimwalls = 0;
+    numcyclers = 0;
+    animatecnt = 0;
+    parallaxtype = 0;
+    randomseed = 17;
+    ud.pause_on = 0;
+    ud.camerasprite = -1;
+    ud.eog = 0;
+    tempwallptr = 0;
+    camsprite = -1;
+    earthquaketime = 0;
+
+    numinterpolations = 0;
+    startofdynamicinterpolations = 0;
+
+    if (((g & MODE_EOL) != MODE_EOL && numplayers < 2) || (ud.coop != 1 && numplayers > 1)) {
+        preMap.resetWeapons(snum);
+        preMap.resetIinventory(snum);
+    }
+    else if (p.curr_weapon == HANDREMOTE_WEAPON) {
+        p.ammo_amount[HANDBOMB_WEAPON]++;
+        p.curr_weapon = HANDBOMB_WEAPON;
+    }
+
+    p.timebeforeexit = 0;
+    p.customexitsound = 0;
+};
+
 //670
 preMap.preLevel = function (g) {
     var i, nexti, j, startwall, endwall, lotaglist;
     var lotags = new Int16Array(65);
 
     show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
-    show2dwallnew = new Uint8Array((MAXWALLS + 7) >> 3);
-    show2dspritenew = new Uint8Array((MAXSPRITES + 7) >> 3);
+    show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
+    show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
 
     preMap.resetPreStat(0, g);
     numclouds = 0;
@@ -220,9 +323,9 @@ preMap.preLevel = function (g) {
             continue;
         }
     }
-    
+
     i = headspritestat[0];
-    
+
     while (i >= 0) {
         nexti = nextspritestat[i];
 
@@ -324,19 +427,16 @@ preMap.preLevel = function (g) {
     }
 
     mirrorcnt = 0;
-    
-    for( i = 0; i < numwalls; i++ )
-    {
+
+    for (i = 0; i < numwalls; i++) {
         var wal = wall[i];
 
-        if(wal.overpicnum == MIRROR && (wal.cstat&32) != 0)
-        {
+        if (wal.overpicnum == MIRROR && (wal.cstat & 32) != 0) {
             j = wal.nextsector;
 
-            if(mirrorcnt > 63)
+            if (mirrorcnt > 63)
                 throw new Error("Too many mirrors (64 max.)");
-            if ( (j >= 0) && sector[j].ceilingpicnum != MIRROR )
-            {
+            if ((j >= 0) && sector[j].ceilingpicnum != MIRROR) {
                 sector[j].ceilingpicnum = MIRROR;
                 sector[j].floorpicnum = MIRROR;
                 mirrorwall[mirrorcnt] = i;
@@ -346,14 +446,13 @@ preMap.preLevel = function (g) {
             }
         }
 
-        if(numanimwalls >= MAXANIMWALLS)
+        if (numanimwalls >= MAXANIMWALLS)
             throw new Error("Too many 'anim' walls (max 512.)");
 
         animwall[numanimwalls].tag = 0;
         animwall[numanimwalls].wallnum = 0;
 
-        switch(wal.overpicnum)
-        {
+        switch (wal.overpicnum) {
             case FANSHADOW:
             case FANSPRITE:
                 wall.cstat |= 65;
@@ -362,17 +461,17 @@ preMap.preLevel = function (g) {
                 break;
 
             case W_FORCEFIELD:
-                if(!tiles[W_FORCEFIELD].data)
-                    for(j=0;j<3;j++)
-                        tloadtile(W_FORCEFIELD+j);
-            case W_FORCEFIELD+1:
-            case W_FORCEFIELD+2:
-                if(wal.shade > 31)
+                if (!tiles[W_FORCEFIELD].data)
+                    for (j = 0; j < 3; j++)
+                        tloadtile(W_FORCEFIELD + j);
+            case W_FORCEFIELD + 1:
+            case W_FORCEFIELD + 2:
+                if (wal.shade > 31)
                     wal.cstat = 0;
-                else wal.cstat |= 85+256;
+                else wal.cstat |= 85 + 256;
 
 
-                if(wal.lotag && wal.nextwall >= 0)
+                if (wal.lotag && wal.nextwall >= 0)
                     wall[wal.nextwall].lotag =
                         wal.lotag;
 
@@ -386,17 +485,16 @@ preMap.preLevel = function (g) {
 
         wal.extra = -1;
 
-        switch(wal.picnum)
-        {
+        switch (wal.picnum) {
             case WATERTILE2:
-                for(j=0;j<3;j++)
-                    if(!tiles[wal.picnum+j].data)
-                        tloadtile(wal.picnum+j);
+                for (j = 0; j < 3; j++)
+                    if (!tiles[wal.picnum + j].data)
+                        tloadtile(wal.picnum + j);
                 break;
 
             case TECHLIGHT2:
             case TECHLIGHT4:
-                if(tiles[wal.picnum].data == null)
+                if (tiles[wal.picnum].data == null)
                     tloadtile(wal.picnum);
                 break;
             case W_TECHWALL1:
@@ -410,8 +508,8 @@ preMap.preLevel = function (g) {
             case SCREENBREAK6:
             case SCREENBREAK7:
             case SCREENBREAK8:
-                if(!tiles[SCREENBREAK6].data)
-                    for(j=SCREENBREAK6;j<SCREENBREAK9;j++)
+                if (!tiles[SCREENBREAK6].data)
+                    for (j = SCREENBREAK6; j < SCREENBREAK9; j++)
                         tloadtile(j);
                 animwall[numanimwalls].wallnum = i;
                 animwall[numanimwalls].tag = -1;
@@ -424,9 +522,8 @@ preMap.preLevel = function (g) {
 
                 wal.extra = wal.picnum;
                 animwall[numanimwalls].tag = -1;
-                if(ud.lockout)
-                {
-                    if(wal.picnum == FEMPIC1)
+                if (ud.lockout) {
+                    if (wal.picnum == FEMPIC1)
                         wal.picnum = BLANKSCREEN;
                     else wal.picnum = SCREENBREAK6;
                 }
@@ -473,7 +570,7 @@ preMap.preLevel = function (g) {
 };
 
 //640
-preMap.setupBackdrop = function(sky) {
+preMap.setupBackdrop = function (sky) {
     var i;
 
     for (i = 0; i < MAXPSKYTILES; i++) {
@@ -484,25 +581,24 @@ preMap.setupBackdrop = function(sky) {
         parallaxyscale = 32768;
     }
 
-    switch(sky)
-    {
+    switch (sky) {
         case 78: //CLOUDYOCEAN:
             parallaxyscale = 65536;
             break;
         case 80: //MOONSKY1 :
-            pskyoff[6]=1; pskyoff[1]=2; pskyoff[4]=2; pskyoff[2]=3;
+            pskyoff[6] = 1; pskyoff[1] = 2; pskyoff[4] = 2; pskyoff[2] = 3;
             break;
         case 84: //BIGORBIT1: // orbit
-            pskyoff[5]=1; pskyoff[6]=2; pskyoff[7]=3; pskyoff[2]=4;
+            pskyoff[5] = 1; pskyoff[6] = 2; pskyoff[7] = 3; pskyoff[2] = 4;
             break;
         case 89: //LA:
-            parallaxyscale = 16384+1024;
-            pskyoff[0]=1; pskyoff[1]=2; pskyoff[2]=1; pskyoff[3]=3;
-            pskyoff[4]=4; pskyoff[5]=0; pskyoff[6]=2; pskyoff[7]=3;
+            parallaxyscale = 16384 + 1024;
+            pskyoff[0] = 1; pskyoff[1] = 2; pskyoff[2] = 1; pskyoff[3] = 3;
+            pskyoff[4] = 4; pskyoff[5] = 0; pskyoff[6] = 2; pskyoff[7] = 3;
             break;
     }
 
-    pskybits=3;
+    pskybits = 3;
 };
 
 //990
@@ -565,9 +661,9 @@ preMap.newGame = function (vn, ln, sk) {
 };
 
 //1071
-preMap.resetpSpriteVars = function(g) {
-    var i, j, nexti,circ;
-    var firstx,firsty;
+preMap.resetpSpriteVars = function (g) {
+    var i, j, nexti, circ;
+    var firstx, firsty;
     var s;
     var aimmode = new Uint8Array(MAXPLAYERS);
     var tsbar = structArray(StatusBar, MAXPLAYERS);
@@ -577,7 +673,7 @@ preMap.resetpSpriteVars = function(g) {
     for (var k = 0; k < bot_used.length; k++) {
         bot_used[k] = false;
     }
-    
+
     var bot_names = ["* ELASTI",
         "* ^ZookeM^",
         "* DOOM",
@@ -600,166 +696,173 @@ preMap.resetpSpriteVars = function(g) {
         "* MOE{GER}"];
 
 
-    EGS(ps[0].cursectnum,ps[0].posx,ps[0].posy,ps[0].posz,
-        APLAYER,0,0,0,ps[0].ang,0,0,0,10);
-    throw "todo"
-    //if(ud.recstat != 2) for(i=0;i<MAXPLAYERS;i++)
-    //    {
-    //    aimmode[i] = ps[i].aim_mode;
-    //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
-    //    {
-    //        for(j=0;j<MAX_WEAPONS;j++)
-    //        {
-    //            tsbar[i].ammo_amount[j] = ps[i].ammo_amount[j];
-    //            tsbar[i].gotweapon[j] = ps[i].gotweapon[j];
-    //        }
+    EGS(ps[0].cursectnum, ps[0].posx, ps[0].posy, ps[0].posz,
+        APLAYER, 0, 0, 0, ps[0].ang, 0, 0, 0, 10);
+    if (ud.recstat != 2) {
+        throw "todo"
+        //for (i = 0; i < MAXPLAYERS; i++) {
+        //    aimmode[i] = ps[i].aim_mode;
+        //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
+        //    {
+        //        for(j=0;j<MAX_WEAPONS;j++)
+        //        {
+        //            tsbar[i].ammo_amount[j] = ps[i].ammo_amount[j];
+        //            tsbar[i].gotweapon[j] = ps[i].gotweapon[j];
+        //        }
 
-    //        tsbar[i].shield_amount = ps[i].shield_amount;
-    //        tsbar[i].curr_weapon = ps[i].curr_weapon;
-    //        tsbar[i].inven_icon = ps[i].inven_icon;
+        //        tsbar[i].shield_amount = ps[i].shield_amount;
+        //        tsbar[i].curr_weapon = ps[i].curr_weapon;
+        //        tsbar[i].inven_icon = ps[i].inven_icon;
 
-    //        tsbar[i].firstaid_amount = ps[i].firstaid_amount;
-    //        tsbar[i].steroids_amount = ps[i].steroids_amount;
-    //        tsbar[i].holoduke_amount = ps[i].holoduke_amount;
-    //        tsbar[i].jetpack_amount = ps[i].jetpack_amount;
-    //        tsbar[i].heat_amount = ps[i].heat_amount;
-    //        tsbar[i].scuba_amount = ps[i].scuba_amount;
-    //        tsbar[i].boot_amount = ps[i].boot_amount;
-    //    }
-    //}
+        //        tsbar[i].firstaid_amount = ps[i].firstaid_amount;
+        //        tsbar[i].steroids_amount = ps[i].steroids_amount;
+        //        tsbar[i].holoduke_amount = ps[i].holoduke_amount;
+        //        tsbar[i].jetpack_amount = ps[i].jetpack_amount;
+        //        tsbar[i].heat_amount = ps[i].heat_amount;
+        //        tsbar[i].scuba_amount = ps[i].scuba_amount;
+        //        tsbar[i].boot_amount = ps[i].boot_amount;
+        //    }
+    }
 
-    //resetplayerstats(0); // reset a player 
+    preMap.resetPlayerStats(0); // reset a player 
 
-    //for(i=1;i<MAXPLAYERS;i++) // reset all the others
-    //    memcpy(&ps[i],&ps[0],sizeof(ps[0]));
+    for (i = 1; i < MAXPLAYERS; i++) // reset all the others
+        ps[i] = new PlayerType();
 
     //// FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
-    //if(numplayers<2 && !(g&MODE_DEMO))
-    //    memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice)); 
+    if (numplayers < 2 && !(g & MODE_DEMO))
+        throw new Error("todo");  // todo    memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice)); 
 
-    //if(g&MODE_DEMO &&	(ud.playing_demo_rev == BYTEVERSION_27 ||
-    //					ud.playing_demo_rev == BYTEVERSION_28 || 
-    //					ud.playing_demo_rev == BYTEVERSION_29 ||
-    //					ud.playing_demo_rev == BYTEVERSION_116 ||
-    //					ud.playing_demo_rev == BYTEVERSION_117 ||
-    //					ud.playing_demo_rev == BYTEVERSION_118 ))
-    //    for(i=0; i<ud.multimode; i++)
-    //        memcpy(ud.wchoice[i],ud.mywchoice,sizeof(ud.mywchoice)); // assuming.... :-(
 
-    //// FIX_00076: Added default names for bots + fixed a "killed <name>" bug in Fakeplayers with AI
-    //if(!(g&MODE_DEMO) && numplayers<2 && ud.multimode > 1)
-    //    for(i=connecthead;i>=0;i=connectpoint2[i])
-    //        if (i!=myconnectindex)
-    //        {
-    //            memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice));
+    if (g & MODE_DEMO && (ud.playing_demo_rev == BYTEVERSION_27 ||
+    					ud.playing_demo_rev == BYTEVERSION_28 ||
+    					ud.playing_demo_rev == BYTEVERSION_29 ||
+    					ud.playing_demo_rev == BYTEVERSION_116 ||
+    					ud.playing_demo_rev == BYTEVERSION_117 ||
+    					ud.playing_demo_rev == BYTEVERSION_118))
+        for (i = 0; i < ud.multimode; i++)
+            ud.wchoice[i] = new Int32Array(ud.mywchoice); // assuming.... :-(
 
-    //            //	add bot's names
-    //            do 
-    //            { 
-    //                j = rand()%BOT_MAX_NAME; 
-    //            } 
-    //            while(bot_used[j]);
+    // FIX_00076: Added default names for bots + fixed a "killed <name>" bug in Fakeplayers with AI
+    if (!(g & MODE_DEMO) && numplayers < 2 && ud.multimode > 1) {
+        throw new Error("todo");
 
-    //            strcpy(ud.user_name[i], bot_names[j]);
-    //            bot_used[j] = true;
-    //            ps[i].fakeplayer = 1 + ud.playerai;  // = true if fakerplayer. (==2 if AI)
-    //        }
+        //    for(i=connecthead;i>=0;i=connectpoint2[i])
+        //        if (i!=myconnectindex)
+        //        {
+        //            memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice));
 
-    //if(ud.recstat != 2) for(i=0;i<MAXPLAYERS;i++)
-    //    {
-    //    ps[i].aim_mode = aimmode[i];
-    //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
-    //    {
-    //        for(j=0;j<MAX_WEAPONS;j++)
-    //        {
-    //            ps[i].ammo_amount[j] = tsbar[i].ammo_amount[j];
-    //            ps[i].gotweapon[j] = tsbar[i].gotweapon[j];
-    //        }
-    //        ps[i].shield_amount = tsbar[i].shield_amount;
-    //        ps[i].curr_weapon = tsbar[i].curr_weapon;
-    //        ps[i].inven_icon = tsbar[i].inven_icon;
+        //            //	add bot's names
+        //            do 
+        //            { 
+        //                j = rand()%BOT_MAX_NAME; 
+        //            } 
+        //            while(bot_used[j]);
 
-    //        ps[i].firstaid_amount = tsbar[i].firstaid_amount;
-    //        ps[i].steroids_amount= tsbar[i].steroids_amount;
-    //        ps[i].holoduke_amount = tsbar[i].holoduke_amount;
-    //        ps[i].jetpack_amount = tsbar[i].jetpack_amount;
-    //        ps[i].heat_amount = tsbar[i].heat_amount;
-    //        ps[i].scuba_amount= tsbar[i].scuba_amount;
-    //        ps[i].boot_amount = tsbar[i].boot_amount;
-    //    }
-    //}
+        //            strcpy(ud.user_name[i], bot_names[j]);
+        //            bot_used[j] = true;
+        //            ps[i].fakeplayer = 1 + ud.playerai;  // = true if fakerplayer. (==2 if AI)
+        //}
+    }
 
-    //numplayersprites = 0;
-    //circ = 2048/ud.multimode;
+    if (ud.recstat != 2) for (i = 0; i < MAXPLAYERS; i++) {
+        throw new Error("todo");
+        //    ps[i].aim_mode = aimmode[i];
+        //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
+        //    {
+        //        for(j=0;j<MAX_WEAPONS;j++)
+        //        {
+        //            ps[i].ammo_amount[j] = tsbar[i].ammo_amount[j];
+        //            ps[i].gotweapon[j] = tsbar[i].gotweapon[j];
+        //        }
+        //        ps[i].shield_amount = tsbar[i].shield_amount;
+        //        ps[i].curr_weapon = tsbar[i].curr_weapon;
+        //        ps[i].inven_icon = tsbar[i].inven_icon;
 
-    //which_palookup = 9;
-    //j = connecthead;
-    //i = headspritestat[10];
-    //while(i >= 0)
-    //{
-    //    nexti = nextspritestat[i];
-    //    s = &sprite[i];
+        //        ps[i].firstaid_amount = tsbar[i].firstaid_amount;
+        //        ps[i].steroids_amount= tsbar[i].steroids_amount;
+        //        ps[i].holoduke_amount = tsbar[i].holoduke_amount;
+        //        ps[i].jetpack_amount = tsbar[i].jetpack_amount;
+        //        ps[i].heat_amount = tsbar[i].heat_amount;
+        //        ps[i].scuba_amount= tsbar[i].scuba_amount;
+        //        ps[i].boot_amount = tsbar[i].boot_amount;
+        //    }
+    }
 
-    //    if( numplayersprites == MAXPLAYERS)
-    //        gameexit("\nToo many player sprites (max 16.)");
+    numplayersprites = 0;
+    circ = (2048 / ud.multimode) | 0;
 
-    //    if(numplayersprites == 0)
-    //    {
-    //        firstx = ps[0].posx;
-    //        firsty = ps[0].posy;
-    //    }
+    which_palookup = 9;
+    j = connecthead;
+    i = headspritestat[10];
+    
+    while(i >= 0)
+    {
+        nexti = nextspritestat[i];
+        s = sprite[i];
 
-    //    po[numplayersprites].ox = s.x;
-    //    po[numplayersprites].oy = s.y;
-    //    po[numplayersprites].oz = s.z;
-    //    po[numplayersprites].oa = s.ang;
-    //    po[numplayersprites].os = s.sectnum;
+        if( numplayersprites == MAXPLAYERS)
+            throw new Error("Too many player sprites (max 16.)");
 
-    //    numplayersprites++;
-    //    if(j >= 0)
-    //    {
-    //        s.owner = i;
-    //        s.shade = 0;
-    //        s.xrepeat = 42;
-    //        s.yrepeat = 36;
-    //        s.cstat = 1+256;
-    //        s.xoffset = 0;
-    //        s.clipdist = 64;
+        if(numplayersprites == 0)
+        {
+            firstx = ps[0].posx;
+            firsty = ps[0].posy;
+        }
 
-    //        if( (g&MODE_EOL) != MODE_EOL || ps[j].last_extra == 0)
-    //        {
-    //            ps[j].last_extra = max_player_health;
-    //            s.extra = max_player_health;
-    //        }
-    //        else s.extra = ps[j].last_extra;
+        po[numplayersprites].ox = s.x;
+        po[numplayersprites].oy = s.y;
+        po[numplayersprites].oz = s.z;
+        po[numplayersprites].oa = s.ang;
+        po[numplayersprites].os = s.sectnum;
 
-    //        s.yvel = j;
+        numplayersprites++;
+        if(j >= 0)
+        {
+            s.owner = i;
+            s.shade = 0;
+            s.xrepeat = 42;
+            s.yrepeat = 36;
+            s.cstat = 1+256;
+            s.xoffset = 0;
+            s.clipdist = 64;
 
-    //        if(s.pal == 0)
-    //        {
-    //            s.pal = ps[j].palookup = which_palookup;
-    //            which_palookup++;
-    //            if( which_palookup >= 17 ) which_palookup = 9;
-    //        }
-    //        else ps[j].palookup = s.pal;
+            if( (g&MODE_EOL) != MODE_EOL || ps[j].last_extra == 0)
+            {
+                ps[j].last_extra = max_player_health;
+                s.extra = max_player_health;
+            }
+            else s.extra = ps[j].last_extra;
 
-    //        ps[j].i = i;
-    //        ps[j].frag_ps = j;
-    //        hittype[i].owner = i;
+            s.yvel = j;
 
-    //        hittype[i].bposx = ps[j].bobposx = ps[j].oposx = ps[j].posx =        s.x;
-    //        hittype[i].bposy = ps[j].bobposy = ps[j].oposy = ps[j].posy =        s.y;
-    //        hittype[i].bposz = ps[j].oposz = ps[j].posz =        s.z;
-    //        ps[j].oang  = ps[j].ang  =        s.ang;
+            if(s.pal == 0)
+            {
+                s.pal = ps[j].palookup = which_palookup;
+                which_palookup++;
+                if( which_palookup >= 17 ) which_palookup = 9;
+            }
+            else ps[j].palookup = s.pal;
 
-    //        updatesector(s.x,s.y,&ps[j].cursectnum);
+            ps[j].i = i;
+            ps[j].frag_ps = j;
+            hittype[i].owner = i;
 
-    //        j = connectpoint2[j];
+            hittype[i].bposx = ps[j].bobposx = ps[j].oposx = ps[j].posx =        s.x;
+            hittype[i].bposy = ps[j].bobposy = ps[j].oposy = ps[j].posy =        s.y;
+            hittype[i].bposz = ps[j].oposz = ps[j].posz =        s.z;
+            ps[j].oang  = ps[j].ang  =        s.ang;
 
-    //    }
-    //    else deletesprite(i);
-    //    i = nexti;
-    //}
+            var cursectnumRef = new Ref(ps[j].cursectnum);
+            updatesector(s.x, s.y, cursectnumRef);
+            ps[j].cursectnum = cursectnumRef.$;
+
+            j = connectpoint2[j];
+
+        }
+        else deletesprite(i);
+        i = nexti;
+    }
 };
 
 //1286
@@ -772,7 +875,7 @@ function genSpriteRemaps() {
     } else {
         throw new Error("ERROR: File 'LOOKUP.DAT' not found.");
     }
-    
+
     for (var j = 0; j < numl; j++) {
         lookpos = kread8(fp);
         kread(fp, tempbuf, 256);
@@ -872,6 +975,6 @@ preMap.enterLevel = function (g) {
 
     Sector.allignWarpElevators();
     preMap.resetpSpriteVars(g);
-    
+
     debugger;
 };
