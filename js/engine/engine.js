@@ -199,15 +199,16 @@ var clipit = structArray(LineType, MAXCLIPNUM);
 var clipsectorlist = new Int16Array(MAXCLIPNUM), clipsectnum = 0;
 var clipobjectval = new Int16Array(MAXCLIPNUM);
 
-//typedef struct
-//{
-//    int32_t sx, sy, z;
-//    short a, picnum;
-//    int8_t dashade;
-//    uint8_t  dapalnum, dastat, pagesleft;
-//    int32_t cx1, cy1, cx2, cy2;
-//} permfifotype;
-//static permfifotype permfifo[MAXPERMS];
+function PermFifoType()
+{
+    this.sx = 0; this.sy = 0; this.z = 0;
+    this.a = 0; this.picnum = 0;
+    this.dashade = 0;
+    this.dapalnum = 0; this.dastat = 0; this.pagesleft = 0;
+    this.cx1 = 0; this.cy1 = 0; this.cx2 = 0; this.cy2 = 0;
+}
+
+var permfifo = structArray(PermFifoType, MAXPERMS);
 var permhead = 0, permtail = 0;
 
 ////FCS: Num walls to potentially render.
@@ -2468,7 +2469,68 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
         return;
     }
 
-    throw new Error("TODO");
+    if (numpages >= 2) {
+        debugger;
+        per = permfifo[permhead];
+        per.sx = sx;
+        per.sy = sy;
+        per.z = z;
+        per.a = a;
+        per.picnum = picnum;
+        per.dashade = dashade;
+        per.dapalnum = dapalnum;
+        per.dastat = dastat;
+        per.pagesleft = numpages+((beforedrawrooms&1)<<7);
+        per.cx1 = cx1;
+        per.cy1 = cy1;
+        per.cx2 = cx2;
+        per.cy2 = cy2;
+
+        /* Would be better to optimize out true bounding boxes */
+        if (dastat&64)  /* If non-masking write, checking for overlapping cases */
+        {
+            for(i=permtail; i!=permhead; i=((i+1)&(MAXPERMS-1)))
+            {
+                per2 = permfifo[i];
+                if ((per2.pagesleft&127) == 0) continue;
+                if (per2.sx != per.sx) continue;
+                if (per2.sy != per.sy) continue;
+                if (per2.z != per.z) continue;
+                if (per2.a != per.a) continue;
+                if (tiles[per2.picnum].dim.width > tiles[per.picnum].dim.width)
+                    continue;
+                
+                if (tiles[per2.picnum].dim.height > tiles[per.picnum].dim.height)
+                    continue;
+                if (per2.cx1 < per.cx1) continue;
+                if (per2.cy1 < per.cy1) continue;
+                if (per2.cx2 > per.cx2) continue;
+                if (per2.cy2 > per.cy2) continue;
+                per2.pagesleft = 0;
+            }
+            if ((per.z == 65536) && (per.a == 0))
+                for(i=permtail; i!=permhead; i=((i+1)&(MAXPERMS-1)))
+                {
+                    per2 = permfifo[i];
+                    if ((per2.pagesleft&127) == 0) continue;
+                    if (per2.z != 65536) continue;
+                    if (per2.a != 0) continue;
+                    if (per2.cx1 < per.cx1) continue;
+                    if (per2.cy1 < per.cy1) continue;
+                    if (per2.cx2 > per.cx2) continue;
+                    if (per2.cy2 > per.cy2) continue;
+                    if ((per2.sx>>16) < (per.sx>>16)) continue;
+                    if ((per2.sy>>16) < (per.sy>>16)) continue;
+                    if ((per2.sx>>16)+tiles[per2.picnum].dim.width > (per.sx>>16)+tiles[per.picnum].dim.width)
+                        continue;
+                    if ((per2.sy>>16)+tiles[per2.picnum].dim.height > (per.sy>>16)+tiles[per.picnum].dim.height)
+                        continue;
+                    per2.pagesleft = 0;
+                }
+        }
+
+        permhead = ((permhead+1)&(MAXPERMS-1));
+    }
 }
 
 //8193

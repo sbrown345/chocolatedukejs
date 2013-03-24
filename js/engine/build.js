@@ -155,7 +155,7 @@ var sector = structArray(SectorType, MAXSECTORS);
 var wall = structArray(Wall, MAXSPRITES);
 var sprite = structArray(Sprite, MAXSPRITES);
 
-var mapCRC;
+var mapCRC = 0;
 
 //EXTERN int32_t spritesortcnt;
 //EXTERN spritetype tsprite[MAXSPRITESONSCREEN];

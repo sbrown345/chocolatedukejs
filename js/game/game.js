@@ -169,6 +169,7 @@ Game.drawBackground = function () {
     // FIX_00081: Screen border in menu
     if (ud.screen_size > 8 && (ps[myconnectindex].gm & MODE_GAME || ud.recstat == 2)) // ud.recstat == 2 => playing demo
     {
+        debugger;
         y = 0;
         if (ud.coop != 1) {
             if (ud.multimode > 1) y += 8;

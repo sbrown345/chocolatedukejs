@@ -911,6 +911,30 @@ preMap.resetpSpriteVars = function (g) {
     }
 };
 
+preMap.clearFrags = function() {
+    var i;
+
+    for (i = 0; i < MAXPLAYERS; i++)
+        ps[i].frag = ps[i].fraggedself = 0;
+
+    for (var j = 0; j < frags.length; j++) {
+        var frag = frags[j];
+        for (var k = 0; k < frag.length; k++) {
+            frag[k] = 0;
+        }
+    }
+};
+
+preMap.resetTimeVars = function() {
+    vel = svel = angvel = horiz = 0;
+
+    totalclock = 0;
+    cloudtotalclock = 0;
+    ototalclock = 0;
+    lockclock = 0;
+    ready2send = 1;
+};
+
 //1286
 function genSpriteRemaps() {
     var fp = TCkopen4load("lookup.dat", false);
@@ -1159,35 +1183,32 @@ preMap.enterLevel = function (g) {
     Network.flushPackets();
     preMap.waitForEverybody();
 
-    debugger;
-
-
     palto(0, 0, 0, 0);
     preMap.vscrn();
     clearView(0);
     Game.drawBackground();
 
-    //    clearbufbyte(playerquitflag,MAXPLAYERS,0x01010101);
-    //    ps[myconnectindex].over_shoulder_on = 0;
+    for (var j = 0; j < playerquitflag.length; j++) {
+        playerquitflag[j] = 1;
+    }
+     ps[myconnectindex].over_shoulder_on = 0;
 
-    //    clearfrags();
+     preMap.clearFrags();
 
-    //    resettimevars();  // Here we go
+     preMap.resetTimeVars();  // Here we go
 
-    //    if(numplayers > 1) 
-    //    {
-    //        buf[0] = 132;	// xDuke TAG ID
-    //        buf[1] = mapCRC & 0xFF;
-    //        buf[2] = (mapCRC>>8) & 0xFF;
+    if(numplayers > 1) {
+        throw new Error("todo");
+        //buf[0] = 132;	// xDuke TAG ID
+        //buf[1] = mapCRC & 0xFF;
+        //buf[2] = (mapCRC>>8) & 0xFF;
 
-    //        for(i=connecthead;i>=0;i=connectpoint2[i])
-    //            if( i != myconnectindex )
-    //                sendpacket(i,(uint8_t*)buf,3);
-    //    }
+        //for(i=connecthead;i>=0;i=connectpoint2[i])
+        //    if( i != myconnectindex )
+        //        sendpacket(i,(uint8_t*)buf,3);
+    }
 
-    //    ud.mapCRC[myconnectindex] = mapCRC;
-
-
+    ud.mapCRC[myconnectindex] = mapCRC;
 
     debugger;
 };
