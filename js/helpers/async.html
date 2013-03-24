@@ -58,11 +58,12 @@
                 console.log("_______ result: ", foo);
                 return foo;
             }, function () {
+                q.setPositionAtStart(); // important!
+                
                 output += "|50 " + "while" + i;
                 console.log("exec WHILE");
 
                 if (i == 1) {
-                    q.setPositionAtStart(); // important!
                     q.add(function () {
                         output += "|55 while nested";
                     });

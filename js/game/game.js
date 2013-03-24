@@ -2455,6 +2455,7 @@ function main(argc, argv) {
             console.log("Start game loop");
             q.setPositionAtStart()
                 .addWhile(function () {
+                    q.setPositionAtStart(); // important!
                     return !(ps[myconnectindex].gm & MODE_END);
                 }, function () {
                     throw new Error("todo");
@@ -2539,14 +2540,15 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     return 1;
 };
 
+//8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
 Game.whichDemo = 1;
-Game.playBack = function () {
+Game.playBack = function() {
     q.setPositionAtStart();
 
     var i, j, k, l, t;
-    var foundDemo;
+    var foundemo = 0;
 
     if (ready2send) {
         return false;
@@ -2561,11 +2563,11 @@ Game.playBack = function () {
 
 
     if (numplayers < 2 && ud.multimode_bot < 2) {
-        foundDemo = Game.openDemoRead(Game.whichDemo);
+        foundemo = Game.openDemoRead(Game.whichDemo);
     }
 
 
-    if (foundDemo === 0) {
+    if (foundemo === 0) {
         throw new Error("todo");
     } else {
         ud.recstat = 2;
@@ -2577,7 +2579,42 @@ Game.playBack = function () {
         preMap.enterLevel(MODE_DEMO);
     }
 
-    throw new Error("todo");
+    if (foundemo === 0 || Game.inMenu || KB.keyWaiting() || numplayers > 1) {
+        FX.stopAllSounds();
+        clearsoundlocks();
+        ps[myconnectindex].gm |= MODE_MENU;
+    }
+
+    ready2send = 0;
+    i = 0;
+
+    KB.flushKeyboardQueue();
+
+    k = 0;
+
+    // DEMO LOOP
+    q.setPositionAtStart()
+        .addWhile(function() {
+             return ud.reccnt > 0 || foundemo === 0;
+        }, function () {
+            q.setPositionAtStart();
+
+            console.log("demo loop")
+            throw new Error("todo");
+        })
+        .add(function() {
+            throw new Error("todo");
+            //kclose(recfilep);
+            //ud.playing_demo_rev = 0;
+            //if(ps[myconnectindex].gm&MODE_MENU)
+            //{
+            //    goto RECHECK;
+            //}
+
+            //return 1;
+        });
+    
+    // put no code here
 };
 
 //10434

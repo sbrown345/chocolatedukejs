@@ -221,6 +221,7 @@ function playanm(filename, t) {
         .addWhile(function () {
             return totalclock < ototalclock;
         }, function () {
+            q.setPositionAtStart(); // important!
             if (KB.keyWaiting()) {
                 //goto ENDOFANIMLOOP;
                 throw new Error("goto label todo");

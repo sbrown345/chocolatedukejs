@@ -1209,6 +1209,73 @@ preMap.enterLevel = function (g) {
     }
 
     ud.mapCRC[myconnectindex] = mapCRC;
-
-    debugger;
 };
+
+
+/*
+Duke Nukem V
+
+Layout:
+
+      Settings:
+        Suburbs
+          Duke inflitrating neighborhoods inf. by aliens
+        Death Valley:
+          Sorta like a western.  Bull-skulls halb buried in the sand
+          Military compound:  Aliens take over nuke-missle silo, duke
+            must destroy.
+          Abondend Aircraft field
+        Vegas:
+          Blast anything bright!  Alien lights camoflauged.
+          Alien Drug factory. The Blue Liquid
+        Mountainal Cave:
+          Interior cave battles.
+        Jungle:
+          Trees, canopee, animals, a mysterious hole in the earth
+        Penetencury:
+          Good use of spotlights:
+      Inventory:
+        Wood,
+        Metal,
+        Torch,
+        Rope,
+        Plastique,
+        Cloth,
+        Wiring,
+        Glue,
+        Cigars,
+        Food,
+        Duck Tape,
+        Nails,
+        Piping,
+        Petrol,
+        Uranium,
+        Gold,
+        Prism,
+        Power Cell,
+
+        Hand spikes (Limited usage, they become dull)
+        Oxygent     (Oxygen mixed with stimulant)
+
+
+      Player Skills:
+        R-Left,R-Right,Foward,Back
+        Strafe, Jump, Double Flip Jump for distance
+        Help, Escape
+        Fire/Use
+        Use Menu
+
+Programming:
+     Images: Polys
+     Actors:
+       Multi-Object sections for change (head,arms,legs,torsoe,all change)
+       Facial expressions.  Pal lookup per poly?
+
+     struct imagetype
+        {
+            int *itable; // AngX,AngY,AngZ,Xoff,Yoff,Zoff;
+            int *idata;
+            struct imagetype *prev, *next;
+        }
+
+*/
