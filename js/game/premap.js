@@ -4,8 +4,60 @@ var preMap = {}; // todo rename PreMap
 
 var which_palookup = 9;
 
+//36
 function tloadtile(tileNumber) {
     gotpic[tileNumber >> 3] |= (1 << (tileNumber & 7));
+}
+
+//278
+function cacheit() {
+    console.log("todo cacheit"); // todo
+    //var i,j;
+
+    //precachenecessarysounds();
+
+    //cachegoodsprites();
+
+    //for(i=0;i<numwalls;i++)
+    //    if(! tiles[wall[i].picnum].data )
+    //    {
+    //        if(!tiles[wall[i].picnum].data )
+    //            tloadtile(wall[i].picnum);
+    //        if(wall[i].overpicnum >= 0 && !tiles[wall[i].overpicnum].data  )
+    //            tloadtile(wall[i].overpicnum);
+    //    }
+
+    //for(i=0;i<numsectors;i++)
+    //{
+    //    if( !tiles[sector[i].floorpicnum].data  )
+    //        tloadtile( sector[i].floorpicnum );
+    //    if( !tiles[sector[i].ceilingpicnum].data )
+    //    {
+    //        tloadtile( sector[i].ceilingpicnum );
+    //        if( tiles[sector[i].ceilingpicnum].data == (uint8_t*)LA)
+    //        {
+    //            tloadtile(LA+1);
+    //            tloadtile(LA+2);
+    //        }
+    //    }
+
+    //    j = headspritesect[i];
+    //    while(j >= 0)
+    //    {
+    //        if(sprite[j].xrepeat != 0 && sprite[j].yrepeat != 0 && (sprite[j].cstat&32768) == 0)
+    //            if(!tiles[sprite[j].picnum].data )
+    //                cachespritenum(j);
+    //        j = nextspritesect[j];
+    //    }
+    //}
+
+}
+
+//322
+
+function docacheit() {
+    console.log("todo docacheit");
+    // todo
 }
 
 //357
@@ -699,8 +751,7 @@ preMap.resetpSpriteVars = function (g) {
     EGS(ps[0].cursectnum, ps[0].posx, ps[0].posy, ps[0].posz,
         APLAYER, 0, 0, 0, ps[0].ang, 0, 0, 0, 10);
     if (ud.recstat != 2) {
-        throw "todo"
-        //for (i = 0; i < MAXPLAYERS; i++) {
+        throw "todo"; //for (i = 0; i < MAXPLAYERS; i++) {
         //    aimmode[i] = ps[i].aim_mode;
         //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
         //    {
@@ -795,17 +846,15 @@ preMap.resetpSpriteVars = function (g) {
     which_palookup = 9;
     j = connecthead;
     i = headspritestat[10];
-    
-    while(i >= 0)
-    {
+
+    while (i >= 0) {
         nexti = nextspritestat[i];
         s = sprite[i];
 
-        if( numplayersprites == MAXPLAYERS)
+        if (numplayersprites == MAXPLAYERS)
             throw new Error("Too many player sprites (max 16.)");
 
-        if(numplayersprites == 0)
-        {
+        if (numplayersprites == 0) {
             firstx = ps[0].posx;
             firsty = ps[0].posy;
         }
@@ -817,18 +866,16 @@ preMap.resetpSpriteVars = function (g) {
         po[numplayersprites].os = s.sectnum;
 
         numplayersprites++;
-        if(j >= 0)
-        {
+        if (j >= 0) {
             s.owner = i;
             s.shade = 0;
             s.xrepeat = 42;
             s.yrepeat = 36;
-            s.cstat = 1+256;
+            s.cstat = 1 + 256;
             s.xoffset = 0;
             s.clipdist = 64;
 
-            if( (g&MODE_EOL) != MODE_EOL || ps[j].last_extra == 0)
-            {
+            if ((g & MODE_EOL) != MODE_EOL || ps[j].last_extra == 0) {
                 ps[j].last_extra = max_player_health;
                 s.extra = max_player_health;
             }
@@ -836,11 +883,10 @@ preMap.resetpSpriteVars = function (g) {
 
             s.yvel = j;
 
-            if(s.pal == 0)
-            {
+            if (s.pal == 0) {
                 s.pal = ps[j].palookup = which_palookup;
                 which_palookup++;
-                if( which_palookup >= 17 ) which_palookup = 9;
+                if (which_palookup >= 17) which_palookup = 9;
             }
             else ps[j].palookup = s.pal;
 
@@ -848,10 +894,10 @@ preMap.resetpSpriteVars = function (g) {
             ps[j].frag_ps = j;
             hittype[i].owner = i;
 
-            hittype[i].bposx = ps[j].bobposx = ps[j].oposx = ps[j].posx =        s.x;
-            hittype[i].bposy = ps[j].bobposy = ps[j].oposy = ps[j].posy =        s.y;
-            hittype[i].bposz = ps[j].oposz = ps[j].posz =        s.z;
-            ps[j].oang  = ps[j].ang  =        s.ang;
+            hittype[i].bposx = ps[j].bobposx = ps[j].oposx = ps[j].posx = s.x;
+            hittype[i].bposy = ps[j].bobposy = ps[j].oposy = ps[j].posy = s.y;
+            hittype[i].bposz = ps[j].oposz = ps[j].posz = s.z;
+            ps[j].oang = ps[j].ang = s.ang;
 
             var cursectnumRef = new Ref(ps[j].cursectnum);
             updatesector(s.x, s.y, cursectnumRef);
@@ -919,6 +965,48 @@ preMap.doFrontScreens = function () {
     }
 };
 
+//1410
+preMap.clearFifo = function () {
+    syncvaltail = 0;
+    syncvaltottail = 0;
+    syncstat = 0;
+    bufferjitter = 1;
+    mymaxlag = otherminlag = 0;
+
+    movefifoplc = movefifosendplc = fakemovefifoplc = 0;
+    avgfvel = avgsvel = avgavel = avghorz = avgbits = 0;
+    otherminlag = mymaxlag = 0;
+
+    clearbuf(myminlag, 0, myminlag.length);
+    loc = new Input();
+    sync = structArray(Sync, MAXPLAYERS);
+    inputfifo = new Array(MOVEFIFOSIZ);
+    for (var i = 0; i < inputfifo.length; i++) {
+        inputfifo[i] = structArray(Input, MAXPLAYERS);
+    }
+
+    clearbuf(movefifoend, 0, movefifoend.length);
+    clearbuf(syncvalhead, 0, syncvalhead.length);
+    clearbuf(myminlag, 0, myminlag.length);
+};
+
+//1434
+preMap.resetMys = function () {
+    myx = omyx = ps[myconnectindex].posx;
+    myy = omyy = ps[myconnectindex].posy;
+    myz = omyz = ps[myconnectindex].posz;
+    myxvel = myyvel = myzvel = 0;
+    myang = omyang = ps[myconnectindex].ang;
+    myhoriz = omyhoriz = ps[myconnectindex].horiz;
+    myhorizoff = omyhorizoff = ps[myconnectindex].horizoff;
+    mycursectnum = ps[myconnectindex].cursectnum;
+    myjumpingcounter = ps[myconnectindex].jumping_counter;
+    myjumpingtoggle = ps[myconnectindex].jumping_toggle;
+    myonground = ps[myconnectindex].on_ground;
+    myhardlanding = ps[myconnectindex].hard_landing;
+    myreturntocenter = ps[myconnectindex].return_to_center;
+};
+
 //1451
 preMap.enterLevel = function (g) {
     var i;
@@ -974,7 +1062,7 @@ preMap.enterLevel = function (g) {
             ps[0].posz = poszRef.$;
             ps[0].ang = angRef.$;
             ps[0].cursectnum = cursectnumRef.$;
-            
+
             if (loadBoardResult === -1) {
                 throw new Error("Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found! Not using the right grp file?");
             }
@@ -987,6 +1075,119 @@ preMap.enterLevel = function (g) {
 
     Sector.allignWarpElevators();
     preMap.resetpSpriteVars(g);
+
+
+    if (ud.recstat != 2)
+        Music.stopSong();
+
+    cacheit();
+    docacheit();
+
+    if (ud.recstat != 2) {
+        throw new Error("todo");
+        //music_select = (ud.volume_number*11) + ud.level_number;
+        //playmusic(&music_fn[0][music_select][0]);
+    }
+
+    if ((g & MODE_GAME) || (g & MODE_EOL))
+        ps[myconnectindex].gm = MODE_GAME;
+    else if (g & MODE_RESTART) {
+        if (ud.recstat == 2)
+            ps[myconnectindex].gm = MODE_DEMO;
+        else ps[myconnectindex].gm = MODE_GAME;
+    }
+
+    if ((ud.recstat == 1) && (g & MODE_RESTART) != MODE_RESTART) {
+        throw new Error("todo");
+        opendemowrite();
+    }
+
+    //    //if (VOLUMEONE) // commented out in original
+    //    //    if(ud.level_number == 0 && ud.recstat != 2) FTA(40,&ps[myconnectindex]);
+
+    fta_quotes[103] = "Chocolate JS Duke3D v" + ud.rev[myconnectindex][2] + "." + ud.rev[myconnectindex][3];
+    FTA(103, ps[myconnectindex], 1);
+
+    if (ud.auto_aim == 1 && ud.recstat != 2) {
+        fta_quotes[103] = "Autoaim set to Bullet only";
+        FTA(103, ps[myconnectindex], 1);
+    }
+
+    if (nHostForceDisableAutoaim && ud.recstat != 2) {
+        fta_quotes[103] = "Autoaim disabled by host";
+        FTA(103, ps[myconnectindex], 1);
+    }
+
+
+    for (i = connecthead; i >= 0; i = connectpoint2[i])
+        switch (sector[sprite[ps[i].i].sectnum].floorpicnum) {
+            case HURTRAIL:
+            case FLOORSLIME:
+            case FLOORPLASMA:
+                preMap.resetWeapons(i);
+                preMap.resetIinventory(i);
+                ps[i].gotweapon[PISTOL_WEAPON] = 0;
+                ps[i].ammo_amount[PISTOL_WEAPON] = 0;
+                ps[i].curr_weapon = KNEE_WEAPON;
+                ps[i].kickback_pic = 0;
+                break;
+        }
+
+    //PREMAP.C - replace near the my's at the end of the file
+
+    preMap.resetMys();
+
+    ps[myconnectindex].palette = palette;
+    palto(0, 0, 0, 0);
+
+    Player.setPal(ps[myconnectindex]);
+    flushperms();
+
+    everyothertime = 0;
+    global_random = 0;
+
+    ud.last_level = ud.level_number + 1;
+
+    preMap.clearFifo();
+
+    for (i = numinterpolations - 1; i >= 0; i--) {
+        bakipos[i] = curipos[i];
+    }
+
+    restorepalette = 1;
+
+    Network.flushPackets();
+    preMap.waitForEverybody();
+
+    debugger;
+
+
+    palto(0, 0, 0, 0);
+    preMap.vscrn();
+    clearView(0);
+    Game.drawBackground();
+
+    //    clearbufbyte(playerquitflag,MAXPLAYERS,0x01010101);
+    //    ps[myconnectindex].over_shoulder_on = 0;
+
+    //    clearfrags();
+
+    //    resettimevars();  // Here we go
+
+    //    if(numplayers > 1) 
+    //    {
+    //        buf[0] = 132;	// xDuke TAG ID
+    //        buf[1] = mapCRC & 0xFF;
+    //        buf[2] = (mapCRC>>8) & 0xFF;
+
+    //        for(i=connecthead;i>=0;i=connectpoint2[i])
+    //            if( i != myconnectindex )
+    //                sendpacket(i,(uint8_t*)buf,3);
+    //    }
+
+    //    ud.mapCRC[myconnectindex] = mapCRC;
+
+
 
     debugger;
 };

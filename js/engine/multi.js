@@ -43,6 +43,7 @@ Multi.unstable.initCrc = function () {
     }
 };
 
+//166
 Multi.unstable.initMultiPlayers = function (multiOption, comRateOption, priority) {
     var i;
 
@@ -67,4 +68,9 @@ Multi.unstable.initMultiPlayers = function (multiOption, comRateOption, priority
     }
 
     throw new Error("todo - network stuff");
+};
+
+//519
+Multi.unstable.flushPackets = function (multiOption, comRateOption, priority) {
+    //todo
 };

@@ -122,15 +122,89 @@ function badguy(s) {
     return 0;
 }
 
+//2333
+function FTA(q, p, mode) {
+    if (ud.fta_on === 1 || mode) {
+        if (p.fta > 0 && q != 115 && q !== 116)
+            if (p.ftq === 115 || p.ftq === 116) return;
+
+        p.fta = 100;
+
+        if (p.ftq !== q || q === 26)
+            // || q == 26 || q == 115 || q ==116 || q == 117 || q == 122 )
+        {
+            p.ftq = q;
+            pub = NUMPAGES;
+            pus = NUMPAGES;
+        }
+    }
+}
+
+//3001
+Game.drawBackground = function () {
+    var dapicnum;
+    var x, y, x1, y1, x2, y2;
+
+    flushperms();
+
+    switch (ud.m_volume_number) {
+        default: dapicnum = BIGHOLE; break;
+        case 1: dapicnum = BIGHOLE; break;
+        case 2: dapicnum = BIGHOLE; break;
+    }
+
+    y1 = 0; y2 = ydim;
+    if (ready2send || ud.recstat == 2) {
+        if (ud.coop != 1) {
+            if (ud.multimode > 1) y1 += scale(ydim, 8, 200);
+            if (ud.multimode > 4) y1 += scale(ydim, 8, 200);
+        }
+        if (ud.screen_size >= 8) y2 = scale(ydim, 200 - 34, 200);
+    }
+
+    for (y = y1; y < y2; y += 128)
+        for (x = 0; x < xdim; x += 128)
+            rotateSprite(x << 16, y << 16, 65536, 0, dapicnum, 8, 0, 8 + 16 + 64 + 128, 0, y1, xdim - 1, y2 - 1);
+
+    // FIX_00081: Screen border in menu
+    if (ud.screen_size > 8 && (ps[myconnectindex].gm & MODE_GAME || ud.recstat == 2)) // ud.recstat == 2 => playing demo
+    {
+        y = 0;
+        if (ud.coop != 1) {
+            if (ud.multimode > 1) y += 8;
+            if (ud.multimode > 4) y += 8;
+        }
+
+        x1 = max(windowx1 - 4, 0);
+        y1 = max(windowy1 - 4, y);
+        x2 = min(windowx2 + 4, xdim - 1);
+        y2 = min(windowy2 + 4, scale(ydim, 200 - 34, 200) - 1);
+
+        for (y = y1 + 4; y < y2 - 4; y += 64) {
+            rotateSprite(x1 << 16, y << 16, 65536, 0, VIEWBORDER, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+            rotateSprite((x2 + 1) << 16, (y + 64) << 16, 65536, 1024, VIEWBORDER, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+        }
+
+        for (x = x1 + 4; x < x2 - 4; x += 64) {
+            rotateSprite((x + 64) << 16, y1 << 16, 65536, 512, VIEWBORDER, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+            rotateSprite(x << 16, (y2 + 1) << 16, 65536, 1536, VIEWBORDER, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+        }
+
+        rotateSprite(x1 << 16, y1 << 16, 65536, 0, VIEWBORDER + 1, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+        rotateSprite((x2 + 1) << 16, y1 << 16, 65536, 512, VIEWBORDER + 1, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+        rotateSprite((x2 + 1) << 16, (y2 + 1) << 16, 65536, 1024, VIEWBORDER + 1, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+        rotateSprite(x1 << 16, (y2 + 1) << 16, 65536, 1536, VIEWBORDER + 1, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);
+    }
+};
+
 //3472
-function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss)
-{
+function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
     var i;
     var s;
 
     i = Engine.insertSprite(whatsect, s_ss);
 
-    if( i < 0 )
+    if (i < 0)
         throw new Error(" Too many sprites spawned. This may happen (for any duke port) if you have hacked the steroids trail in the *.con files. If so, delete your *.con files to use the internal ones and try again.");
 
     hittype[i].bposx = s_x;
@@ -176,17 +250,15 @@ function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s
     hittype[i].floorz = hittype[s_ow].floorz;
     hittype[i].ceilingz = hittype[s_ow].ceilingz;
 
-    hittype[i].temp_data[0]=hittype[i].temp_data[2]=hittype[i].temp_data[3]=hittype[i].temp_data[5]=0;
-    if( actorscrptr[s_pn] )
-    {
+    hittype[i].temp_data[0] = hittype[i].temp_data[2] = hittype[i].temp_data[3] = hittype[i].temp_data[5] = 0;
+    if (actorscrptr[s_pn]) {
         s.extra = script[actorscrptr[s_pn]];
-        hittype[i].temp_data[4] =  script[actorscrptr[s_pn]+1];
-        hittype[i].temp_data[1] =  script[actorscrptr[s_pn]+2];
+        hittype[i].temp_data[4] = script[actorscrptr[s_pn] + 1];
+        hittype[i].temp_data[1] = script[actorscrptr[s_pn] + 2];
         s.hitag = script[actorscrptr[s_pn] + 3];
     }
-    else
-    {
-        hittype[i].temp_data[1]=hittype[i].temp_data[4]=0;
+    else {
+        hittype[i].temp_data[1] = hittype[i].temp_data[4] = 0;
         s.extra = 0;
         s.hitag = 0;
     }
@@ -203,7 +275,7 @@ function EGS( whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s
             changespritestat(i,5);
         }
     */
-    return(i);
+    return (i);
 }
 
 //3552
@@ -329,7 +401,7 @@ function spawn(j, pn) {
             sprite[i].extra = script[actorscrptr[s]]; //sprite[i].extra = *(actorscrptr[s]);
             console.log("sprite[%i].extra = %i", i, sprite[i].extra);
             hittype[i].temp_data[4] = script[actorscrptr[s] + 1]; // *(actorscrptr[s]+1);
-            hittype[i].temp_data[1] = script[actorscrptr[s]+2]; // *(actorscrptr[s]+2);
+            hittype[i].temp_data[1] = script[actorscrptr[s] + 2]; // *(actorscrptr[s]+2);
             if (script[actorscrptr[s] + 3] && sprite[i].hitag === 0) {
                 sprite[i].hitag = script[actorscrptr[s] + 3]; //*(actorscrptr[s]+3);
             }
@@ -1503,16 +1575,14 @@ function spawn(j, pn) {
                     break;
                 case 18:
 
-                    if(sp.ang == 512)
-                    {
+                    if (sp.ang == 512) {
                         hittype[i].temp_data[1] = sector[sect].ceilingz;
-                        if(sp.pal)
+                        if (sp.pal)
                             sector[sect].ceilingz = sp.z;
                     }
-                    else
-                    {
+                    else {
                         hittype[i].temp_data[1] = sector[sect].floorz;
-                        if(sp.pal)
+                        if (sp.pal)
                             sector[sect].floorz = sp.z;
                     }
 
@@ -1532,9 +1602,8 @@ function spawn(j, pn) {
                     sector[sect].ceilingz = sp.z;
                     break;
                 case 27:
-                    if(ud.recstat == 1)
-                    {
-                        sp.xrepeat=sp.yrepeat=64;
+                    if (ud.recstat == 1) {
+                        sp.xrepeat = sp.yrepeat = 64;
                         sp.cstat &= 32767;
                     }
                     break;
@@ -1664,24 +1733,23 @@ function spawn(j, pn) {
 
                 case 3:
 
-                    hittype[i].temp_data[3]=sector[sect].floorshade;
+                    hittype[i].temp_data[3] = sector[sect].floorshade;
 
                     sector[sect].floorshade = sp.shade;
                     sector[sect].ceilingshade = sp.shade;
 
-                    sp.owner = sector[sect].ceilingpal<<8;
+                    sp.owner = sector[sect].ceilingpal << 8;
                     sp.owner |= sector[sect].floorpal;
 
                     //fix all the walls;
 
                     startwall = sector[sect].wallptr;
-                    endwall = startwall+sector[sect].wallnum;
+                    endwall = startwall + sector[sect].wallnum;
 
-                    for(s=startwall;s<endwall;s++)
-                    {
-                        if(!(wall[s].hitag&1))
-                            wall[s].shade=sp.shade;
-                        if( (wall[s].cstat&2) && wall[s].nextwall >= 0)
+                    for (s = startwall; s < endwall; s++) {
+                        if (!(wall[s].hitag & 1))
+                            wall[s].shade = sp.shade;
+                        if ((wall[s].cstat & 2) && wall[s].nextwall >= 0)
                             wall[wall[s].nextwall].shade = sp.shade;
                     }
                     break;
@@ -1689,13 +1757,13 @@ function spawn(j, pn) {
                 case 31:
                     hittype[i].temp_data[1] = sector[sect].floorz;
                     //    hittype[i].temp_data[2] = sp.hitag;
-                    if(sp.ang != 1536) sector[sect].floorz = sp.z;
+                    if (sp.ang != 1536) sector[sect].floorz = sp.z;
 
                     startwall = sector[sect].wallptr;
-                    endwall = startwall+sector[sect].wallnum;
+                    endwall = startwall + sector[sect].wallnum;
 
-                    for(s=startwall;s<endwall;s++)
-                        if(wall[s].hitag === 0) wall[s].hitag = 9999;
+                    for (s = startwall; s < endwall; s++)
+                        if (wall[s].hitag === 0) wall[s].hitag = 9999;
 
                     setinterpolation(sector[sect].floorz);
 
@@ -1720,20 +1788,20 @@ function spawn(j, pn) {
                     hittype[i].temp_data[2] = sector[sect].floorshade;
 
                     startwall = sector[sect].wallptr;
-                    endwall = startwall+sector[sect].wallnum;
+                    endwall = startwall + sector[sect].wallnum;
 
-                    sp.owner = sector[sect].ceilingpal<<8;
+                    sp.owner = sector[sect].ceilingpal << 8;
                     sp.owner |= sector[sect].floorpal;
 
-                    for(s=startwall;s<endwall;s++)
-                        if(wall[s].shade > hittype[i].temp_data[3])
+                    for (s = startwall; s < endwall; s++)
+                        if (wall[s].shade > hittype[i].temp_data[3])
                             hittype[i].temp_data[3] = wall[s].shade;
 
                     break;
 
                 case 9:
-                    if( sector[sect].lotag &&
-                        labs(sector[sect].ceilingz-sp.z) > 1024)
+                    if (sector[sect].lotag &&
+                        labs(sector[sect].ceilingz - sp.z) > 1024)
                         sector[sect].lotag |= 32768; //If its open
                 case 8:
                     //First, get the ceiling-floor shade
@@ -1742,10 +1810,10 @@ function spawn(j, pn) {
                     hittype[i].temp_data[1] = sector[sect].ceilingshade;
 
                     startwall = sector[sect].wallptr;
-                    endwall = startwall+sector[sect].wallnum;
+                    endwall = startwall + sector[sect].wallnum;
 
-                    for(s=startwall;s<endwall;s++)
-                        if(wall[s].shade > hittype[i].temp_data[2])
+                    for (s = startwall; s < endwall; s++)
+                        if (wall[s].shade > hittype[i].temp_data[2])
                             hittype[i].temp_data[2] = wall[s].shade;
 
                     hittype[i].temp_data[3] = 1; //Take Out;

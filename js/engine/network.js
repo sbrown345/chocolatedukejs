@@ -14,3 +14,14 @@ Network.initMultiPlayers = function(multiOption, comRateOption, priority) {
             break;
     }
 };
+
+Network.flushPackets = function () {
+    switch (nNetMode) {
+        case 0:
+            Multi.unstable.flushPackets();
+            break;
+        case 1:
+            throw new Error("todo");
+            break;
+    }
+};

@@ -21,6 +21,7 @@ var BYTEVERSION_1_3 = 1; // for 1.3 demos (Not compatible)
 
 var BYTEVERSION = 119; // xDuke v19.7
 
+var global_random;
 var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_ammo_amount = new Int32Array(MAX_WEAPONS);
 
 // int32_t temp_data[MAXSPRITES][6];
@@ -139,22 +140,22 @@ var ps = structArray(PlayerType, MAXPLAYERS);
 //struct user_defs ud;
 
 var pus = 0, pub = 0;
-//uint8_t  syncstat, syncval[MAXPLAYERS][MOVEFIFOSIZ];
-//int32_t syncvalhead[MAXPLAYERS], syncvaltail, syncvaltottail;
+var syncstat, syncval = new multiDimArray(Uint8Array, MAXPLAYERS, MOVEFIFOSIZ);
+var syncvalhead = new Int32Array(MAXPLAYERS), syncvaltail, syncvaltottail;
 
-//input sync[MAXPLAYERS], loc;
+var sync /*[MAXPLAYERS]*/, loc;
 //input recsync[RECSYNCBUFSIZ];
-//int32_t avgfvel, avgsvel, avgavel, avghorz, avgbits;
+var avgfvel, avgsvel, avgavel, avghorz, avgbits;
 
 
-//input inputfifo[MOVEFIFOSIZ][MAXPLAYERS];
+var inputfifo;//[MOVEFIFOSIZ][MAXPLAYERS];
 //input recsync[RECSYNCBUFSIZ];
 
-//int32_t movefifosendplc;
+var movefifosendplc;
 
 //Multiplayer syncing variables
 var screenpeek;
-//int32_t movefifoend[MAXPLAYERS];
+var movefifoend = new Int32Array(MAXPLAYERS);
 
 //Game recording variables
 
@@ -199,14 +200,14 @@ var env_music_fn = new Array(4);
 var impact_damage;
 
 ////GLOBAL.C - replace the end "my's" with this
-//int32_t myx, omyx, myxvel, myy, omyy, myyvel, myz, omyz, myzvel;
-//short myhoriz, omyhoriz, myhorizoff, omyhorizoff;
-//short myang, omyang, mycursectnum, myjumpingcounter,frags[MAXPLAYERS][MAXPLAYERS];
+var myx, omyx, myxvel, myy, omyy, myyvel, myz, omyz, myzvel;
+var myhoriz, omyhoriz, myhorizoff, omyhorizoff;
+var myang, omyang, mycursectnum, myjumpingcounter, frags = multiDimArray(Int16Array, MAXPLAYERS, MAXPLAYERS);
 
-//uint8_t  myjumpingtoggle, myonground, myhardlanding, myreturntocenter;
-//int8_t multiwho, multipos, multiwhat, multiflag;
+var  myjumpingtoggle, myonground, myhardlanding, myreturntocenter;
+var multiwho, multipos, multiwhat, multiflag;
 
-//int32_t fakemovefifoplc,movefifoplc;
+var fakemovefifoplc, movefifoplc;
 //int32_t myxbak[MOVEFIFOSIZ], myybak[MOVEFIFOSIZ], myzbak[MOVEFIFOSIZ];
 var myhorizbak = new Int32Array(MOVEFIFOSIZ), dukefriction = 0xcc00, show_shareware;
 
@@ -220,9 +221,9 @@ var networkmode = 255, movesperpacket = 1, gamequit = 0, everyothertime;
 var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradius, shrinkerblastradius, morterblastradius, bouncemineblastradius, seenineblastradius;
 //STATUSBARTYPE sbar;
 
-//int32_t myminlag[MAXPLAYERS], mymaxlag, otherminlag, bufferjitter = 1;
+var myminlag = new Int32Array(MAXPLAYERS), mymaxlag, otherminlag, bufferjitter = 1;
 var numclouds, clouds = new Int16Array(128), cloudx = new Int16Array(128), cloudy = new Int16Array(128);
-//int32_t cloudtotalclock = 0,totalmemory = 0;
+var cloudtotalclock = 0, totalmemory = 0;
 var numinterpolations = 0, startofdynamicinterpolations = 0;
 var oldipos = new Int32Array(MAXINTERPOLATIONS);
 var bakipos = new Int32Array(MAXINTERPOLATIONS);

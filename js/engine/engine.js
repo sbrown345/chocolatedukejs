@@ -266,6 +266,12 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     var sect;
     var s;
     var w;
+    
+    console.assert(daposx instanceof Ref, " daposx must be ref");
+    console.assert(daposy instanceof Ref, " daposy must be ref");
+    console.assert(daposz instanceof Ref, " daposz must be ref");
+    console.assert(daang instanceof Ref, " daang must be ref");
+    console.assert(dacursectnum instanceof Ref, " dacursectnum must be ref");
 
     // FIX_00058: Save/load game crash in both single and multiplayer
     // We have to reset those arrays since the same

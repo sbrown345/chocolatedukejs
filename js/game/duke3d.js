@@ -77,11 +77,31 @@ var FREEZE_WEAPON = 9;
 var HANDREMOTE_WEAPON = 10;
 var GROW_WEAPON = 11;
 
+function Sync() {
+    this.avel = 0;
+    this.horz = 0;
+    this.fvel = 0;
+    this.svel = 0;
+    this.bits = 0;
+}
 
+function Input() {
+    this.avel = 0;
+    this.horz = 0;
+    this.fvel = 0;
+    this.svel = 0;
+    this.bits = 0;
+}
 
 ///* !!! FIXME: "sync" is defined in unistd.h ... :(  --ryan. */
-//#define sync duke_sync
-//extern input inputfifo[MOVEFIFOSIZ][MAXPLAYERS], sync[MAXPLAYERS];
+// todo fix: this is work around for macro: possibly confusing sync/duke_sync
+window.__defineSetter__("duke_sync", function (v) {
+    sync = v;
+});
+window.__defineGetter__("duke_sync", function () {
+    return sync;
+});
+
 //extern input recsync[RECSYNCBUFSIZ];
 
 //extern int32_t movefifosendplc;
