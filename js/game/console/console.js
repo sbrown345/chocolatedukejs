@@ -7,6 +7,9 @@ var MAX_CONSOLE_VIEWABLE = 10;
 
 var BUILD_NUMBER = "Build 19";
 
+// Toggle for the console state
+var nConsole_Active = 0;
+
 function ConsoleElement() {
     this.text = null;
     this.prev = null;
@@ -84,3 +87,12 @@ Console.getArgc = function () {
 Console.getArgv = function ($var) {
     return argv[$var];
 };
+
+Console.isActive = function (i) {
+    return nConsole_Active;
+};
+
+Console.setActive = function (i) {
+    nConsole_Active = (i == 0) ? 0 : 1;
+};
+

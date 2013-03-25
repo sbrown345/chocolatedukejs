@@ -198,6 +198,189 @@ Game.drawBackground = function () {
     }
 };
 
+Game.se40code = function(x, y, z, a, h, smoothratio) {
+    var i = headspritestat[15];
+    while (i >= 0) {
+        switch (sprite[i].lotag) {
+        //            case 40:
+        //            case 41:
+        //                SE40_Draw(i,x,y,a,smoothratio);
+        //                break;
+        case 42:
+        case 43:
+        case 44:
+        case 45:
+            if (ps[screenpeek].cursectnum === sprite[i].sectnum)
+                SE40_Draw(i, x, y, z, a, h, smoothratio);
+            break;
+        }
+        i = nextspritestat[i];
+    }
+};
+
+var oyrepeat = -1;
+Game.displayRooms = function (snum, smoothratio) {
+    var cposx, cposy, cposz, dst, j, fz, cz;
+    var sect, cang, k, choriz;
+    var p;
+    var tposx, tposy, i;
+    var tang;
+
+    p = ps[snum];
+
+    if (pub > 0) {
+        if (ud.screen_size > 8) {
+            Game.drawBackground();
+        }
+
+        pub = 0;
+    }
+
+    if (ud.overhead_on == 2 || ud.show_help || p.cursectnum == -1) {
+        return;
+    }
+
+    smoothratio = Math.min(Math.max(smoothratio, 0), 65536);
+
+    visibility = p.visibility;
+
+    if (ud.pause_on || ps[snum].on_crane > -1) {
+        smoothratio = 65536;
+    }
+
+    sect = p.cursectnum;
+    if (sect < 0 || sect >= MAXSECTORS) {
+        return;
+    }
+
+    dointerpolations(smoothratio);
+
+    Sector.animateCamSprite();
+
+    if (ud.camerasprite >= 0) {
+        throw "todo"
+    } else {
+        i = divScale22(1, sprite[p.i].yrepeat + 28);
+        if (i != oyrepeat) {
+            oyrepeat = i;
+            //printf("1: %d %d\n", oyrepeat,yxaspect);
+            setAspect(oyrepeat, yxaspect);
+            //printf("2: %d %d\n", oyrepeat,yxaspect);
+        }
+
+        if (screencapt) {
+            throw "todo"
+            //tiles[MAXTILES-1].lock = 254;
+            //if (tiles[MAXTILES-1].data == NULL)
+            //    allocache(tiles[MAXTILES-1].data,100*160,&tiles[MAXTILES-1].lock);
+
+            //setviewtotile(MAXTILES-1,100,160);
+        }
+        else if ((ud.screen_tilting && p.rotscrnang) || ud.detail == 0) {
+            throw "todo"
+            //    if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
+
+            //    tiles[MAXTILES-2].lock = 255;
+            //    if (tiles[MAXTILES-2].data == NULL)
+            //        allocache(&tiles[MAXTILES-2].data,320*320,&tiles[MAXTILES-2].lock);
+            //    if ((tang&1023) == 0)
+            //        setviewtotile(MAXTILES-2,200>>(1-ud.detail),320>>(1-ud.detail));
+            //else
+            //		setviewtotile(MAXTILES-2,320>>(1-ud.detail),320>>(1-ud.detail));
+            //    if ((tang&1023) == 512)
+            //    {     //Block off unscreen section of 90ø tilted screen
+            //        j = ((320-60)>>(1-ud.detail));
+            //        for(i=(60>>(1-ud.detail))-1;i>=0;i--)
+            //        {
+            //            startumost[i] = 1; startumost[i+j] = 1;
+            //            startdmost[i] = 0; startdmost[i+j] = 0;
+            //        }
+            //    }
+
+            //    i = (tang&511); if (i > 256) i = 512-i;
+            //    i = sinTable[i+512]*8 + sinTable[i]*5;
+            //    setAspect(i>>1,yxaspect);
+        }
+        if ((snum == myconnectindex) && (numplayers > 1)) {
+            throw "todo"
+            //cposx = omyx+mulscale16((int32_t)(myx-omyx),smoothratio);
+            //cposy = omyy+mulscale16((int32_t)(myy-omyy),smoothratio);
+            //cposz = omyz+mulscale16((int32_t)(myz-omyz),smoothratio);
+            //cang = omyang+mulscale16((int32_t)(((myang+1024-omyang)&2047)-1024),smoothratio);
+            //choriz = omyhoriz+omyhorizoff+mulscale16((int32_t)(myhoriz+myhorizoff-omyhoriz-omyhorizoff),smoothratio);
+            //sect = mycursectnum;
+        } else {
+            cposx = p.oposx + mulscale16((p.posx - p.oposx), smoothratio);
+            cposy = p.oposy + mulscale16((p.posy - p.oposy), smoothratio);
+            cposz = p.oposz + mulscale16((p.posz - p.oposz), smoothratio);
+            cang = p.oang + mulscale16((((p.ang + 1024 - p.oang) & 2047) - 1024), smoothratio);
+            choriz = p.ohoriz + p.ohorizoff + mulscale16((p.horiz + p.horizoff - p.ohoriz - p.ohorizoff), smoothratio);
+        }
+        cang += p.look_ang;
+
+        if (p.newowner >= 0) {
+            cang = p.ang + p.look_ang;
+            choriz = p.horiz + p.horizoff;
+            cposx = p.posx;
+            cposy = p.posy;
+            cposz = p.posz;
+            sect = sprite[p.newowner].sectnum;
+            smoothratio = 65536;
+        }
+        else if (p.over_shoulder_on == 0) {
+            cposz += p.opyoff + mulscale16((p.pyoff - p.opyoff), smoothratio);
+        } else {
+            throw "todo"
+            //view(p,&cposx,&cposy,&cposz,&sect,cang,choriz);
+        }
+
+        cz = hittype[p.i].ceilingz;
+        fz = hittype[p.i].floorz;
+
+        if(earthquaketime > 0 && p.on_ground == 1)
+        {
+            cposz += 256-(((earthquaketime)&1)<<9);
+            cang += (2-((earthquaketime)&2))<<2;
+        }
+
+        if(sprite[p.i].pal == 1) cposz -= (18<<8);
+
+        if(p.newowner >= 0)
+            choriz = 100+sprite[p.newowner].shade;
+        else if(p.spritebridge == 0)
+        {
+            if( cposz < ( p.truecz + (4<<8) ) ) cposz = cz + (4<<8);
+            else if( cposz > ( p.truefz - (4<<8) ) ) cposz = fz - (4<<8);
+        }
+
+        if (sect >= 0) {
+            var czRef = new Ref(cz);
+            var fzRef = new Ref(fz);
+            getzsofslope(sect, cposx, cposy, czRef, fzRef);
+            cz = czRef.$;
+            fz = fzRef.$;
+            if (cposz < cz+(4<<8)) cposz = cz+(4<<8);
+            if (cposz > fz-(4<<8)) cposz = fz-(4<<8);
+        }
+
+        if(choriz > 299) choriz = 299;
+        else if(choriz < -99) choriz = -99;
+
+        Game.se40code(cposx, cposy, cposz, cang, choriz, smoothratio);
+
+        if ((gotpic[MIRROR >> 3] & (1 << (MIRROR & 7))) > 0) {
+            throw "todo"
+        }
+        
+        drawrooms(cposx, cposy, cposz, cang, choriz, sect);
+        animatesprites(cposx, cposy, cang, smoothratio);
+        drawmasks();
+        throw "todo"
+    } 
+
+    throw "todo"
+};
+
 //3472
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
     var i;
@@ -325,8 +508,7 @@ Game.wallSwitchCheck = function (i) {
             return 1;
     }
     return 0;
-}
-
+};
 var tempwallptr;
 
 function spawn(j, pn) {
@@ -985,8 +1167,8 @@ function spawn(j, pn) {
                     sp.z = sprite[j].z - PHEIGHT + (3 << 8);
                 }
 
-                sp.x = sprite[j].x + (sintable[(a + 512) & 2047] >> 7);
-                sp.y = sprite[j].y + (sintable[a & 2047] >> 7);
+                sp.x = sprite[j].x + (sinTable[(a + 512) & 2047] >> 7);
+                sp.y = sprite[j].y + (sinTable[a & 2047] >> 7);
 
                 sp.shade = -8;
 
@@ -1664,8 +1846,7 @@ function spawn(j, pn) {
                     break;
 
                 case 17:
-                    throw new Error("todo")
-
+                    throw new Error("todo");
                     //        hittype[i].temp_data[2] = sector[sect].floorz; //Stopping loc
 
                     //        j = nextsectorneighborz(sect,sector[sect].floorz,-1,-1);
@@ -1687,7 +1868,7 @@ function spawn(j, pn) {
                 case 36:
                     break;
                 case 20:
-                    throw new Error("todo")
+                    throw new Error("todo");
                     //        {
                     //            int32_t q;
 
@@ -1822,7 +2003,7 @@ function spawn(j, pn) {
                     break;
 
                 case 11://Pivitor rotater
-                    throw new Error("todo")
+                    throw new Error("todo");
                     //        if(sp.ang>1024) hittype[i].temp_data[3] = 2;
                     //        else hittype[i].temp_data[3] = -2;
                 case 0:
@@ -2544,7 +2725,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
 Game.whichDemo = 1;
-Game.playBack = function() {
+Game.playBack = function () {
     q.setPositionAtStart();
 
     var i, j, k, l, t;
@@ -2594,15 +2775,35 @@ Game.playBack = function() {
 
     // DEMO LOOP
     q.setPositionAtStart()
-        .addWhile(function() {
-             return ud.reccnt > 0 || foundemo === 0;
+        .addWhile(function () {
+            return ud.reccnt > 0 || foundemo === 0;
         }, function () {
             q.setPositionAtStart();
+            console.log("demo loop");
+            if (foundemo) {
+                while (totalclock >= (lockclock + TICSPERFRAME)) {
+                    throw new Error("todo");
+                }
+            }
 
-            console.log("demo loop")
+            if (foundemo === 0) {
+                Game.drawBackground();
+            } else {
+                if (Console.isActive()) {
+                    nonsharedkeys();
+                } else {
+                    j = Math.min(Math.max((totalclock - lockclock) * (65536 / TICSPERFRAME), 0), 65536);
+                    Game.displayRooms(screenpeek, j); //MAJOR BIT HERE!
+                    displayrest(j);
+
+                    if (ud.multimode > 1 && ps[myconnectindex].gm)
+                        getpackets();
+                }
+            }
+
             throw new Error("todo");
         })
-        .add(function() {
+        .add(function () {
             throw new Error("todo");
             //kclose(recfilep);
             //ud.playing_demo_rev = 0;
@@ -2613,7 +2814,7 @@ Game.playBack = function() {
 
             //return 1;
         });
-    
+
     // put no code here
 };
 

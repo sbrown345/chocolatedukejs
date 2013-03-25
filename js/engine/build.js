@@ -216,3 +216,5 @@ var show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
 var show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
 var show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
 var automapping = 0;
+
+var visitedSectors = new Uint8Array((MAXSECTORS + 7) >> 3);

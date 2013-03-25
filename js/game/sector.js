@@ -2,8 +2,31 @@
 
 var Sector = {};
 
+//385
+Sector.animateCamSprite = function () {
+    var i;
+
+    if(camsprite <= 0) return;
+
+    i = camsprite;
+
+    if(hittype[i].temp_data[0] >= 11)
+    {
+        throw "todo"
+        //hittype[i].temp_data[0] = 0;
+
+        //if(ps[screenpeek].newowner >= 0)
+        //    sprite[i].owner = ps[screenpeek].newowner;
+
+        //else if(sprite[i].owner >= 0 && dist(&sprite[ps[screenpeek].i],&sprite[i]) < 2048)
+        //    xyzmirror(sprite[i].owner,sprite[i].picnum);
+    }
+    else 
+        hittype[i].temp_data[0]++;
+};
+
 //2383
-Sector.allignWarpElevators = function() {
+Sector.allignWarpElevators = function () {
     var i, j;
 
     i = headspritestat[3];

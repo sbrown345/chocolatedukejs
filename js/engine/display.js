@@ -170,8 +170,8 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
         throw new Error("todo");
     }
 
-    //horizlookup = (int32_t*)malloc(j);
-    //horizlookup2 = (int32_t*)malloc(j);
+    horizlookup = new Int32Array(j / 4);
+    horizlookup2 = new Int32Array(j / 4);
 
     j = 0;
 

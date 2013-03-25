@@ -241,12 +241,15 @@ function makeitfall(i) {
     }
 
     if ((s.statnum === 1 || s.statnum === 10 || s.statnum === 2 || s.statnum === 6)) {
-        var refObj = new GetZRangeRefObj(hittype[i].ceilingz, hz, hittype[i].floorz, lz);
-        getzrange(s.x, s.y, s.z - (FOURSLEIGHT), s.sectnum, refObj, 127, CLIPMASK0);
-        hittype[i].ceilingz = refObj.ceilz;
-        hz = refObj.ceilhit;
-        hittype[i].floorz = refObj.florz;
-        lz = refObj.florhit;
+        var ceilingzRef = new Ref(hittype[i].ceilingz);
+        var hzRef = new Ref(hz);
+        var floorzRef = new Ref(hittype[i].floorz);
+        var lzRef = new Ref(lz);
+        getzrange(s.x, s.y, s.z - (FOURSLEIGHT), s.sectnum, ceilingzRef, hzRef, floorzRef, lzRef, 127, CLIPMASK0);
+        hittype[i].ceilingz = ceilingzRef.$;
+        hz = hzRef.$;
+        hittype[i].floorz = floorzRef.$;
+        lz = lzRef.$;
     } else {
         hittype[i].ceilingz = sector[s.sectnum].ceilingz;
         hittype[i].floorz = sector[s.sectnum].floorz;

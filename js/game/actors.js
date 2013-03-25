@@ -1,20 +1,41 @@
 ﻿'use strict';
 
 function updateinterpolations() {
-    throw new Error("todo")
+    // todo
+    //for (var i = numinterpolations - 1; i >= 0; i--) {
+    //    oldipos[i] = curipos[i];
+    //}
 }
 
+//40
 function setinterpolation(posptr) {
     var i;
 
-    //todo: (btw, demo plays with this commented out)
+    ////todo: (btw, demo plays with this commented out)
 
-    if (numinterpolations >= MAXINTERPOLATIONS) return;
-    for (i = numinterpolations - 1; i >= 0; i--)
-        if (curipos[i] == posptr) return;
-    curipos[numinterpolations] = posptr; //todo: address of...?
-    oldipos[numinterpolations] = /* * */posptr; //VALUE OF..?
-    numinterpolations++;
+    //if (numinterpolations >= MAXINTERPOLATIONS) return;
+    //for (i = numinterpolations - 1; i >= 0; i--)
+    //    if (curipos[i] == posptr) return;
+    //curipos[numinterpolations] = posptr; //todo: address of...?
+    //oldipos[numinterpolations] = /* * */posptr; //VALUE OF..?
+    //numinterpolations++;
+}
+
+//66
+function dointerpolations(smoothratio) {
+    //Stick at beginning of drawscreen
+    // todo
+    //var i, j, odelta, ndelta;
+
+    //ndelta = 0;
+    //j = 0;
+    //for (i = numinterpolations - 1; i >= 0; i--) {
+    //    bakipos[i] = curipos[i];
+    //    odelta = ndelta;
+    //    ndelta = curipos[i] - oldipos[i];
+    //    if (odelta != ndelta) j = mulscale16(ndelta, smoothratio);
+    //    curipos[i] = oldipos[i] + j;
+    //}
 }
 
 //87
@@ -43,7 +64,6 @@ function floorspace(sectnum) {
 }
 
 // 625
-
 function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
     var daz, h, oldx, oldy;
     var retval, dasectnum, cd;
@@ -124,24 +144,23 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
         dasectnum = refSectnum.$;
     }
 
-    if( dasectnum >= 0)
-        if ( (dasectnum != sprite[spritenum].sectnum) )
-            changespritesect(spritenum,dasectnum);
-    daz = sprite[spritenum].z + ((zchange*TICSPERFRAME)>>3);
+    if (dasectnum >= 0)
+        if ((dasectnum != sprite[spritenum].sectnum))
+            changespritesect(spritenum, dasectnum);
+    daz = sprite[spritenum].z + ((zchange * TICSPERFRAME) >> 3);
     if ((daz > hittype[spritenum].ceilingz) && (daz <= hittype[spritenum].floorz))
         sprite[spritenum].z = daz;
     else
         if (retval == 0)
-            return(16384+dasectnum);
+            return (16384 + dasectnum);
 
-    return(retval);
+    return (retval);
 }
 
 
 //713
 // The set sprite function
-function ssp(i, cliptype) 
-{
+function ssp(i, cliptype) {
     var movetype;
     var s = sprite[i];
 

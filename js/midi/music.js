@@ -7,6 +7,9 @@
 // but it looks like MIDI.js loads soundfont plugins
 // or wait on html5 midi
 
+// get sound font by putting all midi's through this?
+// https://github.com/mudcube/MIDI.js/blob/master/soundfont-generator/ruby/soundfont_builder.rb
+
 Music.registerTimbreBank = function() {
     console.log("registerTimbreBank ?? ");
 };
