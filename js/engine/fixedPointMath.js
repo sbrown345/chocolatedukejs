@@ -43,15 +43,17 @@ function dmulscale(input1, input2, input3, input4, input5) {
 }
 
 for (var i3 = 1; i3 <= 32; i3++) {
-    window["divScale" + i3] = new Function("i1", "i2", "return Math.floor(i1 * Math.pow(2, " + i3 + ") / i2);");
+    window["divScale" + i3] = new Function("i1", "i2", "return divScale(i1, i2, " + i3 + ");"); // todo: inline
 }
 
 function divScale(i1, i2, i3) {
+    if (isNaN(i1) || isNaN(i2) || isNaN(i3)) throw "error NaN not allowed"; //todo: remove later
+
     //var i1Lo = i1;
     //var i1Hi = 0; // todo: faster using bitshift?? (google's Long class didn't work)
-    // This Math.pow MUCH slower than bitshift (google - math.pow vs shift performance)
+    // This Math.pow MUCH slower than shift (google - math.pow vs shift performance)
     // maybe this is faster: http://stackoverflow.com/questions/3323633/efficient-way-of-doing-64-bit-rotate-using-32-bit-values
-    return Math.floor((i1 * Math.pow(2, i3)) / i2);
+    return (((i1 * Math.pow(2, i3))) / i2) | 0;
 }
 
 function mul32(n, m) {
