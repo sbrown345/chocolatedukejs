@@ -93,6 +93,7 @@ function klabs(i1) {
 }
 
 function clearbuf(buffer, start, end) {
+    // todo: check this
     for (var i = start; i < end; i++) {
         buffer[i] = 0;
     }

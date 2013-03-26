@@ -2233,7 +2233,6 @@ function spawn(j, pn) {
     }
 
     console.log("cstat: %i", sp.cstat);
-    console.log("cstat: %i", sp.cstat);
     //console.log("sect: %i", sect); //todo: CHECK sect and all objects
     // todo check all... spritetype (Sprite)
 

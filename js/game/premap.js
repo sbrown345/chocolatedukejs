@@ -1087,6 +1087,7 @@ preMap.enterLevel = function (g) {
             ps[0].ang = angRef.$;
             ps[0].cursectnum = cursectnumRef.$;
 
+            console.log("filename=%s", fulllevelfilename);
             if (loadBoardResult === -1) {
                 throw new Error("Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found! Not using the right grp file?");
             }

@@ -1,8 +1,8 @@
-﻿'use strict';
+﻿'use strict'; 
 
 var Engine = {};
 
-//int32_t stereowidth = 23040, stereopixelwidth = 28, ostereopixelwidth = -1;
+var stereowidth = 23040, stereopixelwidth = 28, ostereopixelwidth = -1;
 var stereomode = 0, visualpage, activepage, whiteband, blackband;
 //uint8_t  oa1, o3c2, ortca, ortcb, overtbits, laststereoint;
 
@@ -97,18 +97,17 @@ var pvWalls = structArray(PvWall, MAXWALLSB);
 //*/
 
 //// bunchWallsList contains the list of walls in a bunch.
-//static short bunchWallsList[MAXWALLSB];
+var bunchWallsList = new Uint16Array(MAXWALLSB);
 
-//static short bunchfirst[MAXWALLSB], bunchlast[MAXWALLSB];
+var bunchfirst = new Uint16Array(MAXWALLSB), bunchlast= new Uint16Array(MAXWALLSB);
 
 
-
-//static short smost[MAXYSAVES], smostcnt;
+var smost = new Int16Array(MAXYSAVES), smostcnt;
 //static short smoststart[MAXWALLSB];
 //static uint8_t  smostwalltype[MAXWALLSB];
-//static int32_t smostwall[MAXWALLSB], smostwallcnt = -1L;
+var smostwall = new Int32Array(MAXWALLSB), smostwallcnt = -1;
 
-//static short maskwall[MAXWALLSB], maskwallcnt;
+var maskwall = new Int16Array(MAXWALLSB), maskwallcnt;
 //static int32_t spritesx[MAXSPRITESONSCREEN];
 //static int32_t spritesy[MAXSPRITESONSCREEN+1];
 //static int32_t spritesz[MAXSPRITESONSCREEN];
@@ -215,7 +214,7 @@ var numscans ;
 
 var numbunches;
 
-var umhits;
+var numhits;
 
 var editstatus = 0;
 var searchit;
@@ -223,6 +222,9 @@ var searchx = -1, searchy;                     /* search input  */
 var searchsector, searchwall, searchstat;     /* search output */
 
 var numtilefiles, artfil = -1, artfilnum, artfilplc;
+
+var inpreparemirror = 0;
+var mirrorsx1, mirrorsy1, mirrorsx2, mirrorsy2;
 
 var totalclocklock;
 
@@ -241,8 +243,236 @@ function nsqrtasm(param) {
     param = ((param & 0xffff0000) | sqrtable_a[param]);
     param = param >> ((cx & 0xff00) >> 8);
 
-    console.log("nsqrtasm: %i", param);;
+    //console.log("nsqrtasm: %i", param);
     return param;
+}
+
+//329
+
+/*
+ FCS:
+ Scan through sectors using portals (a portal is wall with a nextsector attribute >= 0).
+ Flood is prevented if a portal does not face the POV.
+ */
+function scansector (sectnum)
+{
+    var wal, wal2;
+    var spr;
+    var xs, ys, x1, y1, x2, y2, xp1, yp1, xp2=0, yp2=0, tempint;
+    var z, zz, startwall, endwall, numscansbefore, scanfirst, bunchfrst;
+    var nextsectnum;
+    ////The stack storing sectors to visit.
+    var sectorsToVisit = new Int16Array(256), numSectorsToVisit;
+
+    var skipitaddwall = function() {
+        if ((wall[z].point2 < z) && (scanfirst < numscans)) {
+            bunchWallsList[numscans - 1] = scanfirst;
+            scanfirst = numscans;
+            console.log("scanfirst: %i", scanfirst);
+        }
+    };
+    
+    if (sectnum < 0)
+        return;
+
+    if (automapping)
+        show2dsector[sectnum>>3] |= pow2char[sectnum&7];
+
+    sectorsToVisit[0] = sectnum;
+    numSectorsToVisit = 1;
+    do
+    {
+        sectnum = sectorsToVisit[--numSectorsToVisit];
+
+        //Add every script in the current sector as potentially visible.
+        for(z=headspritesect[sectnum]; z>=0; z=nextspritesect[z])
+        {
+            spr = sprite[z];
+            if ((((spr.cstat&0x8000) == 0) || (showinvisibility)) &&
+                    (spr.xrepeat > 0) && (spr.yrepeat > 0) &&
+                    (spritesortcnt < MAXSPRITESONSCREEN))
+            {
+                xs = spr.x-globalposx;
+                ys = spr.y-globalposy;
+                if ((spr.cstat&48) || (xs*cosglobalang+ys*singlobalang > 0))
+                {
+                    copybufbyte(spr, tsprite[spritesortcnt], 44);
+                    tsprite[spritesortcnt++].owner = z;
+                }
+            }
+        }
+
+        //Mark the current sector bit as "visited" in the bitvector
+        visitedSectors[sectnum>>3] |= pow2char[sectnum&7];
+
+        bunchfrst = numbunches;
+        numscansbefore = numscans;
+
+        startwall = sector[sectnum].wallptr;
+        endwall = startwall + sector[sectnum].wallnum;
+        scanfirst = numscans;
+
+        
+        for(z=startwall; z<endwall; z++) {
+            wal = wall[z];
+            nextsectnum = wal.nextsector;
+
+            wal2 = wall[wal.point2];
+
+            // In camera space the center is the player.
+            // Tranform the 2 Wall endpoints (x,y) from worldspace to camera space.
+            // After that we have two vectors starting from the camera and going to the endpoints (x1,y1) and (x2,y2).
+            x1 = wal.x-globalposx;
+            y1 = wal.y-globalposy;
+
+            x2 = wal2.x-globalposx;
+            y2 = wal2.y-globalposy;
+
+            // If this is a portal...
+            if ((nextsectnum >= 0) && ((wal.cstat&32) == 0))
+                //If this portal has not been visited yet.
+                if ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)
+                {
+                    //Cross product . Z component
+                    tempint = x1*y2-x2*y1;
+
+                    // Using cross product, determine if the portal is facing us or not.
+                    // If it is: Add it to the stack and bump the stack counter.
+                    // This line is equivalent to tempint < 0x40000
+                    if ((/*(uint32_t)*/tempint+262144) < 524288) // ??? What is this test ?? How acute the angle is ?
+                    {
+                        //(x2-x1)*(x2-x1)+(y2-y1)*(y2-y1) is the squared length of the wall
+                        // ??? What is this test ?? How acute the angle is ?
+                        if (mulscale5(tempint,tempint) <= (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+                            sectorsToVisit[numSectorsToVisit++] = nextsectnum;
+                    }
+                }
+
+            // Rotate the wall endpoints vectors according to the player orientation.
+            // This is a regular rotation matrix using [29.3] fixed point.
+            if ((z == startwall) || (wall[z-1].point2 != z))
+            {
+                //If this is the first endpoint of the bunch, rotate: This is a standard cos sin 2D rotation matrix projection
+                xp1 = dmulscale6(y1,cosglobalang,-x1,singlobalang);
+                yp1 = dmulscale6(x1,cosviewingrangeglobalang,y1,sinviewingrangeglobalang);
+            }
+            else
+            {
+                //If this is NOT the first endpoint, Save the coordinate for next loop.
+                xp1 = xp2;
+                yp1 = yp2;
+            }
+
+            // Rotate: This is a standard cos sin 2D rotation matrix projection
+            xp2 = dmulscale6(y2,cosglobalang,-x2,singlobalang);
+            yp2 = dmulscale6(x2,cosviewingrangeglobalang,y2,sinviewingrangeglobalang);
+
+
+
+            // Equivalent of a near plane clipping ?
+            if ((yp1 < 256) && (yp2 < 256)){skipitaddwall();continue;}
+
+            /* If wall's NOT facing you */
+            if (dmulscale32(xp1,yp2,-xp2,yp1) >= 0) {skipitaddwall();continue;}
+
+            // The wall is still not eligible for rendition: Let's do some more Frustrum culling !!
+            if (xp1 >= -yp1){
+                
+                if ((xp1 > yp1) || (yp1 == 0))
+                    {skipitaddwall();continue;}
+
+                //Project the point onto screen and see in which column it belongs.
+                pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = halfxdimen + scale(xp1,halfxdimen,yp1);
+                if (xp1 >= 0)
+                    pvWalls[numscans].screenSpaceCoo[0][VEC_COL]++;   /* Fix for SIGNED divide */
+
+                if (pvWalls[numscans].screenSpaceCoo[0][VEC_COL] >= xdimen)
+                    pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = xdimen-1;
+
+                pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] = yp1;
+            }
+            else{
+                
+                if (xp2 < -yp2)
+                    {skipitaddwall();continue;}
+
+                pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = 0;
+                tempint = yp1-yp2+xp1-xp2;
+                
+                if (tempint == 0)
+                    {skipitaddwall();continue;}
+                
+                pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] = yp1 + scale(yp2-yp1,xp1+yp1,tempint);
+            }
+            
+            if (pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] < 256)
+                {skipitaddwall();continue;}
+
+            if (xp2 <= yp2){
+                
+                if ((xp2 < -yp2) || (yp2 == 0)){skipitaddwall();continue;}
+                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = halfxdimen + scale(xp2,halfxdimen,yp2) - 1;
+                if (xp2 >= 0) pvWalls[numscans].screenSpaceCoo[1][VEC_COL]++;   /* Fix for SIGNED divide */
+                if (pvWalls[numscans].screenSpaceCoo[1][VEC_COL] >= xdimen) pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen-1;
+                pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] = yp2;
+            }
+            else{
+                
+                if (xp1 > yp1) {skipitaddwall();continue;}
+                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen-1;
+                tempint = xp2-xp1+yp1-yp2;
+                if (tempint == 0) {skipitaddwall();continue;}
+                pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] = yp1 + scale(yp2-yp1,yp1-xp1,tempint);
+            }
+            if ((pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] < 256) || (pvWalls[numscans].screenSpaceCoo[0][VEC_COL] > pvWalls[numscans].screenSpaceCoo[1][VEC_COL])) {
+                 skipitaddwall(); continue;
+            }
+
+            // Made it all the way!
+            // Time to add this wall information to the stack of wall potentially visible.
+            pvWalls[numscans].sectorId = sectnum;
+            pvWalls[numscans].worldWallId = z;
+
+            //Save the camera space wall endpoints coordinate (camera origin at player location + rotated according to player orientation).
+            pvWalls[numscans].cameraSpaceCoo[0][VEC_X] = xp1;
+            pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
+            pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
+            pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
+            console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+
+            bunchWallsList[numscans] = numscans+1;
+            numscans++;
+            
+            skipitaddwall();
+        }
+
+        //FCS: TODO rename this p2[] to bunchList[] or something like that. This name is an abomination
+        //     DONE, p2 is now called "bunchWallsList".
+        
+        //Break down the list of walls for this sector into bunchs. Since a bunch is a
+        // continuously visible list of wall: A sector can generate many bunches.
+        for(z=numscansbefore; z<numscans; z++)
+        {
+            if ((wall[pvWalls[z].worldWallId].point2 !=
+                 pvWalls[bunchWallsList[z]].worldWallId) || (pvWalls[z].screenSpaceCoo[1][VEC_COL] >= pvWalls[bunchWallsList[z]].screenSpaceCoo[0][VEC_COL]))
+            {
+                // Create an entry in the bunch list
+                bunchfirst[numbunches++] = bunchWallsList[z];
+                
+                //Mark the end of the bunch wall list.
+                bunchWallsList[z] = -1;
+            }
+        }
+
+        //For each bunch, find the last wall and cache it in bunchlast.
+        for(z=bunchfrst; z<numbunches; z++)
+        {
+            for(zz=bunchfirst[z]; bunchWallsList[zz]>=0; zz=bunchWallsList[zz]);
+            bunchlast[z] = zz;
+        }
+
+    } while (numSectorsToVisit > 0);
+    // do this until the stack of sectors to visit if empty.
 }
 
 //658
@@ -253,7 +483,7 @@ Engine.getpalookup = function (davis, dashade) {
 
 Engine.doSetAspect = function(davis, dashade) {
     var i, j, k, x, xinc;
-    debugger;
+    
     if (xyaspect != oxyaspect) {
         oxyaspect = xyaspect;
         j = xyaspect * 320;
@@ -261,10 +491,7 @@ Engine.doSetAspect = function(davis, dashade) {
         for (i = ydim * 4 - 1; i >= 0; i--)
             if (i != (horizycent - 1)) {
                 horizlookup[i] = divScale28(1, i - (horizycent - 1));
-                throw "todo horizlookup[0] is wrong"
-                console.log(" horizlookup[%i] = %i", i, horizlookup[i]);
                 horizlookup2[i] = divScale14(klabs(horizlookup[i]), j);
-                console.log(" horizlookup2[%i] = %i", i, horizlookup2[i]);
             }
     }
 
@@ -282,6 +509,685 @@ Engine.doSetAspect = function(davis, dashade) {
             radarang2[i] = /*(short)*/((radarang[k] + j) >> 6);
         }
     }
+};
+
+
+function owallmost(mostbuf,  w,  z)
+{
+    var bad, inty, xcross, y, yinc;
+    var s1, s2, s3, s4, ix1, ix2, iy1, iy2, t;
+
+    z <<= 7;
+    s1 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s2 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    s3 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s4 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    bad = (z<s1)+((z<s2)<<1)+((z>s3)<<2)+((z>s4)<<3);
+
+    ix1 = pvWalls[w].screenSpaceCoo[0][VEC_COL];
+    iy1 = pvWalls[w].screenSpaceCoo[0][VEC_DIST];
+    ix2 = pvWalls[w].screenSpaceCoo[1][VEC_COL];
+    iy2 = pvWalls[w].screenSpaceCoo[1][VEC_DIST];
+
+    if ((bad&3) == 3)
+    {
+        debugger;
+        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, 0);
+        return(bad);
+    }
+
+    if ((bad&12) == 12)
+    {
+        debugger;
+        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
+        return(bad);
+    }
+
+    if (bad&3)
+    {
+        t = divscale30(z-s1,s2-s1);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+
+        if ((bad&3) == 2)
+        {
+            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
+                iy2 = inty;
+                ix2 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
+        }
+        else
+        {
+            if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
+                iy1 = inty;
+                ix1 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
+        }
+    }
+
+    if (bad&12)
+    {
+        t = divscale30(z-s3,s4-s3);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+
+        if ((bad&12) == 8)
+        {
+            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
+                iy2 = inty;
+                ix2 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
+        }
+        else
+        {
+            if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
+                iy1 = inty;
+                ix1 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
+        }
+    }
+
+    y = (scale(z,xdimenscale,iy1)<<4);
+    yinc = ((scale(z,xdimenscale,iy2)<<4)-y) / (ix2-ix1+1);
+    qinterpolatedown16short(mostbuf[ix1],ix2-ix1+1,y+(globalhoriz<<16),yinc);
+
+    if (mostbuf[ix1] < 0) mostbuf[ix1] = 0;
+    if (mostbuf[ix1] > ydimen) mostbuf[ix1] = ydimen;
+    if (mostbuf[ix2] < 0) mostbuf[ix2] = 0;
+    if (mostbuf[ix2] > ydimen) mostbuf[ix2] = ydimen;
+
+    return(bad);
+}
+
+function wallmost(mostbuf, w, sectnum, dastat)
+{
+    var bad, i, j, t, y, z, inty, intz, xcross, yinc, fw;
+    var x1, y1, z1, x2, y2, z2, xv, yv, dx, dy, dasqr, oz1, oz2;
+    var s1, s2, s3, s4, ix1, ix2, iy1, iy2;
+
+    if (dastat == 0){
+        z = sector[sectnum].ceilingz-globalposz;
+        if ((sector[sectnum].ceilingstat&2) == 0)
+            return(owallmost(mostbuf,w,z));
+    }
+    else{
+        z = sector[sectnum].floorz-globalposz;
+        if ((sector[sectnum].floorstat&2) == 0)
+            return(owallmost(mostbuf,w,z));
+    }
+
+    i = pvWalls[w].worldWallId;
+    if (i == sector[sectnum].wallptr)
+        return(owallmost(mostbuf,w,z));
+
+    x1 = wall[i].x;
+    x2 = wall[wall[i].point2].x-x1;
+    y1 = wall[i].y;
+    y2 = wall[wall[i].point2].y-y1;
+
+    fw = sector[sectnum].wallptr;
+    i = wall[fw].point2;
+    dx = wall[i].x-wall[fw].x;
+    dy = wall[i].y-wall[fw].y;
+    dasqr = krecipasm(nsqrtasm(dx*dx+dy*dy));
+
+    if (pvWalls[w].screenSpaceCoo[0][VEC_COL] == 0){
+        xv = cosglobalang+sinviewingrangeglobalang;
+        yv = singlobalang-cosviewingrangeglobalang;
+    }
+    else{
+        xv = x1-globalposx;
+        yv = y1-globalposy;
+    }
+    i = xv*(y1-globalposy)-yv*(x1-globalposx);
+    j = yv*x2-xv*y2;
+    
+    if (klabs(j) > klabs(i>>3))
+        i = divscale28(i,j);
+    
+    if (dastat == 0){
+        t = mulscale15(sector[sectnum].ceilingheinum,dasqr);
+        z1 = sector[sectnum].ceilingz;
+    }
+    else{
+        t = mulscale15(sector[sectnum].floorheinum,dasqr);
+        z1 = sector[sectnum].floorz;
+    }
+    
+    z1 = dmulscale24(dx*t,mulscale20(y2,i)+((y1-wall[fw].y)<<8),-dy*t,mulscale20(x2,i)+((x1-wall[fw].x)<<8))+((z1-globalposz)<<7);
+
+
+    if (pvWalls[w].screenSpaceCoo[1][VEC_COL] == xdimen-1){
+        xv = cosglobalang-sinviewingrangeglobalang;
+        yv = singlobalang+cosviewingrangeglobalang;
+    }
+    else{
+        xv = (x2+x1)-globalposx;
+        yv = (y2+y1)-globalposy;
+    }
+    
+    i = xv*(y1-globalposy)-yv*(x1-globalposx);
+    j = yv*x2-xv*y2;
+    
+    if (klabs(j) > klabs(i>>3))
+        i = divscale28(i,j);
+    
+    if (dastat == 0){
+        t = mulscale15(sector[sectnum].ceilingheinum,dasqr);
+        z2 = sector[sectnum].ceilingz;
+    }
+    else{
+        t = mulscale15(sector[sectnum].floorheinum,dasqr);
+        z2 = sector[sectnum].floorz;
+    }
+    
+    z2 = dmulscale24(dx*t,mulscale20(y2,i)+((y1-wall[fw].y)<<8),-dy*t,mulscale20(x2,i)+((x1-wall[fw].x)<<8))+((z2-globalposz)<<7);
+
+
+    s1 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s2 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    s3 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s4 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    bad = (z1<s1)+((z2<s2)<<1)+((z1>s3)<<2)+((z2>s4)<<3);
+
+    ix1 = pvWalls[w].screenSpaceCoo[0][VEC_COL];
+    ix2 = pvWalls[w].screenSpaceCoo[1][VEC_COL];
+    iy1 = pvWalls[w].screenSpaceCoo[0][VEC_DIST];
+    iy2 = pvWalls[w].screenSpaceCoo[1][VEC_DIST];
+    oz1 = z1;
+    oz2 = z2;
+
+    if ((bad & 3) == 3) {
+        debugger;
+        clearbufbyte(mostbuf[ix1],(ix2-ix1+1)*2,0);
+        return(bad);
+    }
+
+    if ((bad&12) == 12){
+        debugger;
+        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
+        return(bad);
+    }
+
+    if (bad&3){
+        /* inty = intz / (globaluclip>>16) */
+        t = divscale30(oz1-s1,s2-s1+oz1-oz2);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
+        intz = oz1 + mulscale30(oz2-oz1,t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+
+        if ((bad&3) == 2){
+            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross){
+                z2 = intz;
+                iy2 = inty;
+                ix2 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
+        }
+        else{
+            if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
+                z1 = intz;
+                iy1 = inty;
+                ix1 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
+        }
+    }
+
+    if (bad&12){
+        /* inty = intz / (globaldclip>>16) */
+        t = divscale30(oz1-s3,s4-s3+oz1-oz2);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
+        intz = oz1 + mulscale30(oz2-oz1,t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+
+        if ((bad&12) == 8){
+            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
+                z2 = intz;
+                iy2 = inty;
+                ix2 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
+        }
+        else{
+            if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
+                z1 = intz;
+                iy1 = inty;
+                ix1 = xcross;
+            }
+            debugger;
+            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
+        }
+    }
+
+    y = (scale(z1,xdimenscale,iy1)<<4);
+    yinc = ((scale(z2,xdimenscale,iy2)<<4)-y) / (ix2-ix1+1);
+    qinterpolatedown16short(mostbuf[ix1],ix2-ix1+1,y+(globalhoriz<<16),yinc);
+
+    if (mostbuf[ix1] < 0)
+        mostbuf[ix1] = 0;
+    if (mostbuf[ix1] > ydimen)
+        mostbuf[ix1] = ydimen;
+    if (mostbuf[ix2] < 0)
+        mostbuf[ix2] = 0;
+    if (mostbuf[ix2] > ydimen)
+        mostbuf[ix2] = ydimen;
+
+    return(bad);
+}
+
+Engine.draWalls = function(bunch) {
+    var sec, nextsec;
+    var wal;
+    var i, x, x1, x2, cz = new Int32Array(5), fz = new Int32Array(5);
+    var z, wallnum, sectnum, nextsectnum;
+    var startsmostwallcnt, startsmostcnt, gotswall;
+    var andwstat1, andwstat2;
+
+    z = bunchfirst[bunch];
+    sectnum = pvWalls[z].sectorId;
+    sec = sector[sectnum];
+
+    andwstat1 = 0xff;
+    andwstat2 = 0xff;
+    for (; z >= 0; z = bunchWallsList[z]) { /* uplc/dplc calculation */
+
+        andwstat1 &= wallmost(uplc, z, sectnum, 0);
+        andwstat2 &= wallmost(dplc, z, sectnum, 1);
+    }
+
+    ///* draw ceilings */
+    //if ((andwstat1&3) != 3){
+    //    if ((sec.ceilingstat&3) == 2)
+    //        grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0);
+    //    else if ((sec.ceilingstat&1) == 0)
+    //        ceilscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
+    //    else
+    //        parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0,bunch);
+    //}
+
+    ///* draw floors */
+    //if ((andwstat2&12) != 12){
+    //    if ((sec.floorstat&3) == 2)
+    //        grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1);
+    //    else if ((sec.floorstat&1) == 0)
+    //        florscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
+    //    else
+    //        parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1,bunch);
+    //}
+
+    ///* DRAW WALLS SECTION! */
+    //for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
+
+    //    x1 = pvWalls[z].screenSpaceCoo[0][VEC_COL];
+    //    x2 = pvWalls[z].screenSpaceCoo[1][VEC_COL];
+    //    if (umost[x2] >= dmost[x2])
+    //    {
+
+    //        for(x=x1; x<x2; x++)
+    //            if (umost[x] < dmost[x]) 
+    //                break;
+
+    //        if (x >= x2)
+    //        {
+    //            smostwall[smostwallcnt] = z;
+    //            smostwalltype[smostwallcnt] = 0;
+    //            smostwallcnt++;
+    //            continue;
+    //        }
+    //    }
+
+    //    wallnum = pvWalls[z].worldWallId;
+    //    wal = &wall[wallnum];
+    //    nextsectnum = wal.nextsector;
+    //    nextsec = &sector[nextsectnum];
+
+    //    gotswall = 0;
+
+    //    startsmostwallcnt = smostwallcnt;
+    //    startsmostcnt = smostcnt;
+
+    //    if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+    //    {
+    //        if (searchy <= uplc[searchx]){ /* ceiling */
+    //            searchsector = sectnum;
+    //            searchwall = wallnum;
+    //            searchstat = 1;
+    //            searchit = 1;
+    //        }
+    //        else if (searchy >= dplc[searchx]){ /* floor */
+    //            searchsector = sectnum;
+    //            searchwall = wallnum;
+    //            searchstat = 2;
+    //            searchit = 1;
+    //        }
+    //    }
+
+    //    if (nextsectnum >= 0){
+    //        getzsofslope((short)sectnum,wal.x,wal.y,&cz[0],&fz[0]);
+    //        getzsofslope((short)sectnum,wall[wal.point2].x,wall[wal.point2].y,&cz[1],&fz[1]);
+    //        getzsofslope((short)nextsectnum,wal.x,wal.y,&cz[2],&fz[2]);
+    //        getzsofslope((short)nextsectnum,wall[wal.point2].x,wall[wal.point2].y,&cz[3],&fz[3]);
+    //        getzsofslope((short)nextsectnum,globalposx,globalposy,&cz[4],&fz[4]);
+
+    //        if ((wal.cstat&48) == 16)
+    //            maskwall[maskwallcnt++] = z;
+
+    //        if (((sec.ceilingstat&1) == 0) || ((nextsec.ceilingstat&1) == 0)){
+    //            if ((cz[2] <= cz[0]) && (cz[3] <= cz[1])){
+    //                if (globparaceilclip)
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (uplc[x] > umost[x])
+    //                            if (umost[x] <= dmost[x]){
+    //                                umost[x] = uplc[x];
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //            }
+    //            else{
+    //                wallmost(dwall,z,nextsectnum,(uint8_t )0);
+    //                if ((cz[2] > fz[0]) || (cz[3] > fz[1]))
+    //                    for(i=x1; i<=x2; i++) if (dwall[i] > dplc[i]) dwall[i] = dplc[i];
+
+    //                if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+    //                    if (searchy <= dwall[searchx]) /* wall */{
+    //                        searchsector = sectnum;
+    //                        searchwall = wallnum;
+    //                        searchstat = 0;
+    //                        searchit = 1;
+    //                    }
+
+    //                globalorientation = (int32_t)wal.cstat;
+    //                globalpicnum = wal.picnum;
+    //                if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
+    //                globalxpanning = (int32_t)wal.xpanning;
+    //                globalypanning = (int32_t)wal.ypanning;
+    //                globalshiftval = (picsiz[globalpicnum]>>4);
+    //                if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height) globalshiftval++;
+    //                globalshiftval = 32-globalshiftval;
+
+    //                //Animated
+    //                if (tiles[globalpicnum].animFlags&192)
+    //                    globalpicnum += animateoffs(globalpicnum);
+
+    //                globalshade = (int32_t)wal.shade;
+    //                globvis = globalvisibility;
+    //                if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+    //                globalpal = (int32_t)wal.pal;
+    //                globalyscale = (wal.yrepeat<<(globalshiftval-19));
+    //                if ((globalorientation&4) == 0)
+    //                    globalzd = (((globalposz-nextsec.ceilingz)*globalyscale)<<8);
+    //                else
+    //                    globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
+    //                globalzd += (globalypanning<<24);
+    //                if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
+
+    //                if (gotswall == 0) {
+    //                    gotswall = 1;
+    //                    prepwall(z,wal);
+    //                }
+    //                wallscan(x1,x2,uplc,dwall,swall,lwall);
+
+    //                if ((cz[2] >= cz[0]) && (cz[3] >= cz[1])){
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (dwall[x] > umost[x])
+    //                            if (umost[x] <= dmost[x]){
+    //                                umost[x] = dwall[x];
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //                }
+    //                else
+    //                {
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (umost[x] <= dmost[x]){
+    //                            i = max(uplc[x],dwall[x]);
+    //                            if (i > umost[x]){
+    //                                umost[x] = i;
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //                        }
+    //                }
+    //            }
+    //            if ((cz[2] < cz[0]) || (cz[3] < cz[1]) || (globalposz < cz[4])){
+    //                i = x2-x1+1;
+    //                if (smostcnt+i < MAXYSAVES){
+    //                    smoststart[smostwallcnt] = smostcnt;
+    //                    smostwall[smostwallcnt] = z;
+    //                    smostwalltype[smostwallcnt] = 1;   /* 1 for umost */
+    //                    smostwallcnt++;
+    //                    copybufbyte((int32_t *)&umost[x1],(int32_t *)&smost[smostcnt],i*2);
+    //                    smostcnt += i;
+    //                }
+    //            }
+    //        }
+    //        if (((sec.floorstat&1) == 0) || ((nextsec.floorstat&1) == 0)){
+    //            if ((fz[2] >= fz[0]) && (fz[3] >= fz[1])){
+    //                if (globparaflorclip)
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (dplc[x] < dmost[x])
+    //                            if (umost[x] <= dmost[x]){
+    //                                dmost[x] = dplc[x];
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //            }
+    //            else{
+    //                wallmost(uwall,z,nextsectnum,(uint8_t )1);
+    //                if ((fz[2] < cz[0]) || (fz[3] < cz[1]))
+    //                    for(i=x1; i<=x2; i++) if (uwall[i] < uplc[i]) uwall[i] = uplc[i];
+
+    //                if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+    //                    if (searchy >= uwall[searchx]) /* wall */{
+    //                        searchsector = sectnum;
+    //                        searchwall = wallnum;
+    //                        if ((wal.cstat&2) > 0) searchwall = wal.nextwall;
+    //                        searchstat = 0;
+    //                        searchit = 1;
+    //                    }
+
+    //                if ((wal.cstat&2) > 0){
+    //                    wallnum = wal.nextwall;
+    //                    wal = &wall[wallnum];
+    //                    globalorientation = (int32_t)wal.cstat;
+    //                    globalpicnum = wal.picnum;
+    //                    if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
+    //                    globalxpanning = (int32_t)wal.xpanning;
+    //                    globalypanning = (int32_t)wal.ypanning;
+
+    //                    if (tiles[globalpicnum].animFlags&192) 
+    //                        globalpicnum += animateoffs(globalpicnum);
+
+    //                    globalshade = (int32_t)wal.shade;
+    //                    globalpal = (int32_t)wal.pal;
+    //                    wallnum = pvWalls[z].worldWallId;
+    //                    wal = &wall[wallnum];
+    //                }
+    //                else{
+    //                    globalorientation = (int32_t)wal.cstat;
+    //                    globalpicnum = wal.picnum;
+
+    //                    if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) 
+    //                    globalpicnum = 0;
+
+    //                    globalxpanning = (int32_t)wal.xpanning;
+    //                    globalypanning = (int32_t)wal.ypanning;
+
+    //                    if (tiles[globalpicnum].animFlags&192) 
+    //                        globalpicnum += animateoffs(globalpicnum);
+    //                    globalshade = (int32_t)wal.shade;
+    //                    globalpal = (int32_t)wal.pal;
+    //                }
+    //                globvis = globalvisibility;
+    //                if (sec.visibility != 0)
+    //                    globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+    //                globalshiftval = (picsiz[globalpicnum]>>4);
+
+    //                if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+    //                    globalshiftval++;
+
+    //                globalshiftval = 32-globalshiftval;
+    //                globalyscale = (wal.yrepeat<<(globalshiftval-19));
+
+    //                if ((globalorientation&4) == 0)
+    //                    globalzd = (((globalposz-nextsec.floorz)*globalyscale)<<8);
+    //                else
+    //                    globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
+
+    //                globalzd += (globalypanning<<24);
+    //                if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
+
+    //                if (gotswall == 0) {
+    //                    gotswall = 1;
+    //                    prepwall(z,wal);
+    //                }
+    //                wallscan(x1,x2,uwall,dplc,swall,lwall);
+
+    //                if ((fz[2] <= fz[0]) && (fz[3] <= fz[1]))
+    //                {
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (uwall[x] < dmost[x])
+    //                            if (umost[x] <= dmost[x]){
+    //                                dmost[x] = uwall[x];
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //                }
+    //                else
+    //                {
+    //                    for(x=x1; x<=x2; x++)
+    //                        if (umost[x] <= dmost[x]){
+    //                            i = min(dplc[x],uwall[x]);
+    //                            if (i < dmost[x])
+    //                            {
+    //                                dmost[x] = i;
+    //                                if (umost[x] > dmost[x]) numhits--;
+    //                            }
+    //                        }
+    //                }
+    //            }
+    //            if ((fz[2] > fz[0]) || (fz[3] > fz[1]) || (globalposz > fz[4])){
+    //                i = x2-x1+1;
+    //                if (smostcnt+i < MAXYSAVES){
+    //                    smoststart[smostwallcnt] = smostcnt;
+    //                    smostwall[smostwallcnt] = z;
+    //                    smostwalltype[smostwallcnt] = 2;   /* 2 for dmost */
+    //                    smostwallcnt++;
+    //                    copybufbyte((int32_t *)&dmost[x1],(int32_t *)&smost[smostcnt],i*2);
+    //                    smostcnt += i;
+    //                }
+    //            }
+    //        }
+    //        if (numhits < 0) return;
+    //        if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
+    //            if (umost[x2] < dmost[x2])
+    //                scansector((short) nextsectnum);
+    //            else
+    //            {
+    //                for(x=x1; x<x2; x++)
+    //                    if (umost[x] < dmost[x]){
+    //                        scansector((short) nextsectnum);
+    //                        break;
+    //                    }
+
+    //                /*
+    //                 * If can't see sector beyond, then cancel smost array and just
+    //                 *  store wall!
+    //                 */
+    //                if (x == x2){
+    //                    smostwallcnt = startsmostwallcnt;
+    //                    smostcnt = startsmostcnt;
+    //                    smostwall[smostwallcnt] = z;
+    //                    smostwalltype[smostwallcnt] = 0;
+    //                    smostwallcnt++;
+    //                }
+    //            }
+    //        }
+    //    }
+    //    if ((nextsectnum < 0) || (wal.cstat&32))   /* White/1-way wall */
+    //    {
+    //        globalorientation = (int32_t)wal.cstat;
+    //        if (nextsectnum < 0)
+    //            globalpicnum = wal.picnum;
+    //        else
+    //            globalpicnum = wal.overpicnum;
+
+    //        if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES)
+    //        globalpicnum = 0;
+
+    //        globalxpanning = (int32_t)wal.xpanning;
+    //        globalypanning = (int32_t)wal.ypanning;
+
+    //        if (tiles[globalpicnum].animFlags&192)
+    //            globalpicnum += animateoffs(globalpicnum);
+
+    //        globalshade = (int32_t)wal.shade;
+    //        globvis = globalvisibility;
+    //        if (sec.visibility != 0)
+    //            globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+
+    //        globalpal = (int32_t)wal.pal;
+    //        globalshiftval = (picsiz[globalpicnum]>>4);
+    //        if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+    //            globalshiftval++;
+
+    //        globalshiftval = 32-globalshiftval;
+    //        globalyscale = (wal.yrepeat<<(globalshiftval-19));
+    //        if (nextsectnum >= 0)
+    //        {
+    //            if ((globalorientation&4) == 0)
+    //                globalzd = globalposz-nextsec.ceilingz;
+    //            else
+    //                globalzd = globalposz-sec.ceilingz;
+    //        }
+    //        else
+    //        {
+    //            if ((globalorientation&4) == 0)
+    //                globalzd = globalposz-sec.ceilingz;
+    //            else
+    //                globalzd = globalposz-sec.floorz;
+    //        }
+    //        globalzd = ((globalzd*globalyscale)<<8) + (globalypanning<<24);
+
+    //        if (globalorientation&256){
+    //            globalyscale = -globalyscale;
+    //            globalzd = -globalzd;
+    //        }
+
+    //        if (gotswall == 0) {
+    //            gotswall = 1;
+    //            prepwall(z,wal);
+    //        }
+
+    //        wallscan(x1,x2,uplc,dplc,swall,lwall);
+
+    //        for(x=x1; x<=x2; x++)
+    //            if (umost[x] <= dmost[x])
+    //            {
+    //                umost[x] = 1;
+    //                dmost[x] = 0;
+    //                numhits--;
+    //            }
+    //        smostwall[smostwallcnt] = z;
+    //        smostwalltype[smostwallcnt] = 0;
+    //        smostwallcnt++;
+
+    //        if ((searchit == 2) && (searchx >= x1) && (searchx <= x2)){
+    //            searchit = 1;
+    //            searchsector = sectnum;
+    //            searchwall = wallnum;
+    //            if (nextsectnum < 0) searchstat = 0;
+    //            else searchstat = 4;
+    //        }
+    //    }
+    //}
 };
 
 //2593
@@ -354,7 +1260,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     sinviewingrangeglobalang = mulscale16(singlobalang, viewingrange);
 
     if (stereomode != 0) {
-        throw "todo"
+        throw "todo";
     }
 
     if ((xyaspect != oxyaspect) || (xdimen != oxdimen) || (viewingrange != oviewingrange)) {
@@ -379,9 +1285,9 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     umost[0] = shortptr1[0]-windowy1;
     dmost[0] = shortptr2[0]-windowy1;
 
-    //NumHits is the number of column to draw.
+    // NumHits is the number of column to draw.
     numhits = xdimen;
-    //Num walls to potentially render.
+    // Num walls to potentially render.
     numscans = 0;
 
     numbunches = 0;
@@ -400,7 +1306,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         var globalcursectnumRef = new Ref(globalcursectnum);
         updatesector(globalposx,globalposy,globalcursectnumRef);
         globalcursectnum = globalcursectnumRef.$;
-        //Seem the player has left the map since updatesector cannot locate him -> Restore to the last known sector.
+        // Seem the player has left the map since updatesector cannot locate him -> Restore to the last known sector.
         if (globalcursectnum < 0) 
             globalcursectnum = i;
     }
@@ -408,23 +1314,118 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     globparaceilclip = 1;
     globparaflorclip = 1;
 
-    //Update the ceiling and floor Z coordinate for the player's 2D position.
+    // Update the ceiling and floor Z coordinate for the player's 2D position.
     var czRef = new Ref(cz);
     var fzRef = new Ref(fz);
     getzsofslope(globalcursectnum, globalposx, globalposy, czRef, fzRef);
     cz = czRef.$;
-    cz = fzRef.$;
+    fz = fzRef.$;
 
     if (globalposz < cz) globparaceilclip = 0;
     if (globalposz > fz) globparaflorclip = 0;
 
-    //Build the list of potentially visible wall in to "bunches".
+    // Build the list of potentially visible wall in to "bunches".
     scansector(globalcursectnum);
-
-
     debugger;
 
-    throw "todo"
+    if (inpreparemirror)
+    {
+        console.log("test, is this block working?");
+        inpreparemirror = 0;
+        mirrorsx1 = xdimen-1;
+        mirrorsx2 = 0;
+        for(i=numscans-1; i>=0; i--)
+        {
+            if (wall[pvWalls[i].worldWallId].nextsector < 0) continue;
+            if (pvWalls[i].screenSpaceCoo[0][VEC_COL] < mirrorsx1) mirrorsx1 = pvWalls[i].screenSpaceCoo[0][VEC_COL];
+            if (pvWalls[i].screenSpaceCoo[1][VEC_COL] > mirrorsx2) mirrorsx2 = pvWalls[i].screenSpaceCoo[1][VEC_COL];
+        }
+
+        if (stereomode)
+        {
+            mirrorsx1 += (stereopixelwidth<<1);
+            mirrorsx2 += (stereopixelwidth<<1);
+        }
+
+        for(i=0; i<mirrorsx1; i++)
+            if (umost[i] <= dmost[i])
+            {
+                umost[i] = 1;
+                dmost[i] = 0;
+                numhits--;
+            }
+        for(i=mirrorsx2+1; i<xdimen; i++)
+            if (umost[i] <= dmost[i])
+            {
+                umost[i] = 1;
+                dmost[i] = 0;
+                numhits--;
+            }
+
+        Engine.draWalls(0);
+        numbunches--;
+        bunchfirst[0] = bunchfirst[numbunches];
+        bunchlast[0] = bunchlast[numbunches];
+
+        mirrorsy1 = min(umost[mirrorsx1],umost[mirrorsx2]);
+        mirrorsy2 = max(dmost[mirrorsx1],dmost[mirrorsx2]);
+    }
+    
+    // scansector has generated the bunches, it is now time to see which ones to render.
+    // numhits is the number of column of pixels to draw: (if the screen is 320x200 then numhits starts at 200).
+    // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
+    // When every bunches have been tested for rendition.
+    while ((numbunches > 0) && (numhits > 0))
+    {
+        // tempbuf is used to mark which bunches have been elected as "closest".
+        // if tempbug[x] == 1 then it should be skipped.
+        clearbuf(tempbuf, 0, ((numbunches + 3) >> 2));
+
+        /* Almost works, but not quite :( */
+        closest = 0; 
+        tempbuf[closest] = 1;       
+        for(i=1; i<numbunches; i++)
+        {
+            if ((j = bunchfront(i,closest)) < 0) 
+                continue;
+            tempbuf[i] = 1;
+            if (j == 0){
+                tempbuf[closest] = 1;
+                closest = i;
+            }
+        }
+        
+        /* Double-check */
+        for(i=0; i<numbunches; i++) 
+        {
+            if (tempbuf[i]) 
+                continue;
+            if ((j = bunchfront(i,closest)) < 0) 
+                continue;
+            tempbuf[i] = 1;
+            if (j == 0){
+                tempbuf[closest] = 1;
+                closest = i, i = 0;
+            }
+        }
+
+        //Draw every solid walls with ceiling/floor in the bunch "closest"
+        Engine.draWalls(closest);
+
+        if (automapping)
+        {
+            for(z=bunchfirst[closest]; z>=0; z=bunchWallsList[z])
+                show2dwall[pvWalls[z].worldWallId>>3] |=
+                pow2char  [pvWalls[z].worldWallId&7];
+        }
+
+        //Since we just rendered a bunch, lower the current stack element so we can treat the next item
+        numbunches--;
+        //...and move the bunch at the top of the stack so we won't iterate on it again...
+        bunchfirst[closest] = bunchfirst[numbunches];
+        bunchlast[closest] = bunchlast[numbunches];
+    }
+    throw "todo";
 }
 
 //3179

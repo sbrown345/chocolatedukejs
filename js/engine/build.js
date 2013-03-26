@@ -157,8 +157,8 @@ var sprite = structArray(Sprite, MAXSPRITES);
 
 var mapCRC = 0;
 
-//EXTERN int32_t spritesortcnt;
-//EXTERN spritetype tsprite[MAXSPRITESONSCREEN];
+var spritesortcnt;
+var tsprite = structArray(Sprite, MAXSPRITESONSCREEN);
 
 var vidoption = 0;
 var xdim, ydim, numpages = 0;
