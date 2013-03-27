@@ -99,9 +99,18 @@ function clearbuf(buffer, start, end) {
     }
 }
 
-function clearbufbyte(buffer, start, end) {
-    for (var i = start; i < end; i++) {
-        buffer[i] = 0;
+function clearbufbyte(buffer, offset, c, a) {
+    if (arguments.length != 4) throw "arg error";
+    if (offset > 0) debugger;
+
+    var p = new Uint8Array(buffer.buffer);
+    var pIdx = offset * buffer.BYTES_PER_ELEMENT;
+    var m = [0xff, 0xff00, 0xff0000, 0xff000000];
+    var n = [0, 8, 16, 24];
+    var z = 0;
+    while ((c--) > 0) {
+        p[pIdx++] = ((a & m[z]) >>> n[z]);
+        z = (z + 1) & 3;
     }
 }
 

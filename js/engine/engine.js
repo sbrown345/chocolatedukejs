@@ -1,4 +1,4 @@
-﻿'use strict'; 
+﻿'use strict';
 
 var Engine = {};
 
@@ -99,7 +99,7 @@ var pvWalls = structArray(PvWall, MAXWALLSB);
 //// bunchWallsList contains the list of walls in a bunch.
 var bunchWallsList = new Uint16Array(MAXWALLSB);
 
-var bunchfirst = new Uint16Array(MAXWALLSB), bunchlast= new Uint16Array(MAXWALLSB);
+var bunchfirst = new Uint16Array(MAXWALLSB), bunchlast = new Uint16Array(MAXWALLSB);
 
 
 var smost = new Int16Array(MAXYSAVES), smostcnt;
@@ -141,7 +141,7 @@ var cosviewingrangeglobalang, sinviewingrangeglobalang;
 var globalpalwritten; //ptr
 var globaluclip, globaldclip, globvis = 0;
 var globalvisibility, globalhisibility, globalpisibility, globalcisibility;
-var  globparaceilclip, globparaflorclip;
+var globparaceilclip, globparaflorclip;
 
 var xyaspect, viewingrangerecip;
 
@@ -210,7 +210,7 @@ var permfifo = structArray(PermFifoType, MAXPERMS);
 var permhead = 0, permtail = 0;
 
 //FCS: Num walls to potentially render.
-var numscans ;
+var numscans;
 
 var numbunches;
 
@@ -254,48 +254,43 @@ function nsqrtasm(param) {
  Scan through sectors using portals (a portal is wall with a nextsector attribute >= 0).
  Flood is prevented if a portal does not face the POV.
  */
-function scansector (sectnum)
-{
+function scansector(sectnum) {
     var wal, wal2;
     var spr;
-    var xs, ys, x1, y1, x2, y2, xp1, yp1, xp2=0, yp2=0, tempint;
+    var xs, ys, x1, y1, x2, y2, xp1, yp1, xp2 = 0, yp2 = 0, tempint;
     var z, zz, startwall, endwall, numscansbefore, scanfirst, bunchfrst;
     var nextsectnum;
     ////The stack storing sectors to visit.
     var sectorsToVisit = new Int16Array(256), numSectorsToVisit;
 
-    var skipitaddwall = function() {
+    var skipitaddwall = function () {
         if ((wall[z].point2 < z) && (scanfirst < numscans)) {
             bunchWallsList[numscans - 1] = scanfirst;
             scanfirst = numscans;
             console.log("scanfirst: %i", scanfirst);
         }
     };
-    
+
     if (sectnum < 0)
         return;
 
     if (automapping)
-        show2dsector[sectnum>>3] |= pow2char[sectnum&7];
+        show2dsector[sectnum >> 3] |= pow2char[sectnum & 7];
 
     sectorsToVisit[0] = sectnum;
     numSectorsToVisit = 1;
-    do
-    {
+    do {
         sectnum = sectorsToVisit[--numSectorsToVisit];
 
         //Add every script in the current sector as potentially visible.
-        for(z=headspritesect[sectnum]; z>=0; z=nextspritesect[z])
-        {
+        for (z = headspritesect[sectnum]; z >= 0; z = nextspritesect[z]) {
             spr = sprite[z];
-            if ((((spr.cstat&0x8000) == 0) || (showinvisibility)) &&
+            if ((((spr.cstat & 0x8000) == 0) || (showinvisibility)) &&
                     (spr.xrepeat > 0) && (spr.yrepeat > 0) &&
-                    (spritesortcnt < MAXSPRITESONSCREEN))
-            {
-                xs = spr.x-globalposx;
-                ys = spr.y-globalposy;
-                if ((spr.cstat&48) || (xs*cosglobalang+ys*singlobalang > 0))
-                {
+                    (spritesortcnt < MAXSPRITESONSCREEN)) {
+                xs = spr.x - globalposx;
+                ys = spr.y - globalposy;
+                if ((spr.cstat & 48) || (xs * cosglobalang + ys * singlobalang > 0)) {
                     copybufbyte(spr, tsprite[spritesortcnt], 44);
                     tsprite[spritesortcnt++].owner = z;
                 }
@@ -303,7 +298,7 @@ function scansector (sectnum)
         }
 
         //Mark the current sector bit as "visited" in the bitvector
-        visitedSectors[sectnum>>3] |= pow2char[sectnum&7];
+        visitedSectors[sectnum >> 3] |= pow2char[sectnum & 7];
 
         bunchfrst = numbunches;
         numscansbefore = numscans;
@@ -312,8 +307,8 @@ function scansector (sectnum)
         endwall = startwall + sector[sectnum].wallnum;
         scanfirst = numscans;
 
-        
-        for(z=startwall; z<endwall; z++) {
+
+        for (z = startwall; z < endwall; z++) {
             wal = wall[z];
             nextsectnum = wal.nextsector;
 
@@ -322,110 +317,107 @@ function scansector (sectnum)
             // In camera space the center is the player.
             // Tranform the 2 Wall endpoints (x,y) from worldspace to camera space.
             // After that we have two vectors starting from the camera and going to the endpoints (x1,y1) and (x2,y2).
-            x1 = wal.x-globalposx;
-            y1 = wal.y-globalposy;
+            x1 = wal.x - globalposx;
+            y1 = wal.y - globalposy;
 
-            x2 = wal2.x-globalposx;
-            y2 = wal2.y-globalposy;
+            x2 = wal2.x - globalposx;
+            y2 = wal2.y - globalposy;
 
             // If this is a portal...
-            if ((nextsectnum >= 0) && ((wal.cstat&32) == 0))
+            if ((nextsectnum >= 0) && ((wal.cstat & 32) == 0))
                 //If this portal has not been visited yet.
-                if ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)
-                {
+                if ((visitedSectors[nextsectnum >> 3] & pow2char[nextsectnum & 7]) == 0) {
                     //Cross product . Z component
-                    tempint = x1*y2-x2*y1;
+                    tempint = x1 * y2 - x2 * y1;
 
                     // Using cross product, determine if the portal is facing us or not.
                     // If it is: Add it to the stack and bump the stack counter.
                     // This line is equivalent to tempint < 0x40000
-                    if ((/*(uint32_t)*/tempint+262144) < 524288) // ??? What is this test ?? How acute the angle is ?
+                    if ((/*(uint32_t)*/tempint + 262144) < 524288) // ??? What is this test ?? How acute the angle is ?
                     {
                         //(x2-x1)*(x2-x1)+(y2-y1)*(y2-y1) is the squared length of the wall
                         // ??? What is this test ?? How acute the angle is ?
-                        if (mulscale5(tempint,tempint) <= (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+                        if (mulscale5(tempint, tempint) <= (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
                             sectorsToVisit[numSectorsToVisit++] = nextsectnum;
                     }
                 }
 
             // Rotate the wall endpoints vectors according to the player orientation.
             // This is a regular rotation matrix using [29.3] fixed point.
-            if ((z == startwall) || (wall[z-1].point2 != z))
-            {
+            if ((z == startwall) || (wall[z - 1].point2 != z)) {
                 //If this is the first endpoint of the bunch, rotate: This is a standard cos sin 2D rotation matrix projection
-                xp1 = dmulscale6(y1,cosglobalang,-x1,singlobalang);
-                yp1 = dmulscale6(x1,cosviewingrangeglobalang,y1,sinviewingrangeglobalang);
+                xp1 = dmulscale6(y1, cosglobalang, -x1, singlobalang);
+                yp1 = dmulscale6(x1, cosviewingrangeglobalang, y1, sinviewingrangeglobalang);
             }
-            else
-            {
+            else {
                 //If this is NOT the first endpoint, Save the coordinate for next loop.
                 xp1 = xp2;
                 yp1 = yp2;
             }
 
             // Rotate: This is a standard cos sin 2D rotation matrix projection
-            xp2 = dmulscale6(y2,cosglobalang,-x2,singlobalang);
-            yp2 = dmulscale6(x2,cosviewingrangeglobalang,y2,sinviewingrangeglobalang);
+            xp2 = dmulscale6(y2, cosglobalang, -x2, singlobalang);
+            yp2 = dmulscale6(x2, cosviewingrangeglobalang, y2, sinviewingrangeglobalang);
 
 
 
             // Equivalent of a near plane clipping ?
-            if ((yp1 < 256) && (yp2 < 256)){skipitaddwall();continue;}
+            if ((yp1 < 256) && (yp2 < 256)) { skipitaddwall(); continue; }
 
             /* If wall's NOT facing you */
-            if (dmulscale32(xp1,yp2,-xp2,yp1) >= 0) {skipitaddwall();continue;}
+            if (dmulscale32(xp1, yp2, -xp2, yp1) >= 0) { skipitaddwall(); continue; }
 
             // The wall is still not eligible for rendition: Let's do some more Frustrum culling !!
-            if (xp1 >= -yp1){
-                
+            if (xp1 >= -yp1) {
+
                 if ((xp1 > yp1) || (yp1 == 0))
-                    {skipitaddwall();continue;}
+                { skipitaddwall(); continue; }
 
                 //Project the point onto screen and see in which column it belongs.
-                pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = halfxdimen + scale(xp1,halfxdimen,yp1);
+                pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = halfxdimen + scale(xp1, halfxdimen, yp1);
                 if (xp1 >= 0)
                     pvWalls[numscans].screenSpaceCoo[0][VEC_COL]++;   /* Fix for SIGNED divide */
 
                 if (pvWalls[numscans].screenSpaceCoo[0][VEC_COL] >= xdimen)
-                    pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = xdimen-1;
+                    pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = xdimen - 1;
 
                 pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] = yp1;
             }
-            else{
-                
+            else {
+
                 if (xp2 < -yp2)
-                    {skipitaddwall();continue;}
+                { skipitaddwall(); continue; }
 
                 pvWalls[numscans].screenSpaceCoo[0][VEC_COL] = 0;
-                tempint = yp1-yp2+xp1-xp2;
-                
-                if (tempint == 0)
-                    {skipitaddwall();continue;}
-                
-                pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] = yp1 + scale(yp2-yp1,xp1+yp1,tempint);
-            }
-            
-            if (pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] < 256)
-                {skipitaddwall();continue;}
+                tempint = yp1 - yp2 + xp1 - xp2;
 
-            if (xp2 <= yp2){
-                
-                if ((xp2 < -yp2) || (yp2 == 0)){skipitaddwall();continue;}
-                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = halfxdimen + scale(xp2,halfxdimen,yp2) - 1;
+                if (tempint == 0)
+                { skipitaddwall(); continue; }
+
+                pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] = yp1 + scale(yp2 - yp1, xp1 + yp1, tempint);
+            }
+
+            if (pvWalls[numscans].screenSpaceCoo[0][VEC_DIST] < 256)
+            { skipitaddwall(); continue; }
+
+            if (xp2 <= yp2) {
+
+                if ((xp2 < -yp2) || (yp2 == 0)) { skipitaddwall(); continue; }
+                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = halfxdimen + scale(xp2, halfxdimen, yp2) - 1;
                 if (xp2 >= 0) pvWalls[numscans].screenSpaceCoo[1][VEC_COL]++;   /* Fix for SIGNED divide */
-                if (pvWalls[numscans].screenSpaceCoo[1][VEC_COL] >= xdimen) pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen-1;
+                if (pvWalls[numscans].screenSpaceCoo[1][VEC_COL] >= xdimen) pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen - 1;
                 pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] = yp2;
             }
-            else{
-                
-                if (xp1 > yp1) {skipitaddwall();continue;}
-                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen-1;
-                tempint = xp2-xp1+yp1-yp2;
-                if (tempint == 0) {skipitaddwall();continue;}
-                pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] = yp1 + scale(yp2-yp1,yp1-xp1,tempint);
+            else {
+
+                if (xp1 > yp1) { skipitaddwall(); continue; }
+                pvWalls[numscans].screenSpaceCoo[1][VEC_COL] = xdimen - 1;
+                tempint = xp2 - xp1 + yp1 - yp2;
+                if (tempint == 0) { skipitaddwall(); continue; }
+                pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] = yp1 + scale(yp2 - yp1, yp1 - xp1, tempint);
             }
             if ((pvWalls[numscans].screenSpaceCoo[1][VEC_DIST] < 256) || (pvWalls[numscans].screenSpaceCoo[0][VEC_COL] > pvWalls[numscans].screenSpaceCoo[1][VEC_COL])) {
-                 skipitaddwall(); continue;
+                skipitaddwall(); continue;
             }
 
             // Made it all the way!
@@ -440,34 +432,31 @@ function scansector (sectnum)
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
             console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
 
-            bunchWallsList[numscans] = numscans+1;
+            bunchWallsList[numscans] = numscans + 1;
             numscans++;
-            
+
             skipitaddwall();
         }
 
         //FCS: TODO rename this p2[] to bunchList[] or something like that. This name is an abomination
         //     DONE, p2 is now called "bunchWallsList".
-        
+
         //Break down the list of walls for this sector into bunchs. Since a bunch is a
         // continuously visible list of wall: A sector can generate many bunches.
-        for(z=numscansbefore; z<numscans; z++)
-        {
+        for (z = numscansbefore; z < numscans; z++) {
             if ((wall[pvWalls[z].worldWallId].point2 !=
-                 pvWalls[bunchWallsList[z]].worldWallId) || (pvWalls[z].screenSpaceCoo[1][VEC_COL] >= pvWalls[bunchWallsList[z]].screenSpaceCoo[0][VEC_COL]))
-            {
+                 pvWalls[bunchWallsList[z]].worldWallId) || (pvWalls[z].screenSpaceCoo[1][VEC_COL] >= pvWalls[bunchWallsList[z]].screenSpaceCoo[0][VEC_COL])) {
                 // Create an entry in the bunch list
                 bunchfirst[numbunches++] = bunchWallsList[z];
-                
+
                 //Mark the end of the bunch wall list.
                 bunchWallsList[z] = -1;
             }
         }
 
         //For each bunch, find the last wall and cache it in bunchlast.
-        for(z=bunchfrst; z<numbunches; z++)
-        {
-            for(zz=bunchfirst[z]; bunchWallsList[zz]>=0; zz=bunchWallsList[zz]);
+        for (z = bunchfrst; z < numbunches; z++) {
+            for (zz = bunchfirst[z]; bunchWallsList[zz] >= 0; zz = bunchWallsList[zz]);
             bunchlast[z] = zz;
         }
 
@@ -481,9 +470,9 @@ Engine.getpalookup = function (davis, dashade) {
 };
 
 
-Engine.doSetAspect = function(davis, dashade) {
+Engine.doSetAspect = function (davis, dashade) {
     var i, j, k, x, xinc;
-    
+
     if (xyaspect != oxyaspect) {
         oxyaspect = xyaspect;
         j = xyaspect * 320;
@@ -512,191 +501,175 @@ Engine.doSetAspect = function(davis, dashade) {
 };
 
 
-function owallmost(mostbuf,  w,  z)
-{
+function owallmost(mostbuf, w, z) {
     var bad, inty, xcross, y, yinc;
     var s1, s2, s3, s4, ix1, ix2, iy1, iy2, t;
 
     z <<= 7;
-    s1 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
-    s2 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
-    s3 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
-    s4 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
-    bad = (z<s1)+((z<s2)<<1)+((z>s3)<<2)+((z>s4)<<3);
+    s1 = mulscale20(globaluclip, pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s2 = mulscale20(globaluclip, pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    s3 = mulscale20(globaldclip, pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s4 = mulscale20(globaldclip, pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    bad = (z < s1) + ((z < s2) << 1) + ((z > s3) << 2) + ((z > s4) << 3);
 
     ix1 = pvWalls[w].screenSpaceCoo[0][VEC_COL];
     iy1 = pvWalls[w].screenSpaceCoo[0][VEC_DIST];
     ix2 = pvWalls[w].screenSpaceCoo[1][VEC_COL];
     iy2 = pvWalls[w].screenSpaceCoo[1][VEC_DIST];
 
-    if ((bad&3) == 3)
-    {
-        debugger;
-        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, 0);
-        return(bad);
+    if ((bad & 3) === 3) {
+        clearbufbyte(mostbuf, ix1, (ix2 - ix1 + 1) * 2, 0);
+        return (bad);
     }
 
-    if ((bad&12) == 12)
-    {
-        debugger;
-        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
-        return(bad);
+    if ((bad & 12) === 12) {
+        clearbufbyte(mostbuf, ix1, (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
+        return (bad);
     }
 
-    if (bad&3)
-    {
-        t = divscale30(z-s1,s2-s1);
-        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
-        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+    if (bad & 3) {
+        t = divscale30(z - s1, s2 - s1);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
-        if ((bad&3) == 2)
-        {
+        if ((bad & 3) === 2) {
             if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
                 iy2 = inty;
                 ix2 = xcross;
             }
-            debugger;
-            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
+            clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
         }
-        else
-        {
+        else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
                 iy1 = inty;
                 ix1 = xcross;
             }
-            debugger;
-            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
+            clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
         }
     }
 
-    if (bad&12)
-    {
-        t = divscale30(z-s3,s4-s3);
-        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
-        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+    if (bad & 12) {
+        t = divscale30(z - s3, s4 - s3);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
-        if ((bad&12) == 8)
-        {
+        if ((bad & 12) == 8) {
             if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
                 iy2 = inty;
                 ix2 = xcross;
             }
-            debugger;
-            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
+            clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
         }
-        else
-        {
+        else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
                 iy1 = inty;
                 ix1 = xcross;
             }
-            debugger;
-            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
+            clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
         }
     }
 
-    y = (scale(z,xdimenscale,iy1)<<4);
-    yinc = ((scale(z,xdimenscale,iy2)<<4)-y) / (ix2-ix1+1);
-    qinterpolatedown16short(mostbuf[ix1],ix2-ix1+1,y+(globalhoriz<<16),yinc);
+    y = (scale(z, xdimenscale, iy1) << 4);
+    yinc = ((scale(z, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1);
+    qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0) mostbuf[ix1] = 0;
     if (mostbuf[ix1] > ydimen) mostbuf[ix1] = ydimen;
     if (mostbuf[ix2] < 0) mostbuf[ix2] = 0;
     if (mostbuf[ix2] > ydimen) mostbuf[ix2] = ydimen;
 
-    return(bad);
+    return (bad);
 }
 
-function wallmost(mostbuf, w, sectnum, dastat)
-{
+function wallmost(mostbuf, w, sectnum, dastat) {
     var bad, i, j, t, y, z, inty, intz, xcross, yinc, fw;
     var x1, y1, z1, x2, y2, z2, xv, yv, dx, dy, dasqr, oz1, oz2;
     var s1, s2, s3, s4, ix1, ix2, iy1, iy2;
 
-    if (dastat == 0){
-        z = sector[sectnum].ceilingz-globalposz;
-        if ((sector[sectnum].ceilingstat&2) == 0)
-            return(owallmost(mostbuf,w,z));
+    if (dastat == 0) {
+        z = sector[sectnum].ceilingz - globalposz;
+        if ((sector[sectnum].ceilingstat & 2) == 0)
+            return (owallmost(mostbuf, w, z));
     }
-    else{
-        z = sector[sectnum].floorz-globalposz;
-        if ((sector[sectnum].floorstat&2) == 0)
-            return(owallmost(mostbuf,w,z));
+    else {
+        z = sector[sectnum].floorz - globalposz;
+        if ((sector[sectnum].floorstat & 2) == 0)
+            return (owallmost(mostbuf, w, z));
     }
 
     i = pvWalls[w].worldWallId;
     if (i == sector[sectnum].wallptr)
-        return(owallmost(mostbuf,w,z));
+        return (owallmost(mostbuf, w, z));
 
     x1 = wall[i].x;
-    x2 = wall[wall[i].point2].x-x1;
+    x2 = wall[wall[i].point2].x - x1;
     y1 = wall[i].y;
-    y2 = wall[wall[i].point2].y-y1;
+    y2 = wall[wall[i].point2].y - y1;
 
     fw = sector[sectnum].wallptr;
     i = wall[fw].point2;
-    dx = wall[i].x-wall[fw].x;
-    dy = wall[i].y-wall[fw].y;
-    dasqr = krecipasm(nsqrtasm(dx*dx+dy*dy));
+    dx = wall[i].x - wall[fw].x;
+    dy = wall[i].y - wall[fw].y;
+    dasqr = krecipasm(nsqrtasm(dx * dx + dy * dy));
 
-    if (pvWalls[w].screenSpaceCoo[0][VEC_COL] == 0){
-        xv = cosglobalang+sinviewingrangeglobalang;
-        yv = singlobalang-cosviewingrangeglobalang;
+    if (pvWalls[w].screenSpaceCoo[0][VEC_COL] == 0) {
+        xv = cosglobalang + sinviewingrangeglobalang;
+        yv = singlobalang - cosviewingrangeglobalang;
     }
-    else{
-        xv = x1-globalposx;
-        yv = y1-globalposy;
+    else {
+        xv = x1 - globalposx;
+        yv = y1 - globalposy;
     }
-    i = xv*(y1-globalposy)-yv*(x1-globalposx);
-    j = yv*x2-xv*y2;
-    
-    if (klabs(j) > klabs(i>>3))
-        i = divscale28(i,j);
-    
-    if (dastat == 0){
-        t = mulscale15(sector[sectnum].ceilingheinum,dasqr);
+    i = xv * (y1 - globalposy) - yv * (x1 - globalposx);
+    j = yv * x2 - xv * y2;
+
+    if (klabs(j) > klabs(i >> 3))
+        i = divscale28(i, j);
+
+    if (dastat == 0) {
+        t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
         z1 = sector[sectnum].ceilingz;
     }
-    else{
-        t = mulscale15(sector[sectnum].floorheinum,dasqr);
+    else {
+        t = mulscale15(sector[sectnum].floorheinum, dasqr);
         z1 = sector[sectnum].floorz;
     }
-    
-    z1 = dmulscale24(dx*t,mulscale20(y2,i)+((y1-wall[fw].y)<<8),-dy*t,mulscale20(x2,i)+((x1-wall[fw].x)<<8))+((z1-globalposz)<<7);
+
+    z1 = dmulscale24(dx * t, mulscale20(y2, i) + ((y1 - wall[fw].y) << 8), -dy * t, mulscale20(x2, i) + ((x1 - wall[fw].x) << 8)) + ((z1 - globalposz) << 7);
 
 
-    if (pvWalls[w].screenSpaceCoo[1][VEC_COL] == xdimen-1){
-        xv = cosglobalang-sinviewingrangeglobalang;
-        yv = singlobalang+cosviewingrangeglobalang;
+    if (pvWalls[w].screenSpaceCoo[1][VEC_COL] == xdimen - 1) {
+        xv = cosglobalang - sinviewingrangeglobalang;
+        yv = singlobalang + cosviewingrangeglobalang;
     }
-    else{
-        xv = (x2+x1)-globalposx;
-        yv = (y2+y1)-globalposy;
+    else {
+        xv = (x2 + x1) - globalposx;
+        yv = (y2 + y1) - globalposy;
     }
-    
-    i = xv*(y1-globalposy)-yv*(x1-globalposx);
-    j = yv*x2-xv*y2;
-    
-    if (klabs(j) > klabs(i>>3))
-        i = divscale28(i,j);
-    
-    if (dastat == 0){
-        t = mulscale15(sector[sectnum].ceilingheinum,dasqr);
+
+    i = xv * (y1 - globalposy) - yv * (x1 - globalposx);
+    j = yv * x2 - xv * y2;
+
+    if (klabs(j) > klabs(i >> 3))
+        i = divscale28(i, j);
+
+    if (dastat == 0) {
+        t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
         z2 = sector[sectnum].ceilingz;
     }
-    else{
-        t = mulscale15(sector[sectnum].floorheinum,dasqr);
+    else {
+        t = mulscale15(sector[sectnum].floorheinum, dasqr);
         z2 = sector[sectnum].floorz;
     }
-    
-    z2 = dmulscale24(dx*t,mulscale20(y2,i)+((y1-wall[fw].y)<<8),-dy*t,mulscale20(x2,i)+((x1-wall[fw].x)<<8))+((z2-globalposz)<<7);
+
+    z2 = dmulscale24(dx * t, mulscale20(y2, i) + ((y1 - wall[fw].y) << 8), -dy * t, mulscale20(x2, i) + ((x1 - wall[fw].x) << 8)) + ((z2 - globalposz) << 7);
 
 
-    s1 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
-    s2 = mulscale20(globaluclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
-    s3 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
-    s4 = mulscale20(globaldclip,pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
-    bad = (z1<s1)+((z2<s2)<<1)+((z1>s3)<<2)+((z2>s4)<<3);
+    s1 = mulscale20(globaluclip, pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s2 = mulscale20(globaluclip, pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    s3 = mulscale20(globaldclip, pvWalls[w].screenSpaceCoo[0][VEC_DIST]);
+    s4 = mulscale20(globaldclip, pvWalls[w].screenSpaceCoo[1][VEC_DIST]);
+    bad = (z1 < s1) + ((z2 < s2) << 1) + ((z1 > s3) << 2) + ((z2 > s4) << 3);
 
     ix1 = pvWalls[w].screenSpaceCoo[0][VEC_COL];
     ix2 = pvWalls[w].screenSpaceCoo[1][VEC_COL];
@@ -707,25 +680,25 @@ function wallmost(mostbuf, w, sectnum, dastat)
 
     if ((bad & 3) == 3) {
         debugger;
-        clearbufbyte(mostbuf[ix1],(ix2-ix1+1)*2,0);
-        return(bad);
+        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, 0);
+        return (bad);
     }
 
-    if ((bad&12) == 12){
+    if ((bad & 12) == 12) {
         debugger;
         clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
-        return(bad);
+        return (bad);
     }
 
-    if (bad&3){
+    if (bad & 3) {
         /* inty = intz / (globaluclip>>16) */
-        t = divscale30(oz1-s1,s2-s1+oz1-oz2);
-        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
-        intz = oz1 + mulscale30(oz2-oz1,t);
-        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+        t = divscale30(oz1 - s1, s2 - s1 + oz1 - oz2);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
+        intz = oz1 + mulscale30(oz2 - oz1, t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
-        if ((bad&3) == 2){
-            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross){
+        if ((bad & 3) == 2) {
+            if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
                 z2 = intz;
                 iy2 = inty;
                 ix2 = xcross;
@@ -733,7 +706,7 @@ function wallmost(mostbuf, w, sectnum, dastat)
             debugger;
             clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
         }
-        else{
+        else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
                 z1 = intz;
                 iy1 = inty;
@@ -744,14 +717,14 @@ function wallmost(mostbuf, w, sectnum, dastat)
         }
     }
 
-    if (bad&12){
+    if (bad & 12) {
         /* inty = intz / (globaldclip>>16) */
-        t = divscale30(oz1-s3,s4-s3+oz1-oz2);
-        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST]-pvWalls[w].screenSpaceCoo[0][VEC_DIST],t);
-        intz = oz1 + mulscale30(oz2-oz1,t);
-        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST],t),pvWalls[w].screenSpaceCoo[1][VEC_COL]-pvWalls[w].screenSpaceCoo[0][VEC_COL],inty);
+        t = divscale30(oz1 - s3, s4 - s3 + oz1 - oz2);
+        inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
+        intz = oz1 + mulscale30(oz2 - oz1, t);
+        xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
-        if ((bad&12) == 8){
+        if ((bad & 12) == 8) {
             if (pvWalls[w].screenSpaceCoo[0][VEC_COL] <= xcross) {
                 z2 = intz;
                 iy2 = inty;
@@ -760,7 +733,7 @@ function wallmost(mostbuf, w, sectnum, dastat)
             debugger;
             clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
         }
-        else{
+        else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
                 z1 = intz;
                 iy1 = inty;
@@ -771,9 +744,9 @@ function wallmost(mostbuf, w, sectnum, dastat)
         }
     }
 
-    y = (scale(z1,xdimenscale,iy1)<<4);
-    yinc = ((scale(z2,xdimenscale,iy2)<<4)-y) / (ix2-ix1+1);
-    qinterpolatedown16short(mostbuf[ix1],ix2-ix1+1,y+(globalhoriz<<16),yinc);
+    y = (scale(z1, xdimenscale, iy1) << 4);
+    yinc = ((scale(z2, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1);
+    qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0)
         mostbuf[ix1] = 0;
@@ -784,10 +757,10 @@ function wallmost(mostbuf, w, sectnum, dastat)
     if (mostbuf[ix2] > ydimen)
         mostbuf[ix2] = ydimen;
 
-    return(bad);
+    return (bad);
 }
 
-Engine.draWalls = function(bunch) {
+Engine.draWalls = function (bunch) {
     var sec, nextsec;
     var wal;
     var i, x, x1, x2, cz = new Int32Array(5), fz = new Int32Array(5);
@@ -1267,23 +1240,22 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         Engine.doSetAspect();
     }
 
-    frameoffset = frameplace+viewoffset;
+    frameoffset = frameplace + viewoffset;
 
     //Clear the bit vector that keep track of what sector has been flooded in.
-    clearbufbyte(visitedSectors, 0, visitedSectors.length);
+    clearbufbyte(visitedSectors, 0, ((numsectors + 7) >> 3), 0);
 
     //Clear the occlusion array.
     shortptr1 = windowx1;//(short *)&startumost[windowx1];
     shortptr2 = windowx1;//(short *)&startdmost[windowx1];
-    i = xdimen-1;
-    do
-    {
-        umost[i] = shortptr1[i]-windowy1;
-        dmost[i] = shortptr2[i]-windowy1;
+    i = xdimen - 1;
+    do {
+        umost[i] = shortptr1[i] - windowy1;
+        dmost[i] = shortptr2[i] - windowy1;
         i--;
     } while (i != 0);
-    umost[0] = shortptr1[0]-windowy1;
-    dmost[0] = shortptr2[0]-windowy1;
+    umost[0] = shortptr1[0] - windowy1;
+    dmost[0] = shortptr2[0] - windowy1;
 
     // NumHits is the number of column to draw.
     numhits = xdimen;
@@ -1298,16 +1270,15 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
 
     if (globalcursectnum >= MAXSECTORS)
         globalcursectnum -= MAXSECTORS;
-    else
-    {
+    else {
         // Even if the player leaves the map, the engine will keep on rendering from the last visited sector.
         // Save it.
         i = globalcursectnum;
         var globalcursectnumRef = new Ref(globalcursectnum);
-        updatesector(globalposx,globalposy,globalcursectnumRef);
+        updatesector(globalposx, globalposy, globalcursectnumRef);
         globalcursectnum = globalcursectnumRef.$;
         // Seem the player has left the map since updatesector cannot locate him -> Restore to the last known sector.
-        if (globalcursectnum < 0) 
+        if (globalcursectnum < 0)
             globalcursectnum = i;
     }
 
@@ -1328,35 +1299,30 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     scansector(globalcursectnum);
     debugger;
 
-    if (inpreparemirror)
-    {
+    if (inpreparemirror) {
         console.log("test, is this block working?");
         inpreparemirror = 0;
-        mirrorsx1 = xdimen-1;
+        mirrorsx1 = xdimen - 1;
         mirrorsx2 = 0;
-        for(i=numscans-1; i>=0; i--)
-        {
+        for (i = numscans - 1; i >= 0; i--) {
             if (wall[pvWalls[i].worldWallId].nextsector < 0) continue;
             if (pvWalls[i].screenSpaceCoo[0][VEC_COL] < mirrorsx1) mirrorsx1 = pvWalls[i].screenSpaceCoo[0][VEC_COL];
             if (pvWalls[i].screenSpaceCoo[1][VEC_COL] > mirrorsx2) mirrorsx2 = pvWalls[i].screenSpaceCoo[1][VEC_COL];
         }
 
-        if (stereomode)
-        {
-            mirrorsx1 += (stereopixelwidth<<1);
-            mirrorsx2 += (stereopixelwidth<<1);
+        if (stereomode) {
+            mirrorsx1 += (stereopixelwidth << 1);
+            mirrorsx2 += (stereopixelwidth << 1);
         }
 
-        for(i=0; i<mirrorsx1; i++)
-            if (umost[i] <= dmost[i])
-            {
+        for (i = 0; i < mirrorsx1; i++)
+            if (umost[i] <= dmost[i]) {
                 umost[i] = 1;
                 dmost[i] = 0;
                 numhits--;
             }
-        for(i=mirrorsx2+1; i<xdimen; i++)
-            if (umost[i] <= dmost[i])
-            {
+        for (i = mirrorsx2 + 1; i < xdimen; i++)
+            if (umost[i] <= dmost[i]) {
                 umost[i] = 1;
                 dmost[i] = 0;
                 numhits--;
@@ -1367,43 +1333,40 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         bunchfirst[0] = bunchfirst[numbunches];
         bunchlast[0] = bunchlast[numbunches];
 
-        mirrorsy1 = min(umost[mirrorsx1],umost[mirrorsx2]);
-        mirrorsy2 = max(dmost[mirrorsx1],dmost[mirrorsx2]);
+        mirrorsy1 = min(umost[mirrorsx1], umost[mirrorsx2]);
+        mirrorsy2 = max(dmost[mirrorsx1], dmost[mirrorsx2]);
     }
-    
+
     // scansector has generated the bunches, it is now time to see which ones to render.
     // numhits is the number of column of pixels to draw: (if the screen is 320x200 then numhits starts at 200).
     // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
     // When every bunches have been tested for rendition.
-    while ((numbunches > 0) && (numhits > 0))
-    {
+    while ((numbunches > 0) && (numhits > 0)) {
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.
         clearbuf(tempbuf, 0, ((numbunches + 3) >> 2));
 
         /* Almost works, but not quite :( */
-        closest = 0; 
-        tempbuf[closest] = 1;       
-        for(i=1; i<numbunches; i++)
-        {
-            if ((j = bunchfront(i,closest)) < 0) 
+        closest = 0;
+        tempbuf[closest] = 1;
+        for (i = 1; i < numbunches; i++) {
+            if ((j = bunchfront(i, closest)) < 0)
                 continue;
             tempbuf[i] = 1;
-            if (j == 0){
+            if (j == 0) {
                 tempbuf[closest] = 1;
                 closest = i;
             }
         }
-        
+
         /* Double-check */
-        for(i=0; i<numbunches; i++) 
-        {
-            if (tempbuf[i]) 
+        for (i = 0; i < numbunches; i++) {
+            if (tempbuf[i])
                 continue;
-            if ((j = bunchfront(i,closest)) < 0) 
+            if ((j = bunchfront(i, closest)) < 0)
                 continue;
             tempbuf[i] = 1;
-            if (j == 0){
+            if (j == 0) {
                 tempbuf[closest] = 1;
                 closest = i, i = 0;
             }
@@ -1412,11 +1375,10 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         //Draw every solid walls with ceiling/floor in the bunch "closest"
         Engine.draWalls(closest);
 
-        if (automapping)
-        {
-            for(z=bunchfirst[closest]; z>=0; z=bunchWallsList[z])
-                show2dwall[pvWalls[z].worldWallId>>3] |=
-                pow2char  [pvWalls[z].worldWallId&7];
+        if (automapping) {
+            for (z = bunchfirst[closest]; z >= 0; z = bunchWallsList[z])
+                show2dwall[pvWalls[z].worldWallId >> 3] |=
+                pow2char[pvWalls[z].worldWallId & 7];
         }
 
         //Since we just rendered a bunch, lower the current stack element so we can treat the next item
@@ -1733,8 +1695,8 @@ Engine.initFastColorLookup = function (rScale, gScale, bScale) {
         j += 129 - (i << 1);
     }
 
-    clearbufbyte(colhere, 0, colhere.length);
-    clearbufbyte(colhead, 0, colhead.length);
+    clearbufbyte(colhere, 0, colhere.length, 0);
+    clearbufbyte(colhead, 0, colhead.length, 0);
 
     var pal1 = 768 - 3;
     for (i = 255; i >= 0; i--, pal1 -= 3) {
