@@ -138,7 +138,7 @@ var globalposx, globalposy, globalposz, globalhoriz;
 var globalang, globalcursectnum;
 var globalpal, cosglobalang, singlobalang;
 var cosviewingrangeglobalang, sinviewingrangeglobalang;
-var globalpalwritten; //ptr
+var globalpalwritten; //ptr to palookup
 var globaluclip, globaldclip, globvis = 0;
 var globalvisibility, globalhisibility, globalpisibility, globalcisibility;
 var globparaceilclip, globparaflorclip;
@@ -469,6 +469,28 @@ Engine.getpalookup = function (davis, dashade) {
     return Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1);
 };
 
+function getpalookup(davis, dashade) {
+    return (Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1));
+}
+
+//665
+function hline(xr, yp) {
+    debugger;
+    var xl, r, s;
+
+    xl = lastx[yp];
+
+    if (xl > xr)
+        return;
+
+    r = horizlookup2[yp - globalhoriz + horizycent];
+    asm1 = globalx1 * r;
+    asm2 = globaly2 * r;
+    s = (getpalookup(mulscale16(r, globvis), globalshade) << 8);
+
+    hlineasm4(xr - xl, s, globalx2 * r + globalypanning, globaly1 * r + globalxpanning, ylookup[yp] + xr, frameoffset);
+}
+
 
 /* renders non-parallaxed ceilings. --ryan. */
 function ceilscan ( x1,  x2,  sectnum)
@@ -478,8 +500,8 @@ function ceilscan ( x1,  x2,  sectnum)
 
     sec = sector[sectnum];
     
-    if (palookup[sec.ceilingpal] != globalpalwritten)
-        globalpalwritten = palookup[sec.ceilingpal];
+    if (palookup[sec.ceilingpal] != palookup[globalpalwritten])
+        palookup[globalpalwritten] = palookup[sec.ceilingpal];
 
     
     globalzd = sec.ceilingz-globalposz;
@@ -593,7 +615,7 @@ function ceilscan ( x1,  x2,  sectnum)
     globalx2 = (globalx2-globaly2)*halfxdimen;
 
     sethlinesizes(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4,globalbufplc);
-    debugger;
+    
     globalx2 += globaly2*(x1-1);
     globaly1 += globalx1*(x1-1);
     globalx1 = mulscale16(globalx1,globalzd);
@@ -774,7 +796,7 @@ function owallmost(mostbuf, w, z) {
 
     y = (scale(z, xdimenscale, iy1) << 4);
     yinc = (((scale(z, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1)) | 0;
-    qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
+    qinterpolatedown16short(mostbuf, ix1, ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0) mostbuf[ix1] = 0;
     if (mostbuf[ix1] > ydimen) mostbuf[ix1] = ydimen;
@@ -950,7 +972,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 
     y = (scale(z1, xdimenscale, iy1) << 4);
     yinc = (((scale(z2, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1)) | 0;
-    qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
+    qinterpolatedown16short(mostbuf, ix1, ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0)
         mostbuf[ix1] = 0;
@@ -2305,6 +2327,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 //}
                 ////qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
                 qinterpolatedown16short(uplc, dax1, dax2 - dax1, yplc, yinc);
+                console.log("uplc[0] = %i", uplc[0]);
             } else {
                 yplc = y2 + mulscale16((dax2 << 16) + 65535 - x2, yinc);
                 //if (typeof dax2 != 0) {

@@ -7,6 +7,9 @@ var transluc = new Uint8Array(65536 / 4);
 var MAX_PIXEL_RENDERERED = ((1600 * 1200) + 20000);
 var pixelsAllowed = 10000000000;
 
+function shrd(a, b, c) { return ((b) << (32 - (c))) | ((a) >> (c)); }
+function shld(a, b, c) { return (((b) >> (32 - (c))) | ((a) << (c))); }
+
 var RENDER_DRAW_WALL_BORDERS = 1;
 var RENDER_DRAW_WALL_INSIDE = 1;
 var RENDER_DRAW_CEILING_AND_FLOOR = 1;
@@ -33,6 +36,48 @@ function sethlinesizes(i1, _bits, textureAddress) {
     machxbits_al = i1;
     bitsSetup = _bits;
     textureSetup = textureAddress;
+}
+
+//FCS:   Draw ceiling/floors
+//Draw a line from destination in the framebuffer to framebuffer-numPixels
+function hlineasm4( numPixels,  shade,  i4,  i5, destOffset, dest) {
+    if (arguments.length != 6) throw "bad args";
+
+    var shifter = ((256-machxbits_al) & 0x1f);
+    var source;
+    
+    var texture = textureSetup;
+    var bits = bitsSetup;
+
+    i4 = i4 | 0; // it is int32
+    i5 = i5 >>> 0; // it is uint32
+    
+    shade = shade & 0xffffff00;
+    numPixels++;
+    
+    if (!RENDER_DRAW_CEILING_AND_FLOOR)
+        return;
+
+    // todo: for loop (faster!)
+    while (numPixels) {
+
+        source = i5 >> shifter;
+        source = shld(source,i4,bits);
+        source = texture[source];
+
+        throw "todo: palookup is a list of pointers itself? - to a pallet or something";
+        // globalpalwritten points to the first palookup pointer
+        if (pixelsAllowed-- > 0)
+            dest[destOffset] = palookup[globalpalwritten + (shade | source)]; 
+        
+        destOffset--;
+        
+        i5 -= asm1;
+        i4 -= asm2;
+        
+        numPixels--;
+		
+    }
 }
 
 // 89
