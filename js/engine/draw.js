@@ -21,6 +21,20 @@ function setBytesPerLine(_bytesPerLine) {
     bytesperline = _bytesPerLine;
 }
 
+var  asm1;
+var  asm2;
+var  asm3;
+var  asm4;
+
+var machxbits_al;
+var bitsSetup;
+var textureSetup;
+function sethlinesizes(i1, _bits, textureAddress) {
+    machxbits_al = i1;
+    bitsSetup = _bits;
+    textureSetup = textureAddress;
+}
+
 // 89
 var rmach_eax;
 var rmach_ebx;

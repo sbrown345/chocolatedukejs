@@ -550,7 +550,6 @@ function ceilscan ( x1,  x2,  sectnum)
         globalypanning = globaly2*ox + globalx2*oy;
     }
 
-    debugger;
     globalx2 = mulscale16(globalx2,viewingrangerecip);
     globaly1 = mulscale16(globaly1,viewingrangerecip);
     globalxshift = (8-(picsiz[globalpicnum]&15));
@@ -594,7 +593,7 @@ function ceilscan ( x1,  x2,  sectnum)
     globalx2 = (globalx2-globaly2)*halfxdimen;
 
     sethlinesizes(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4,globalbufplc);
-
+    debugger;
     globalx2 += globaly2*(x1-1);
     globaly1 += globalx1*(x1-1);
     globalx1 = mulscale16(globalx1,globalzd);
@@ -610,7 +609,7 @@ function ceilscan ( x1,  x2,  sectnum)
         for(x=x1; x<=x2; x++)
         {
             twall = umost[x]-1;
-            bwall = min(uplc[x],dmost[x]);
+            bwall = Math.min(uplc[x],dmost[x]);
             if (twall < bwall-1)
             {
                 if (twall >= y2)
@@ -670,7 +669,7 @@ function ceilscan ( x1,  x2,  sectnum)
     for(x=x1; x<=x2; x++)
     {
         twall = umost[x]-1;
-        bwall = min(uplc[x],dmost[x]);
+        bwall = Math.min(uplc[x],dmost[x]);
         if (twall < bwall-1)
         {
             if (twall >= y2)
@@ -1156,7 +1155,7 @@ Engine.draWalls = function (bunch) {
                     {
                         for(x=x1; x<=x2; x++)
                             if (umost[x] <= dmost[x]){
-                                i = max(uplc[x],dwall[x]);
+                                i = Math.max(uplc[x],dwall[x]);
                                 if (i > umost[x]){
                                     umost[x] = i;
                                     if (umost[x] > dmost[x]) numhits--;
@@ -1270,7 +1269,7 @@ Engine.draWalls = function (bunch) {
                     {
                         for(x=x1; x<=x2; x++)
                             if (umost[x] <= dmost[x]){
-                                i = min(dplc[x],uwall[x]);
+                                i = Math.min(dplc[x],uwall[x]);
                                 if (i < dmost[x])
                                 {
                                     dmost[x] = i;
@@ -1601,8 +1600,8 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         bunchfirst[0] = bunchfirst[numbunches];
         bunchlast[0] = bunchlast[numbunches];
 
-        mirrorsy1 = min(umost[mirrorsx1], umost[mirrorsx2]);
-        mirrorsy2 = max(dmost[mirrorsx1], dmost[mirrorsx2]);
+        mirrorsy1 = Math.min(umost[mirrorsx1], umost[mirrorsx2]);
+        mirrorsy2 = Math.max(dmost[mirrorsx1], dmost[mirrorsx2]);
     }
 
     // scansector has generated the bunches, it is now time to see which ones to render.
