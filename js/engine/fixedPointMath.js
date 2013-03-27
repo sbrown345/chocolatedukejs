@@ -113,7 +113,6 @@ function clearbuf(buffer, start, end) {
 
 function clearbufbyte(buffer, offset, c, a) {
     if (arguments.length != 4) throw "arg error";
-    if (offset > 0) debugger;
 
     var p = new Uint8Array(buffer.buffer);
     var pIdx = offset * buffer.BYTES_PER_ELEMENT;

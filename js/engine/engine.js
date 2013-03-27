@@ -849,12 +849,36 @@ Engine.draWalls = function (bunch) {
             }
         }
 
-        if (nextsectnum >= 0){
-            getzsofslope(sectnum,wal.x,wal.y,cz[0],fz[0]);
-            getzsofslope(sectnum,wall[wal.point2].x,wall[wal.point2].y,cz[1],fz[1]);
-            getzsofslope(nextsectnum,wal.x,wal.y,cz[2],fz[2]);
-            getzsofslope(nextsectnum,wall[wal.point2].x,wall[wal.point2].y,cz[3],fz[3]);
-            getzsofslope(nextsectnum,globalposx,globalposy,cz[4],fz[4]);
+        if (nextsectnum >= 0) {
+            var czRef = new Ref(cz[0]);
+            var fzRef = new Ref(fz[0]);
+            getzsofslope(sectnum, wal.x, wal.y, czRef, fzRef);
+            cz[0] = czRef.$;
+            fz[0] = fzRef.$;
+            
+            czRef.$ = cz[1];
+            fzRef.$ = fz[1];
+            getzsofslope(sectnum, wall[wal.point2].x, wall[wal.point2].y, czRef, fzRef);
+            cz[1] = czRef.$;
+            fz[1] = fzRef.$;
+
+            czRef.$ = cz[2];
+            fzRef.$ = fz[2];
+            getzsofslope(nextsectnum, wal.x, wal.y, czRef, fzRef);
+            cz[2] = czRef.$;
+            fz[2] = fzRef.$;
+
+            czRef.$ = cz[3];
+            fzRef.$ = fz[3];
+            getzsofslope(nextsectnum, wall[wal.point2].x, wall[wal.point2].y, czRef, fzRef);
+            cz[3] = czRef.$;
+            fz[3] = fzRef.$;
+
+            czRef.$ = cz[4];
+            fzRef.$ = fz[4];
+            getzsofslope(nextsectnum, globalposx, globalposy, czRef, fzRef);
+            cz[4] = czRef.$;
+            fz[4] = fzRef.$;
 
             if ((wal.cstat&48) == 16)
                 maskwall[maskwallcnt++] = z;
@@ -1252,12 +1276,12 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     shortptr2 = windowx1;//(short *)&startdmost[windowx1];
     i = xdimen - 1;
     do {
-        umost[i] = shortptr1[i] - windowy1;
-        dmost[i] = shortptr2[i] - windowy1;
+        umost[i] = startumost[shortptr1 + i] - windowy1;
+        dmost[i] = startdmost[shortptr2 + i] - windowy1;
         i--;
     } while (i != 0);
-    umost[0] = shortptr1[0] - windowy1;
-    dmost[0] = shortptr2[0] - windowy1;
+    umost[0] = startumost[shortptr1] - windowy1;
+    dmost[0] = startdmost[shortptr2] - windowy1;
 
     // NumHits is the number of column to draw.
     numhits = xdimen;
