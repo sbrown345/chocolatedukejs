@@ -72,10 +72,22 @@ function mul32(n, m) {
 //    return ((high << 16) >>> 0) + (al * bl);
 //}
 
-toInt8. toInt8Helper = new Int8Array(1);
+toInt8.helper = new Int8Array(1);
 function toInt8(v) {
-    toInt8.toInt8Helper[0] = v;
-    return toInt8.toInt8Helper[0];
+    toInt8.helper[0] = v;
+    return toInt8.helper[0];
+}
+
+toUint8.helper = new Uint8Array(1);
+function toUint8(v) {
+    toUint8.helper[0] = v;
+    return toUint8.helper[0];
+}
+
+toUint32.helper = new Uint32Array(1);
+function toUint32(v) {
+    toUint32.helper[0] = v;
+    return toUint32.helper[0];
 }
 
 function ksgn(i1) {
@@ -88,7 +100,7 @@ function klabs(i1) {
     if (i1 < 0) {
         i1 = -i1;
     }
-    
+
     return i1;
 }
 

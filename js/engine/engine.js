@@ -97,9 +97,9 @@ var pvWalls = structArray(PvWall, MAXWALLSB);
 //*/
 
 //// bunchWallsList contains the list of walls in a bunch.
-var bunchWallsList = new Uint16Array(MAXWALLSB);
+var bunchWallsList = new Int16Array(MAXWALLSB);
 
-var bunchfirst = new Uint16Array(MAXWALLSB), bunchlast = new Uint16Array(MAXWALLSB);
+var bunchfirst = new Int16Array(MAXWALLSB), bunchlast = new Int16Array(MAXWALLSB);
 
 
 var smost = new Int16Array(MAXYSAVES), smostcnt;
@@ -500,7 +500,7 @@ Engine.doSetAspect = function (davis, dashade) {
     }
 };
 
-
+//1926
 function owallmost(mostbuf, w, z) {
     var bad, inty, xcross, y, yinc;
     var s1, s2, s3, s4, ix1, ix2, iy1, iy2, t;
@@ -680,13 +680,13 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 
     if ((bad & 3) == 3) {
         debugger;
-        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, 0);
+        clearbufbyte(mostbuf, ix1, (ix2 - ix1 + 1) * 2, 0);
         return (bad);
     }
 
     if ((bad & 12) == 12) {
         debugger;
-        clearbufbyte(mostbuf[ix1], (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
+        clearbufbyte(mostbuf, ix1, (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
         return (bad);
     }
 
@@ -704,7 +704,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 ix2 = xcross;
             }
             debugger;
-            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
+            clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
         }
         else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
@@ -713,7 +713,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 ix1 = xcross;
             }
             debugger;
-            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
+            clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
         }
     }
 
@@ -731,7 +731,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 ix2 = xcross;
             }
             debugger;
-            clearbufbyte(mostbuf[xcross + 1], (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
+            clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
         }
         else {
             if (xcross <= pvWalls[w].screenSpaceCoo[1][VEC_COL]) {
@@ -740,7 +740,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 ix1 = xcross;
             }
             debugger;
-            clearbufbyte(mostbuf[pvWalls[w].screenSpaceCoo[0][VEC_COL]], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
+            clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
         }
     }
 
@@ -779,388 +779,390 @@ Engine.draWalls = function (bunch) {
         andwstat1 &= wallmost(uplc, z, sectnum, 0);
         andwstat2 &= wallmost(dplc, z, sectnum, 1);
     }
+    
+    /* draw ceilings */
+    if ((andwstat1&3) != 3){
+        if ((sec.ceilingstat&3) == 2)
+            grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0);
+        else if ((sec.ceilingstat&1) == 0)
+            ceilscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
+        else
+            parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0,bunch);
+    }
 
-    ///* draw ceilings */
-    //if ((andwstat1&3) != 3){
-    //    if ((sec.ceilingstat&3) == 2)
-    //        grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0);
-    //    else if ((sec.ceilingstat&1) == 0)
-    //        ceilscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
-    //    else
-    //        parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0,bunch);
-    //}
+    /* draw floors */
+    if ((andwstat2&12) != 12){
+        if ((sec.floorstat&3) == 2)
+            grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1);
+        else if ((sec.floorstat&1) == 0)
+            florscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
+        else
+            parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1,bunch);
+    }
 
-    ///* draw floors */
-    //if ((andwstat2&12) != 12){
-    //    if ((sec.floorstat&3) == 2)
-    //        grouscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1);
-    //    else if ((sec.floorstat&1) == 0)
-    //        florscan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum);
-    //    else
-    //        parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1,bunch);
-    //}
+    debugger;
 
-    ///* DRAW WALLS SECTION! */
-    //for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
+    /* DRAW WALLS SECTION! */
+    for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
 
-    //    x1 = pvWalls[z].screenSpaceCoo[0][VEC_COL];
-    //    x2 = pvWalls[z].screenSpaceCoo[1][VEC_COL];
-    //    if (umost[x2] >= dmost[x2])
-    //    {
+        x1 = pvWalls[z].screenSpaceCoo[0][VEC_COL];
+        x2 = pvWalls[z].screenSpaceCoo[1][VEC_COL];
+        if (umost[x2] >= dmost[x2])
+        {
 
-    //        for(x=x1; x<x2; x++)
-    //            if (umost[x] < dmost[x]) 
-    //                break;
+            for(x=x1; x<x2; x++)
+                if (umost[x] < dmost[x]) 
+                    break;
 
-    //        if (x >= x2)
-    //        {
-    //            smostwall[smostwallcnt] = z;
-    //            smostwalltype[smostwallcnt] = 0;
-    //            smostwallcnt++;
-    //            continue;
-    //        }
-    //    }
+            if (x >= x2)
+            {
+                smostwall[smostwallcnt] = z;
+                smostwalltype[smostwallcnt] = 0;
+                smostwallcnt++;
+                continue;
+            }
+        }
 
-    //    wallnum = pvWalls[z].worldWallId;
-    //    wal = &wall[wallnum];
-    //    nextsectnum = wal.nextsector;
-    //    nextsec = &sector[nextsectnum];
+        wallnum = pvWalls[z].worldWallId;
+        wal = wall[wallnum];
+        nextsectnum = wal.nextsector;
+        nextsec = sector[nextsectnum];
 
-    //    gotswall = 0;
+        gotswall = 0;
 
-    //    startsmostwallcnt = smostwallcnt;
-    //    startsmostcnt = smostcnt;
+        startsmostwallcnt = smostwallcnt;
+        startsmostcnt = smostcnt;
 
-    //    if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
-    //    {
-    //        if (searchy <= uplc[searchx]){ /* ceiling */
-    //            searchsector = sectnum;
-    //            searchwall = wallnum;
-    //            searchstat = 1;
-    //            searchit = 1;
-    //        }
-    //        else if (searchy >= dplc[searchx]){ /* floor */
-    //            searchsector = sectnum;
-    //            searchwall = wallnum;
-    //            searchstat = 2;
-    //            searchit = 1;
-    //        }
-    //    }
+        if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+        {
+            if (searchy <= uplc[searchx]){ /* ceiling */
+                searchsector = sectnum;
+                searchwall = wallnum;
+                searchstat = 1;
+                searchit = 1;
+            }
+            else if (searchy >= dplc[searchx]){ /* floor */
+                searchsector = sectnum;
+                searchwall = wallnum;
+                searchstat = 2;
+                searchit = 1;
+            }
+        }
 
-    //    if (nextsectnum >= 0){
-    //        getzsofslope((short)sectnum,wal.x,wal.y,&cz[0],&fz[0]);
-    //        getzsofslope((short)sectnum,wall[wal.point2].x,wall[wal.point2].y,&cz[1],&fz[1]);
-    //        getzsofslope((short)nextsectnum,wal.x,wal.y,&cz[2],&fz[2]);
-    //        getzsofslope((short)nextsectnum,wall[wal.point2].x,wall[wal.point2].y,&cz[3],&fz[3]);
-    //        getzsofslope((short)nextsectnum,globalposx,globalposy,&cz[4],&fz[4]);
+        if (nextsectnum >= 0){
+            getzsofslope(sectnum,wal.x,wal.y,cz[0],fz[0]);
+            getzsofslope(sectnum,wall[wal.point2].x,wall[wal.point2].y,cz[1],fz[1]);
+            getzsofslope(nextsectnum,wal.x,wal.y,cz[2],fz[2]);
+            getzsofslope(nextsectnum,wall[wal.point2].x,wall[wal.point2].y,cz[3],fz[3]);
+            getzsofslope(nextsectnum,globalposx,globalposy,cz[4],fz[4]);
 
-    //        if ((wal.cstat&48) == 16)
-    //            maskwall[maskwallcnt++] = z;
+            if ((wal.cstat&48) == 16)
+                maskwall[maskwallcnt++] = z;
 
-    //        if (((sec.ceilingstat&1) == 0) || ((nextsec.ceilingstat&1) == 0)){
-    //            if ((cz[2] <= cz[0]) && (cz[3] <= cz[1])){
-    //                if (globparaceilclip)
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (uplc[x] > umost[x])
-    //                            if (umost[x] <= dmost[x]){
-    //                                umost[x] = uplc[x];
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //            }
-    //            else{
-    //                wallmost(dwall,z,nextsectnum,(uint8_t )0);
-    //                if ((cz[2] > fz[0]) || (cz[3] > fz[1]))
-    //                    for(i=x1; i<=x2; i++) if (dwall[i] > dplc[i]) dwall[i] = dplc[i];
+            if (((sec.ceilingstat&1) == 0) || ((nextsec.ceilingstat&1) == 0)){
+                if ((cz[2] <= cz[0]) && (cz[3] <= cz[1])){
+                    if (globparaceilclip)
+                        for(x=x1; x<=x2; x++)
+                            if (uplc[x] > umost[x])
+                                if (umost[x] <= dmost[x]){
+                                    umost[x] = uplc[x];
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                }
+                else{
+                    wallmost(dwall,z,nextsectnum, 0);
+                    if ((cz[2] > fz[0]) || (cz[3] > fz[1]))
+                        for(i=x1; i<=x2; i++) if (dwall[i] > dplc[i]) dwall[i] = dplc[i];
 
-    //                if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
-    //                    if (searchy <= dwall[searchx]) /* wall */{
-    //                        searchsector = sectnum;
-    //                        searchwall = wallnum;
-    //                        searchstat = 0;
-    //                        searchit = 1;
-    //                    }
+                    if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+                        if (searchy <= dwall[searchx]) /* wall */{
+                            searchsector = sectnum;
+                            searchwall = wallnum;
+                            searchstat = 0;
+                            searchit = 1;
+                        }
 
-    //                globalorientation = (int32_t)wal.cstat;
-    //                globalpicnum = wal.picnum;
-    //                if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
-    //                globalxpanning = (int32_t)wal.xpanning;
-    //                globalypanning = (int32_t)wal.ypanning;
-    //                globalshiftval = (picsiz[globalpicnum]>>4);
-    //                if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height) globalshiftval++;
-    //                globalshiftval = 32-globalshiftval;
+                    globalorientation = wal.cstat;
+                    globalpicnum = wal.picnum;
+                    if (toUint32(globalpicnum) >= MAXTILES) globalpicnum = 0;
+                    globalxpanning = wal.xpanning;
+                    globalypanning = wal.ypanning;
+                    globalshiftval = (picsiz[globalpicnum]>>4);
+                    if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height) globalshiftval++;
+                    globalshiftval = 32-globalshiftval;
 
-    //                //Animated
-    //                if (tiles[globalpicnum].animFlags&192)
-    //                    globalpicnum += animateoffs(globalpicnum);
+                    //Animated
+                    if (tiles[globalpicnum].animFlags&192)
+                        globalpicnum += animateoffs(globalpicnum);
 
-    //                globalshade = (int32_t)wal.shade;
-    //                globvis = globalvisibility;
-    //                if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
-    //                globalpal = (int32_t)wal.pal;
-    //                globalyscale = (wal.yrepeat<<(globalshiftval-19));
-    //                if ((globalorientation&4) == 0)
-    //                    globalzd = (((globalposz-nextsec.ceilingz)*globalyscale)<<8);
-    //                else
-    //                    globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
-    //                globalzd += (globalypanning<<24);
-    //                if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
+                    globalshade = wal.shade;
+                    globvis = globalvisibility;
+                    if (sec.visibility != 0) globvis = mulscale4(globvis,toUint8(sec.visibility+16));
+                    globalpal = wal.pal;
+                    globalyscale = (wal.yrepeat<<(globalshiftval-19));
+                    if ((globalorientation&4) == 0)
+                        globalzd = (((globalposz-nextsec.ceilingz)*globalyscale)<<8);
+                    else
+                        globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
+                    globalzd += (globalypanning<<24);
+                    if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
 
-    //                if (gotswall == 0) {
-    //                    gotswall = 1;
-    //                    prepwall(z,wal);
-    //                }
-    //                wallscan(x1,x2,uplc,dwall,swall,lwall);
+                    if (gotswall == 0) {
+                        gotswall = 1;
+                        prepwall(z,wal);
+                    }
+                    wallscan(x1,x2,uplc,dwall,swall,lwall);
 
-    //                if ((cz[2] >= cz[0]) && (cz[3] >= cz[1])){
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (dwall[x] > umost[x])
-    //                            if (umost[x] <= dmost[x]){
-    //                                umost[x] = dwall[x];
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //                }
-    //                else
-    //                {
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (umost[x] <= dmost[x]){
-    //                            i = max(uplc[x],dwall[x]);
-    //                            if (i > umost[x]){
-    //                                umost[x] = i;
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //                        }
-    //                }
-    //            }
-    //            if ((cz[2] < cz[0]) || (cz[3] < cz[1]) || (globalposz < cz[4])){
-    //                i = x2-x1+1;
-    //                if (smostcnt+i < MAXYSAVES){
-    //                    smoststart[smostwallcnt] = smostcnt;
-    //                    smostwall[smostwallcnt] = z;
-    //                    smostwalltype[smostwallcnt] = 1;   /* 1 for umost */
-    //                    smostwallcnt++;
-    //                    copybufbyte((int32_t *)&umost[x1],(int32_t *)&smost[smostcnt],i*2);
-    //                    smostcnt += i;
-    //                }
-    //            }
-    //        }
-    //        if (((sec.floorstat&1) == 0) || ((nextsec.floorstat&1) == 0)){
-    //            if ((fz[2] >= fz[0]) && (fz[3] >= fz[1])){
-    //                if (globparaflorclip)
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (dplc[x] < dmost[x])
-    //                            if (umost[x] <= dmost[x]){
-    //                                dmost[x] = dplc[x];
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //            }
-    //            else{
-    //                wallmost(uwall,z,nextsectnum,(uint8_t )1);
-    //                if ((fz[2] < cz[0]) || (fz[3] < cz[1]))
-    //                    for(i=x1; i<=x2; i++) if (uwall[i] < uplc[i]) uwall[i] = uplc[i];
+                    if ((cz[2] >= cz[0]) && (cz[3] >= cz[1])){
+                        for(x=x1; x<=x2; x++)
+                            if (dwall[x] > umost[x])
+                                if (umost[x] <= dmost[x]){
+                                    umost[x] = dwall[x];
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                    }
+                    else
+                    {
+                        for(x=x1; x<=x2; x++)
+                            if (umost[x] <= dmost[x]){
+                                i = max(uplc[x],dwall[x]);
+                                if (i > umost[x]){
+                                    umost[x] = i;
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                            }
+                    }
+                }
+                if ((cz[2] < cz[0]) || (cz[3] < cz[1]) || (globalposz < cz[4])){
+                    i = x2-x1+1;
+                    if (smostcnt+i < MAXYSAVES){
+                        smoststart[smostwallcnt] = smostcnt;
+                        smostwall[smostwallcnt] = z;
+                        smostwalltype[smostwallcnt] = 1;   /* 1 for umost */
+                        smostwallcnt++;
+                        throw "todo: copybufbyte((int32_t *)&umost[x1],(int32_t *)&smost[smostcnt],i*2);"
+                        smostcnt += i;
+                    }
+                }
+            }
+            if (((sec.floorstat&1) == 0) || ((nextsec.floorstat&1) == 0)){
+                if ((fz[2] >= fz[0]) && (fz[3] >= fz[1])){
+                    if (globparaflorclip)
+                        for(x=x1; x<=x2; x++)
+                            if (dplc[x] < dmost[x])
+                                if (umost[x] <= dmost[x]){
+                                    dmost[x] = dplc[x];
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                }
+                else{
+                    wallmost(uwall,z,nextsectnum,1);
+                    if ((fz[2] < cz[0]) || (fz[3] < cz[1]))
+                        for(i=x1; i<=x2; i++) if (uwall[i] < uplc[i]) uwall[i] = uplc[i];
 
-    //                if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
-    //                    if (searchy >= uwall[searchx]) /* wall */{
-    //                        searchsector = sectnum;
-    //                        searchwall = wallnum;
-    //                        if ((wal.cstat&2) > 0) searchwall = wal.nextwall;
-    //                        searchstat = 0;
-    //                        searchit = 1;
-    //                    }
+                    if ((searchit == 2) && (searchx >= x1) && (searchx <= x2))
+                        if (searchy >= uwall[searchx]) /* wall */{
+                            searchsector = sectnum;
+                            searchwall = wallnum;
+                            if ((wal.cstat&2) > 0) searchwall = wal.nextwall;
+                            searchstat = 0;
+                            searchit = 1;
+                        }
 
-    //                if ((wal.cstat&2) > 0){
-    //                    wallnum = wal.nextwall;
-    //                    wal = &wall[wallnum];
-    //                    globalorientation = (int32_t)wal.cstat;
-    //                    globalpicnum = wal.picnum;
-    //                    if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
-    //                    globalxpanning = (int32_t)wal.xpanning;
-    //                    globalypanning = (int32_t)wal.ypanning;
+                    if ((wal.cstat&2) > 0){
+                        wallnum = wal.nextwall;
+                        wal = wall[wallnum];
+                        globalorientation = wal.cstat;
+                        globalpicnum = wal.picnum;
+                        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+                        globalxpanning = wal.xpanning;
+                        globalypanning = wal.ypanning;
 
-    //                    if (tiles[globalpicnum].animFlags&192) 
-    //                        globalpicnum += animateoffs(globalpicnum);
+                        if (tiles[globalpicnum].animFlags&192) 
+                            globalpicnum += animateoffs(globalpicnum);
 
-    //                    globalshade = (int32_t)wal.shade;
-    //                    globalpal = (int32_t)wal.pal;
-    //                    wallnum = pvWalls[z].worldWallId;
-    //                    wal = &wall[wallnum];
-    //                }
-    //                else{
-    //                    globalorientation = (int32_t)wal.cstat;
-    //                    globalpicnum = wal.picnum;
+                        globalshade = wal.shade;
+                        globalpal = wal.pal;
+                        wallnum = pvWalls[z].worldWallId;
+                        wal = wall[wallnum];
+                    }
+                    else{
+                        globalorientation = wal.cstat;
+                        globalpicnum = wal.picnum;
 
-    //                    if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) 
-    //                    globalpicnum = 0;
+                        if (globalpicnum >= MAXTILES) 
+                        globalpicnum = 0;
 
-    //                    globalxpanning = (int32_t)wal.xpanning;
-    //                    globalypanning = (int32_t)wal.ypanning;
+                        globalxpanning = wal.xpanning;
+                        globalypanning = wal.ypanning;
 
-    //                    if (tiles[globalpicnum].animFlags&192) 
-    //                        globalpicnum += animateoffs(globalpicnum);
-    //                    globalshade = (int32_t)wal.shade;
-    //                    globalpal = (int32_t)wal.pal;
-    //                }
-    //                globvis = globalvisibility;
-    //                if (sec.visibility != 0)
-    //                    globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
-    //                globalshiftval = (picsiz[globalpicnum]>>4);
+                        if (tiles[globalpicnum].animFlags&192) 
+                            globalpicnum += animateoffs(globalpicnum);
+                        globalshade = wal.shade;
+                        globalpal = wal.pal;
+                    }
+                    globvis = globalvisibility;
+                    if (sec.visibility != 0)
+                        globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
+                    globalshiftval = (picsiz[globalpicnum]>>4);
 
-    //                if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
-    //                    globalshiftval++;
+                    if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+                        globalshiftval++;
 
-    //                globalshiftval = 32-globalshiftval;
-    //                globalyscale = (wal.yrepeat<<(globalshiftval-19));
+                    globalshiftval = 32-globalshiftval;
+                    globalyscale = (wal.yrepeat<<(globalshiftval-19));
 
-    //                if ((globalorientation&4) == 0)
-    //                    globalzd = (((globalposz-nextsec.floorz)*globalyscale)<<8);
-    //                else
-    //                    globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
+                    if ((globalorientation&4) == 0)
+                        globalzd = (((globalposz-nextsec.floorz)*globalyscale)<<8);
+                    else
+                        globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
 
-    //                globalzd += (globalypanning<<24);
-    //                if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
+                    globalzd += (globalypanning<<24);
+                    if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
 
-    //                if (gotswall == 0) {
-    //                    gotswall = 1;
-    //                    prepwall(z,wal);
-    //                }
-    //                wallscan(x1,x2,uwall,dplc,swall,lwall);
+                    if (gotswall == 0) {
+                        gotswall = 1;
+                        prepwall(z,wal);
+                    }
+                    wallscan(x1,x2,uwall,dplc,swall,lwall);
 
-    //                if ((fz[2] <= fz[0]) && (fz[3] <= fz[1]))
-    //                {
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (uwall[x] < dmost[x])
-    //                            if (umost[x] <= dmost[x]){
-    //                                dmost[x] = uwall[x];
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //                }
-    //                else
-    //                {
-    //                    for(x=x1; x<=x2; x++)
-    //                        if (umost[x] <= dmost[x]){
-    //                            i = min(dplc[x],uwall[x]);
-    //                            if (i < dmost[x])
-    //                            {
-    //                                dmost[x] = i;
-    //                                if (umost[x] > dmost[x]) numhits--;
-    //                            }
-    //                        }
-    //                }
-    //            }
-    //            if ((fz[2] > fz[0]) || (fz[3] > fz[1]) || (globalposz > fz[4])){
-    //                i = x2-x1+1;
-    //                if (smostcnt+i < MAXYSAVES){
-    //                    smoststart[smostwallcnt] = smostcnt;
-    //                    smostwall[smostwallcnt] = z;
-    //                    smostwalltype[smostwallcnt] = 2;   /* 2 for dmost */
-    //                    smostwallcnt++;
-    //                    copybufbyte((int32_t *)&dmost[x1],(int32_t *)&smost[smostcnt],i*2);
-    //                    smostcnt += i;
-    //                }
-    //            }
-    //        }
-    //        if (numhits < 0) return;
-    //        if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
-    //            if (umost[x2] < dmost[x2])
-    //                scansector((short) nextsectnum);
-    //            else
-    //            {
-    //                for(x=x1; x<x2; x++)
-    //                    if (umost[x] < dmost[x]){
-    //                        scansector((short) nextsectnum);
-    //                        break;
-    //                    }
+                    if ((fz[2] <= fz[0]) && (fz[3] <= fz[1]))
+                    {
+                        for(x=x1; x<=x2; x++)
+                            if (uwall[x] < dmost[x])
+                                if (umost[x] <= dmost[x]){
+                                    dmost[x] = uwall[x];
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                    }
+                    else
+                    {
+                        for(x=x1; x<=x2; x++)
+                            if (umost[x] <= dmost[x]){
+                                i = min(dplc[x],uwall[x]);
+                                if (i < dmost[x])
+                                {
+                                    dmost[x] = i;
+                                    if (umost[x] > dmost[x]) numhits--;
+                                }
+                            }
+                    }
+                }
+                if ((fz[2] > fz[0]) || (fz[3] > fz[1]) || (globalposz > fz[4])){
+                    i = x2-x1+1;
+                    if (smostcnt+i < MAXYSAVES){
+                        smoststart[smostwallcnt] = smostcnt;
+                        smostwall[smostwallcnt] = z;
+                        smostwalltype[smostwallcnt] = 2;   /* 2 for dmost */
+                        smostwallcnt++;
+                        throw "todo: copybufbyte((int32_t *)&dmost[x1],(int32_t *)&smost[smostcnt],i*2);";
+                        smostcnt += i;
+                    }
+                }
+            }
+            if (numhits < 0) return;
+            if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
+                if (umost[x2] < dmost[x2])
+                    scansector(nextsectnum);
+                else
+                {
+                    for(x=x1; x<x2; x++)
+                        if (umost[x] < dmost[x]){
+                            scansector(nextsectnum);
+                            break;
+                        }
 
-    //                /*
-    //                 * If can't see sector beyond, then cancel smost array and just
-    //                 *  store wall!
-    //                 */
-    //                if (x == x2){
-    //                    smostwallcnt = startsmostwallcnt;
-    //                    smostcnt = startsmostcnt;
-    //                    smostwall[smostwallcnt] = z;
-    //                    smostwalltype[smostwallcnt] = 0;
-    //                    smostwallcnt++;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    if ((nextsectnum < 0) || (wal.cstat&32))   /* White/1-way wall */
-    //    {
-    //        globalorientation = (int32_t)wal.cstat;
-    //        if (nextsectnum < 0)
-    //            globalpicnum = wal.picnum;
-    //        else
-    //            globalpicnum = wal.overpicnum;
+                    /*
+                     * If can't see sector beyond, then cancel smost array and just
+                     *  store wall!
+                     */
+                    if (x == x2){
+                        smostwallcnt = startsmostwallcnt;
+                        smostcnt = startsmostcnt;
+                        smostwall[smostwallcnt] = z;
+                        smostwalltype[smostwallcnt] = 0;
+                        smostwallcnt++;
+                    }
+                }
+            }
+        }
+        if ((nextsectnum < 0) || (wal.cstat&32))   /* White/1-way wall */
+        {
+            globalorientation = wal.cstat;
+            if (nextsectnum < 0)
+                globalpicnum = wal.picnum;
+            else
+                globalpicnum = wal.overpicnum;
 
-    //        if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES)
-    //        globalpicnum = 0;
+            if (globalpicnum >= MAXTILES)
+            globalpicnum = 0;
 
-    //        globalxpanning = (int32_t)wal.xpanning;
-    //        globalypanning = (int32_t)wal.ypanning;
+            globalxpanning = wal.xpanning;
+            globalypanning = wal.ypanning;
 
-    //        if (tiles[globalpicnum].animFlags&192)
-    //            globalpicnum += animateoffs(globalpicnum);
+            if (tiles[globalpicnum].animFlags&192)
+                globalpicnum += animateoffs(globalpicnum);
 
-    //        globalshade = (int32_t)wal.shade;
-    //        globvis = globalvisibility;
-    //        if (sec.visibility != 0)
-    //            globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+            globalshade = wal.shade;
+            globvis = globalvisibility;
+            if (sec.visibility != 0)
+                globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
 
-    //        globalpal = (int32_t)wal.pal;
-    //        globalshiftval = (picsiz[globalpicnum]>>4);
-    //        if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
-    //            globalshiftval++;
+            globalpal = wal.pal;
+            globalshiftval = (picsiz[globalpicnum]>>4);
+            if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+                globalshiftval++;
 
-    //        globalshiftval = 32-globalshiftval;
-    //        globalyscale = (wal.yrepeat<<(globalshiftval-19));
-    //        if (nextsectnum >= 0)
-    //        {
-    //            if ((globalorientation&4) == 0)
-    //                globalzd = globalposz-nextsec.ceilingz;
-    //            else
-    //                globalzd = globalposz-sec.ceilingz;
-    //        }
-    //        else
-    //        {
-    //            if ((globalorientation&4) == 0)
-    //                globalzd = globalposz-sec.ceilingz;
-    //            else
-    //                globalzd = globalposz-sec.floorz;
-    //        }
-    //        globalzd = ((globalzd*globalyscale)<<8) + (globalypanning<<24);
+            globalshiftval = 32-globalshiftval;
+            globalyscale = (wal.yrepeat<<(globalshiftval-19));
+            if (nextsectnum >= 0)
+            {
+                if ((globalorientation&4) == 0)
+                    globalzd = globalposz-nextsec.ceilingz;
+                else
+                    globalzd = globalposz-sec.ceilingz;
+            }
+            else
+            {
+                if ((globalorientation&4) == 0)
+                    globalzd = globalposz-sec.ceilingz;
+                else
+                    globalzd = globalposz-sec.floorz;
+            }
+            globalzd = ((globalzd*globalyscale)<<8) + (globalypanning<<24);
 
-    //        if (globalorientation&256){
-    //            globalyscale = -globalyscale;
-    //            globalzd = -globalzd;
-    //        }
+            if (globalorientation&256){
+                globalyscale = -globalyscale;
+                globalzd = -globalzd;
+            }
 
-    //        if (gotswall == 0) {
-    //            gotswall = 1;
-    //            prepwall(z,wal);
-    //        }
+            if (gotswall == 0) {
+                gotswall = 1;
+                prepwall(z,wal);
+            }
 
-    //        wallscan(x1,x2,uplc,dplc,swall,lwall);
+            wallscan(x1,x2,uplc,dplc,swall,lwall);
 
-    //        for(x=x1; x<=x2; x++)
-    //            if (umost[x] <= dmost[x])
-    //            {
-    //                umost[x] = 1;
-    //                dmost[x] = 0;
-    //                numhits--;
-    //            }
-    //        smostwall[smostwallcnt] = z;
-    //        smostwalltype[smostwallcnt] = 0;
-    //        smostwallcnt++;
+            for(x=x1; x<=x2; x++)
+                if (umost[x] <= dmost[x])
+                {
+                    umost[x] = 1;
+                    dmost[x] = 0;
+                    numhits--;
+                }
+            smostwall[smostwallcnt] = z;
+            smostwalltype[smostwallcnt] = 0;
+            smostwallcnt++;
 
-    //        if ((searchit == 2) && (searchx >= x1) && (searchx <= x2)){
-    //            searchit = 1;
-    //            searchsector = sectnum;
-    //            searchwall = wallnum;
-    //            if (nextsectnum < 0) searchstat = 0;
-    //            else searchstat = 4;
-    //        }
-    //    }
-    //}
+            if ((searchit == 2) && (searchx >= x1) && (searchx <= x2)){
+                searchit = 1;
+                searchsector = sectnum;
+                searchwall = wallnum;
+                if (nextsectnum < 0) searchstat = 0;
+                else searchstat = 4;
+            }
+        }
+    }
 };
 
 //2593
