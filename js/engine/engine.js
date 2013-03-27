@@ -153,13 +153,13 @@ var bufplce = new Int32Array(4);
 
 var palookupoffse = new Uint8Array(4);
 
-//uint8_t  globalxshift, globalyshift;
-//int32_t globalxpanning, globalypanning, globalshade;
-//int16_t globalpicnum, globalshiftval;
-//int32_t globalzd, globalyscale, globalorientation;
-//uint8_t* globalbufplc;
-//int32_t globalx1, globaly1, globalx2, globaly2, globalx3, globaly3, globalzx;
-//int32_t globalx, globaly, globalz;
+var  globalxshift, globalyshift;
+var globalxpanning, globalypanning, globalshade;
+var globalpicnum, globalshiftval;
+var globalzd, globalyscale, globalorientation;
+var globalbufplc;
+var globalx1, globaly1, globalx2, globaly2, globalx3, globaly3, globalzx;
+var globalx, globaly, globalz;
 
 ////FCS:
 //// Those two variables are using during portal flooding:
@@ -470,35 +470,239 @@ Engine.getpalookup = function (davis, dashade) {
 };
 
 
-Engine.doSetAspect = function (davis, dashade) {
-    var i, j, k, x, xinc;
+/* renders non-parallaxed ceilings. --ryan. */
+function ceilscan ( x1,  x2,  sectnum)
+{
+    var i, j, ox, oy, x, y1, y2, twall, bwall;
+    var sec;
 
-    if (xyaspect != oxyaspect) {
-        oxyaspect = xyaspect;
-        j = xyaspect * 320;
-        horizlookup2[horizycent - 1] = divScale26(131072, j);
-        for (i = ydim * 4 - 1; i >= 0; i--)
-            if (i != (horizycent - 1)) {
-                horizlookup[i] = divScale28(1, i - (horizycent - 1));
-                horizlookup2[i] = divScale14(klabs(horizlookup[i]), j);
+    sec = sector[sectnum];
+    
+    if (palookup[sec.ceilingpal] != globalpalwritten)
+        globalpalwritten = palookup[sec.ceilingpal];
+
+    
+    globalzd = sec.ceilingz-globalposz;
+    
+    
+    if (globalzd > 0)
+        return;
+    
+    
+    globalpicnum = sec.ceilingpicnum;
+    
+    if (/*(uint32_t)*/globalpicnum >= MAXTILES)
+    globalpicnum = 0;
+    
+    setgotpic(globalpicnum);
+    
+    //Check the tile dimension are valid.
+    if ((tiles[globalpicnum].dim.width <= 0) ||
+        (tiles[globalpicnum].dim.height <= 0))
+        return;
+    
+    if (tiles[globalpicnum].animFlags&192)
+        globalpicnum += animateoffs(globalpicnum);
+
+    TILE_MakeAvailable(globalpicnum);
+    
+    globalbufplc = tiles[globalpicnum].data;
+
+    globalshade = sec.ceilingshade;
+    globvis = globalcisibility;
+    if (sec.visibility != 0)
+        globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+    
+    globalorientation = sec.ceilingstat;
+
+
+    if ((globalorientation&64) == 0){
+        globalx1 = singlobalang;
+        globalx2 = singlobalang;
+        globaly1 = cosglobalang;
+        globaly2 = cosglobalang;
+        globalxpanning = (globalposx<<20);
+        globalypanning = -(globalposy<<20);
+    }
+    else{
+        j = sec.wallptr;
+        ox = wall[wall[j].point2].x - wall[j].x;
+        oy = wall[wall[j].point2].y - wall[j].y;
+        i = nsqrtasm(ox*ox+oy*oy);
+        
+        if (i == 0)
+            i = 1024;
+        else
+            i = (1048576/i) | 0;
+        
+        globalx1 = mulscale10(dmulscale10(ox,singlobalang,-oy,cosglobalang),i);
+        globaly1 = mulscale10(dmulscale10(ox,cosglobalang,oy,singlobalang),i);
+        globalx2 = -globalx1;
+        globaly2 = -globaly1;
+
+        ox = ((wall[j].x-globalposx)<<6);
+        oy = ((wall[j].y-globalposy)<<6);
+        i = dmulscale14(oy,cosglobalang,-ox,singlobalang);
+        j = dmulscale14(ox,cosglobalang,oy,singlobalang);
+        ox = i;
+        oy = j;
+        globalxpanning = globalx1*ox - globaly1*oy;
+        globalypanning = globaly2*ox + globalx2*oy;
+    }
+
+    debugger;
+    globalx2 = mulscale16(globalx2,viewingrangerecip);
+    globaly1 = mulscale16(globaly1,viewingrangerecip);
+    globalxshift = (8-(picsiz[globalpicnum]&15));
+    globalyshift = (8-(picsiz[globalpicnum]>>4));
+    if (globalorientation&8) {
+        globalxshift++;
+        globalyshift++;
+    }
+
+    if ((globalorientation&0x4) > 0){
+        i = globalxpanning;
+        globalxpanning = globalypanning;
+        globalypanning = i;
+        i = globalx2;
+        globalx2 = -globaly1;
+        globaly1 = -i;
+        i = globalx1;
+        globalx1 = globaly2;
+        globaly2 = i;
+    }
+    if ((globalorientation&0x10) > 0){
+        globalx1 = -globalx1;
+        globaly1 = -globaly1;
+        globalxpanning = -globalxpanning;
+    }
+    if ((globalorientation&0x20) > 0){
+        globalx2 = -globalx2;
+        globaly2 = -globaly2;
+        globalypanning = -globalypanning;
+    }
+    
+    globalx1 <<= globalxshift;
+    globaly1 <<= globalxshift;
+    globalx2 <<= globalyshift;
+    globaly2 <<= globalyshift;
+    globalxpanning <<= globalxshift;
+    globalypanning <<= globalyshift;
+    globalxpanning += ((sec.ceilingxpanning)<<24);
+    globalypanning += ((sec.ceilingypanning)<<24);
+    globaly1 = (-globalx1-globaly1)*halfxdimen;
+    globalx2 = (globalx2-globaly2)*halfxdimen;
+
+    sethlinesizes(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4,globalbufplc);
+
+    globalx2 += globaly2*(x1-1);
+    globaly1 += globalx1*(x1-1);
+    globalx1 = mulscale16(globalx1,globalzd);
+    globalx2 = mulscale16(globalx2,globalzd);
+    globaly1 = mulscale16(globaly1,globalzd);
+    globaly2 = mulscale16(globaly2,globalzd);
+    globvis = klabs(mulscale10(globvis,globalzd));
+
+    if (!(globalorientation&0x180))
+    {
+        y1 = umost[x1];
+        y2 = y1;
+        for(x=x1; x<=x2; x++)
+        {
+            twall = umost[x]-1;
+            bwall = min(uplc[x],dmost[x]);
+            if (twall < bwall-1)
+            {
+                if (twall >= y2)
+                {
+                    while (y1 < y2-1) hline(x-1,++y1);
+                    y1 = twall;
+                }
+                else
+                {
+                    while (y1 < twall)
+                        hline(x-1,++y1);
+                    while (y1 > twall)
+                        lastx[y1--] = x;
+                }
+                while (y2 > bwall)
+                    hline(x-1,--y2);
+                while (y2 < bwall)
+                    lastx[y2++] = x;
             }
-    }
-
-
-    if ((xdimen != oxdimen) || (viewingrange != oviewingrange)) {
-        oxdimen = xdimen;
-        oviewingrange = viewingrange;
-        xinc = mulscale32(viewingrange * 320, xdimenrecip);
-        x = (640 << 16) - mulscale1(xinc, xdimen);
-        for (i = 0; i < xdimen; i++) {
-            j = (x & 65535);
-            k = (x >> 16);
-            x += xinc;
-            if (j != 0) j = mulscale16(radarang[k + 1] - radarang[k], j);
-            radarang2[i] = /*(short)*/((radarang[k] + j) >> 6);
+            else
+            {
+                while (y1 < y2-1)
+                    hline(x-1,++y1);
+                if (x == x2) {
+                    globalx2 += globaly2;
+                    globaly1 += globalx1;
+                    break;
+                }
+                y1 = umost[x+1];
+                y2 = y1;
+            }
+            globalx2 += globaly2;
+            globaly1 += globalx1;
         }
+        while (y1 < y2-1) hline(x2,++y1);
+        faketimerhandler();
+        return;
     }
-};
+
+    switch(globalorientation&0x180)
+    {
+        case 128:
+            msethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+        case 256:
+            settrans(TRANS_NORMAL);
+            tsethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+        case 384:
+            settrans(TRANS_REVERSE);
+            tsethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+    }
+
+    y1 = umost[x1];
+    y2 = y1;
+    for(x=x1; x<=x2; x++)
+    {
+        twall = umost[x]-1;
+        bwall = min(uplc[x],dmost[x]);
+        if (twall < bwall-1)
+        {
+            if (twall >= y2)
+            {
+                while (y1 < y2-1) slowhline(x-1,++y1);
+                y1 = twall;
+            }
+            else
+            {
+                while (y1 < twall) slowhline(x-1,++y1);
+                while (y1 > twall) lastx[y1--] = x;
+            }
+            while (y2 > bwall) slowhline(x-1,--y2);
+            while (y2 < bwall) lastx[y2++] = x;
+        }
+        else
+        {
+            while (y1 < y2-1) slowhline(x-1,++y1);
+            if (x == x2) {
+                globalx2 += globaly2;
+                globaly1 += globalx1;
+                break;
+            }
+            y1 = umost[x+1];
+            y2 = y1;
+        }
+        globalx2 += globaly2;
+        globaly1 += globalx1;
+    }
+    while (y1 < y2-1) slowhline(x2,++y1);
+    faketimerhandler();
+}
 
 //1926
 function owallmost(mostbuf, w, z) {
@@ -570,7 +774,7 @@ function owallmost(mostbuf, w, z) {
     }
 
     y = (scale(z, xdimenscale, iy1) << 4);
-    yinc = ((scale(z, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1);
+    yinc = (((scale(z, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1)) | 0;
     qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0) mostbuf[ix1] = 0;
@@ -581,6 +785,7 @@ function owallmost(mostbuf, w, z) {
     return (bad);
 }
 
+//2016
 function wallmost(mostbuf, w, sectnum, dastat) {
     var bad, i, j, t, y, z, inty, intz, xcross, yinc, fw;
     var x1, y1, z1, x2, y2, z2, xv, yv, dx, dy, dasqr, oz1, oz2;
@@ -745,7 +950,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     }
 
     y = (scale(z1, xdimenscale, iy1) << 4);
-    yinc = ((scale(z2, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1);
+    yinc = (((scale(z2, xdimenscale, iy2) << 4) - y) / (ix2 - ix1 + 1)) | 0;
     qinterpolatedown16short(mostbuf[ix1], ix2 - ix1 + 1, y + (globalhoriz << 16), yinc);
 
     if (mostbuf[ix1] < 0)
@@ -760,6 +965,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     return (bad);
 }
 
+//2191
 Engine.draWalls = function (bunch) {
     var sec, nextsec;
     var wal;
@@ -768,6 +974,7 @@ Engine.draWalls = function (bunch) {
     var startsmostwallcnt, startsmostcnt, gotswall;
     var andwstat1, andwstat2;
 
+    console.log("drawalls %i", bunch);
     z = bunchfirst[bunch];
     sectnum = pvWalls[z].sectorId;
     sec = sector[sectnum];
@@ -1084,7 +1291,10 @@ Engine.draWalls = function (bunch) {
                     }
                 }
             }
-            if (numhits < 0) return;
+            if (numhits < 0) {
+                console.log("drawals numhits < 0 return");
+                return;
+            }
             if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
                 if (umost[x2] < dmost[x2])
                     scansector(nextsectnum);
@@ -1187,6 +1397,7 @@ Engine.draWalls = function (bunch) {
             }
         }
     }
+    console.log("eo drawals")
 };
 
 //2593
@@ -1200,14 +1411,46 @@ function setAspect(daxrange, daaspect) {
     xdimscale = scale(320, xyaspect, xdimen);
 }
 
-//2774
+//2600
+Engine.doSetAspect = function (davis, dashade) {
+    var i, j, k, x, xinc;
+
+    if (xyaspect != oxyaspect) {
+        oxyaspect = xyaspect;
+        j = xyaspect * 320;
+        horizlookup2[horizycent - 1] = divScale26(131072, j);
+        for (i = ydim * 4 - 1; i >= 0; i--)
+            if (i != (horizycent - 1)) {
+                horizlookup[i] = divScale28(1, i - (horizycent - 1));
+                horizlookup2[i] = divScale14(klabs(horizlookup[i]), j);
+            }
+    }
+
+
+    if ((xdimen != oxdimen) || (viewingrange != oviewingrange)) {
+        oxdimen = xdimen;
+        oviewingrange = viewingrange;
+        xinc = mulscale32(viewingrange * 320, xdimenrecip);
+        x = (640 << 16) - mulscale1(xinc, xdimen);
+        for (i = 0; i < xdimen; i++) {
+            j = (x & 65535);
+            k = (x >> 16);
+            x += xinc;
+            if (j != 0) j = mulscale16(radarang[k + 1] - radarang[k], j);
+            radarang2[i] = /*(short)*/((radarang[k] + j) >> 6);
+        }
+    }
+};
+
+
+    //2774
 var pixelRenderable = 0;
-//#include "keyboard.h"
-//void WriteLastPaletteToFile(void);
-//void WriteTranslucToFile(void);
-/*  
-      FCS: Draw every walls in Front to Back Order.
-*/
+    //#include "keyboard.h"
+    //void WriteLastPaletteToFile(void);
+    //void WriteTranslucToFile(void);
+    /*  
+          FCS: Draw every walls in Front to Back Order.
+    */
 function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     var i, j, z, closest;
     //Ceiling and Floor height at the player position.
@@ -1323,7 +1566,6 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
 
     // Build the list of potentially visible wall in to "bunches".
     scansector(globalcursectnum);
-    debugger;
 
     if (inpreparemirror) {
         console.log("test, is this block working?");

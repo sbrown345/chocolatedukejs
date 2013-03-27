@@ -6,11 +6,18 @@ function scale(input1, input2, input3) {
 // using floor so negative numbers come out the same as original
 for (var input3 = 1; input3 <= 32; input3++) {
     window["mulscale" + input3] =
-        new Function("input1", "input2", "return Math.floor(input1 * input2 / Math.pow(2, " + input3 + "))");
+        //new Function("input1", "input2", "return Math.floor(input1 * input2 / Math.pow(2, " + input3 + "))");
+        new Function("input1", "input2", "return mulscale(input1, input2, " + input3 + ")");
 }
 
 function mulscale(input1, input2, input3) {
-    return Math.floor(input1 * input2 / Math.pow(2, input3));
+    if ((input1 | 0) != input1) throw "input1 not an integer";
+    if ((input2 | 0) != input2) throw "input2 not an integer";
+    if ((input3 | 0) != input3) throw "input3 not an integer";
+
+    var output = Math.floor(input1 * input2 / Math.pow(2, input3));
+    console.log("mulscale: %i, %i, %i = %i", input1, input2, input3, output);
+    return output;
 }
 
 //for (var input3 = 1; input3 <= 32; input3++) {
@@ -47,6 +54,9 @@ for (var i3 = 1; i3 <= 32; i3++) {
 }
 
 function divScale(i1, i2, i3) {
+    if ((i1 | 0) != i1) throw "i1 not an integer: " + i1;
+    if ((i2 | 0) != i2) throw "i2 not an integer: " + i2;
+    if ((i3 | 0) != i3) throw "i3 not an integer: " + i3;
     if (isNaN(i1) || isNaN(i2) || isNaN(i3)) throw "error NaN not allowed"; //todo: remove later
 
     //var i1Lo = i1;
