@@ -509,6 +509,8 @@ Game.wallSwitchCheck = function (i) {
     }
     return 0;
 };
+
+//3608
 var tempwallptr;
 
 function spawn(j, pn) {
@@ -2237,6 +2239,16 @@ function spawn(j, pn) {
     // todo check all... spritetype (Sprite)
 
     return i;
+}
+
+//5413
+function animatesprites(/*int32_t x,int32_t y,short a,int32_t smoothratio*/) {
+    console.log("todo: animatesprites");
+}
+
+//5775
+function drawmasks() {
+    console.log("todo: drawmasks");
 }
 
 //7486

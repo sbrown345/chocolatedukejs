@@ -121,9 +121,9 @@ var dmost = new Int16Array(MAXXDIM + 1);
 
 //int16_t bakumost[MAXXDIM+1], bakdmost[MAXXDIM+1];
 var uplc = new Int16Array(MAXXDIM + 1), dplc = new Int16Array(MAXXDIM + 1);
-//static int16_t uwall[MAXXDIM+1], dwall[MAXXDIM+1];
-//static int32_t swplc[MAXXDIM+1], lplc[MAXXDIM+1];
-//static int32_t swall[MAXXDIM+1], lwall[MAXXDIM+4];
+var uwall = new Int16Array(MAXXDIM + 1), dwall = new Int16Array(MAXXDIM + 1);
+var swplc = new Int16Array(MAXXDIM + 1), lplc = new Int16Array(MAXXDIM + 1);
+var swall = new Int16Array(MAXXDIM + 1), lwall = new Int16Array(MAXXDIM + 4);
 var xdimen = -1, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
 var wx1, wy1, wx2, wy2, ydimen;
 var viewoffset;
@@ -464,6 +464,113 @@ function scansector(sectnum) {
     // do this until the stack of sectors to visit if empty.
 }
 
+
+/*
+ FCS:
+    
+ Goal : ????
+ param 1: Z is the wallID in the list of potentially visible walls.
+ param 2: Only used to lookup the xrepeat attribute of the wall.
+ 
+*/
+function prepwall(z, wal) {
+    var i, l=0, ol=0, splc, sinc, x, topinc, top, botinc, bot, walxrepeat;
+    var wallCoo = pvWalls[z].cameraSpaceCoo;
+    
+    walxrepeat = (wal.xrepeat<<3);
+
+    /* lwall calculation */
+    i = pvWalls[z].screenSpaceCoo[0][VEC_COL]-halfxdimen;
+    
+    //Let's use some of the camera space wall coordinate now.
+    topinc = -(wallCoo[0][VEC_Y]>>2);
+    botinc = ((wallCoo[1][VEC_Y]-wallCoo[0][VEC_Y])>>8);
+    
+    top = mulscale5(wallCoo[0][VEC_X],xdimen)+mulscale2(topinc,i);
+    bot = mulscale11(wallCoo[0][VEC_X]-wallCoo[1][VEC_X],xdimen)+mulscale2(botinc,i);
+
+    splc = mulscale19(wallCoo[0][VEC_Y],xdimscale);
+    sinc = mulscale16(wallCoo[1][VEC_Y]-wallCoo[0][VEC_Y],xdimscale);
+
+    //X screenspce column of point Z.
+    x = pvWalls[z].screenSpaceCoo[0][VEC_COL];
+    
+    if (bot != 0)
+    {
+        l = divScale12(top,bot);
+        swall[x] = mulscale21(l,sinc)+splc;
+        l *= walxrepeat;
+        lwall[x] = (l>>18);
+    }
+    
+    //If the wall is less than 4 column wide.
+    while (x+4 <= pvWalls[z].screenSpaceCoo[1][VEC_COL])
+    {
+        top += topinc;
+        bot += botinc;
+        if (bot != 0)
+        {
+            ol = l;
+            l = divScale12(top,bot);
+            swall[x+4] = mulscale21(l,sinc)+splc;
+            l *= walxrepeat;
+            lwall[x+4] = (l>>18);
+        }
+        i = ((ol+l)>>1);
+        lwall[x+2] = (i>>18);
+        lwall[x+1] = ((ol+i)>>19);
+        lwall[x+3] = ((l+i)>>19);
+        swall[x+2] = ((swall[x]+swall[x+4])>>1);
+        swall[x+1] = ((swall[x]+swall[x+2])>>1);
+        swall[x+3] = ((swall[x+4]+swall[x+2])>>1);
+        x += 4;
+    }
+    
+    //If the wall is less than 2 columns wide.
+    if (x+2 <= pvWalls[z].screenSpaceCoo[1][VEC_COL])
+    {
+        top += (topinc>>1);
+        bot += (botinc>>1);
+        if (bot != 0)
+        {
+            ol = l;
+            l = divScale12(top,bot);
+            swall[x+2] = mulscale21(l,sinc)+splc;
+            l *= walxrepeat;
+            lwall[x+2] = (l>>18);
+        }
+        lwall[x+1] = ((l+ol)>>19);
+        swall[x+1] = ((swall[x]+swall[x+2])>>1);
+        x += 2;
+    }
+    
+    //The wall is 1 column wide.
+    if (x+1 <= pvWalls[z].screenSpaceCoo[1][VEC_COL])
+    {
+        bot += (botinc>>2);
+        if (bot != 0)
+        {
+            l = divScale12(top+(topinc>>2),bot);
+            swall[x+1] = mulscale21(l,sinc)+splc;
+            lwall[x+1] = mulscale18(l,walxrepeat);
+        }
+    }
+
+    if (lwall[pvWalls[z].screenSpaceCoo[0][VEC_COL]] < 0)
+        lwall[pvWalls[z].screenSpaceCoo[0][VEC_COL]] = 0;
+    
+    if ((lwall[pvWalls[z].screenSpaceCoo[1][VEC_COL]] >= walxrepeat) && (walxrepeat))
+        lwall[pvWalls[z].screenSpaceCoo[1][VEC_COL]] = walxrepeat-1;
+    
+    if (wal.cstat&8)
+    {
+        walxrepeat--;
+        for(x=pvWalls[z].screenSpaceCoo[0][VEC_COL]; x<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; x++)
+            lwall[x] = walxrepeat-lwall[x];
+    }
+}
+
+
 //658
 Engine.getpalookup = function (davis, dashade) {
     return Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1);
@@ -475,7 +582,6 @@ function getpalookup(davis, dashade) {
 
 //665
 function hline(xr, yp) {
-    debugger;
     var xl, r, s;
 
     xl = lastx[yp];
@@ -491,7 +597,7 @@ function hline(xr, yp) {
     hlineasm4(xr - xl, s, globalx2 * r + globalypanning, globaly1 * r + globalxpanning, ylookup[yp] + xr, frameoffset);
 }
 
-
+//710
 /* renders non-parallaxed ceilings. --ryan. */
 function ceilscan ( x1,  x2,  sectnum)
 {
@@ -514,7 +620,7 @@ function ceilscan ( x1,  x2,  sectnum)
     globalpicnum = sec.ceilingpicnum;
     
     if (/*(uint32_t)*/globalpicnum >= MAXTILES)
-    globalpicnum = 0;
+        globalpicnum = 0;
     
     setgotpic(globalpicnum);
     
@@ -724,6 +830,219 @@ function ceilscan ( x1,  x2,  sectnum)
     while (y1 < y2-1) slowhline(x2,++y1);
     faketimerhandler();
 }
+
+
+/*
+ * renders walls and parallaxed skies/floors. Look at parascan() for the
+ *  higher level of parallaxing.
+ *
+ *    x1 == offset of leftmost pixel of wall. 0 is left of surface.
+ *    x2 == offset of rightmost pixel of wall. 0 is left of surface.
+ *
+ *  apparently, walls are always vertical; there are sloping functions
+ *   (!!!) er...elsewhere. Only the sides need be vertical, as the top and
+ *   bottom of the polygon will need to be angled as the camera perspective
+ *   shifts (user spins in a circle, etc.)
+ *
+ *  uwal is an array of the upper most pixels, and dwal are the lower most.
+ *   This must be a list, as the top and bottom of the polygon are not
+ *   necessarily horizontal lines.
+ *
+ *   So, the screen coordinate of the top left of a wall is specified by
+ *   uwal[x1], the bottom left by dwal[x1], the top right by uwal[x2], and
+ *   the bottom right by dwal[x2]. Every physical point on the edge of the
+ *   wall in between is specified by traversing those arrays, one pixel per
+ *   element.
+ *
+ *  --ryan.
+ */
+function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
+    debugger;
+    var i, x, xnice, ynice;
+    var fpalookup;
+    var y1ve = new Int32Array(4), y2ve = new Int32Array(4), u4, d4, z, tileWidth, tsizy;
+    var bad;
+
+    tileWidth = tiles[globalpicnum].dim.width;
+    tsizy = tiles[globalpicnum].dim.height;
+    
+    setgotpic(globalpicnum);
+    
+    if ((tileWidth <= 0) || (tsizy <= 0))
+        return;
+    
+    if ((uwal[x1] > ydimen) && (uwal[x2] > ydimen))
+        return;
+    
+    if ((dwal[x1] < 0) && (dwal[x2] < 0))
+        return;
+
+    TILE_MakeAvailable(globalpicnum);
+
+    xnice = (pow2long[picsiz[globalpicnum]&15] == tileWidth);
+    if (xnice)
+        tileWidth--;
+    
+    ynice = (pow2long[picsiz[globalpicnum]>>4] == tsizy);
+    if (ynice)
+        tsizy = (picsiz[globalpicnum]>>4);
+
+    fpalookup = palookup[globalpal];
+
+    setupvlineasm(globalshiftval);
+
+    //Starting on the left column of the wall, check the occlusion arrays.
+    x = x1;
+    while ((umost[x] > dmost[x]) && (x <= x2))
+        x++;
+
+    console.log("((x+frameoffset-(uint8_t*)NULL)&3): %i",  x + frameoffset[0] &3);
+    for(; (x<=x2)&& x + frameoffset[0] &3; x++)
+    {
+        y1ve[0] = Math.max(uwal[x],umost[x]);
+        y2ve[0] = Math.min(dwal[x],dmost[x]);
+        if (y2ve[0] <= y1ve[0])
+            continue;
+
+        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+
+        bufplce[0] = lwal[x] + globalxpanning;
+        
+        if (bufplce[0] >= tileWidth)
+        {
+            if (xnice == 0)
+                bufplce[0] %= tileWidth;
+            else
+                bufplce[0] &= tileWidth;
+        }
+
+        if (ynice == 0)
+            bufplce[0] *= tsizy;
+        else
+            bufplce[0] <<= tsizy;
+
+        vince[0] = swal[x]*globalyscale;
+        vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
+
+        vlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],bufplce[0]+tiles[globalpicnum].data,x+frameoffset+ylookup[y1ve[0]]);
+    }
+    
+    for(; x<=x2-3; x+=4)
+    {
+        bad = 0;
+        for(z=3; z>=0; z--)
+        {
+            y1ve[z] = Math.max(uwal[x+z],umost[x+z]);
+            y2ve[z] = Math.min(dwal[x+z],dmost[x+z])-1;
+
+            if (y2ve[z] < y1ve[z])
+            {
+                bad += pow2char[z];
+                continue;
+            }
+
+            i = lwal[x+z] + globalxpanning;
+            if (i >= tileWidth) {
+                if (xnice == 0) i %= tileWidth;
+                else i &= tileWidth;
+            }
+            if (ynice == 0)
+                i *= tsizy;
+            else
+                i <<= tsizy;
+            bufplce[z] = tiles[globalpicnum].data[i];
+
+            vince[z] = swal[x+z]*globalyscale;
+            vplce[z] = globalzd + vince[z]*(y1ve[z]-globalhoriz+1);
+        }
+
+        if (bad == 15)
+            continue;
+
+        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+        palookupoffse[3] = fpalookup[(getpalookup(mulscale16(swal[x+3],globvis),globalshade)<<8)];
+
+        if ((palookupoffse[0] == palookupoffse[3]) && ((bad&0x9) == 0))
+        {
+            palookupoffse[1] = palookupoffse[0];
+            palookupoffse[2] = palookupoffse[0];
+        }
+        else
+        {
+            palookupoffse[1] = fpalookup[(getpalookup(mulscale16(swal[x+1],globvis),globalshade)<<8)];
+            palookupoffse[2] = fpalookup[(getpalookup(mulscale16(swal[x+2],globvis),globalshade)<<8)];
+        }
+
+        u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
+        d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
+
+        if ((bad != 0) || (u4 >= d4))
+        {
+            if (!(bad&1))
+                prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+x+frameoffset+0);
+            if (!(bad&2))
+                prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+x+frameoffset+1);
+            if (!(bad&4))
+                prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+x+frameoffset+2);
+            if (!(bad&8))
+                prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+x+frameoffset+3);
+            continue;
+        }
+
+        if (u4 > y1ve[0])
+            vplce[0] =prevlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+x+frameoffset+0);
+        if (u4 > y1ve[1])
+            vplce[1] = prevlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+x+frameoffset+1);
+        if (u4 > y1ve[2])
+            vplce[2] = prevlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+x+frameoffset+2);
+        if (u4 > y1ve[3])
+            vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+x+frameoffset+3);
+
+        if (d4 >= u4)
+            vlineasm4(d4 - u4 + 1, ylookup[u4] + x, frameoffset);
+
+        i = x + frameoffset[ylookup[d4 + 1]];
+        console.log("i: %i", i);
+        
+        if (y2ve[0] > d4)
+            prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
+        if (y2ve[1] > d4)
+            prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
+        if (y2ve[2] > d4)
+            prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
+        if (y2ve[3] > d4)
+            prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+    }
+    for(; x<=x2; x++)
+    {
+        y1ve[0] = Math.max(uwal[x],umost[x]);
+        y2ve[0] = Math.min(dwal[x],dmost[x]);
+        if (y2ve[0] <= y1ve[0])
+            continue;
+
+        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+
+        bufplce[0] = lwal[x] + globalxpanning;
+        if (bufplce[0] >= tileWidth) {
+            if (xnice == 0)
+                bufplce[0] %= tileWidth;
+            else
+                bufplce[0] &= tileWidth;
+        }
+        
+        if (ynice == 0) bufplce[0]
+            *= tsizy;
+        else
+            bufplce[0] <<= tsizy;
+
+        vince[0] = swal[x]*globalyscale;
+        vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
+
+        vlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],bufplce[0]+tiles[globalpicnum].data,x+frameoffset+ylookup[y1ve[0]]);
+    }
+    faketimerhandler();
+}
+
 
 //1926
 function owallmost(mostbuf, w, z) {
@@ -1028,8 +1347,6 @@ Engine.draWalls = function (bunch) {
             parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1,bunch);
     }
 
-    debugger;
-
     /* DRAW WALLS SECTION! */
     for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
 
@@ -1243,7 +1560,7 @@ Engine.draWalls = function (bunch) {
                         globalpicnum = wal.picnum;
 
                         if (globalpicnum >= MAXTILES) 
-                        globalpicnum = 0;
+                            globalpicnum = 0;
 
                         globalxpanning = wal.xpanning;
                         globalypanning = wal.ypanning;
@@ -1350,7 +1667,7 @@ Engine.draWalls = function (bunch) {
                 globalpicnum = wal.overpicnum;
 
             if (globalpicnum >= MAXTILES)
-            globalpicnum = 0;
+                globalpicnum = 0;
 
             globalxpanning = wal.xpanning;
             globalypanning = wal.ypanning;
@@ -1464,14 +1781,14 @@ Engine.doSetAspect = function (davis, dashade) {
 };
 
 
-    //2774
+//2774
 var pixelRenderable = 0;
-    //#include "keyboard.h"
-    //void WriteLastPaletteToFile(void);
-    //void WriteTranslucToFile(void);
-    /*  
-          FCS: Draw every walls in Front to Back Order.
-    */
+//#include "keyboard.h"
+//void WriteLastPaletteToFile(void);
+//void WriteTranslucToFile(void);
+/*  
+      FCS: Draw every walls in Front to Back Order.
+*/
 function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     var i, j, z, closest;
     //Ceiling and Floor height at the player position.
