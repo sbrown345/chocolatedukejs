@@ -500,7 +500,7 @@ function ceilscan ( x1,  x2,  sectnum)
 
     sec = sector[sectnum];
     
-    if (palookup[sec.ceilingpal] != palookup[globalpalwritten])
+    if (palookup[sec.ceilingpal] != globalpalwritten)
         palookup[globalpalwritten] = palookup[sec.ceilingpal];
 
     
@@ -1529,8 +1529,10 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     if ((xyaspect != oxyaspect) || (xdimen != oxdimen) || (viewingrange != oviewingrange)) {
         Engine.doSetAspect();
     }
-
-    frameoffset = frameplace + viewoffset;
+    if (stereomode != 0) {
+        throw "todo - need to cater for viewoffset and frameoffset";
+    }
+    //frameoffset = frameplace.position + viewoffset;
 
     //Clear the bit vector that keep track of what sector has been flooded in.
     clearbufbyte(visitedSectors, 0, ((numsectors + 7) >> 3), 0);
@@ -2025,12 +2027,22 @@ function loadPalette() {
 
     numpalookups = kread16(file);
 
-    // todo: check these caching methods that dont' seem to get run??, what are they for?
+    //// todo: check these caching methods that dont' seem to get run??, what are they for?
+    ////CODE EXPLORATION
+    ////printf("Num palettes lookup: %d.\n",numpalookups);
+    
+    //if ((palookup[0] = (uint8_t  *)kkmalloc(numpalookups<<8)) == NULL)
+    palookup[0] = new Uint8Array(65536);
+    //allocache(&palookup[0],numpalookups<<8,&permanentlock);
+    
+    ////Transluctent pallete is 65KB.
+    //if ((transluc = (uint8_t  *)kkmalloc(65536)) == NULL)
+    //allocache(&transluc,65536,&permanentlock);
 
-    globalpalwritten = 0; //palookup[0] - pointer
+    globalpalwritten = palookup[0];// - pointer
     globalpal = 0;
 
-    kread(file, palookup, numpalookups << 8); // todo check all this
+    kread(file, palookup[globalpal], numpalookups << 8); // todo check all this
 
     kread(file, transluc, 65536); // todo check all this
 
@@ -2322,18 +2334,9 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             yinc = divScale16(y2 - y1, x2 - x1);
             if (dax2 > dax1) {
                 yplc = y1 + mulscale16((dax1 << 16) + 65535 - x1, yinc);
-                //if (typeof dax1 != 0) {
-                //        throw new Error("need to set start pointer for array, note: (& uplc[dax1])");
-                //}
-                ////qinterpolatedown16short((int32_t *)(&uplc[dax1]),dax2-dax1,yplc,yinc);
                 qinterpolatedown16short(uplc, dax1, dax2 - dax1, yplc, yinc);
-                console.log("uplc[0] = %i", uplc[0]);
             } else {
                 yplc = y2 + mulscale16((dax2 << 16) + 65535 - x2, yinc);
-                //if (typeof dax2 != 0) {
-                //    throw new Error("need to set start pointer for array, note: (& dplc[dax2])");
-                //}
-                ////qinterpolatedown16short((int32_t * )( & dplc[dax2]), dax1 - dax2, yplc, yinc);
                 qinterpolatedown16short(dplc, dax2, dax1 - dax2, yplc, yinc);
             }
         }
@@ -3896,11 +3899,11 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
         return;
     }
 
-    //if (palookup[palnum] == null) {
-    //    console.log("palookup[palnum] "); // todo
-    //} else {
-    //    throw new Error("palookup is a ptr etc, fix this")// todo
-    //}
+    if (palookup[palnum] == null) {
+        console.log("palookup[palnum] "); // todo
+        palookup[palnum] = new Uint8Array(numpalookups << 8);
+        //todo: cache stuff??????
+    } 
 
     if (dastat === 0) {
         return;
@@ -3909,15 +3912,35 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
     if ((r | g | b | 63) !== 63) {
         return;
     }
-
-    console.warn("makepalookup todo!!!!!!"); // todo
-    //if ((r | g | b) === 0) {
-    //    for (i = 0; i < 256; i++) {
-    //        //ptr=palookup[0]   
-    //    }
-    //} else {
-    //    // todo?   
-    //}
+    
+    if ((r|g|b) == 0)
+    {
+        for(i=0; i<256; i++) {
+            ptr = new PointerHelper(palookup[0], remapbuf[i]);
+            ptr2 = new PointerHelper(palookup[palnum], i);
+            for(j=0; j<numpalookups; j++) {
+                ptr2.setByte(ptr.getByte());
+                ptr.position += 256;
+                ptr2.position += 256;
+            }
+        }
+    }
+    else {
+        throw new Error("makepalookup todo!!!!!!"); // todo
+        //ptr2 = new PointerHelper(palookup[palnum]);
+        //for(i=0; i<numpalookups; i++)
+        //{
+        //    palscale = divscale16(i,numpalookups);
+        //    for(j=0; j<256; j++)
+        //    {
+        //        ptr = new PointerHelper(palette[remapbuf[j]*3]) (uint8_t  *)&palette[remapbuf[j]*3]; //ptr = (uint8_t  *)&palette[remapbuf[j]*3];
+        //        ptr2.setByte = getclosestcol((int32_t)ptr[0]+mulscale16(r-ptr[0],palscale),
+        //                                (int32_t)ptr[1]+mulscale16(g-ptr[1],palscale),
+        //                                (int32_t)ptr[2]+mulscale16(b-ptr[2],palscale));
+        //        ptr2.position++;
+        //    }
+        //}
+    }
 }
 
 //8244

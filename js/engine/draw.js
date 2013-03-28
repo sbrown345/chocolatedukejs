@@ -24,10 +24,10 @@ function setBytesPerLine(_bytesPerLine) {
     bytesperline = _bytesPerLine;
 }
 
-var  asm1;
-var  asm2;
-var  asm3;
-var  asm4;
+var asm1;
+var asm2;
+var asm3;
+var asm4;
 
 var machxbits_al;
 var bitsSetup;
@@ -40,43 +40,46 @@ function sethlinesizes(i1, _bits, textureAddress) {
 
 //FCS:   Draw ceiling/floors
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
-function hlineasm4( numPixels,  shade,  i4,  i5, destOffset, dest) {
+function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
 
-    var shifter = ((256-machxbits_al) & 0x1f);
+    var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
-    
+
     var texture = textureSetup;
     var bits = bitsSetup;
 
     i4 = i4 | 0; // it is int32
     i5 = i5 >>> 0; // it is uint32
-    
+
     shade = shade & 0xffffff00;
     numPixels++;
-    
+
     if (!RENDER_DRAW_CEILING_AND_FLOOR)
         return;
 
+    var destArray = dest.array;
     // todo: for loop (faster!)
     while (numPixels) {
 
-        source = i5 >> shifter;
-        source = shld(source,i4,bits);
+        source = i5 >>> shifter;
+        source = shld(source, i4, bits);
         source = texture[source];
+        //console.log("numPixels: %i, source: %i", numPixels, source);
 
-        throw "todo: palookup is a list of pointers itself? - to a pallet or something";
+        // throw "todo: palookup is a list of pointers itself? - to a pallet or something";
         // globalpalwritten points to the first palookup pointer
-        if (pixelsAllowed-- > 0)
-            dest[destOffset] = palookup[globalpalwritten + (shade | source)]; 
-        
+        if (pixelsAllowed-- > 0) {
+            destArray[destOffset] = globalpalwritten[shade | source];
+            //console.log("dest: %i", destArray[destOffset]);
+        }
+
         destOffset--;
-        
+
         i5 -= asm1;
         i4 -= asm2;
-        
+
         numPixels--;
-		
     }
 }
 

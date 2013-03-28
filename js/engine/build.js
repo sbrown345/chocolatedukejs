@@ -183,7 +183,7 @@ var numpalookups;
 
 //EXTERN uint8_t  palette[768];
 //EXTERN short numpalookups;
-var palookup = new Uint8Array(MAXPALOOKUPS);
+var palookup = new Array(MAXPALOOKUPS); // EXTERN uint8_t  *palookup[MAXPALOOKUPS];
 var parallaxtype, showinvisibility;
 var parallaxyoffs, parallaxyscale;
 var visibility, parallaxvisibility; pskyoff

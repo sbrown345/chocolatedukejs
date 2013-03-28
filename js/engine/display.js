@@ -156,9 +156,7 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
 
     console.assert(ScreenWidth == screenWidth, "todo, match up ScreenWidth and screenWidth");
     console.assert(ScreenHeight == screenHeight, "todo, match up ScreenHeight and screenHeight");
-    frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
-
-    frameoffset = 0;
+    frameoffset = frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
 
     j = ydim * 4 * 4;
 
@@ -284,13 +282,14 @@ var framePlacePointerHelper;
 function PointerHelper(uint8Array, position) {
     this.array = uint8Array;
     this.position = position || 0;
-    this.setByte = function (v) {
-        this.array[position] = v;
-    };
-    this.getByte = function () {
-        return this.array[this.position];
-    };
 }
+
+PointerHelper.prototype.setByte = function (v) {
+    this.array[this.position] = v;
+};
+PointerHelper.prototype.getByte = function () {
+    return this.array[this.position];
+};
 
 function _nextpage() {
     var ticks;
@@ -326,14 +325,14 @@ function updateCanvas() {
         var buf = new ArrayBuffer(imageData.data.length); // creating new ones like this is faster than having them premade
         var buf8 = new Uint8ClampedArray(buf);
         var data = new Uint32Array(buf);
-        
+
         var newImageData = frameplace.array;
         var len = newImageData.length;
         // chrome: a for loop with the length saved as a variable seemed to be the fastest (do while: slow, for with a i++ < len also slow) 
         for (var i = 0; i < len; i++) {
-            data[i] = colorPalette[newImageData[i]]; 
-        } 
-        
+            data[i] = colorPalette[newImageData[i]];
+        }
+
         imageData.data.set(buf8);
         surfaceContext.putImageData(imageData, 0, 0);
     }
