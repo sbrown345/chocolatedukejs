@@ -135,6 +135,15 @@ function clearbufbyte(buffer, offset, c, a) {
     }
 }
 
+function copybufbyte(s, sPos, d, dPos, c) {
+    var  p = new PointerHelper(s, sPos), q = new PointerHelper(d, dPos);
+    while ((c--) > 0) {
+        q.setByte(p.getByte());
+        q.position++;
+        p.position++;
+    }
+}
+
 function qinterpolatedown16short(buffer, bufferOffset, num, val, add) {
     if (typeof qinterpolatedown16short === "number") throw "wrong type, should be array";
     if (arguments.length !== 5) throw "bad args";

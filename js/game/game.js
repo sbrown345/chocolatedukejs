@@ -519,7 +519,7 @@ function spawn(j, pn) {
     var sp;
     var text = "";
 
-    console.log("spawn j: %i, pn: %i", j, pn);
+    //console.log("spawn j: %i, pn: %i", j, pn);
     if (j >= 0) {
         throw new Error("TODO");
         //i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
@@ -2234,7 +2234,7 @@ function spawn(j, pn) {
             break;
     }
 
-    console.log("cstat: %i", sp.cstat);
+    //console.log("cstat: %i", sp.cstat);
     //console.log("sect: %i", sect); //todo: CHECK sect and all objects
     // todo check all... spritetype (Sprite)
 

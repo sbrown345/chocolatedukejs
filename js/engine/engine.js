@@ -103,8 +103,8 @@ var bunchfirst = new Int16Array(MAXWALLSB), bunchlast = new Int16Array(MAXWALLSB
 
 
 var smost = new Int16Array(MAXYSAVES), smostcnt;
-//static short smoststart[MAXWALLSB];
-//static uint8_t  smostwalltype[MAXWALLSB];
+var smoststart = new Int16Array(MAXWALLSB);
+var smostwalltype = new Uint8Array(MAXWALLSB);
 var smostwall = new Int32Array(MAXWALLSB), smostwallcnt = -1;
 
 var maskwall = new Int16Array(MAXWALLSB), maskwallcnt;
@@ -153,7 +153,7 @@ var bufplce = new Int32Array(4);
 
 var palookupoffse = new Uint8Array(4);
 
-var  globalxshift, globalyshift;
+var globalxshift, globalyshift;
 var globalxpanning, globalypanning, globalshade;
 var globalpicnum, globalshiftval;
 var globalzd, globalyscale, globalorientation;
@@ -247,6 +247,16 @@ function nsqrtasm(param) {
     return param;
 }
 
+function krecipasm(i) { // Ken did this
+    var ab = new ArrayBuffer(4);
+    var f = new Float32Array(ab);
+    f[0] = i;
+    i = new Int32Array(ab)[0];
+    console.log("krecipasm: %i: ", (recipTable[(i >> 12) & 2047] >> (((i - 0x3f800000) >> 23) & 31)) ^ (i >> 31));
+    return ((recipTable[(i[0] >> 12) & 2047] >> (((i - 0x3f800000) >> 23) & 31)) ^ (i >> 31));
+}
+
+
 //329
 
 /*
@@ -291,6 +301,7 @@ function scansector(sectnum) {
                 xs = spr.x - globalposx;
                 ys = spr.y - globalposy;
                 if ((spr.cstat & 48) || (xs * cosglobalang + ys * singlobalang > 0)) {
+                    throw "todo: copybufbyte args:";
                     copybufbyte(spr, tsprite[spritesortcnt], 44);
                     tsprite[spritesortcnt++].owner = z;
                 }
@@ -430,7 +441,7 @@ function scansector(sectnum) {
             pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
-            console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+            //console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
 
             bunchWallsList[numscans] = numscans + 1;
             numscans++;
@@ -950,7 +961,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
                 i *= tsizy;
             else
                 i <<= tsizy;
-            bufplce[z] = tiles[globalpicnum].data[i];
+            bufplce[z] = i;//tiles[globalpicnum].data+i;
 
             vince[z] = swal[x+z]*globalyscale;
             vplce[z] = globalzd + vince[z]*(y1ve[z]-globalhoriz+1);
@@ -999,9 +1010,9 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
             vplce[3] = prevlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+x+frameoffset+3);
 
         if (d4 >= u4)
-            vlineasm4(d4 - u4 + 1, ylookup[u4] + x, frameoffset);
+            vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x /*+ frameoffset*/);
 
-        i = x + frameoffset[ylookup[d4 + 1]];
+        i = x + frameoffset.position + ylookup[d4 + 1];
         console.log("i: %i", i);
         
         if (y2ve[0] > d4)
@@ -1072,7 +1083,7 @@ function owallmost(mostbuf, w, z) {
     }
 
     if (bad & 3) {
-        t = divscale30(z - s1, s2 - s1);
+        t = divScale30(z - s1, s2 - s1);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
@@ -1093,7 +1104,7 @@ function owallmost(mostbuf, w, z) {
     }
 
     if (bad & 12) {
-        t = divscale30(z - s3, s4 - s3);
+        t = divScale30(z - s3, s4 - s3);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
@@ -1169,7 +1180,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     j = yv * x2 - xv * y2;
 
     if (klabs(j) > klabs(i >> 3))
-        i = divscale28(i, j);
+        i = divScale28(i, j);
 
     if (dastat == 0) {
         t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
@@ -1196,7 +1207,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     j = yv * x2 - xv * y2;
 
     if (klabs(j) > klabs(i >> 3))
-        i = divscale28(i, j);
+        i = divScale28(i, j);
 
     if (dastat == 0) {
         t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
@@ -1230,14 +1241,13 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     }
 
     if ((bad & 12) == 12) {
-        debugger;
         clearbufbyte(mostbuf, ix1, (ix2 - ix1 + 1) * 2, ydimen + (ydimen << 16));
         return (bad);
     }
 
     if (bad & 3) {
         /* inty = intz / (globaluclip>>16) */
-        t = divscale30(oz1 - s1, s2 - s1 + oz1 - oz2);
+        t = divScale30(oz1 - s1, s2 - s1 + oz1 - oz2);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         intz = oz1 + mulscale30(oz2 - oz1, t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
@@ -1264,7 +1274,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 
     if (bad & 12) {
         /* inty = intz / (globaldclip>>16) */
-        t = divscale30(oz1 - s3, s4 - s3 + oz1 - oz2);
+        t = divScale30(oz1 - s3, s4 - s3 + oz1 - oz2);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         intz = oz1 + mulscale30(oz2 - oz1, t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
@@ -1474,7 +1484,10 @@ Engine.draWalls = function (bunch) {
                     else
                         globalzd = (((globalposz-sec.ceilingz)*globalyscale)<<8);
                     globalzd += (globalypanning<<24);
-                    if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;
+                    if (globalorientation & 256) {
+                        globalyscale = -globalyscale;
+                        globalzd = -globalzd;
+                    }
 
                     if (gotswall == 0) {
                         gotswall = 1;
@@ -1509,7 +1522,7 @@ Engine.draWalls = function (bunch) {
                         smostwall[smostwallcnt] = z;
                         smostwalltype[smostwallcnt] = 1;   /* 1 for umost */
                         smostwallcnt++;
-                        throw "todo: copybufbyte((int32_t *)&umost[x1],(int32_t *)&smost[smostcnt],i*2);"
+                        copybufbyte(umost, x1, smost, smostcnt, i * 2);
                         smostcnt += i;
                     }
                 }
@@ -3681,7 +3694,7 @@ function clipmove(x, y, z, sectnum,
                 templong1 = (goalx - intx) * lx + (goaly - inty) * ly;
 
                 if ((klabs(templong1) >> 11) < templong2)
-                    i = divscale20(templong1, templong2);
+                    i = divScale20(templong1, templong2);
                 else
                     i = 0;
                 goalx = mulscale20(lx, i) + intx;
@@ -4247,7 +4260,7 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
         //ptr2 = new PointerHelper(palookup[palnum]);
         //for(i=0; i<numpalookups; i++)
         //{
-        //    palscale = divscale16(i,numpalookups);
+        //    palscale = divScale16(i,numpalookups);
         //    for(j=0; j<256; j++)
         //    {
         //        ptr = new PointerHelper(palette[remapbuf[j]*3]) (uint8_t  *)&palette[remapbuf[j]*3]; //ptr = (uint8_t  *)&palette[remapbuf[j]*3];

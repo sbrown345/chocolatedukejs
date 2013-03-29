@@ -279,8 +279,8 @@ function VBE_setPalette(paletteBuffer, debug) {
 
 //1460
 var framePlacePointerHelper;
-function PointerHelper(uint8Array, position) {
-    this.array = uint8Array;
+function PointerHelper(array, position) {
+    this.array = array instanceof Uint8Array ? array : new Uint8Array(array.buffer);
     this.position = position || 0;
 }
 
