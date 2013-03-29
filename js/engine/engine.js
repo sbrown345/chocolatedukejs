@@ -868,7 +868,6 @@ function ceilscan ( x1,  x2,  sectnum)
  *  --ryan.
  */
 function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
-    debugger;
     var i, x, xnice, ynice;
     var fpalookup;
     var y1ve = new Int32Array(4), y2ve = new Int32Array(4), u4, d4, z, tileWidth, tsizy;
@@ -2008,7 +2007,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         bunchfirst[closest] = bunchfirst[numbunches];
         bunchlast[closest] = bunchlast[numbunches];
     }
-    throw "todo";
+    console.log("check todo");
 }
 
 //3179
@@ -4309,6 +4308,29 @@ function clearView(dacol) {
 
     faketimerhandler();
 }
+function setviewback() {
+    console.log("todo setviewback");
+    //var i, j, k;
+
+    //if (setviewcnt <= 0) return;
+    //setviewcnt--;
+
+    //setview(bakwindowx1[setviewcnt],bakwindowy1[setviewcnt],
+    //        bakwindowx2[setviewcnt],bakwindowy2[setviewcnt]);
+    //copybufbyte(&bakumost[windowx1],&startumost[windowx1],(windowx2-windowx1+1)*sizeof(startumost[0]));
+    //copybufbyte(&bakdmost[windowx1],&startdmost[windowx1],(windowx2-windowx1+1)*sizeof(startdmost[0]));
+    //vidoption = bakvidoption[setviewcnt];
+    //frameplace = bakframeplace[setviewcnt];
+    //if (setviewcnt == 0)
+    //    k = bakxsiz[0];
+    //else
+    //    k = max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
+    //j = 0;
+    //for(i=0; i<=k; i++) ylookup[i] = j, j += bytesperline;
+    //setBytesPerLine(bytesperline);
+}
+
+
 //9237
 
 function getceilzofslope(sectnum, dax, day) {

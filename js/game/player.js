@@ -2,6 +2,7 @@
 
 var Player = {};
 
+//34
 Player.setPal = function(p) {
     if (p.heat_on)
         p.palette = slimepal;
@@ -19,3 +20,6 @@ Player.setPal = function(p) {
         }
     restorepalette = 1;
 };
+
+//1215
+var lastvisinc;

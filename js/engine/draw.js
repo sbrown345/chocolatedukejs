@@ -169,6 +169,32 @@ function prevlineasm1( i1,  palette,  i3,  i4, source, dest) {
     //}
 }
 
+//250
+//FCS: This is used to draw wall border vertical lines
+function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, dest) {
+    console.log("todo vlineasm1");
+    /*uint32_t temp;
+
+    if (!RENDER_DRAW_WALL_BORDERS)
+        return vplce;
+
+    numPixels++;
+    while (numPixels)
+    {
+        temp = ((uint32_t)vplce) >> mach3_al;
+        
+        temp = texture[temp];
+      
+        if (pixelsAllowed-- > 0)
+            *dest = palookupoffse[temp];
+	    
+        vplce += vince;
+        dest += bytesperline;
+        numPixels--;
+    }
+    return vplce;*/
+}
+
 //386
 var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {

@@ -122,6 +122,11 @@ function badguy(s) {
     return 0;
 }
 
+function operatefta() {
+    // todo
+    console.log("todo operatefta");
+}
+
 //2333
 function FTA(q, p, mode) {
     if (ud.fta_on === 1 || mode) {
@@ -138,6 +143,11 @@ function FTA(q, p, mode) {
             pus = NUMPAGES;
         }
     }
+}
+
+//2700
+function displayrest(smoothratio) {
+    console.log("todo displayrest");
 }
 
 //3001
@@ -198,6 +208,7 @@ Game.drawBackground = function () {
     }
 };
 
+//3205
 Game.se40code = function(x, y, z, a, h, smoothratio) {
     var i = headspritestat[15];
     while (i >= 0) {
@@ -218,6 +229,7 @@ Game.se40code = function(x, y, z, a, h, smoothratio) {
     }
 };
 
+//3229
 var oyrepeat = -1;
 Game.displayRooms = function (snum, smoothratio) {
     var cposx, cposy, cposz, dst, j, fz, cz;
@@ -372,13 +384,39 @@ Game.displayRooms = function (snum, smoothratio) {
             throw "todo"
         }
         
+        console.log("todo cehck drawrooms") //todo
         drawrooms(cposx, cposy, cposz, cang, choriz, sect);
         animatesprites(cposx, cposy, cang, smoothratio);
         drawmasks();
-        throw "todo"
+
+        if(screencapt === 1)
+        {
+            setviewback();
+            tiles[MAXTILES-1].lock = 1;
+            screencapt = 0;
+        }
+        else if( ( ud.screen_tilting && p.rotscrnang) || ud.detail==0 )
+        {
+            if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
+            setviewback();
+            tiles[MAXTILES-2].animFlags &= 0xff0000ff;
+            i = (tang&511); if (i > 256) i = 512-i;
+            i = sinTable[i + 512] * 8 + sinTable[i] * 5;
+            if ((1-ud.detail) == 0) i >>= 1;
+            rotateSprite(160<<16,100<<16,i,tang+512,MAXTILES-2,0,0,4+2+64,windowx1,windowy1,windowx2,windowy2);
+            tiles[MAXTILES-2].lock = 199;
+        }
     } 
 
-    throw "todo"
+    // 
+    restoreinterpolations();
+
+    if (totalclock < lastvisinc)
+    {
+        if (klabs(p.visibility-ud.const_visibility) > 8)
+            p.visibility += (ud.const_visibility-p.visibility)>>2;
+    }
+    else p.visibility = ud.const_visibility;
 };
 
 //3472
@@ -2243,11 +2281,13 @@ function spawn(j, pn) {
 
 //5413
 function animatesprites(/*int32_t x,int32_t y,short a,int32_t smoothratio*/) {
+    //todo animatesprites
     console.log("todo: animatesprites");
 }
 
 //5775
 function drawmasks() {
+    //todo drawmasks
     console.log("todo: drawmasks");
 }
 
@@ -2808,7 +2848,69 @@ Game.playBack = function () {
                     displayrest(j);
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm)
-                        getpackets();
+                        getPackets();
+                    
+                    if( (ps[myconnectindex].gm&MODE_MENU) && (ps[myconnectindex].gm&MODE_EOL) )
+                    {
+                        console.log("playback(1) :: goto RECHECK:");
+                        throw "todo: goto RECHECK";
+                    }
+
+                    if(ps[myconnectindex].gm&MODE_TYPE)
+                    {
+                        typemode();
+                        if((ps[myconnectindex].gm&MODE_TYPE) != MODE_TYPE)
+                            ps[myconnectindex].gm = MODE_MENU;
+                    }
+                    else {
+                        console.warn("todo");
+                        //CONSOLE_HandleInput();
+                        //if( !CONSOLE_IsActive())
+                        //{
+                        //    menus();
+                        //}
+                        //CONSOLE_Render();
+                        //if( ud.multimode > 1 )
+                        //{
+                        //    ControlInfo noshareinfo;
+                        //    if( !CONSOLE_IsActive() )
+                        //    {
+                        //        CONTROL_GetInput( &noshareinfo );
+                        //        if( ACTION(gamefunc_SendMessage) )
+                        //        {
+                        //            KB_FlushKeyboardQueue();
+                        //            CONTROL_ClearAction( gamefunc_SendMessage );
+                        //            ps[myconnectindex].gm = MODE_TYPE;
+                        //            typebuf[0] = 0;
+                        //            inputloc = 0;
+                        //        }
+                        //    }
+
+                        //}
+                    }
+
+                    operatefta();
+
+                    if(ud.last_camsprite != ud.camerasprite)
+                    {
+                        ud.last_camsprite = ud.camerasprite;
+                        ud.camera_time = totalclock+(TICRATE*2);
+                    }
+
+                    if (VOLUMEONE())
+                        if( ud.show_help == 0 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
+                            rotateSprite((320-50)<<16,9<<16,65536,0,BETAVERSION,0,0,2+8+16+128,0,0,xdim-1,ydim-1);
+
+                    getPackets();
+                    nextpage();
+
+                    if( ps[myconnectindex].gm==MODE_END || ps[myconnectindex].gm==MODE_GAME )
+                    {
+                        if(foundemo)
+                            kclose(recfilep);
+                        ud.playing_demo_rev = 0;
+                        return 0;
+                    }
                 }
             }
 

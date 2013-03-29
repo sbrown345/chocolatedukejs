@@ -38,6 +38,13 @@ function dointerpolations(smoothratio) {
     //}
 }
 
+//80
+function restoreinterpolations()  //Stick at end of drawscreen
+{
+    var i;
+    for(i=numinterpolations-1;i>=0;i--) curipos[i] = bakipos[i];
+}
+
 //87
 function ceilingspace(sectnum) {
     if ((sector[sectnum].ceilingstat & 1) && sector[sectnum].ceilingpal === 0) {
