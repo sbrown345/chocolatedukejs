@@ -40,18 +40,18 @@ function sethlinesizes(i1, _bits, textureAddress) {
 
 //FCS:   Draw ceiling/floors
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
-var hlineasm4Count = 0;
+//var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
 
-    console.log("hlineasm4Count: %i, numPixels: %i", hlineasm4Count, numPixels);
+    //console.log("hlineasm4Count: %i, numPixels: %i", hlineasm4Count, numPixels);
     var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
 
     var texture = textureSetup;
     var bits = bitsSetup;
 
-    i4 = i4 | 0; // it is int32
+    //i4 = i4 | 0; // it is int32
     i5 = i5 >>> 0; // it is uint32
 
     shade = shade & 0xffffff00;
@@ -83,7 +83,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
 
         numPixels--;
     }
-    hlineasm4Count++;
+    //hlineasm4Count++;
 }
 
 // 89
