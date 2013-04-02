@@ -186,10 +186,10 @@ Game.drawBackground = function () {
             if (ud.multimode > 4) y += 8;
         }
 
-        x1 = max(windowx1 - 4, 0);
-        y1 = max(windowy1 - 4, y);
-        x2 = min(windowx2 + 4, xdim - 1);
-        y2 = min(windowy2 + 4, scale(ydim, 200 - 34, 200) - 1);
+        x1 = Math.max(windowx1 - 4, 0);
+        y1 = Math.max(windowy1 - 4, y);
+        x2 = Math.min(windowx2 + 4, xdim - 1);
+        y2 = Math.min(windowy2 + 4, scale(ydim, 200 - 34, 200) - 1);
 
         for (y = y1 + 4; y < y2 - 4; y += 64) {
             rotateSprite(x1 << 16, y << 16, 65536, 0, VIEWBORDER, 0, 0, 8 + 16 + 64 + 128, x1, y1, x2, y2);

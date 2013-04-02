@@ -167,15 +167,18 @@ function prevlineasm1(i1, palette, i3, i4, source, destOffset, dest) {
 
         return i1;
     } else {
-        return vlineasm1(i1, palette, i3, i4, source, destOffset, dest);
+        return vlineasm1(i1, palette, i3, i4, source, 0, destOffset, dest);
     }
 }
 
 //250
 //FCS: This is used to draw wall border vertical lines
-function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, destOffset, dest) {
-    console.warn("todo vlineasm1");
-    /*uint32_t temp;
+function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffset, destOffset, dest) {
+    if (arguments.length != 8) {
+        throw new Error("vlineasm1 should have 8 arguments");
+    }
+
+    var temp;
 
     if (!RENDER_DRAW_WALL_BORDERS)
         return vplce;
@@ -183,18 +186,19 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, destOffset, 
     numPixels++;
     while (numPixels)
     {
-        temp = ((uint32_t)vplce) >> mach3_al;
-        
-        temp = texture[temp];
+        temp = vplce >>> mach3_al;
+
+        temp = texture[textureOffset + temp];
       
         if (pixelsAllowed-- > 0)
-            *dest = palookupoffse[temp];
+            dest[destOffset] = palookupoffse[temp];
 	    
         vplce += vince;
-        dest += bytesperline;
+        destOffset += bytesperline;
         numPixels--;
     }
-    return vplce;*/
+    
+    return vplce;
 }
 
 //386

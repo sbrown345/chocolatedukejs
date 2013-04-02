@@ -1048,7 +1048,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        vlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],bufplce[0]+tiles[globalpicnum].data,x+frameoffset+ylookup[y1ve[0]]);
+        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset);
     }
     faketimerhandler();
 }
@@ -2677,7 +2677,12 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     setgotpic(picnum);
     bufplc = new PointerHelper(tiles[picnum].data);
 
-    palookupoffs = palookup[dapalnum] + (Engine.getpalookup(0, dashade) << 8);
+    palookupoffs = [
+         dapalnum + (Engine.getpalookup(0, dashade) << 8),
+         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 1,
+         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 2,
+         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 3
+    ];
 
     i = divScale32(1, z);
     xv = mulscale14(sinang, i);
@@ -2834,11 +2839,11 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             if (dastat & 64) {
                 if ((xv2 & 0x0000ffff) == 0) {
                     qlinemode = 1;
-                    setuprhlineasm4(0, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, 0, 0);
+                    setuprhlineasm4(0, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs[0], 0, 0);
                 }
                 else {
                     qlinemode = 0;
-                    setuprhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
+                    setuprhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs[0], tileHeight, 0);
                 }
             }
             else {
