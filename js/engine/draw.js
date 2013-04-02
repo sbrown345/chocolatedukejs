@@ -40,9 +40,11 @@ function sethlinesizes(i1, _bits, textureAddress) {
 
 //FCS:   Draw ceiling/floors
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
+var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
 
+    console.log("hlineasm4Count: %i, numPixels: %i", hlineasm4Count, numPixels);
     var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
 
@@ -81,6 +83,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
 
         numPixels--;
     }
+    hlineasm4Count++;
 }
 
 // 89
@@ -148,31 +151,30 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
 var mach3_al = 0;
 
 //FCS:  RENDER TOP AND BOTTOM COLUMN
-function prevlineasm1( i1,  palette,  i3,  i4, source, dest) {
-    console.log("todo prevlineasm1");
-    //if (i3 == 0)
-    //{
-    //    if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
-    //        return 0;
+function prevlineasm1(i1, palette, i3, i4, source, destOffset, dest) {
+    if (i3 == 0)
+    {
+        if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
+            return 0;
 
-    //    i1 += i4;
-    //    i4 = ((uint32_t)i4) >> mach3_al;
-    //    i4 = (i4&0xffffff00) | source[i4];
+        i1 += i4;
+        i4 = (i4) >>> mach3_al;
+        i4 = (i4&0xffffff00) | source[i4];
 
-    //    if (pixelsAllowed-- > 0)
-    //        *dest = palette[i4];
+        if (pixelsAllowed-- > 0)
+            dest[destOffset] = palette[i4];
 		
 
-    //    return i1;
-    //} else {
-    //    return vlineasm1(i1,palette,i3,i4,source,dest);
-    //}
+        return i1;
+    } else {
+        return vlineasm1(i1, palette, i3, i4, source, destOffset, dest);
+    }
 }
 
 //250
 //FCS: This is used to draw wall border vertical lines
-function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, dest) {
-    console.log("todo vlineasm1");
+function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, destOffset, dest) {
+    console.warn("todo vlineasm1");
     /*uint32_t temp;
 
     if (!RENDER_DRAW_WALL_BORDERS)

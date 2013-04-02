@@ -2834,6 +2834,22 @@ Game.playBack = function () {
             if (foundemo) {
                 while (totalclock >= (lockclock + TICSPERFRAME)) {
                     throw new Error("todo");
+
+                    if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
+                        i = 0;
+                        l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
+                        kdfread(recsync, 10 * ud.multimode, l / ud.multimode, recfilep);
+                    }
+
+                    for (j = connecthead; j >= 0; j = connectpoint2[j]) {
+                        copybufbyte(recsync[i], inputfifo[movefifoend[j] & (MOVEFIFOSIZ - 1)][j], 10);
+
+                        movefifoend[j]++;
+                        i++;
+                        ud.reccnt--;
+                    }
+                    domovethings();
+
                 }
             }
 
@@ -2913,8 +2929,6 @@ Game.playBack = function () {
                     }
                 }
             }
-
-            throw new Error("todo");
         })
         .add(function () {
             throw new Error("todo");
