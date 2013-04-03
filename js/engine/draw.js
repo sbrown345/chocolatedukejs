@@ -39,7 +39,7 @@ function sethlinesizes(i1, _bits, textureAddress) {
 
 //FCS:   Draw ceiling/floors
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
-var hlineasm4Count = 0;
+//var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
 
@@ -66,9 +66,6 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
         source = shld(source, i4, bits) >>> 0;
         source = texture[source];
 
-        if (source === undefined)
-            debugger;
-
         // throw "todo: palookup is a list of pointers itself? - to a pallet or something";
         // globalpalwritten points to the first palookup pointer
         if (pixelsAllowed-- > 0) {
@@ -84,7 +81,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
 
         numPixels--;
     }
-    hlineasm4Count++;
+    //hlineasm4Count++;
 }
 
 // 89
@@ -178,6 +175,9 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
     if (arguments.length != 8) {
         throw new Error("vlineasm1 should have 8 arguments");
     }
+
+    if (dest.length === undefined)
+        throw "dest should have a length e.g. be an array";
 
     var temp;
 

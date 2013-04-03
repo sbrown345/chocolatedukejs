@@ -3,10 +3,16 @@
 var Game = {};
 
 var appendImageDebug = false;
-function appendCanvasImageToPage() {
+function appendCanvasImageToPage(text) {
+    // could log into console (https://github.com/escusado/console.meme)
     if (!appendImageDebug) return;
     
     updateCanvas();
+    if (text) {
+        var span = document.createElement("span");
+        span.innerHTML = text;
+        document.getElementById("canvasDebug").appendChild(span);
+    }
     var img = document.createElement("img");
     img.src = surface.toDataURL("image/png");
     document.getElementById("canvasDebug").appendChild(img);

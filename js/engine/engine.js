@@ -740,7 +740,6 @@ function ceilscan ( x1,  x2,  sectnum)
     globaly1 = mulscale16(globaly1,globalzd);
     globaly2 = mulscale16(globaly2,globalzd);
     globvis = klabs(mulscale10(globvis,globalzd));
-
     if (!(globalorientation&0x180))
     {
         y1 = umost[x1];
@@ -908,8 +907,9 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     while ((umost[x] > dmost[x]) && (x <= x2))
         x++;
 
-    console.log("((x+frameoffset-(uint8_t*)NULL)&3): %i",  x + frameoffset[0] &3);
-    for(; (x<=x2)&& x + frameoffset[0] &3; x++)
+    debugger;
+    console.log("((x+frameoffset-(uint8_t*)NULL)&3): %i",  (x + frameoffset.array[0]) &3);
+    for (; (x <= x2) && (x + frameoffset.array[0]) & 3; x++)
     {
         y1ve[0] = Math.max(uwal[x],umost[x]);
         y2ve[0] = Math.min(dwal[x],dmost[x]);
@@ -936,7 +936,8 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        vlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],bufplce[0]+tiles[globalpicnum].data,x+frameoffset+ylookup[y1ve[0]]);
+        debugger;
+        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], bufplce[0] + tiles[globalpicnum].data, x + ylookup[y1ve[0]], frameoffset);
     }
     
     for(; x<=x2-3; x+=4)
@@ -1010,11 +1011,13 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         if (u4 > y1ve[3])
             vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + x + 3, frameoffset);
 
-        if (d4 >= u4)
+        if (d4 >= u4) {
+            console.log("columnIndex: %i ", d4 - u4 + 1);
             vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x /*+ frameoffset*/);
+            appendCanvasImageToPage((d4 - u4 + 1) + " " + (ylookup[u4] + x));
+        }
 
         i = x + frameoffset.position + ylookup[d4 + 1];
-        console.log("i: %i", i);
         
         if (y2ve[0] > d4)
             prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
@@ -1042,15 +1045,16 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
                 bufplce[0] &= tileWidth;
         }
         
-        if (ynice == 0) bufplce[0]
-            *= tsizy;
+        if (ynice == 0)
+            bufplce[0] *= tsizy;
         else
             bufplce[0] <<= tsizy;
 
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset);
+        debugger;
+        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
     }
     faketimerhandler();
 }
@@ -2774,7 +2778,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 p = frameplace;
                 p.position = x; // could be dodgy sharing this position?
 
-                //if (ud.playing_demo_rev == 117) {
+                //if (ud.playing_demo_rev == 117)
                 appendCanvasImageToPage();
 
                 u4 = Math.max(Math.max(y1ve[0], y1ve[1]), Math.max(y1ve[2], y1ve[3]));
