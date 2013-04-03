@@ -753,7 +753,8 @@ function ceilscan ( x1,  x2,  sectnum)
             {
                 if (twall >= y2)
                 {
-                    while (y1 < y2-1) hline(x-1,++y1);
+                    while (y1 < y2 - 1)
+                        hline(x - 1, ++y1);
                     y1 = twall;
                 }
                 else
@@ -783,7 +784,8 @@ function ceilscan ( x1,  x2,  sectnum)
             globalx2 += globaly2;
             globaly1 += globalx1;
         }
-        while (y1 < y2-1) hline(x2,++y1);
+        while (y1 < y2 - 1)
+            hline(x2, ++y1);
         faketimerhandler();
         return;
     }
@@ -1345,6 +1347,9 @@ Engine.draWalls = function (bunch) {
         else
             parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,0,bunch);
     }
+    
+    appendCanvasImageToPage();
+
 
     /* draw floors */
     if ((andwstat2&12) != 12){
@@ -1355,6 +1360,8 @@ Engine.draWalls = function (bunch) {
         else
             parascan(pvWalls[bunchfirst[bunch]].screenSpaceCoo[0][VEC_COL],pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],sectnum,1,bunch);
     }
+    
+    appendCanvasImageToPage();
 
     /* DRAW WALLS SECTION! */
     for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
@@ -1748,6 +1755,7 @@ Engine.draWalls = function (bunch) {
         }
     }
     console.log("eo drawals")
+    appendCanvasImageToPage();
 };
 
 //2593
@@ -2767,11 +2775,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 p.position = x; // could be dodgy sharing this position?
 
                 //if (ud.playing_demo_rev == 117) {
-                //    updateCanvas();
-                //    var img = document.createElement("img");
-                //    img.src = surface.toDataURL("image/png");
-                //    document.getElementById("canvasDebug").appendChild(img);
-                //}
+                appendCanvasImageToPage();
 
                 u4 = Math.max(Math.max(y1ve[0], y1ve[1]), Math.max(y1ve[2], y1ve[3]));
                 d4 = Math.min(Math.min(y2ve[0], y2ve[1]), Math.min(y2ve[2], y2ve[3]));

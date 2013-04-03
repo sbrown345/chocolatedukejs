@@ -7,8 +7,7 @@ var transluc = new Uint8Array(65536 / 4);
 var MAX_PIXEL_RENDERERED = ((1600 * 1200) + 20000);
 var pixelsAllowed = 10000000000;
 
-function shrd(a, b, c) { return ((b) << (32 - (c))) | ((a) >> (c)); }
-function shld(a, b, c) { return (((b) >> (32 - (c))) | ((a) << (c))); }
+function shld(a, b, c) { return (((b) >>> (32 - (c))) | ((a) << (c))); }
 
 var RENDER_DRAW_WALL_BORDERS = 1;
 var RENDER_DRAW_WALL_INSIDE = 1;
@@ -40,19 +39,18 @@ function sethlinesizes(i1, _bits, textureAddress) {
 
 //FCS:   Draw ceiling/floors
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
-//var hlineasm4Count = 0;
+var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
 
-    //console.log("hlineasm4Count: %i, numPixels: %i", hlineasm4Count, numPixels);
     var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
 
     var texture = textureSetup;
     var bits = bitsSetup;
 
-    i4 = i4 | 0; // it is int32
-    i5 = i5 >>> 0; // it is uint32
+    i4 = i4 >> 0; // uint32
+    i5 = i5 >>> 0; // uint32
 
     shade = shade & 0xffffff00;
     numPixels++;
@@ -65,25 +63,28 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     while (numPixels) {
 
         source = i5 >>> shifter;
-        source = shld(source, i4, bits);
+        source = shld(source, i4, bits) >>> 0;
         source = texture[source];
-        //console.log("numPixels: %i, source: %i", numPixels, source);
+
+        if (source === undefined)
+            debugger;
 
         // throw "todo: palookup is a list of pointers itself? - to a pallet or something";
         // globalpalwritten points to the first palookup pointer
         if (pixelsAllowed-- > 0) {
             destArray[destOffset] = globalpalwritten[shade | source];
+            //console.log("hlineasm4Count: %i, numPixels: %i, shade: %i, i4: %i, i5: %i", hlineasm4Count, numPixels, shade, i4, i5);
             //console.log("dest: %i", destArray[destOffset]);
         }
 
         destOffset--;
 
-        i5 -= asm1;
-        i4 -= asm2;
+        i5 = (i5 - asm1) >>> 0;
+        i4 = (i4 - asm2) >>> 0;
 
         numPixels--;
     }
-    //hlineasm4Count++;
+    hlineasm4Count++;
 }
 
 // 89
@@ -257,7 +258,6 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
             temp = bufplcArray[bufplce[i] + temp]; // get texture
-            //todo: console.warn("palookup[palookupoffse[i] + temp]; is a ref, what is this doing:?")
             frameBufferArray[dest + index + i] = palookup[palookupoffse[i]][temp]; // add texture to framebuffer
             vplce[i] += vince[i];
         }

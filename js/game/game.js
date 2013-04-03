@@ -2,13 +2,23 @@
 
 var Game = {};
 
+var appendImageDebug = false;
+function appendCanvasImageToPage() {
+    if (!appendImageDebug) return;
+    
+    updateCanvas();
+    var img = document.createElement("img");
+    img.src = surface.toDataURL("image/png");
+    document.getElementById("canvasDebug").appendChild(img);
+}
+
 var nHostForceDisableAutoaim = 0;
 
 // Game play speed
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
 var TICRATE = g_iTickRate;
-var TICSPERFRAME = (TICRATE / g_iTicksPerFrame);
+var TICSPERFRAME = (TICRATE / g_iTicksPerFrame) | 0;
 
 var CommandSoundToggleOff = 0;
 var CommandMusicToggleOff = 0;
@@ -2860,7 +2870,9 @@ Game.playBack = function () {
                     nonsharedkeys();
                 } else {
                     j = Math.min(Math.max((totalclock - lockclock) * (65536 / TICSPERFRAME), 0), 65536);
+                    appendImageDebug = true;
                     Game.displayRooms(screenpeek, j); //MAJOR BIT HERE!
+                    appendImageDebug = false;
                     displayrest(j);
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm)
