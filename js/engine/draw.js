@@ -51,7 +51,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     var texture = textureSetup;
     var bits = bitsSetup;
 
-    //i4 = i4 | 0; // it is int32
+    i4 = i4 | 0; // it is int32
     i5 = i5 >>> 0; // it is uint32
 
     shade = shade & 0xffffff00;
@@ -257,7 +257,8 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
             temp = bufplcArray[bufplce[i] + temp]; // get texture
-            frameBufferArray[dest + index + i] = palookup[palookupoffse[i] + temp]; // add texture to framebuffer
+            //todo: console.warn("palookup[palookupoffse[i] + temp]; is a ref, what is this doing:?")
+            frameBufferArray[dest + index + i] = palookup[palookupoffse[i]][temp]; // add texture to framebuffer
             vplce[i] += vince[i];
         }
     }

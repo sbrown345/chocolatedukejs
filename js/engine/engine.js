@@ -2676,12 +2676,12 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     setgotpic(picnum);
     bufplc = new PointerHelper(tiles[picnum].data);
-
+    var paLookupResult = (Engine.getpalookup(0, dashade) << 8);
     palookupoffs = [
-         dapalnum + (Engine.getpalookup(0, dashade) << 8),
-         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 1,
-         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 2,
-         dapalnum + (Engine.getpalookup(0, dashade) << 8) + 3
+        palookup[dapalnum][paLookupResult + 0],
+        palookup[dapalnum][paLookupResult + 1],
+        palookup[dapalnum][paLookupResult + 2],
+        palookup[dapalnum][paLookupResult + 3]
     ];
 
     i = divScale32(1, z);
@@ -2736,7 +2736,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             yv <<= 8;
             yv2 <<= 8;
 
-            palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs;
+            palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs[0];
             vince[0] = vince[1] = vince[2] = vince[3] = yv;
 
             for (x = x1; x < x2; x += 4) {
