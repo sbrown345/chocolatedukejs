@@ -907,9 +907,8 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     while ((umost[x] > dmost[x]) && (x <= x2))
         x++;
 
-    debugger;
     console.log("((x+frameoffset-(uint8_t*)NULL)&3): %i",  (x + frameoffset.array[0]) &3);
-    for (; (x <= x2) && (x + frameoffset.array[0]) & 3; x++)
+    for (; (x <= x2) && ((x + frameoffset.position) & 3); x++)
     {
         y1ve[0] = Math.max(uwal[x],umost[x]);
         y2ve[0] = Math.min(dwal[x],dmost[x]);
@@ -937,7 +936,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
         debugger;
-        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], bufplce[0] + tiles[globalpicnum].data, x + ylookup[y1ve[0]], frameoffset);
+        vlineasm1(vince[0], palookup[palookupoffse[0]], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
     }
     
     for(; x<=x2-3; x+=4)
@@ -1053,8 +1052,8 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        debugger;
-        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
+        console.log("todo?")
+        vlineasm1(vince[0], palookup[palookupoffse[0]], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
     }
     faketimerhandler();
 }
