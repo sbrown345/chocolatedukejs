@@ -150,6 +150,10 @@ var mach3_al = 0;
 
 //FCS:  RENDER TOP AND BOTTOM COLUMN
 function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, dest) {
+    if (arguments.length != 8) {
+        throw new Error("prevlineasm1 should have 8 arguments");
+    }
+
     if (i3 == 0) {
         if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
             return 0;
@@ -319,7 +323,7 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
             temp = bufplcArray[bufplce[i] + temp]; // get texture
             if (temp !== 255) {
                 //if (pixelsAllowed-- > 0)
-                frameBufferArray[dest + index + i] = palookup[palookupoffse[i] + temp];
+                frameBufferArray[dest + index + i] = palookup[palookupoffse[i]][temp];
             }
             vplce[i] += vince[i];
         }

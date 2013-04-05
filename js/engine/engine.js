@@ -2806,7 +2806,9 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[3])
                         vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
 
-                    if (d4 >= u4) vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
+                    if (d4 >= u4) {
+                        vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
+                    }
 
                     i = p.position + ylookup[d4 + 1];
                     if (y2ve[0] > d4)
@@ -2827,10 +2829,10 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         continue;
                     }
 
-                    if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
-                    if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
-                    if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
-                    if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
+                    if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + 0, p);
+                    if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + 1, p);
+                    if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + 2, p);
+                    if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + 3, p);
 
                     if (d4 >= u4) mvlineasm4(d4 - u4 + 1, bufplc, ylookup[u4] + p.position, p);
 

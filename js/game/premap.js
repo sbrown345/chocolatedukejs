@@ -1062,7 +1062,7 @@ preMap.enterLevel = function (g) {
 
     i = ud.screen_size;
     ud.screen_size = 0;
-    preMap.doFrontScreens();
+    preMap.doFrontScreens(); // todo: maybe a pause to let it render the loading screen
     preMap.vscrn();
     ud.screen_size = i;
 
