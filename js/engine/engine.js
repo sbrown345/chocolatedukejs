@@ -907,7 +907,6 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     while ((umost[x] > dmost[x]) && (x <= x2))
         x++;
 
-    console.log("((x+frameoffset-(uint8_t*)NULL)&3): %i",  (x + frameoffset.array[0]) &3);
     for (; (x <= x2) && ((x + frameoffset.position) & 3); x++)
     {
         y1ve[0] = Math.max(uwal[x],umost[x]);
@@ -935,7 +934,6 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        debugger;
         vlineasm1(vince[0], palookup[palookupoffse[0]], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
     }
     
@@ -1002,18 +1000,21 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         }
 
         if (u4 > y1ve[0])
-            vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + x + 0, frameoffset);
+            vplce[0] = prevlineasm1(vince[0], palookup[palookupoffse[0]], u4 - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data,bufplce[0], ylookup[y1ve[0]] + x + 0, frameoffset);
         if (u4 > y1ve[1])
-            vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + x + 1, frameoffset);
+            vplce[1] = prevlineasm1(vince[1], palookup[palookupoffse[1]], u4 - y1ve[1] - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + x + 1, frameoffset);
         if (u4 > y1ve[2])
-            vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + x + 2, frameoffset);
+            vplce[2] = prevlineasm1(vince[2], palookup[palookupoffse[2]], u4 - y1ve[2] - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + x + 2, frameoffset);
         if (u4 > y1ve[3])
-            vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + x + 3, frameoffset);
+            vplce[3] = prevlineasm1(vince[3], palookup[palookupoffse[3]], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + x + 3, frameoffset);
 
         if (d4 >= u4) {
-            console.log("columnIndex: %i ", d4 - u4 + 1);
+            if ((d4 - u4 + 1) == 134 && (ylookup[u4] + x) == 168964) {
+                appendImageDebug = true;
+            }
             vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x /*+ frameoffset*/);
-            appendCanvasImageToPage((d4 - u4 + 1) + " " + (ylookup[u4] + x));
+            appendImageDebug = false;
+            //appendCanvasImageToPage((d4 - u4 + 1) + " " + (ylookup[u4] + x));
         }
 
         i = x + frameoffset.position + ylookup[d4 + 1];
@@ -1052,7 +1053,6 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        console.log("todo?")
         vlineasm1(vince[0], palookup[palookupoffse[0]], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
     }
     faketimerhandler();
@@ -1872,7 +1872,8 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     if (stereomode != 0) {
         throw "todo - need to cater for viewoffset and frameoffset";
     }
-    //frameoffset = frameplace.position + viewoffset;
+
+    //todo: frameoffset.position = frameplace.position + viewoffset;    //original: frameoffset = frameplace.position + viewoffset;
 
     //Clear the bit vector that keep track of what sector has been flooded in.
     clearbufbyte(visitedSectors, 0, ((numsectors + 7) >> 3), 0);

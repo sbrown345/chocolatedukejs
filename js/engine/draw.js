@@ -119,7 +119,7 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
     if (i1 <= 0) return;
 
     for (numPixels = i1; numPixels; numPixels--) {
-        i3 = (/*(i3 & 0xffffff00) |  not sure what this is? */textureArray[texturePosition]);
+        i3 = (/*(i3 & 0xffffff00) | todo: check actual original and reinstate? */textureArray[texturePosition]);
 
         i4 -= rmach_eax;
         i4 = i4 >>> 0;
@@ -149,23 +149,22 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
 var mach3_al = 0;
 
 //FCS:  RENDER TOP AND BOTTOM COLUMN
-function prevlineasm1(i1, palette, i3, i4, source, destOffset, dest) {
-    if (i3 == 0)
-    {
+function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, dest) {
+    if (i3 == 0) {
         if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
             return 0;
 
         i1 += i4;
         i4 = (i4) >>> mach3_al;
-        i4 = (i4&0xffffff00) | source[i4];
+        i4 = (i4 & 0xffffff00) | source[i4 + sourceOffset];
 
         if (pixelsAllowed-- > 0)
-            dest[destOffset] = palette[i4];
-		
+            dest.array[destOffset] = palette[i4];
+
 
         return i1;
     } else {
-        return vlineasm1(i1, palette, i3, i4, source, 0, destOffset, dest);
+        return vlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, dest);
     }
 }
 
@@ -266,7 +265,8 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
 
 //417
 // another try for wallscan. maybe merge the two together later
-function vlineasm4_2(columnIndex, frameBuffer) {
+// this draws a 4 pixel wide column. top to bottom.
+function vlineasm4_2(columnIndex, frameBufferPosition) {
     if (!RENDER_DRAW_WALL_INSIDE)
         return;
 
@@ -277,18 +277,19 @@ function vlineasm4_2(columnIndex, frameBuffer) {
     var i = 0;
     var temp;
 
-    var index = frameBuffer + ylookup[columnIndex];
+    var index = frameBufferPosition + ylookup[columnIndex];
     var dest = new PointerHelper(frameplace.array, -ylookup[columnIndex]);
     var destArray = dest.array;
-    for (; i < ((dest.position - bytesperline) >>> 0) < (dest.position >>> 0); dest.position += bytesperline) {
+    for (; i < ((dest.position >>> 0) - bytesperline) < (dest.position >>> 0); dest.position += bytesperline) {
         for (i = 0; i < 4; i++) {
             temp = (vplce[i]) >>> mach3_al;
             temp = tiles[globalpicnum].data[bufplce[i] + temp];
 
-            if (pixelsAllowed-- > 0) {
-                destArray[dest.position + index + i] = palookup[palookupoffse[i]][temp];
-            }
-
+            //if (pixelsAllowed-- > 0) {
+            destArray[dest.position + index + i] = palookup[palookupoffse[i]][temp];
+            //}
+            
+            //appendCanvasImageToPage((dest.position + index + i) + "=" + palookup[palookupoffse[i]][temp]);
             vplce[i] += vince[i];
         }
     }
