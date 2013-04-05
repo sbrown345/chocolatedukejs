@@ -2787,13 +2787,13 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 if (dastat & 64) {
                     if ((bad != 0) || (u4 >= d4)) {
                         if (!(bad & 1))
-                            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
+                            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + 0 + p.position, p.array);
                         if (!(bad & 2))
-                            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
+                            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + 1 + p.position, p.array);
                         if (!(bad & 4))
-                            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
+                            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + 2 + p.position, p.array);
                         if (!(bad & 8))
-                            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
+                            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p.array);
                         continue;
                     }
 

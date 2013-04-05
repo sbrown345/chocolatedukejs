@@ -108,7 +108,7 @@ var packbuf = new Uint8Array(576);
 var camsprite;
 var mirrorwall = new Int16Array(64), mirrorsector = new Int16Array(64), mirrorcnt = 0;
 
-//var current_menu;
+var current_menu = 0;
 
 //uint8_t  betaname[80];
 
@@ -219,7 +219,7 @@ var camerashitable, freezerhurtowner = 0, lasermode;
 var networkmode = 255, movesperpacket = 1, gamequit = 0, everyothertime;
 //// CTW END - MODIFICATION
 var numfreezebounces = 3, rpgblastradius, pipebombblastradius, tripbombblastradius, shrinkerblastradius, morterblastradius, bouncemineblastradius, seenineblastradius;
-//STATUSBARTYPE sbar;
+var sbar = new StatusBar();
 
 var myminlag = new Int32Array(MAXPLAYERS), mymaxlag, otherminlag, bufferjitter = 1;
 var numclouds, clouds = new Int16Array(128), cloudx = new Int16Array(128), cloudy = new Int16Array(128);

@@ -31,6 +31,7 @@ Console.init = function () {
     Console.printf("Type \'HELP\' for help with console Commands.");
 };
 
+//66
 Console.reset = function () {
     var element = consoleBuffer;
     while (element) {
@@ -44,12 +45,24 @@ Console.reset = function () {
     consoleCurrentView = null;
 };
 
+//92
 Console.parseStartupScript = function () {
     ////var startupScript = "startup.cfg";
     ////var file = open(startupScript);
     // todo parseStartupScript
 };
 
+//115
+Console.handleInput = function () {
+    // todo handleInput
+};
+
+//354
+Console.render = function () {
+    // todo console render
+};
+
+//561
 Console.printf = function (newMessage) {
     console.log(newMessage);
 

@@ -128,6 +128,10 @@ var MAXKEYBOARDSCAN  	=	128	;
 
 
 // "Macros"
+KB.keyPressed = function (scan) {
+    // todo
+};
+
 KB.clearKeyDown = function (scan) {
     // todo
 };

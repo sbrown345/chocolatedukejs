@@ -23,10 +23,9 @@ var CRC_BASE_GRP_FULL_13 = 0xBBC9CE44;
 var CRC_BASE_GRP_PLUTONIUM_14 = 0xF514A6AC;
 var CRC_BASE_GRP_ATOMIC_15 = 0xFD3DCFF1;
 
-function VOLUMEONE() {
-    // todo: change to getter
-    getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
-}
+window.__defineGetter__("VOLUMEONE", function () {
+    return getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
+});
 
 //152
 var NUMPAGES = 1;

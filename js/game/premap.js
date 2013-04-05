@@ -1066,7 +1066,7 @@ preMap.enterLevel = function (g) {
     preMap.vscrn();
     ud.screen_size = i;
 
-    if (!VOLUMEONE()) {
+    if (!VOLUMEONE) {
         if (boardfilename && ud.m_level_number == 7 && ud.m_volume_number == 0) {
             throw new Error("todo");
         } else {
