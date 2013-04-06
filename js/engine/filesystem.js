@@ -468,6 +468,7 @@ function kopen4load(filename, readfromGrp) {
 
 //}
 
+//332
 function kread(handle, buffer, leng) {
     var openFile = openFiles[handle];
 
@@ -487,6 +488,37 @@ function kread(handle, buffer, leng) {
     openFile.cursor += leng;
 }
 
+//368
+function kread16(handle) {
+    var openFile = openFiles[handle];
+
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFile.grpID];
+
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    openFile.cursor += 2;
+    return grpStream.readInt16();
+}
+
+//376
+function kread32(handle) {
+    var openFile = openFiles[handle];
+
+    if (!openFile.used) {
+        throw new Error("Invalid handle. Unrecoverable error.");
+    }
+
+    var archive = grpSet.archives[openFile.grpID];
+
+    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
+    openFile.cursor += 4;
+    return grpStream.readInt32();
+}
+
+//384
 function kread8(handle) {
     var openFile = openFiles[handle];
 
@@ -515,35 +547,7 @@ function kreadUint8(handle) {
     return grpStream.readUint8();
 }
 
-function kread16(handle) {
-    var openFile = openFiles[handle];
-
-    if (!openFile.used) {
-        throw new Error("Invalid handle. Unrecoverable error.");
-    }
-
-    var archive = grpSet.archives[openFile.grpID];
-
-    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
-    openFile.cursor += 2;
-    return grpStream.readInt16();
-}
-
-
-function kread32(handle) {
-    var openFile = openFiles[handle];
-
-    if (!openFile.used) {
-        throw new Error("Invalid handle. Unrecoverable error.");
-    }
-
-    var archive = grpSet.archives[openFile.grpID];
-
-    grpStream.seek(archive.fileOffsets[openFile.fd] + openFile.cursor);
-    openFile.cursor += 4;
-    return grpStream.readInt32();
-}
-
+//new for JS
 function kreadText(handle, leng) {
     var openFile = openFiles[handle];
 
@@ -566,8 +570,7 @@ function kreadText(handle, leng) {
     return text;
 }
 
-
-
+//391
 function klseek(handle, offset, whence) {
     if (!openFiles[handle].used) {
         throw new Error("Invalid handle. Unrecoverable error.");
@@ -589,6 +592,7 @@ function klseek(handle, offset, whence) {
     return openFiles[handle].cursor;
 }
 
+//428
 function kfilelength(handle) {
     var openFile = openFiles[handle];
 
@@ -604,6 +608,7 @@ function kfilelength(handle) {
     }
 }
 
+//449
 function kclose(handle) {
     var openFile = openFiles[handle];
 
@@ -614,6 +619,57 @@ function kclose(handle) {
     openFiles[handle] = new OpenFile();
 }
 
+//474
+/* Internal LZW variables */
+var LZWSIZE = 16384;/* Watch out for shorts! */
+var lzwbuf1, lzwbuf4, lzwbuf5;
+var lzwbuflock = new Uint8Array(5);
+var lzwbuf2, lzwbuf3;
+
+//584
+
+function kdfread(buffer, dasizeof, count, fil) {
+    var i, j;
+    var k, kgoal;
+    var leng;
+    var ptr;
+
+    lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 200;
+    if (!lzwbuf1) lzwbuf1 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); // allocache(&lzwbuf1,LZWSIZE+(LZWSIZE>>4),&lzwbuflock[0]);
+    if (!lzwbuf2) lzwbuf2 = new Uint8Array((LZWSIZE + (LZWSIZE >> 4)) * 2); //allocache((uint8_t**)&lzwbuf2,(LZWSIZE+(LZWSIZE>>4))*2,&lzwbuflock[1]);
+    if (!lzwbuf3) lzwbuf3 = new Uint8Array((LZWSIZE + (LZWSIZE >> 4)) * 2); //allocache((uint8_t**)&lzwbuf3,(LZWSIZE+(LZWSIZE>>4))*2,&lzwbuflock[2]);
+    if (!lzwbuf4) lzwbuf4 = new Uint8Array(LZWSIZE); //allocache(&lzwbuf4,LZWSIZE,&lzwbuflock[3]);
+    if (!lzwbuf5) lzwbuf5 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); //allocache(&lzwbuf5,LZWSIZE+(LZWSIZE>>4),&lzwbuflock[4]);
+
+    if (dasizeof > LZWSIZE) {
+        count *= dasizeof;
+        dasizeof = 1;
+    }
+    ptr = new PointerHelper(buffer);
+
+    kread(fil, leng, 2);
+    kread(fil, lzwbuf5, leng);
+    k = 0;
+    kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
+
+    copybufbyte(lzwbuf4, ptr.array, dasizeof);
+    k += dasizeof;
+
+    for (i = 1; i < count; i++) {
+        if (k >= kgoal) {
+            kread(fil, leng, 2);
+            kread(fil, lzwbuf5, leng);
+            k = 0;
+            kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
+        }
+        for (j = 0; j < dasizeof; j++) ptr.array[j + dasizeof] = /*(uint8_t )*/ ((ptr.array[j] + lzwbuf4[j + k]) & 255);
+        k += dasizeof;
+        ptr.position += dasizeof;
+    }
+    lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
+}
+
+//713
 function TCkopen4load(filename, readfromGrp) {
     var fullFilename = "";
     var result = 0;

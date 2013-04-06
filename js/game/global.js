@@ -144,7 +144,7 @@ var syncstat, syncval = new multiDimArray(Uint8Array, MAXPLAYERS, MOVEFIFOSIZ);
 var syncvalhead = new Int32Array(MAXPLAYERS), syncvaltail, syncvaltottail;
 
 var sync /*[MAXPLAYERS]*/, loc;
-//input recsync[RECSYNCBUFSIZ];
+var recsync = structArray(Input, RECSYNCBUFSIZ);
 var avgfvel, avgsvel, avgavel, avghorz, avgbits;
 
 

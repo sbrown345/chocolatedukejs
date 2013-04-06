@@ -1647,7 +1647,6 @@ function spawn(j, pn) {
             changespritestat(i, 4);
             break;
         case NATURALLIGHTNING:
-            throw new Error("todo");
             sp.cstat &= ~257;
             sp.cstat |= 32768;
             break;
@@ -3731,12 +3730,11 @@ Game.playBack = function () {
             console.log("demo loop");
             if (foundemo) {
                 while (totalclock >= (lockclock + TICSPERFRAME)) {
-                    throw new Error("todo");
-
+                    debugger;
                     if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
                         i = 0;
                         l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
-                        kdfread(recsync, 10 * ud.multimode, l / ud.multimode, recfilep);
+                        kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
                     }
 
                     for (j = connecthead; j >= 0; j = connectpoint2[j]) {
@@ -3748,6 +3746,7 @@ Game.playBack = function () {
                     }
                     domovethings();
 
+                    throw new Error("todo");
                 }
             }
 
