@@ -287,8 +287,8 @@ function PointerHelper(array, position) {
 PointerHelper.prototype.setByte = function (v) {
     this.array[this.position] = v;
 };
-PointerHelper.prototype.getByte = function () {
-    return this.array[this.position];
+PointerHelper.prototype.getByte = function (offset) {
+    return this.array[this.position + (offset || 0)];
 };
 
 function _nextpage() {

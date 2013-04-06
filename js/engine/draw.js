@@ -163,7 +163,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
         i4 = (i4 & 0xffffff00) | source[i4 + sourceOffset];
 
         if (pixelsAllowed-- > 0)
-            dest.array[destOffset] = palette[i4];
+            dest.array[destOffset] = palette.getByte(i4);
 
 
         return i1;
@@ -193,7 +193,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
         temp = texture[textureOffset + temp];
       
         if (pixelsAllowed-- > 0)
-            dest[destOffset] = palookupoffse[temp];
+            dest[destOffset] = palookupoffse.getByte(temp);
 	    
         vplce += vince;
         destOffset += bytesperline;
@@ -220,7 +220,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
 
         if (temp != 255) {
             if (pixelsAllowed-- > 0) {
-                destArray[destPosition + dest.position] = palookup[palookupoffse][temp];
+                destArray[destPosition + dest.position] = palookupoffse.getByte(temp);
             }
         }
 
@@ -246,7 +246,7 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
     if (arguments.length != 4) {
         throw new Error("todo: vlineasm4 should have 4 arguments");
     }
-
+    
     frameBuffer.position += frameBufferPosition;
 
     var i;
@@ -261,7 +261,7 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
             temp = bufplcArray[bufplce[i] + temp]; // get texture
-            frameBufferArray[dest + index + i] = palookup[palookupoffse[i]][temp]; // add texture to framebuffer
+            frameBufferArray[dest + index + i] = palookupoffse[i].getByte(temp); // add texture to framebuffer
             vplce[i] += vince[i];
         }
     }
@@ -290,7 +290,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
             temp = tiles[globalpicnum].data[bufplce[i] + temp];
 
             //if (pixelsAllowed-- > 0) {
-            destArray[dest.position + index + i] = palookup[palookupoffse[i]][temp];
+            destArray[dest.position + index + i] = palookupoffse[i].getByte(temp);
             //}
             
             //appendCanvasImageToPage((dest.position + index + i) + "=" + palookup[palookupoffse[i]][temp]);
@@ -323,7 +323,7 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
             temp = bufplcArray[bufplce[i] + temp]; // get texture
             if (temp !== 255) {
                 //if (pixelsAllowed-- > 0)
-                frameBufferArray[dest + index + i] = palookup[palookupoffse[i]][temp];
+                frameBufferArray[dest + index + i] = palookupoffse[i].getByte(temp);
             }
             vplce[i] += vince[i];
         }
