@@ -162,6 +162,7 @@ function myospal(x, y, tilenum, shade, orientation, p) {
 //1473
 
 function weaponnum(ind, x, y, num1, num2, ha) {
+    ha = toUint8(ha);
     var dabuf = "";
 
     rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
@@ -190,7 +191,8 @@ function weaponnum(ind, x, y, num1, num2, ha) {
 
 //1501
 
-function weaponnum999(  ind, x, y, num1,  num2,  ha) {
+function weaponnum999(ind, x, y, num1, num2, ha) {
+    ha = toUint8(ha);
     var dabuf = "";
     rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
     rotateSprite((x-4)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
@@ -236,14 +238,14 @@ function weapon_amounts(p, x, y, u) {
 
     if (u&4)
     {
-        if (u != 0xffffffff) patchstatusbar(96,178,96+12,178+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(96,178,96+12,178+6);
         weaponnum999(PISTOL_WEAPON,x,y,
 			p.ammo_amount[PISTOL_WEAPON],max_ammo_amount[PISTOL_WEAPON],
 			12-20*(cw == PISTOL_WEAPON) );
     }
     if (u&8)
     {
-        if (u != 0xffffffff) patchstatusbar(96,184,96+12,184+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(96, 184, 96 + 12, 184 + 6);
         weaponnum999(SHOTGUN_WEAPON,x,y+6,
 			p.ammo_amount[SHOTGUN_WEAPON],max_ammo_amount[SHOTGUN_WEAPON],
 			(!p.gotweapon[SHOTGUN_WEAPON]*9)+12-18*
@@ -251,7 +253,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&16)
     {
-        if (u != 0xffffffff) patchstatusbar(96,190,96+12,190+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(96, 190, 96 + 12, 190 + 6);
         weaponnum999(CHAINGUN_WEAPON,x,y+12,
 			p.ammo_amount[CHAINGUN_WEAPON],max_ammo_amount[CHAINGUN_WEAPON],
 			(!p.gotweapon[CHAINGUN_WEAPON]*9)+12-18*
@@ -259,7 +261,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&32)
     {
-        if (u != 0xffffffff) patchstatusbar(135,178,135+8,178+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(135, 178, 135 + 8, 178 + 6);
         weaponnum(RPG_WEAPON,x+39,y,
 			p.ammo_amount[RPG_WEAPON],max_ammo_amount[RPG_WEAPON],
 			(!p.gotweapon[RPG_WEAPON]*9)+12-19*
@@ -267,7 +269,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&64)
     {
-        if (u != 0xffffffff) patchstatusbar(135,184,135+8,184+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(135, 184, 135 + 8, 184 + 6);
         weaponnum(HANDBOMB_WEAPON,x+39,y+6,
 			p.ammo_amount[HANDBOMB_WEAPON],max_ammo_amount[HANDBOMB_WEAPON],
 			(((!p.ammo_amount[HANDBOMB_WEAPON])|(!p.gotweapon[HANDBOMB_WEAPON]))*9)+12-19*
@@ -275,7 +277,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&128)
     {
-        if (u != 0xffffffff) patchstatusbar(135,190,135+8,190+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(135, 190, 135 + 8, 190 + 6);
 
         if(VOLUMEONE)
         {
@@ -300,7 +302,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&256)
     {
-        if (u != 0xffffffff) patchstatusbar(166,178,166+8,178+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(166, 178, 166 + 8, 178 + 6);
 
         if(VOLUMEONE)
         {
@@ -319,7 +321,7 @@ function weapon_amounts(p, x, y, u) {
     }
     if (u&512)
     {
-        if (u != 0xffffffff) patchstatusbar(166,184,166+8,184+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(166, 184, 166 + 8, 184 + 6);
         if(VOLUMEONE)
         {
             orderweaponnum(TRIPBOMB_WEAPON,x+70,y+6,
@@ -338,7 +340,7 @@ function weapon_amounts(p, x, y, u) {
 
     if (u&65536)
     {
-        if (u != 0xffffffff) patchstatusbar(166,190,166+8,190+6);
+        if (u != (0xffffffff | 0)) patchstatusbar(166, 190, 166 + 8, 190 + 6);
         if(VOLUMEONE)
         {
             orderweaponnum(-1,x+70,y+12,
@@ -434,9 +436,9 @@ function coolgaugetext(snum) {
 
     offy += preMap.countFragBars(); //add fragbars
     var offxRef = new Ref(offx);
-    var offyRef = new Ref(offx);
-    var stepxRef = new Ref(offx);
-    var stepyRef = new Ref(offx);
+    var offyRef = new Ref(offy);
+    var stepxRef = new Ref(stepx);
+    var stepyRef = new Ref(stepy);
     display_boardfilename_FPS_weapon(offxRef, offyRef, stepxRef, stepyRef);
     offx = offxRef.$;
     offy = offyRef.$;
@@ -545,7 +547,7 @@ function coolgaugetext(snum) {
 
     //DRAW/UPDATE FULL STATUS BAR:
 
-    if (pus) { pus = 0; u = 0xffffffff; } else u = 0;
+    if (pus) { pus = 0; u = 0xffffffff | 0; } else u = 0;
 
     if (sbar.frag[myconnectindex] != p.frag) { sbar.frag[myconnectindex] = p.frag; u |= 32768; }
     if (sbar.got_access != p.got_access) { sbar.got_access = p.got_access; u |= 16384; }
@@ -590,7 +592,7 @@ function coolgaugetext(snum) {
     //15 - update kills
     //16 - update FREEZE_WEAPON ammo
 
-    if (u == 0xffffffff)
+    if (u == (0xffffffff | 0))
     {
         patchstatusbar(0,0,320,200);
         if (ud.multimode > 1 && ud.coop != 1)
@@ -600,7 +602,7 @@ function coolgaugetext(snum) {
     {
         if (u&32768)
         {
-            if (u != 0xffffffff) patchstatusbar(276,183,299,193);
+            if (u != (0xffffffff | 0)) patchstatusbar(276, 183, 299, 193);
             digitalnumber(287,200-17,max(p.frag-p.fraggedself,0),-16,10+16+128);
         }
     }
@@ -608,7 +610,7 @@ function coolgaugetext(snum) {
     {
         if (u&16384)
         {
-            if (u != 0xffffffff) patchstatusbar(275,182,299,194);
+            if (u != (0xffffffff | 0)) patchstatusbar(275, 182, 299, 194);
             if (p.got_access&4) rotateSprite(275<<16,182<<16,65536,0,ACCESS_ICON,0,23,10+16+128,0,0,xdim-1,ydim-1);
             if (p.got_access&2) rotateSprite(288<<16,182<<16,65536,0,ACCESS_ICON,0,21,10+16+128,0,0,xdim-1,ydim-1);
             if (p.got_access&1) rotateSprite(281<<16,189<<16,65536,0,ACCESS_ICON,0,0,10+16+128,0,0,xdim-1,ydim-1);
@@ -618,20 +620,20 @@ function coolgaugetext(snum) {
 
     if (u&1)
     {
-        if (u != 0xffffffff) patchstatusbar(20,183,43,193);
+        if (u != (0xffffffff | 0)) patchstatusbar(20, 183, 43, 193);
         if(sprite[p.i].pal == 1 && p.last_extra < 2)
             digitalnumber(32,200-17,1,-16,10+16+128);
         else digitalnumber(32,200-17,p.last_extra,-16,10+16+128);
     }
     if (u&2)
     {
-        if (u != 0xffffffff) patchstatusbar(52,183,75,193);
+        if (u != (0xffffffff | 0)) patchstatusbar(52, 183, 75, 193);
         digitalnumber(64,200-17,p.shield_amount,-16,10+16+128);
     }
 
     if (u&1024)
     {
-        if (u != 0xffffffff) patchstatusbar(196,183,219,193);
+        if (u != (0xffffffff | 0)) patchstatusbar(196, 183, 219, 193);
         if (p.curr_weapon != KNEE_WEAPON)
         {
             if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
@@ -641,7 +643,7 @@ function coolgaugetext(snum) {
 
     //if (u&(2048+4096+8192))
     //{
-    //    if (u != 0xffffffff)
+    //    if (u != (0xffffffff | 0))
     //    {
     //        if (u&(2048+4096)) { patchstatusbar(231,179,265,197); }
     //        else { patchstatusbar(250,190,261,195); }
@@ -3649,10 +3651,11 @@ Game.playBack = function () {
                     nonsharedkeys();
                 } else {
                     j = Math.min(Math.max((totalclock - lockclock) * (65536 / TICSPERFRAME), 0), 65536);
-                    appendImageDebug = true;
+                    
                     Game.displayRooms(screenpeek, j); //MAJOR BIT HERE!
-                    appendImageDebug = false;
+                    //appendImageDebug = true;
                     displayrest(j);
+                    //appendImageDebug = false;
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm)
                         getPackets();

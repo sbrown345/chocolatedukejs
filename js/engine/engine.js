@@ -583,9 +583,7 @@ function prepwall(z, wal) {
 
 
 //658
-Engine.getpalookup = function (davis, dashade) {
-    return Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1);
-};
+
 
 function getpalookup(davis, dashade) {
     return (Math.min(Math.max(dashade + (davis >> 8), 0), numpalookups - 1));
@@ -2558,8 +2556,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         xoff = 0;
         yoff = 0;
     } else {
-        xoff = ((tiles[picnum].animFlags >> 8) & 255) + (tileWidht >> 1);
-        yoff = ((tiles[picnum].animFlags >> 16) & 255) + (tileHeight >> 1);
+        xoff = (toInt8((tiles[picnum].animFlags >> 8) & 255)) + (tileWidht >> 1);
+        yoff = (toInt8((tiles[picnum].animFlags >> 16) & 255)) + (tileHeight >> 1);
     }
 
     if (dastat & 4) {
@@ -2688,13 +2686,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     setgotpic(picnum);
     bufplc = new PointerHelper(tiles[picnum].data);
-    var paLookupResult = (Engine.getpalookup(0, dashade) << 8);
-    palookupoffs = [
-        palookup[dapalnum][paLookupResult + 0],
-        palookup[dapalnum][paLookupResult + 1],
-        palookup[dapalnum][paLookupResult + 2],
-        palookup[dapalnum][paLookupResult + 3]
-    ];
+    var paLookupResult = (getpalookup(0, dashade) << 8);
+    palookupoffs = dapalnum + paLookupResult;
 
     i = divScale32(1, z);
     xv = mulscale14(sinang, i);
@@ -2748,7 +2741,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             yv <<= 8;
             yv2 <<= 8;
 
-            palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs[0];
+            palookupoffse[0] = palookupoffse[1] = palookupoffse[2] = palookupoffse[3] = palookupoffs;
             vince[0] = vince[1] = vince[2] = vince[3] = yv;
 
             for (x = x1; x < x2; x += 4) {
@@ -2849,15 +2842,15 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
             if (dastat & 64) {
                 if ((xv2 & 0x0000ffff) == 0) {
                     qlinemode = 1;
-                    setuprhlineasm4(0, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs[0], 0, 0);
+                    setuprhlineasm4(0, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, 0, 0);
                 }
                 else {
                     qlinemode = 0;
-                    setuprhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs[0], tileHeight, 0);
+                    setuprhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
                 }
             }
             else {
-                setuprmhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs[0], tileHeight, 0);
+                setuprmhlineasm4(xv2 << 16, yv2 << 16, (xv2 >> 16) * tileHeight + (yv2 >> 16), palookupoffs, tileHeight, 0);
             }
 
             y1 = uplc[x1];
@@ -4140,6 +4133,9 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
     var i;
     var per, per2;
 
+    dashade = toInt8(dashade);
+    dastat = toUint8(dastat);
+
     //If 2D target coordinate do not make sense (left > right)..
     if ((cx1 > cx2) || (cy1 > cy2))
         return;
@@ -4160,6 +4156,7 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
         //console.time("doRotateSprite")
         //console.profile("doRotateSprite")
         doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2);
+        appendCanvasImageToPage(new Error().stack)
         //console.profileEnd("doRotateSprite")
         //console.timeEnd("doRotateSprite")
     }

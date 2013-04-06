@@ -175,9 +175,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
 //250
 //FCS: This is used to draw wall border vertical lines
 function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffset, destOffset, dest) {
-    if (arguments.length != 8) {
-        throw new Error("vlineasm1 should have 8 arguments");
-    }
+    console.assert(arguments.length == 8);
 
     if (dest.length === undefined)
         throw "dest should have a length e.g. be an array";
@@ -209,27 +207,29 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {
     console.log("todo test mvlineasm1 (breaks console text if not used)");
+    console.assert(arguments.length == 8);
+    console.assert(dest instanceof PointerHelper);
 
-    //var temp;
-    //var textureArray = texture.array;
-    //var destArray = dest.array;
+    var temp;
+    var textureArray = texture.array;
+    var destArray = dest.array;
 
-    //for (; i3 >= 0; i3--) {
-    //    temp = ((vplce >>> 0) >> machmv) >>> 0;
-    //    temp = textureArray[temp];
+    for (; i3 >= 0; i3--) {
+        temp = ((vplce >>> 0) >> machmv) >>> 0;
+        temp = textureArray[texturePosition + temp];
 
-    //    if (temp != 255) {
-    //        if (pixelsAllowed-- > 0) {
-    //            destArray[destPosition] = palookupoffse[temp];
-    //        }
-    //    }
+        if (temp != 255) {
+            if (pixelsAllowed-- > 0) {
+                destArray[destPosition] = palookup[palookupoffse][temp];
+            }
+        }
 
-    //    vplce += vince;
-    //    destPosition += bytesperline;
-    //}
-    //dest.position = destPosition;
-    //texture.position = texturePosition;
-    //return vplce;
+        vplce += vince;
+        destPosition += bytesperline;
+    }
+    dest.position = destPosition;
+    texture.position = texturePosition;
+    return vplce;
 }
 
 
