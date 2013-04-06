@@ -194,37 +194,38 @@ function weaponnum(ind, x, y, num1, num2, ha) {
 function weaponnum999(ind, x, y, num1, num2, ha) {
     ha = toUint8(ha);
     var dabuf = "";
-    rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
     rotateSprite((x-4)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
+    rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
     rotateSprite((x+13)<<16,y<<16,65536,0,THREEBYFIVE+11,ha,0,10+128,0,0,xdim-1,ydim-1);
 
     dabuf = String(num1);
-    if(num1 > 99)
+    if (num1 > 99)
     {
-        rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf[0]-'0'.charCodeAt(0),ha,0,10+128,0,0,xdim-1,ydim-1);
-        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-        rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[2].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,10+128,0,0,xdim-1,ydim-1);
+        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
     else if(num1 > 9)
     {
-        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-        rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
-    else rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    else rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
 
     dabuf = String(num2);
     if (num2 > 99)
     {
-        rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-        rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-        rotateSprite((x + 25) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[2].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 25) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
     else if(num2 > 9)
     {
-        rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-        rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
-    else rotateSprite((x + 25) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    else rotateSprite((x + 25) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+
 }
 
 

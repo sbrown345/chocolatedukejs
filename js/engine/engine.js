@@ -2663,10 +2663,14 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     for (v = npoints - 1; v >= 0; v--) {
         x1 = pvWalls[v].cameraSpaceCoo[0][VEC_X];
         x2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_X];
+        //console.log("x1: %i, x2: %i", x1, x2);
         dax1 = (x1 >> 16);
-        if (x1 < lx) lx = x1;
+        if (x1 < lx)
+            lx = x1;
         dax2 = (x2 >> 16);
-        if (x1 > rx) rx = x1;
+        if (x1 > rx)
+            rx = x1;
+        //console.log("lx: %i, rx: %i", lx, rx);
         if (dax1 != dax2) {
             y1 = pvWalls[v].cameraSpaceCoo[0][VEC_Y];
             y2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_Y];
@@ -2759,6 +2763,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (y2 <= y1) continue;
 
                     by += yv * (y1 - oy);
+                    by = by | 0;
                     oy = y1;
 
                     bufplce[xx] = (bx >> 16) * tileHeight + bufplc.position;

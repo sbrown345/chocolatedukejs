@@ -220,7 +220,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
 
         if (temp != 255) {
             if (pixelsAllowed-- > 0) {
-                destArray[destPosition] = palookup[palookupoffse][temp];
+                destArray[destPosition + dest.position] = palookup[palookupoffse][temp];
             }
         }
 
