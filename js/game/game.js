@@ -51,6 +51,65 @@ var recfilep, totalreccnt;
 var restorepalette, screencapt, nomorelogohack = 0;
 var sendmessagecommand = -1;
 
+
+//152
+function gametext(x, y, t, s, dabits) {
+    console.log(t);
+    var ac, newx;
+    var oldt;
+    var centre;
+
+    centre = (x == (320 >> 1));
+    newx = 0;
+    var tIdx = 0;
+    if (centre) {
+        while (t.charCodeAt(tIdx)) {
+            if (t.charCodeAt(tIdx) == 32) {
+                newx += 5;
+                tIdx++;
+                continue;
+            } else ac = t.charCodeAt(tIdx) - '!'.charCodeAt(0) + STARTALPHANUM;
+
+            if (ac < STARTALPHANUM || ac > ENDALPHANUM) break;
+
+            if (t.charCodeAt(tIdx) >= '0' && t.charCodeAt(tIdx) <= '9')
+                newx += 8;
+            else newx += tiles[ac].dim.width;
+            tIdx++;
+        }
+
+        tIdx = 0;
+        x = (320 >> 1) - (newx >> 1);
+    }
+
+    while (t.charCodeAt(tIdx)) {
+        if (t.charCodeAt(tIdx) == 32) {
+            x += 5;
+            tIdx++;
+            continue;
+        } else ac = t.charCodeAt(tIdx) - '!'.charCodeAt(0) + STARTALPHANUM;
+
+        if (ac < STARTALPHANUM || ac > ENDALPHANUM)
+            break;
+
+        rotateSprite(x << 16, y << 16, 65536, 0, ac, s, 0, dabits, 0, 0, xdim - 1, ydim - 1);
+
+        if (t.charCodeAt(tIdx) >= '0' && t.charCodeAt(tIdx) <= '9')
+            x += 8;
+        else x += tiles[ac].dim.width;
+
+        tIdx++;
+    }
+
+    return (x);
+}
+
+//392
+var MAXUSERQUOTES = 4;
+var quotebot = 0, quotebotgoal = 0;
+var user_quote_time = new Int16Array(MAXUSERQUOTES);
+var user_quote = new Array(MAXUSERQUOTES);
+
 //459
 function getPackets() {
     //int32_t i, j, k, l;
@@ -701,8 +760,55 @@ function coolgaugetext(snum) {
 
 //2279
 function operatefta() {
-    // todo
-    console.log("todo operatefta");
+    var i, j, k;
+    if(ud.screen_size > 0) j = 200-45; else j = 200-8;
+    quotebot = Math.min(quotebot,j);
+    quotebotgoal = Math.min(quotebotgoal, j);
+    if(ps[myconnectindex].gm&MODE_TYPE) j -= 8;
+    quotebotgoal = j; j = quotebot;
+    for(i=0;i<MAXUSERQUOTES;i++)
+    {
+        k = user_quote_time[i]; if (k <= 0) break;
+
+        if (k > 4)
+            gametext(320>>1,j,user_quote[i],0,2+8+16);
+        else if (k > 2) gametext(320>>1,j,user_quote[i],0,2+8+16+1);
+        else gametext(320>>1,j,user_quote[i],0,2+8+16+1+32);
+        j -= 8;
+    }
+
+    if (ps[screenpeek].fta <= 1) return;
+
+    if (ud.coop != 1 && ud.screen_size > 0 && ud.multimode > 1)
+    {
+        j = 0; k = 8;
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+            if (i > j) j = i;
+
+        if (j >= 4 && j <= 8) k += 8;
+        else if (j > 8 && j <= 12) k += 16;
+        else if (j > 12) k += 24;
+    }
+    else k = 0;
+
+    if (ps[screenpeek].ftq == 115 || ps[screenpeek].ftq == 116)
+    {
+        k = quotebot;
+        for(i=0;i<MAXUSERQUOTES;i++)
+        {
+            if (user_quote_time[i] <= 0) break;
+            k -= 8;
+        }
+        k -= 4;
+    }
+
+    j = ps[screenpeek].fta;
+    if (j > 4)
+        gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16);
+    else
+        if (j > 2) gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16+1);
+        else
+            gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16+1+32);
 }
 
 //2333
