@@ -227,7 +227,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
         vplce += vince;
         destPosition += bytesperline;
     }
-    dest.position = destPosition;
+    
     texture.position = texturePosition;
     return vplce;
 }
