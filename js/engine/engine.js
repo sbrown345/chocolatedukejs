@@ -3138,7 +3138,6 @@ function inside(x, y, sectnum) {
 
     //Just return the sign. If the position vector cut the sector walls an odd number of time
     //it is inside. Otherwise (even) it is outside.
-    console.log("wallCrossed >> 31 = %i", (wallCrossed >>> 31));
     return wallCrossed >>> 31;
 }
 

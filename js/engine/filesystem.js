@@ -378,7 +378,7 @@ function crc16(array, data_p, length) {
     if (length == 0) {
         return (~crc);
     }
-    
+
     do {
         data = 0xff & array[data_p++];
         for (i = 0; i < 8; i++, data >>= 1) {
@@ -647,7 +647,6 @@ function uncompress(lzwinbuf, compleng, lzwoutbuf) {
         lngPtrHelper_int32 = new Int32Array(lzwinbuf.buffer.slice(bitcnt >> 3, (bitcnt >> 3) + 4));
 
         dat = ((lngPtrHelper_int32[0] >> (bitcnt & 7)) & (oneupnumbits - 1));
-        console.log("dat: %i", dat);
         bitcnt += numbits;
         if ((dat & ((oneupnumbits >> 1) - 1)) > ((currstr - 1) & ((oneupnumbits >> 1) - 1)))
         { dat &= ((oneupnumbits >> 1) - 1); bitcnt--; }
@@ -655,12 +654,16 @@ function uncompress(lzwinbuf, compleng, lzwoutbuf) {
         lzwbuf3[currstr] = dat;
 
         for (leng = 0; dat >= 256; leng++) {
-            dat = lzwbuf3[dat];
             lzwbuf1[leng] = lzwbuf2[dat];
+            dat = lzwbuf3[dat];
         }
 
         lzwoutbuf[outbytecnt++] = dat;
-        for (i = leng - 1; i >= 0; i--) lzwoutbuf[outbytecnt++] = lzwbuf1[i];
+        //console.log2(printfFormatter("lzwoutbuf[outbytecnt-1]: " + lzwoutbuf[outbytecnt - 1]));
+        for (i = leng - 1; i >= 0; i--) {
+            lzwoutbuf[outbytecnt++] = lzwbuf1[i];
+            //console.log2(printfFormatter("lzwoutbuf[outbytecnt-1]: " + lzwoutbuf[outbytecnt - 1]));
+        }
 
         lzwbuf2[currstr - 1] = dat; lzwbuf2[currstr] = dat;
         currstr++;
@@ -679,9 +682,9 @@ function kdfread(buffer, dasizeof, count, fil) {
     var ptr;
 
     lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 200;
-    if (!lzwbuf1) lzwbuf1 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); 
-    if (!lzwbuf2) lzwbuf2 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)) ); 
-    if (!lzwbuf3) lzwbuf3 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)) ); 
+    if (!lzwbuf1) lzwbuf1 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4));
+    if (!lzwbuf2) lzwbuf2 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)));
+    if (!lzwbuf3) lzwbuf3 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)));
     if (!lzwbuf4) lzwbuf4 = new Uint8Array(LZWSIZE);
     if (!lzwbuf5) lzwbuf5 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4));
 
@@ -689,47 +692,51 @@ function kdfread(buffer, dasizeof, count, fil) {
         count *= dasizeof;
         dasizeof = 1;
     }
-    
-    ptr = new PointerHelper(buffer);
+
+    ptr = new PointerHelper(new Uint8Array(buffer.length * dasizeof));
 
     leng = kread16(fil, 2);
     kread(fil, lzwbuf5, leng);
     k = 0;
     kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
 
-    //copybufbyte(lzwbuf4, ptr.array, dasizeof);
-    var lzwbuf4_short = new Int16Array(lzwbuf4.buffer);
-    var lzwbuf4_uint32 = new Uint8Array(lzwbuf4.buffer);
-    for (var l = 0; l < lzwbuf4.length; l += 10) {
-        buffer[l].avel = toInt8(lzwbuf4[l]);
-        buffer[l].horz = toInt8(lzwbuf4[l + 1]);
-        buffer[l].fvel = lzwbuf4_short[((l + 2) / 2) | 0];
-        buffer[l].svel = lzwbuf4_short[((l + 4) / 2) | 0];
-        buffer[l].bits = lzwbuf4_uint32[((l + 6) / 4) | 0];
-        
-        throw "todo: better way!!!!!"
-        //var buffer = new ArrayBuffer(24);
-
-        //// ... read the data into the buffer ...
-
-        //var idView = new Uint32Array(buffer, 0, 1);
-        //var usernameView = new Uint8Array(buffer, 4, 16);
-        //var amountDueView = new Float32Array(buffer, 20, 1);
-    }
-
     k += dasizeof;
-
     for (i = 1; i < count; i++) {
         if (k >= kgoal) {
-            kread(fil, leng, 2);
+            leng = kread16(fil);
             kread(fil, lzwbuf5, leng);
             k = 0;
             kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
         }
-        for (j = 0; j < dasizeof; j++) ptr.array[j + dasizeof] = /*(uint8_t )*/ ((ptr.array[j] + lzwbuf4[j + k]) & 255);
+        
+        for (j = 0; j < dasizeof; j++) {
+            //console.log2(printfFormatter("i: %i, j: %i:, k: %i, ptr[j]: %i, lzwbuf4[j+k]: %i all: %i", i, j, k, ptr.array[ptr.position + j], lzwbuf4[j + k], ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255)));
+            ptr.array[ptr.position + j + dasizeof] = /*(uint8_t )*/ ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255);
+        }
+
         k += dasizeof;
         ptr.position += dasizeof;
     }
+    console.log2show();
+
+    var ds = new DataStream(ptr.array);
+    for ( i = 0; i < count; i++) {
+        //if (i == 23) debugger;
+        //todo: will need different structs...when this func is used for something else
+       var struct =  ds.readStruct([
+            'avel', 'int8',
+            'horz', 'int8',
+            'fvel', 'int16',
+            'svel', 'int16',
+            'bits', 'uint32']);
+        //console.log(struct)
+        buffer[i].avel = struct.avel;
+        buffer[i].horz = struct.horz;
+        buffer[i].fvel = struct.fvel;
+        buffer[i].svel = struct.svel;
+        buffer[i].bits = struct.bits;
+    }
+    //console.log(buffer);
     lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
 

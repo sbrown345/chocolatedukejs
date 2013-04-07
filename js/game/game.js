@@ -1520,7 +1520,6 @@ function spawn(j, pn) {
         if (actorscrptr[s]) {
             // script/actorscrptr is set originally in gamedefs
             sprite[i].extra = script[actorscrptr[s]]; //sprite[i].extra = *(actorscrptr[s]);
-            console.log("sprite[%i].extra = %i", i, sprite[i].extra);
             hittype[i].temp_data[4] = script[actorscrptr[s] + 1]; // *(actorscrptr[s]+1);
             hittype[i].temp_data[1] = script[actorscrptr[s] + 2]; // *(actorscrptr[s]+2);
             if (script[actorscrptr[s] + 3] && sprite[i].hitag === 0) {
