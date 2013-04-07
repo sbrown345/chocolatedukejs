@@ -130,6 +130,60 @@ function displaymasks(snum) {
     }
 }
 
+//1241
+
+function  animatetip( gs, snum)
+{
+    var p, looking_arc;
+    var tip_y = [0,-8,-16,-32,-64,-84,-108,-108,-108,-108,-108,-108,-108,-108,-108,-108,-96,-72,-64,-32,-16];
+
+    if(ps[snum].tipincs == 0) return 0;
+
+    looking_arc = (klabs(ps[snum].look_ang) / 9) | 0;
+    looking_arc -= (ps[snum].hard_landing<<3);
+
+    if(sprite[ps[snum].i].pal == 1)
+        p = 1;
+    else
+        p = sector[ps[snum].cursectnum].floorpal;
+
+    /*    if(ps[snum].access_spritenum >= 0)
+            p = sprite[ps[snum].access_spritenum].pal;
+        else
+            p = wall[ps[snum].access_wallnum].pal;
+      */
+    myospal(170+(sync[snum].avel>>4)-(ps[snum].look_ang>>1),
+        (tip_y[ps[snum].tipincs]>>1)+looking_arc+240-((ps[snum].horiz-ps[snum].horizoff)>>4),TIP+((26-ps[snum].tipincs)>>4),gs,0,p);
+
+    return 1;
+}
+
+//1267
+function animateaccess(gs,snum) {
+    var access_y = [0,-8,-16,-32,-64,-84,-108,-108,-108,-108,-108,-108,-108,-108,-108,-108,-96,-72,-64,-32,-16];
+    var looking_arc;
+    var  p;
+
+    if(ps[snum].access_incs == 0 || sprite[ps[snum].i].extra <= 0) return 0;
+
+    looking_arc = (access_y[ps[snum].access_incs] + klabs(ps[snum].look_ang) / 9) | 0;
+    looking_arc -= (ps[snum].hard_landing<<3);
+
+    if(ps[snum].access_spritenum >= 0)
+        p = sprite[ps[snum].access_spritenum].pal;
+    else p = 0;
+    //    else
+    //        p = wall[ps[snum].access_wallnum].pal;
+
+    if((ps[snum].access_incs-3) > 0 && (ps[snum].access_incs-3)>>3)
+        myospal(170+(sync[snum].avel>>4)-(ps[snum].look_ang>>1)+(access_y[ps[snum].access_incs]>>2),looking_arc+266-((ps[snum].horiz-ps[snum].horizoff)>>4),HANDHOLDINGLASER+(ps[snum].access_incs>>3),gs,0,p);
+    else
+        myospal(170+(sync[snum].avel>>4)-(ps[snum].look_ang>>1)+(access_y[ps[snum].access_incs]>>2),looking_arc+266-((ps[snum].horiz-ps[snum].horizoff)>>4),HANDHOLDINGACCESS,gs,4,p);
+
+    return 1;
+}
+
+
 //1294
 
 var fistsign;
@@ -618,6 +672,193 @@ function displayweapon(snum) {
 
 }
 
+function  doincrements(p)
+{
+    var snum;
+
+    snum = sprite[p.i].yvel;
+    //    j = sync[snum].avel;
+    //    p.weapon_ang = -(j/5);
+
+    p.player_par++;
+
+    if(p.invdisptime > 0)
+        p.invdisptime--;
+
+    if(p.tipincs > 0) p.tipincs--;
+
+    if(p.last_pissed_time > 0 )
+    {
+        p.last_pissed_time--;
+
+        if( p.last_pissed_time == (26*219) )
+        {
+            spritesound(FLUSH_TOILET,p.i);
+            if(snum == screenpeek || ud.coop == 1)
+                spritesound(DUKE_PISSRELIEF,p.i);
+        }
+
+        if( p.last_pissed_time == (26*218) )
+        {
+            p.holster_weapon = 0;
+            p.weapon_pos = 10;
+        }
+    }
+
+    if(p.crack_time > 0)
+    {
+        p.crack_time--;
+        if(p.crack_time == 0)
+        {
+            p.knuckle_incs = 1;
+            p.crack_time = 777;
+        }
+    }
+
+    if( p.steroids_amount > 0 && p.steroids_amount < 400)
+    {
+        p.steroids_amount--;
+        if(p.steroids_amount == 0)
+            checkavailinven(p);
+        if( !(p.steroids_amount&7) )
+            if(snum == screenpeek || ud.coop == 1)
+                spritesound(DUKE_HARTBEAT,p.i);
+    }
+
+    if(p.heat_on && p.heat_amount > 0)
+    {
+        p.heat_amount--;
+        if( p.heat_amount == 0 )
+        {
+            p.heat_on = 0;
+            checkavailinven(p);
+            spritesound(NITEVISION_ONOFF,p.i);
+            setpal(p);
+        }
+    }
+
+    if( p.holoduke_on >= 0 )
+    {
+        p.holoduke_amount--;
+        if(p.holoduke_amount <= 0)
+        {
+            spritesound(TELEPORTER,p.i);
+            p.holoduke_on = -1;
+            checkavailinven(p);
+        }
+    }
+
+    if( p.jetpack_on && p.jetpack_amount > 0 )
+    {
+        p.jetpack_amount--;
+        if(p.jetpack_amount <= 0)
+        {
+            p.jetpack_on = 0;
+            checkavailinven(p);
+            spritesound(DUKE_JETPACK_OFF,p.i);
+            stopsound(DUKE_JETPACK_IDLE);
+            stopsound(DUKE_JETPACK_ON);
+        }
+    }
+
+    if(p.quick_kick > 0 && sprite[p.i].pal != 1)
+    {
+        p.quick_kick--;
+        if( p.quick_kick == 8 )
+            shoot(p.i,KNEE);
+    }
+
+    if(p.access_incs && sprite[p.i].pal != 1)
+    {
+        p.access_incs++;
+        if(sprite[p.i].extra <= 0)
+            p.access_incs = 12;
+        if(p.access_incs == 12)
+        {
+            if(p.access_spritenum >= 0)
+            {
+                checkhitswitch(snum,p.access_spritenum,1);
+                switch(sprite[p.access_spritenum].pal)
+                {
+                    case 0:p.got_access &= (0xffff-0x1);break;
+                    case 21:p.got_access &= (0xffff-0x2);break;
+                    case 23:p.got_access &= (0xffff-0x4);break;
+                }
+                p.access_spritenum = -1;
+            }
+            else
+            {
+                checkhitswitch(snum,p.access_wallnum,0);
+                switch(wall[p.access_wallnum].pal)
+                {
+                    case 0:p.got_access &= (0xffff-0x1);break;
+                    case 21:p.got_access &= (0xffff-0x2);break;
+                    case 23:p.got_access &= (0xffff-0x4);break;
+                }
+            }
+        }
+
+        if(p.access_incs > 20)
+        {
+            p.access_incs = 0;
+            p.weapon_pos = 10;
+            p.kickback_pic = 0;
+        }
+    }
+
+    if(p.scuba_on == 0 && sector[p.cursectnum].lotag == 2)
+    {
+        if(p.scuba_amount > 0)
+        {
+            p.scuba_on = 1;
+            p.inven_icon = 6;
+            FTA(76,p,0);
+        }
+        else
+        {
+            if(p.airleft > 0)
+                p.airleft--;
+            else
+            {
+                p.extra_extra8 += 32;
+                if(p.last_extra < (max_player_health>>1) && (p.last_extra&3) == 0)
+                    spritesound(DUKE_LONGTERM_PAIN,p.i);
+            }
+        }
+    }
+    else if(p.scuba_amount > 0 && p.scuba_on)
+    {
+        p.scuba_amount--;
+        if(p.scuba_amount == 0)
+        {
+            p.scuba_on = 0;
+            checkavailinven(p);
+        }
+    }
+
+    if(p.knuckle_incs)
+    {
+        p.knuckle_incs ++;
+        if(p.knuckle_incs==10)
+        {
+            if(totalclock > 1024)
+                if(snum == screenpeek || ud.coop == 1)
+                {
+                    if(rand()&1)
+                        spritesound(DUKE_CRACK,p.i);
+                    else spritesound(DUKE_CRACK2,p.i);
+                }
+            spritesound(DUKE_CRACK_FIRST,p.i);
+        }
+        else if( p.knuckle_incs == 22 || (sync[snum].bits&(1<<2)))
+            p.knuckle_incs=0;
+
+        return 1;
+    }
+    return 0;
+}
+
+//2337
 Player.processInput = function(snum) {
     var j, i, k, doubvel, fz, cz, hz, lz, truefdist, x, y;
     var  shrunk;
@@ -636,7 +877,6 @@ Player.processInput = function(snum) {
     pi = p.i;
     s = sprite[pi];
 
-    debugger;
     kb = p.kickback_pic;
 
     if(p.cheat_phase <= 0) sb_snum = sync[snum].bits;
@@ -1619,7 +1859,7 @@ Player.processInput = function(snum) {
 
     if(sector[p.cursectnum].lotag == 2) k = 0;
     else k = 1;
-    debugger;
+    
     if (ud.clipping) {
         j = 0;
         p.posx += p.posxv >> 14;
@@ -1764,25 +2004,26 @@ Player.processInput = function(snum) {
 
     if(p.horiz > 299) p.horiz = 299;
     else if(p.horiz < -99) p.horiz = -99;
-    debugger ;
-//    //Shooting code/changes
+    
+    //Shooting code/changes
 
-//    if( p.show_empty_weapon > 0)
-//    {
-//        p.show_empty_weapon--;
-//        if(p.show_empty_weapon == 0)
-//        {
-//            if(p.last_full_weapon == GROW_WEAPON)
-//                p.subweapon |= (1<<GROW_WEAPON);
-//            else if(p.last_full_weapon == SHRINKER_WEAPON)
-//                p.subweapon &= ~(1<<GROW_WEAPON);
-//            addweapon( p, p.last_full_weapon );
-//            return;
-//        }
-//    }
+    if( p.show_empty_weapon > 0)
+    {
+        p.show_empty_weapon--;
+        if(p.show_empty_weapon == 0)
+        {
+            if(p.last_full_weapon == GROW_WEAPON)
+                p.subweapon |= (1<<GROW_WEAPON);
+            else if(p.last_full_weapon == SHRINKER_WEAPON)
+                p.subweapon &= ~(1<<GROW_WEAPON);
+            addweapon( p, p.last_full_weapon );
+            return;
+        }
+    }
 
-//    if(p.knee_incs > 0)
-//    {
+    if(p.knee_incs > 0)
+    {
+        throw "todo"
 //        p.knee_incs++;
 //        p.horiz -= 48;
 //        p.return_to_center = 9;
@@ -1833,45 +2074,45 @@ Player.processInput = function(snum) {
 //        }
 //        else if(p.actorsqu >= 0)
 //            p.ang += getincangle(p.ang,getangle(sprite[p.actorsqu].x-p.posx,sprite[p.actorsqu].y-p.posy))>>2;
-//    }
+    }
 
-//    if( doincrements(p) ) return;
+    if( doincrements(p) ) return;
 
-//    if(p.weapon_pos != 0)
-//    {
-//        if(p.weapon_pos == -9)
-//        {
-//            if(p.last_weapon >= 0)
-//            {
-//                p.weapon_pos = 10;
-//                //                if(p.curr_weapon == KNEE_WEAPON) *kb = 1;
-//                p.last_weapon = -1;
-//            }
-//            else if(p.holster_weapon == 0)
-//                p.weapon_pos = 10;
-//        }
-//        else p.weapon_pos--;
-//    }
+    if(p.weapon_pos != 0)
+    {
+        if(p.weapon_pos == -9)
+        {
+            if(p.last_weapon >= 0)
+            {
+                p.weapon_pos = 10;
+                //                if(p.curr_weapon == KNEE_WEAPON) p.kickback_pic = 1;
+                p.last_weapon = -1;
+            }
+            else if(p.holster_weapon == 0)
+                p.weapon_pos = 10;
+        }
+        else p.weapon_pos--;
+    }
 
-//    // HACKS
+    // HACKS
 
 //    SHOOTINCODE:
 
-//        if( p.curr_weapon == SHRINKER_WEAPON || p.curr_weapon == GROW_WEAPON )
-//            p.random_club_frame += 64; // Glowing
+        if( p.curr_weapon == SHRINKER_WEAPON || p.curr_weapon == GROW_WEAPON )
+            p.random_club_frame += 64; // Glowing
 
-//    if(p.rapid_fire_hold == 1)
-//    {
-//        if( sb_snum&(1<<2) ) return;
-//        p.rapid_fire_hold = 0;
-//    }
+    if(p.rapid_fire_hold == 1)
+    {
+        if( sb_snum&(1<<2) ) return;
+        p.rapid_fire_hold = 0;
+    }
 
-//    if(shrunk || p.tipincs || p.access_incs)
-//        sb_snum &= ~(1<<2);
-//    else if ( shrunk == 0 && (sb_snum&(1<<2)) && (*kb) == 0 && p.fist_incs == 0 &&
-//            p.last_weapon == -1 && ( p.weapon_pos == 0 || p.holster_weapon == 1 ) )
-//    {
-
+    if(shrunk || p.tipincs || p.access_incs)
+        sb_snum &= ~(1<<2);
+    else if ( shrunk == 0 && (sb_snum&(1<<2)) && (p.kickback_pic) == 0 && p.fist_incs == 0 &&
+            p.last_weapon == -1 && ( p.weapon_pos == 0 || p.holster_weapon == 1 ) )
+    {
+        throw  "todo"
 //        p.crack_time = 777;
 
 //        if(p.holster_weapon == 1)
@@ -1888,30 +2129,30 @@ Player.processInput = function(snum) {
 //            case HANDBOMB_WEAPON:
 //                p.hbomb_hold_delay = 0;
 //                if( p.ammo_amount[HANDBOMB_WEAPON] > 0 )
-//                    (*kb)=1;
+        //                    (p.kickback_pic)=1;
 //                break;
 //            case HANDREMOTE_WEAPON:
 //                p.hbomb_hold_delay = 0;
-//                (*kb) = 1;
+        //                (p.kickback_pic) = 1;
 //                break;
 
 //            case PISTOL_WEAPON:
 //                if( p.ammo_amount[PISTOL_WEAPON] > 0 )
 //                {
 //                    p.ammo_amount[PISTOL_WEAPON]--;
-//                    (*kb) = 1;
+//                    (p.kickback_pic) = 1;
 //                }
 //                break;
 
 
 //            case CHAINGUN_WEAPON:
 //                if( p.ammo_amount[CHAINGUN_WEAPON] > 0 ) // && p.random_club_frame == 0)
-//                    (*kb)=1;
+//                    (p.kickback_pic)=1;
 //                break;
 
 //            case SHOTGUN_WEAPON:
 //                if( p.ammo_amount[SHOTGUN_WEAPON] > 0 && p.random_club_frame == 0 )
-//                    (*kb)=1;
+//                    (p.kickback_pic)=1;
 //                break;
 
 //            case TRIPBOMB_WEAPON:
@@ -1951,7 +2192,7 @@ Player.processInput = function(snum) {
 //                            {
 //                                p.posz = p.oposz;
 //                                p.poszv = 0;
-//                                (*kb) = 1;
+//                                (p.kickback_pic) = 1;
 //                            }
 //                }
 //                break;
@@ -1963,13 +2204,13 @@ Player.processInput = function(snum) {
 //                {
 //                    if( p.ammo_amount[GROW_WEAPON] > 0 )
 //                    {
-//                        (*kb) = 1;
+//                        (p.kickback_pic) = 1;
 //                        spritesound(EXPANDERSHOOT,pi);
 //                    }
 //                }
 //                else if( p.ammo_amount[SHRINKER_WEAPON] > 0)
 //                {
-//                    (*kb) = 1;
+//                    (p.kickback_pic) = 1;
 //                    spritesound(SHRINKER_FIRE,pi);
 //                }
 //                break;
@@ -1978,7 +2219,7 @@ Player.processInput = function(snum) {
 //                if (VOLUMEONE) break;
 //                if( p.ammo_amount[FREEZE_WEAPON] > 0 )
 //                {
-//                    (*kb) = 1;
+//                    (p.kickback_pic) = 1;
 //                    spritesound(CAT_FIRE,pi);
 //                }
 //                break;
@@ -1986,7 +2227,7 @@ Player.processInput = function(snum) {
 //                if (VOLUMEONE) break;
 //                if( p.ammo_amount[DEVISTATOR_WEAPON] > 0 )
 //                {
-//                    (*kb) = 1;
+//                    (p.kickback_pic) = 1;
 //                    p.hbomb_hold_delay = !p.hbomb_hold_delay;
 //                    spritesound(CAT_FIRE,pi);
 //                }
@@ -1994,27 +2235,27 @@ Player.processInput = function(snum) {
 
 //            case RPG_WEAPON:
 //                if ( p.ammo_amount[RPG_WEAPON] > 0)
-//                    (*kb) = 1;
+//                    (p.kickback_pic) = 1;
 //                break;
 
 //            case KNEE_WEAPON:
-//                if(p.quick_kick == 0) (*kb) = 1;
+//                if(p.quick_kick == 0) (p.kickback_pic) = 1;
 //                break;
 //        }
-//    }
-//    else if((*kb))
-//    {
-//        switch( p.curr_weapon )
-//        {
-//            case HANDBOMB_WEAPON:
-
-//                if( (*kb) == 6 && (sb_snum&(1<<2)) )
+    }
+    else if((p.kickback_pic))
+    {
+        switch( p.curr_weapon )
+        {
+            case HANDBOMB_WEAPON:
+                throw "todo"
+//                if( (p.kickback_pic) == 6 && (sb_snum&(1<<2)) )
 //                {
 //                    p.rapid_fire_hold = 1;
 //                    break;
 //                }
-//                (*kb)++;
-//                if((*kb)==12)
+//                (p.kickback_pic)++;
+//                if((p.kickback_pic)==12)
 //                {
 //                    p.ammo_amount[HANDBOMB_WEAPON]--;
 
@@ -2052,11 +2293,11 @@ Player.processInput = function(snum) {
 //                    p.hbomb_on = 1;
 
 //                }
-//                else if( (*kb) < 12 && (sb_snum&(1<<2)) )
+//                else if( (p.kickback_pic) < 12 && (sb_snum&(1<<2)) )
 //                    p.hbomb_hold_delay++;
-//                else if( (*kb) > 19 )
+//                else if( (p.kickback_pic) > 19 )
 //                {
-//                    (*kb) = 0;
+//                    (p.kickback_pic) = 0;
 //                    p.curr_weapon = HANDREMOTE_WEAPON;
 //                    p.last_weapon = -1;
 //                    p.weapon_pos = 10;
@@ -2065,72 +2306,72 @@ Player.processInput = function(snum) {
 //                break;
 
 
-//            case HANDREMOTE_WEAPON:
+            case HANDREMOTE_WEAPON:
+                throw "todo"
+                //                (p.kickback_pic)++;
 
-//                (*kb)++;
-
-//                if((*kb) == 2)
+//                if((p.kickback_pic) == 2)
 //                {
 //                    p.hbomb_on = 0;
 //                }
 
-//                if((*kb) == 10)
+//                if((p.kickback_pic) == 10)
 //                {
-//                    (*kb) = 0;
+//                    (p.kickback_pic) = 0;
 //                    if(p.ammo_amount[HANDBOMB_WEAPON] > 0)
 //                        addweapon(p,HANDBOMB_WEAPON);
 //                    else checkavailweapon(p);
 //                }
 //                break;
 
-//            case PISTOL_WEAPON:
-//                if( (*kb)==1)
-//                {
-//                    shoot(pi,SHOTSPARK1);
-//                    spritesound(PISTOL_FIRE,pi);
+            case PISTOL_WEAPON:
+            if( (p.kickback_pic)==1)
+                {
+                    shoot(pi,SHOTSPARK1);
+                    spritesound(PISTOL_FIRE,pi);
 
-//                    lastvisinc = totalclock+32;
-//                    p.visibility = 0;
-//                }
-//                else if((*kb) == 2)
-//                    spawn(pi,SHELL);
+                    lastvisinc = totalclock+32;
+                    p.visibility = 0;
+                }
+                else if((p.kickback_pic) == 2)
+                    spawn(pi,SHELL);
 
-//                (*kb)++;
+                (p.kickback_pic)++;
 
-//                if((*kb) >= 5)
-//                {
-//                    if( p.ammo_amount[PISTOL_WEAPON] <= 0 || (p.ammo_amount[PISTOL_WEAPON]%12) )
-//                    {
-//                        (*kb)=0;
-//                        checkavailweapon(p);
-//                    }
-//                    else
-//                    {
-//                        switch((*kb))
-//                        {
-//                            case 5:
-//                                spritesound(EJECT_CLIP,pi);
-//                                break;
-//                            case 8:
-//                                spritesound(INSERT_CLIP,pi);
-//                                break;
-//                        }
-//                    }
-//                }
+                if((p.kickback_pic) >= 5)
+                {
+                    if( p.ammo_amount[PISTOL_WEAPON] <= 0 || (p.ammo_amount[PISTOL_WEAPON]%12) )
+                    {
+                        (p.kickback_pic)=0;
+                        checkavailweapon(p);
+                    }
+                    else
+                    {
+                        switch((p.kickback_pic))
+                        {
+                            case 5:
+                                spritesound(EJECT_CLIP,pi);
+                                break;
+                            case 8:
+                                spritesound(INSERT_CLIP,pi);
+                                break;
+                        }
+                    }
+                }
 
-//                if((*kb) == 27)
-//                {
-//                    (*kb) = 0;
-//                    checkavailweapon(p);
-//                }
+                if((p.kickback_pic) == 27)
+                {
+                    (p.kickback_pic) = 0;
+                    checkavailweapon(p);
+                }
 
-//                break;
+                break;
 
-//            case SHOTGUN_WEAPON:
+            case SHOTGUN_WEAPON:
+                throw "todo"
+                //                (p.kickback_pic)++;
 
-//                (*kb)++;
-
-//                if(*kb == 4)
+//                if(p.kickback_pic == 4)
 //                {
 //                    shoot(pi,SHOTGUN);
 //                    shoot(pi,SHOTGUN);
@@ -2148,7 +2389,7 @@ Player.processInput = function(snum) {
 //                    p.visibility = 0;
 //                }
 
-//                switch(*kb)
+//                switch(p.kickback_pic)
 //                {
 //                    case 13:
 //                        checkavailweapon(p);
@@ -2168,14 +2409,15 @@ Player.processInput = function(snum) {
 //                        p.kickback_pic++;
 //                        break;
 //                    case 31:
-//                        *kb = 0;
+//                        p.kickback_pic = 0;
 //                        return;
 //                }
 //                break;
 
-//            case CHAINGUN_WEAPON:
+            case CHAINGUN_WEAPON:
+                throw "todo"
 
-//                (*kb)++;
+//                (p.kickback_pic)++;
 
 //                if( *(kb) <= 12 )
 //                {
@@ -2202,27 +2444,28 @@ Player.processInput = function(snum) {
 
 //                        if( ( sb_snum&(1<<2) ) == 0 )
 //                        {
-//                            *kb = 0;
+//                            p.kickback_pic = 0;
 //                            break;
 //                        }
 //                    }
 //                }
-//                else if((*kb) > 10)
+//                else if((p.kickback_pic) > 10)
 //                {
-//                    if( sb_snum&(1<<2) ) *kb = 1;
-//                    else *kb = 0;
+//                    if( sb_snum&(1<<2) ) p.kickback_pic = 1;
+//                    else p.kickback_pic = 0;
 //                }
 
 //                break;
 
-//            case SHRINKER_WEAPON:
-//            case GROW_WEAPON:
+            case SHRINKER_WEAPON:
+            case GROW_WEAPON:
+                throw "todo"
 
 //                if(p.curr_weapon == GROW_WEAPON)
 //                {
-//                    if((*kb) > 3)
+//                    if((p.kickback_pic) > 3)
 //                    {
-//                        *kb = 0;
+//                        p.kickback_pic = 0;
 //                        if( screenpeek == snum ) pus = 1;
 //                        p.ammo_amount[GROW_WEAPON]--;
 //                        shoot(pi,GROWSPARK);
@@ -2231,13 +2474,13 @@ Player.processInput = function(snum) {
 //                        lastvisinc = totalclock+32;
 //                        checkavailweapon(p);
 //                    }
-//                    else (*kb)++;
+//                    else (p.kickback_pic)++;
 //                }
 //                else
 //                {
-//                    if( (*kb) > 10)
+//                    if( (p.kickback_pic) > 10)
 //                    {
-//                        (*kb) = 0;
+//                        (p.kickback_pic) = 0;
 
 //                        p.ammo_amount[SHRINKER_WEAPON]--;
 //                        shoot(pi,SHRINKER);
@@ -2246,16 +2489,18 @@ Player.processInput = function(snum) {
 //                        lastvisinc = totalclock+32;
 //                        checkavailweapon(p);
 //                    }
-//                    else (*kb)++;
+//                    else (p.kickback_pic)++;
 //                }
 //                break;
 
-//            case DEVISTATOR_WEAPON:
-//                if(*kb)
+            case DEVISTATOR_WEAPON:
+                throw "todo"
+        
+//                if(p.kickback_pic)
 //                {
-//                    (*kb)++;
+//                    (p.kickback_pic)++;
 
-//                    if( (*kb) & 1 )
+//                    if( (p.kickback_pic) & 1 )
 //                    {
 //                        p.visibility = 0;
 //                        lastvisinc = totalclock+32;
@@ -2263,15 +2508,16 @@ Player.processInput = function(snum) {
 //                        p.ammo_amount[DEVISTATOR_WEAPON]--;
 //                        checkavailweapon(p);
 //                    }
-//                    if((*kb) > 5) (*kb) = 0;
+//                    if((p.kickback_pic) > 5) (p.kickback_pic) = 0;
 //                }
 //                break;
-//            case FREEZE_WEAPON:
+            case FREEZE_WEAPON:
+                throw "todo"
 
-//                if( (*kb) < 4 )
+//                if( (p.kickback_pic) < 4 )
 //                {
-//                    (*kb)++;
-//                    if( (*kb) == 3 )
+//                    (p.kickback_pic)++;
+//                    if( (p.kickback_pic) == 3 )
 //                    {
 //                        p.ammo_amount[FREEZE_WEAPON]--;
 //                        p.visibility = 0;
@@ -2280,53 +2526,59 @@ Player.processInput = function(snum) {
 //                        checkavailweapon(p);
 //                    }
 //                    if(s.xrepeat < 32)
-//                    { *kb = 0; break; }
+//                    { p.kickback_pic = 0; break; }
 //                }
 //                else
 //                {
 //                    if( sb_snum&(1<<2))
 //                    {
-//                        *kb = 1;
+//                        p.kickback_pic = 1;
 //                        spritesound(CAT_FIRE,pi);
 //                    }
-//                    else *kb = 0;
+//                    else p.kickback_pic = 0;
 //                }
 //                break;
 
-//            case TRIPBOMB_WEAPON:
-//                if(*kb < 4)
+      case TRIPBOMB_WEAPON:
+                throw "todo"
+        
+//                if(p.kickback_pic < 4)
 //                {
 //                    p.posz = p.oposz;
 //                    p.poszv = 0;
-//                    if( (*kb) == 3 )
+//                    if( (p.kickback_pic) == 3 )
 //                        shoot(pi,HANDHOLDINGLASER);
 //                }
-//                if((*kb) == 16)
+//                if((p.kickback_pic) == 16)
 //                {
-//                    (*kb) = 0;
+//                    (p.kickback_pic) = 0;
 //                    checkavailweapon(p);
 //                    p.weapon_pos = -9;
 //                }
-//                else (*kb)++;
+//                else (p.kickback_pic)++;
 //                break;
-//            case KNEE_WEAPON:
-//                (*kb)++;
+            case KNEE_WEAPON:
+                throw "todo"
+        
+//                (p.kickback_pic)++;
 
-//                if( (*kb) == 7) shoot(pi,KNEE);
-//                else if( (*kb) == 14)
+//                if( (p.kickback_pic) == 7) shoot(pi,KNEE);
+//                else if( (p.kickback_pic) == 14)
 //                {
 //                    if( sb_snum&(1<<2) )
-//                        *kb = 1+(TRAND&3);
-//                    else *kb = 0;
+//                        p.kickback_pic = 1+(TRAND&3);
+//                    else p.kickback_pic = 0;
 //                }
 
 //                if(p.wantweaponfire >= 0)
 //                    checkavailweapon(p);
 //                break;
 
-//            case RPG_WEAPON:
-//                (*kb)++;
-//                if( (*kb) == 4 )
+            case RPG_WEAPON:
+                throw "todo"
+        
+//                (p.kickback_pic)++;
+//                if( (p.kickback_pic) == 4 )
 //                {
 //                    p.ammo_amount[RPG_WEAPON]--;
 //                    lastvisinc = totalclock+32;
@@ -2334,10 +2586,9 @@ Player.processInput = function(snum) {
 //                    shoot(pi,RPG);
 //                    checkavailweapon(p);
 //                }
-//                else if( *kb == 20 )
-//                    *kb = 0;
+//                else if( p.kickback_pic == 20 )
+//                    p.kickback_pic = 0;
 //                break;
-//        }
-//    }
-    throw "todo"
-};
+        }
+    }
+}

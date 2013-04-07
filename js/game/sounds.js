@@ -17,6 +17,12 @@ function sound() {
     // http://www.justindeltener.com/sound-programming/sound-blaster-16-tutorial/reading-the-creative-voc-sound-file-format/
 }
 
+//494
+function spritesound(num, i) {
+    // todo!
+}
+
+//652
 function clearsoundlocks() {
     // todo!
 }

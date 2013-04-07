@@ -841,6 +841,11 @@ function ceilscan ( x1,  x2,  sectnum)
     faketimerhandler();
 }
 
+/* renders non-parallaxed floors. --ryan. */
+//947
+function florscan(/*int32_t x1, int32_t x2, int32_t sectnum*/) {
+    console.log("todo florscan")
+}
 
 /*
  * renders walls and parallaxed skies/floors. Look at parascan() for the
@@ -866,6 +871,7 @@ function ceilscan ( x1,  x2,  sectnum)
  *
  *  --ryan.
  */
+//1227
 function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     var i, x, xnice, ynice;
     var fpalookup;
@@ -1017,13 +1023,13 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         i = x + frameoffset.position + ylookup[d4 + 1];
         
         if (y2ve[0] > d4)
-            prevlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
+            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], i + 0, frameoffset);
         if (y2ve[1] > d4)
-            prevlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
+            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], i + 1, frameoffset);
         if (y2ve[2] > d4)
-            prevlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
+            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], i + 2, frameoffset);
         if (y2ve[3] > d4)
-            prevlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3, frameoffset);
     }
     for(; x<=x2; x++)
     {
@@ -1056,6 +1062,11 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     faketimerhandler();
 }
 
+//1729
+var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
+function grouscan(dax1, dax2, sectnum, dastat) {
+    console.log("TODO grouscan");
+}
 
 //1926
 function owallmost(mostbuf, w, z) {
@@ -1800,6 +1811,152 @@ Engine.doSetAspect = function (davis, dashade) {
         }
     }
 };
+
+
+/*
+  FCS: Geez one more horrible algorithm to decipher :| :/ :( cry smiley..... 
+  Algorithm:
+
+  1.
+  Take wall 1 vector [point1,point2] and using two cross products determine if the two endpoints of wall 2 are on the same side of Wall 1 plan.
+  If they are then we can determine according to globalposx and globalposy if  wall2 is before or after wall1's plan.
+  
+  2. Do the same thing again but this time with wall2's plan. Try to find if wall1 is in front of behind wall2's plan.
+
+  Key concept: If a cross-product is equal to 0 this mean they are parallel.
+
+  Return: pvWallID1 in the potentially visible wall list is in front of pvWallID2 (in the same potentially visible list)
+*/
+function wallfront(pvWallID1, pvWallID2) {
+    var wal;
+    var x11, y11, x21, y21, x12, y12, x22, y22, dx, dy, t1, t2;
+
+    //It seems we are going to work in Worldspace coordinates.
+    wal = wall[pvWalls[pvWallID1].worldWallId];
+    x11 = wal.x;
+    y11 = wal.y;
+    wal = wall[wal.point2];
+    x21 = wal.x;
+    y21 = wal.y;
+    wal = wall[pvWalls[pvWallID2].worldWallId];
+    x12 = wal.x;
+    y12 = wal.y;
+    wal = wall[wal.point2];
+    x22 = wal.x;
+    y22 = wal.y;
+
+
+    //This is part 1
+
+    //Wall 1's vector
+    dx = x21-x11;
+    dy = y21-y11;
+
+    //This is a cross-product between Wall 1 vector and the [Wall 1 Point 1. Wall 2 Point 1] vector 
+    t1 = dmulscale2(x12-x11,dy,-dx,y12-y11); /* p1(l2) vs. l1 */
+    //This is a cross-product between Wall 1 vector and the [Wall 1 Point 1. Wall 2 Point 2] vector 
+    t2 = dmulscale2(x22-x11,dy,-dx,y22-y11); /* p2(l2) vs. l1 */
+
+    //If the vectors a parallel, then the cross-product is zero.
+    if (t1 == 0) {
+        //wall2's point1 is on wall1's plan.
+        t1 = t2;
+        if (t1 == 0) // Those two walls are on the same plan.
+        {
+            //Wall 2's point 2 is on wall1's plan.
+            return(-1);
+        }
+    }
+    if (t2 == 0) 
+        t2 = t1;
+
+	
+    //This XOR just determine if the cross-product have the same sign and hence if both points are on the same side of wall 1 plan.
+    //Test if both points of wall2 are on the same side of wall 1 (in front or behind).
+    if ((t1^t2) >= 0)
+    {
+        //cross-product have the same sign: Both points of wall2 are on the same side of wall1 : An answer is possible !!
+
+        //Now is time to take into account the camera position and determine which of wall1 or wall2 is seen first.
+        t2 = dmulscale2(globalposx-x11,dy,-dx,globalposy-y11); /* pos vs. l1 */
+
+        //Test the cross product sign difference.
+        //If (t2^t1) >= 0 then  both cross product had different sign so wall1 is in front of wall2
+        //otherwise wall2 is in front of wall1
+        return((t2^t1) >= 0);
+    }
+
+
+    //This is part 2
+    //Do it again but this time will wall2's plan.
+
+    //Wall 2's vector
+    dx = x22-x12;
+    dy = y22-y12;
+
+    t1 = dmulscale2(x11-x12,dy,-dx,y11-y12); /* p1(l1) vs. l2 */
+    t2 = dmulscale2(x21-x12,dy,-dx,y21-y12); /* p2(l1) vs. l2 */
+    if (t1 == 0) {
+        t1 = t2;
+        if (t1 == 0) 
+            return(-1);
+    }
+    if (t2 == 0) 
+        t2 = t1;
+    if ((t1^t2) >= 0)
+    {
+        t2 = dmulscale2(globalposx-x12,dy,-dx,globalposy-y12); /* pos vs. l2 */
+        return((t2^t1) < 0);
+    }
+
+    //FCS: No wall is in front of the other's plan: This means they are crossing.
+    return(-2);
+}
+
+
+//Return 1 if bunch firstBunchID is in from of bunch secondBunchID.
+function bunchfront(firstBunchID,  secondBunchID)
+{
+    var x1b1, x2b1, x1b2, x2b2;
+    
+    x1b1 = pvWalls[bunchfirst[firstBunchID]].screenSpaceCoo[0][VEC_COL];
+    x2b2 = pvWalls[bunchlast[secondBunchID]].screenSpaceCoo[1][VEC_COL]+1; 
+    if (x1b1 >= x2b2)
+    {
+        //Bunch 1 left side is completely on the right of bunch2's right in screenspace: They do not overlap.
+        return(-1);
+    }
+
+    x1b2 = pvWalls[bunchfirst[secondBunchID]].screenSpaceCoo[0][VEC_COL];
+    x2b1 = pvWalls[bunchlast[firstBunchID]].screenSpaceCoo[1][VEC_COL]+1;
+    if (x1b2 >= x2b1) 
+    {
+        //Bunch 2 left side is completely on the right of bunch 1 right side: They do not overlap.
+        return(-1);
+    }
+
+
+    if (x1b1 >= x1b2)
+    {
+        //Get the last wall in the bunch2.
+        var lastWallID;
+        for(lastWallID=bunchfirst[secondBunchID]; 
+            pvWalls[lastWallID].screenSpaceCoo[1][VEC_COL]<x1b1; 
+            lastWallID=bunchWallsList[lastWallID]);
+
+        return(wallfront(bunchfirst[firstBunchID],lastWallID));
+    }
+    else
+    {
+        //Get the last wall in the bunch.
+        var lastWallID;
+        for(lastWallID=bunchfirst[firstBunchID]; 
+            pvWalls[lastWallID].screenSpaceCoo[1][VEC_COL]<x1b2; 
+            lastWallID=bunchWallsList[lastWallID]);
+
+        return(wallfront(lastWallID,bunchfirst[secondBunchID]));
+    }
+}
 
 
 //2774

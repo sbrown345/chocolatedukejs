@@ -2,6 +2,11 @@
 
 var transluc = new Uint8Array(65536 / 4);
 
+var transrev = 0;
+
+var TRANS_NORMAL = 0;
+var TRANS_REVERSE = 1;
+
 // FCS: In order to see how the engine renders different part of the screen you can set the following macros
 // VISUALIZE RENDERER
 var MAX_PIXEL_RENDERERED = ((1600 * 1200) + 20000);
@@ -298,7 +303,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     }
 }
 
-// 451
+//451
 function setupmvlineasm(i1) {
     //Only keep 5 first bits
     machmv = (i1 & 0x1f);
@@ -329,4 +334,78 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
         //    dest += bytesperline;
         //} while (dest);
     }
+}
+
+/*
+ FCS: Draw a sprite vertical line of pixels.
+ */
+//665
+function DrawSpriteVerticalLine(/*int32_t i2, int32_t numPixels, uint32_t i4, uint8_t  * texture, uint8_t  * dest*/) {
+    // todo
+    console.log("todo DrawSpriteVerticalLine");
+    //uint8_t colorIndex;
+
+    //while (numPixels)
+    //{
+    //    numPixels--;
+
+    //    if (numPixels != 0)
+    //    {
+
+    //        i4 += tsmach_ecx;
+
+    //        if (i4 < (i4 - tsmach_ecx)) 
+    //            adder = tsmach_eax3;
+
+    //        colorIndex = *texture;
+
+    //        i2 += tsmach_eax1;
+    //        if (i2 < (i2 - tsmach_eax1)) 
+    //            texture++;
+
+    //        texture += adder;
+
+    //        //255 is the index of the transparent color: Do not draw it.
+    //        if (colorIndex != 255)
+    //        {
+    //            uint16_t val;
+    //            val = tspal[colorIndex];
+    //            val |= (*dest)<<8;
+
+    //            if (transrev) 
+    //                val = ((val>>8)|(val<<8));
+
+    //            colorIndex = transluc[val];
+
+    //            if (pixelsAllowed-- > 0)
+    //                *dest = colorIndex;
+    //        }
+
+    //        //Move down one pixel on the framebuffer
+    //        dest += bytesperline;
+    //    }
+
+} 
+/* END---------------  SPRITE RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/
+
+
+
+//646
+var  tspal;
+var tsmach_eax1;
+var adder;
+var tsmach_eax3;
+var tsmach_ecx;
+function tsetupspritevline(palette, i2, i3, i4, i5) {
+    tspal = palette;
+    tsmach_eax1 = i5 << 16;
+    adder = (i5 >> 16) + i2;
+    tsmach_eax3 = adder + i4;
+    tsmach_ecx = i3;
+}
+
+/* ---------------  FLOOR/CEILING RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/
+//739
+function settrans(type){
+	transrev = type;
 }

@@ -1463,10 +1463,9 @@ function spawn(j, pn) {
 
     //console.log("spawn j: %i, pn: %i", j, pn);
     if (j >= 0) {
-        throw new Error("TODO");
-        //i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
-        //    ,pn,0,0,0,0,0,0,j,0);
-        //hittype[i].picnum = sprite[j].picnum;
+        i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
+            ,pn,0,0,0,0,0,0,j,0);
+        hittype[i].picnum = sprite[j].picnum;
     } else {
         i = pn;
 
@@ -2182,7 +2181,6 @@ function spawn(j, pn) {
             break;
 
         case PLAYERONWATER:
-            throw new Error("todo");
             if (j >= 0) {
                 sp.xrepeat = sprite[j].xrepeat;
                 sp.yrepeat = sprite[j].yrepeat;
@@ -2204,7 +2202,6 @@ function spawn(j, pn) {
                 changespritestat(i, 10);
             break;
         case WATERBUBBLE:
-            throw new Error("todo");
             if (j >= 0 && sprite[j].picnum == APLAYER)
                 sp.z -= (16 << 8);
             if (sp.picnum == WATERBUBBLE) {
@@ -3734,26 +3731,28 @@ Game.playBack = function () {
             q.setPositionAtStart();
             console.log("demo loop");
             if (foundemo) {
-                while (totalclock >= (lockclock + TICSPERFRAME)) {
-                    
-                    if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
-                        i = 0;
-                        l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
-                        kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
-                    }
-                    var idx;
-                    for (j = connecthead; j >= 0; j = connectpoint2[j]) {
-                        idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
-                        recsync[i].copyTo(inputfifo[idx][j]);
+                q.setPositionAtStart()
+                    .addWhile(function() {
+                        return totalclock >= (lockclock + TICSPERFRAME);
+                    }, function() {
+                        q.setPositionAtStart();
 
-                        movefifoend[j]++;
-                        i++;
-                        ud.reccnt--;
-                    }
-                    Game.doMoveThings();
+                        if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
+                            i = 0;
+                            l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
+                            kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
+                        }
+                        var idx;
+                        for (j = connecthead; j >= 0; j = connectpoint2[j]) {
+                            idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
+                            recsync[i].copyTo(inputfifo[idx][j]);
 
-                    throw new Error("todo");
-                }
+                            movefifoend[j]++;
+                            i++;
+                            ud.reccnt--;
+                        }
+                        Game.doMoveThings();
+                    });
             }
 
             if (foundemo === 0) {
@@ -4002,28 +4001,31 @@ Game.doMoveThings = function() {
     }
 
     if (ud.pause_on == 0) {
-        movefta(); //ST 2
-        moveweapons(); //ST 5 (must be last)
-        movetransports(); //ST 9
+        console.warn("todo: finishy move stuff")
+        //movefta(); //ST 2
+        //moveweapons(); //ST 5 (must be last)
+        //movetransports(); //ST 9
 
-        moveplayers(); //ST 10
-        movefallers(); //ST 12
-        moveexplosions(); //ST 4
+        //moveplayers(); //ST 10
+        //movefallers(); //ST 12
+        //moveexplosions(); //ST 4
 
-        moveactors(); //ST 1
-        moveeffectors(); //ST 3
+        //moveactors(); //ST 1
+        //moveeffectors(); //ST 3
 
-        movestandables(); //ST 6
-        doanimations();
-        movefx(); //ST 11
+        //movestandables(); //ST 6
+        //doanimations();
+        //movefx(); //ST 11
     }
 
-    fakedomovethingscorrect();
+    console.warn("todo: fakedomovethingscorrect")
+    //fakedomovethingscorrect();
 
     if ((everyothertime & 1) == 0) {
-        animatewalls();
-        movecyclers();
-        pan3dsound();
+        console.warn("todo: everyothertime stuff")
+        //animatewalls();
+        //movecyclers();
+        //pan3dsound();
     }
 
 
