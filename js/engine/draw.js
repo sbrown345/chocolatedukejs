@@ -173,7 +173,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
 
         return i1;
     } else {
-        return vlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, dest);
+        return vlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, dest.array);
     }
 }
 

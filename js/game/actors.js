@@ -70,6 +70,60 @@ function floorspace(sectnum) {
     return 0;
 }
 
+//500
+function checkavailweapon( p ) {
+    var i,snum;
+    var weap;
+
+    if(p.wantweaponfire >= 0)
+    {
+        weap = p.wantweaponfire;
+        p.wantweaponfire = -1;
+
+        if(weap == p.curr_weapon) return;
+        else if( p.gotweapon[weap] && p.ammo_amount[weap] > 0 )
+        {
+            addweapon(p,weap);
+            return;
+        }
+    }
+
+    weap = p.curr_weapon;
+    if( p.gotweapon[weap] && p.ammo_amount[weap] > 0 )
+        return;
+
+    snum = sprite[p.i].yvel;
+
+    for(i=0;i<10;i++)
+    {
+        weap = ud.wchoice[snum][i];
+        if (VOLUMEONE)
+            if(weap > 6) continue;
+
+        if(weap == 0) weap = 9;
+        else weap--;
+
+        if( weap == 0 || ( p.gotweapon[weap] && p.ammo_amount[weap] > 0 ) )
+            break;
+    }
+
+    if(i == 10) weap = 0;
+
+    // Found the weapon
+
+    p.last_weapon  = p.curr_weapon;
+    p.random_club_frame = 0;
+    p.curr_weapon  = weap;
+    p.kickback_pic = 0;
+    if(p.holster_weapon == 1)
+    {
+        p.holster_weapon = 0;
+        p.weapon_pos = 10;
+    }
+    else p.weapon_pos   = -1;
+}
+
+
 // 625
 function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
     var daz, h, oldx, oldy;
@@ -217,11 +271,6 @@ function movedummyplayers() {
     i = headspritestat[13];
     while(i >= 0)
     {
-
-        for (; ;) {
-            
-        }
-
         nexti = nextspritestat[i];
 
         p = sprite[sprite[i].owner].yvel;
@@ -253,6 +302,8 @@ function movedummyplayers() {
 
         sprite[i].x += (ps[p].posx-ps[p].oposx);
         sprite[i].y += (ps[p].posy-ps[p].oposy);
-        setsprite(i,sprite[i].x,sprite[i].y,sprite[i].z);
+        setsprite(i, sprite[i].x, sprite[i].y, sprite[i].z);
+        
+        i = nexti;
     }
 }

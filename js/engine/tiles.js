@@ -193,5 +193,29 @@ function TILE_MakeAvailable( picId){
  in order to retrieve the texture to display.
  */
 function animateoffs(tilenum) {
-    throw new Error("todo");
+    var i, k, offs;
+    
+    offs = 0;
+    
+    i = (totalclocklock>>((tiles[tilenum].animFlags>>24)&15));
+    
+    if ((tiles[tilenum].animFlags&63) > 0){
+        switch(tiles[tilenum].animFlags&192)
+        {
+            case 64:
+                k = (i%((tiles[tilenum].animFlags&63)<<1));
+                if (k < (tiles[tilenum].animFlags&63))
+                    offs = k;
+                else
+                    offs = (((tiles[tilenum].animFlags&63)<<1)-k);
+                break;
+            case 128:
+                offs = (i%((tiles[tilenum].animFlags&63)+1));
+                break;
+            case 192:
+                offs = -(i%((tiles[tilenum].animFlags&63)+1));
+        }
+    }
+    
+    return(offs);
 }

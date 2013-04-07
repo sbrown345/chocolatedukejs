@@ -2089,7 +2089,6 @@ function spawn(j, pn) {
 
         case SHELL: //From the player
         case SHOTGUNSHELL:
-            throw new Error("todo");
             if (j >= 0) {
                 var snum, a;
 
