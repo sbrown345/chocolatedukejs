@@ -717,7 +717,7 @@ function kdfread(buffer, dasizeof, count, fil) {
         k += dasizeof;
         ptr.position += dasizeof;
     }
-    console.log2show();
+    //console.log2flush();
 
     var ds = new DataStream(ptr.array);
     for ( i = 0; i < count; i++) {

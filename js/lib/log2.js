@@ -12,7 +12,7 @@ console.log2.concat = function (arr) {
     return s;
 };
 
-console.log2show = function() {
+console.log2flush = function() {
     console.log(console.log2.concat(console.log2.output));
     console.log2.output = [];
 };

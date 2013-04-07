@@ -178,7 +178,7 @@ function menus() {
 
     x = 0;
 
-    sh = 4-(sinTable[(totalclock<<4)&2047]>>11);
+    sh = 4-(sintable[(totalclock<<4)&2047]>>11);
 
     if(!(current_menu >= 1000 && current_menu <= 2999 && current_menu >= 300 && current_menu <= 369))
         vscrn();
@@ -758,7 +758,7 @@ function menus() {
         case 0: // main menu
             c = (320>>1);
             rotateSprite(c<<16,28<<16,65536,0,INGAMEDUKETHREEDEE,0,0,10,0,0,xdim-1,ydim-1);
-            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sinTable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
+            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sintable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
             
             x = probe(c,67,16,6);
 

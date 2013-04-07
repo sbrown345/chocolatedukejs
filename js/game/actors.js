@@ -172,8 +172,8 @@ function ssp(i, cliptype) {
     var s = sprite[i];
 
     movetype = movesprite(i,
-        (s.xvel * (sinTable[(s.ang + 512) & 2047])) >> 14,
-        (s.xvel * (sinTable[s.ang & 2047])) >> 14, s.zvel,
+        (s.xvel * (sintable[(s.ang + 512) & 2047])) >> 14,
+        (s.xvel * (sintable[s.ang & 2047])) >> 14, s.zvel,
         cliptype);
 
     return (movetype == 0);

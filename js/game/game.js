@@ -843,8 +843,8 @@ function moveclouds() {
         cloudtotalclock = totalclock + 6;
 
         for (i = 0; i < numclouds; i++) {
-            cloudx[i] += (sinTable[(ps[screenpeek].ang + 512) & 2047] >> 9);
-            cloudy[i] += (sinTable[ps[screenpeek].ang & 2047] >> 9);
+            cloudx[i] += (sintable[(ps[screenpeek].ang + 512) & 2047] >> 9);
+            cloudy[i] += (sintable[ps[screenpeek].ang & 2047] >> 9);
 
             sector[clouds[i]].ceilingxpanning = cloudx[i] >> 6;
             sector[clouds[i]].ceilingypanning = cloudy[i] >> 6;
@@ -951,8 +951,8 @@ function displayrest(smoothratio) {
             {
 
                 ud.fola += ud.folavel>>3;
-                ud.folx += (ud.folfvel*sinTable[(512+2048-ud.fola)&2047])>>14;
-                ud.foly += (ud.folfvel*sinTable[(512+1024-512-ud.fola)&2047])>>14;
+                ud.folx += (ud.folfvel*sintable[(512+2048-ud.fola)&2047])>>14;
+                ud.foly += (ud.folfvel*sintable[(512+1024-512-ud.fola)&2047])>>14;
 
                 cposx = ud.folx;
                 cposy = ud.foly;
@@ -1305,7 +1305,7 @@ Game.displayRooms = function (snum, smoothratio) {
             setviewback();
             tiles[MAXTILES-2].animFlags &= 0xff0000ff;
             i = (tang&511); if (i > 256) i = 512-i;
-            i = sinTable[i + 512] * 8 + sinTable[i] * 5;
+            i = sintable[i + 512] * 8 + sintable[i] * 5;
             if ((1-ud.detail) == 0) i >>= 1;
             rotateSprite(160<<16,100<<16,i,tang+512,MAXTILES-2,0,0,4+2+64,windowx1,windowy1,windowx2,windowy2);
             tiles[MAXTILES-2].lock = 199;
@@ -2109,8 +2109,8 @@ function spawn(j, pn) {
                     sp.z = sprite[j].z - PHEIGHT + (3 << 8);
                 }
 
-                sp.x = sprite[j].x + (sinTable[(a + 512) & 2047] >> 7);
-                sp.y = sprite[j].y + (sinTable[a & 2047] >> 7);
+                sp.x = sprite[j].x + (sintable[(a + 512) & 2047] >> 7);
+                sp.y = sprite[j].y + (sintable[a & 2047] >> 7);
 
                 sp.shade = -8;
 
@@ -3855,7 +3855,6 @@ Game.playBack = function () {
 Game.doMoveThings = function() {
     var i, j;
     var ch;
-    debugger;
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         if (sync[i].bits & (1 << 17)) {
             multiflag = 2;
@@ -3997,7 +3996,7 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
-            processinput(i);
+            Player.processInput(i);
             checksectors(i);
         }
     }

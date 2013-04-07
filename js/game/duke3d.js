@@ -42,6 +42,8 @@ var FOURSLEIGHT = (1 << 8);
 //195
 var NUM_SOUNDS = 450;
 
+//219
+var PHEIGHT = (38 << 8);
 
 //224
 var MODE_MENU = 1;

@@ -176,7 +176,7 @@ var numsectors, numwalls;
 var totalclock;
 var numframes = 0, randomseed = 0;
 
-var sinTable = new Int16Array(2048);
+var sintable = new Int16Array(2048);
 var palette = new Uint8Array(2048);
 var numpalookups;
 
@@ -186,7 +186,7 @@ var numpalookups;
 var palookup = new Array(MAXPALOOKUPS); // EXTERN uint8_t  *palookup[MAXPALOOKUPS];
 var parallaxtype, showinvisibility;
 var parallaxyoffs, parallaxyscale;
-var visibility, parallaxvisibility; pskyoff
+var visibility, parallaxvisibility, pskyoff;
 
 var windowx1, windowy1, windowx2, windowy2;
 var startumost = new Int16Array(MAXXDIM), startdmost = new Int16Array(MAXXDIM);

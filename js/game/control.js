@@ -14,6 +14,11 @@ var controltype =
 
 var Control = {};
 
+function ACTION(i) {
+    //todo
+    return 0;
+}
+
 //743
 Control.startup = function() {
     console.log("todo Control.startup");

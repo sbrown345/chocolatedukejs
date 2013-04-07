@@ -417,6 +417,7 @@ function transNumber() {
     textptrIdx += l;
 }
 
+//450
 var transCount = 0;
 function parseCommand(readFromGrp) {
     var i, j, k, tempscrptr;
@@ -1413,10 +1414,42 @@ function parseCommand(readFromGrp) {
     return 0;
 }
 
+//1514
 function passOne(readFromGrp) {
     while (parseCommand(readFromGrp) === 0);
 
     if ((error + warning) > 12) {
         console.error("  * ERROR! Too many warnings or errors.");
     }
+}
+
+//1724
+function furthestangle( i, angs) {
+    var j, hitsect,hitwall,hitspr, furthest_angle, angincs;
+    var hx, hy, hz, d, greatestd;
+    var s = sprite[i];
+
+    greatestd = -(1<<30);
+    angincs = 2048/angs;
+
+    if(s.picnum != APLAYER)
+        if( (g_t[0]&63) > 2 ) return( s.ang + 1024 );
+
+    for(j=s.ang;j<(2048+s.ang);j+=angincs)
+    {
+        throw "todo"
+        //hitscan(s.x, s.y, s.z-(8<<8), s.sectnum,
+        //    sintable[(j+512)&2047],
+        //    sintable[j&2047],0,
+        //    &hitsect,&hitwall,&hitspr,&hx,&hy,&hz,CLIPMASK1);
+
+        //d = klabs(hx-s.x) + klabs(hy-s.y);
+
+        //if(d > greatestd)
+        //{
+        //    greatestd = d;
+        //    furthest_angle = j;
+        //}
+    }
+    return (furthest_angle&2047);
 }
