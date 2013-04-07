@@ -508,7 +508,7 @@ function prepwall(z, wal) {
     
     if (bot != 0)
     {
-        l = divScale12(top,bot);
+        l = divscale12(top,bot);
         swall[x] = mulscale21(l,sinc)+splc;
         l *= walxrepeat;
         lwall[x] = (l>>18);
@@ -522,7 +522,7 @@ function prepwall(z, wal) {
         if (bot != 0)
         {
             ol = l;
-            l = divScale12(top,bot);
+            l = divscale12(top,bot);
             swall[x+4] = mulscale21(l,sinc)+splc;
             l *= walxrepeat;
             lwall[x+4] = (l>>18);
@@ -545,7 +545,7 @@ function prepwall(z, wal) {
         if (bot != 0)
         {
             ol = l;
-            l = divScale12(top,bot);
+            l = divscale12(top,bot);
             swall[x+2] = mulscale21(l,sinc)+splc;
             l *= walxrepeat;
             lwall[x+2] = (l>>18);
@@ -561,7 +561,7 @@ function prepwall(z, wal) {
         bot += (botinc>>2);
         if (bot != 0)
         {
-            l = divScale12(top+(topinc>>2),bot);
+            l = divscale12(top+(topinc>>2),bot);
             swall[x+1] = mulscale21(l,sinc)+splc;
             lwall[x+1] = mulscale18(l,walxrepeat);
         }
@@ -1085,7 +1085,7 @@ function owallmost(mostbuf, w, z) {
     }
 
     if (bad & 3) {
-        t = divScale30(z - s1, s2 - s1);
+        t = divscale30(z - s1, s2 - s1);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
@@ -1106,7 +1106,7 @@ function owallmost(mostbuf, w, z) {
     }
 
     if (bad & 12) {
-        t = divScale30(z - s3, s4 - s3);
+        t = divscale30(z - s3, s4 - s3);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
 
@@ -1182,7 +1182,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     j = yv * x2 - xv * y2;
 
     if (klabs(j) > klabs(i >> 3))
-        i = divScale28(i, j);
+        i = divscale28(i, j);
 
     if (dastat == 0) {
         t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
@@ -1209,7 +1209,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
     j = yv * x2 - xv * y2;
 
     if (klabs(j) > klabs(i >> 3))
-        i = divScale28(i, j);
+        i = divscale28(i, j);
 
     if (dastat == 0) {
         t = mulscale15(sector[sectnum].ceilingheinum, dasqr);
@@ -1249,7 +1249,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 
     if (bad & 3) {
         /* inty = intz / (globaluclip>>16) */
-        t = divScale30(oz1 - s1, s2 - s1 + oz1 - oz2);
+        t = divscale30(oz1 - s1, s2 - s1 + oz1 - oz2);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         intz = oz1 + mulscale30(oz2 - oz1, t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
@@ -1276,7 +1276,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 
     if (bad & 12) {
         /* inty = intz / (globaldclip>>16) */
-        t = divScale30(oz1 - s3, s4 - s3 + oz1 - oz2);
+        t = divscale30(oz1 - s3, s4 - s3 + oz1 - oz2);
         inty = pvWalls[w].screenSpaceCoo[0][VEC_DIST] + mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST] - pvWalls[w].screenSpaceCoo[0][VEC_DIST], t);
         intz = oz1 + mulscale30(oz2 - oz1, t);
         xcross = pvWalls[w].screenSpaceCoo[0][VEC_COL] + scale(mulscale30(pvWalls[w].screenSpaceCoo[1][VEC_DIST], t), pvWalls[w].screenSpaceCoo[1][VEC_COL] - pvWalls[w].screenSpaceCoo[0][VEC_COL], inty);
@@ -1762,10 +1762,10 @@ Engine.draWalls = function (bunch) {
 //2593
 function setAspect(daxrange, daaspect) {
     viewingrange = daxrange;
-    viewingrangerecip = divScale32(1, daxrange);
+    viewingrangerecip = divscale32(1, daxrange);
 
     yxaspect = daaspect;
-    xyaspect = divScale32(1, yxaspect);
+    xyaspect = divscale32(1, yxaspect);
     xdimenscale = scale(xdimen, yxaspect, 320);
     xdimscale = scale(320, xyaspect, xdimen);
 }
@@ -1777,11 +1777,11 @@ Engine.doSetAspect = function (davis, dashade) {
     if (xyaspect != oxyaspect) {
         oxyaspect = xyaspect;
         j = xyaspect * 320;
-        horizlookup2[horizycent - 1] = divScale26(131072, j);
+        horizlookup2[horizycent - 1] = divscale26(131072, j);
         for (i = ydim * 4 - 1; i >= 0; i--)
             if (i != (horizycent - 1)) {
-                horizlookup[i] = divScale28(1, i - (horizycent - 1));
-                horizlookup2[i] = divScale14(klabs(horizlookup[i]), j);
+                horizlookup[i] = divscale28(1, i - (horizycent - 1));
+                horizlookup2[i] = divscale14(klabs(horizlookup[i]), j);
             }
     }
 
@@ -2249,7 +2249,7 @@ Engine.loadTables = function () {
         Engine.initKSqrt();
 
         for (i = 0; i < 2048; i++) {
-            recipTable[i] = divScale30(2048, i + 2048);
+            recipTable[i] = divscale30(2048, i + 2048);
         }
 
         if ((file = TCkopen4load("tables.dat", false)) != -1) {
@@ -2642,7 +2642,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         if (dax1 != dax2) {
             y1 = pvWalls[v].cameraSpaceCoo[0][VEC_Y];
             y2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_Y];
-            yinc = divScale16(y2 - y1, x2 - x1);
+            yinc = divscale16(y2 - y1, x2 - x1);
             if (dax2 > dax1) {
                 yplc = y1 + mulscale16((dax1 << 16) + 65535 - x1, yinc);
                 qinterpolatedown16short(uplc, dax1, dax2 - dax1, yplc, yinc);
@@ -2661,7 +2661,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     palookupoffs = new PointerHelper(palookup[dapalnum], (getpalookup(0, dashade) << 8));
 
-    i = divScale32(1, z);
+    i = divscale32(1, z);
     xv = mulscale14(sinang, i);
     yv = mulscale14(cosang, i);
     if (((dastat & 2) != 0) || ((dastat & 8) == 0)) /* Don't aspect unscaled perms */ {
@@ -3383,7 +3383,7 @@ function rintersect(x1, y1, z1, vx, vy, vz, x3, y3, x4, y4,
         topu = vx * y31 - vy * x31;
         if ((topu > 0) || (topu <= bot)) return (0);
     }
-    t = divScale16(topt, bot);
+    t = divscale16(topt, bot);
     intx.$ = x1 + mulscale16(vx, t);
     inty.$ = y1 + mulscale16(vy, t);
     intz.$ = z1 + mulscale16(vz, t);
@@ -3765,7 +3765,7 @@ function clipmove(x, y, z, sectnum,
                 templong1 = (goalx - intx) * lx + (goaly - inty) * ly;
 
                 if ((klabs(templong1) >> 11) < templong2)
-                    i = divScale20(templong1, templong2);
+                    i = divscale20(templong1, templong2);
                 else
                     i = 0;
                 goalx = mulscale20(lx, i) + intx;
@@ -4270,10 +4270,10 @@ function setView(x1, y1, x2, y2) {
 
     xdimen = (x2 - x1) + 1;
     halfxdimen = (xdimen >> 1);
-    xdimenrecip = divScale32(1, xdimen);
+    xdimenrecip = divscale32(1, xdimen);
     ydimen = (y2 - y1) + 1;
 
-    setAspect(65536, divScale16(ydim * 320, xdim * 200));
+    setAspect(65536, divscale16(ydim * 320, xdim * 200));
 
     for (i = 0; i < windowx1; i++) {
         startumost[i] = 1;
@@ -4444,7 +4444,7 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
         //ptr2 = new PointerHelper(palookup[palnum]);
         //for(i=0; i<numpalookups; i++)
         //{
-        //    palscale = divScale16(i,numpalookups);
+        //    palscale = divscale16(i,numpalookups);
         //    for(j=0; j<256; j++)
         //    {
         //        ptr = new PointerHelper(palette[remapbuf[j]*3]) (uint8_t  *)&palette[remapbuf[j]*3]; //ptr = (uint8_t  *)&palette[remapbuf[j]*3];

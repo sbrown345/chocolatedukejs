@@ -1176,7 +1176,7 @@ Game.displayRooms = function (snum, smoothratio) {
     if (ud.camerasprite >= 0) {
         throw "todo"
     } else {
-        i = divScale22(1, sprite[p.i].yrepeat + 28);
+        i = divscale22(1, sprite[p.i].yrepeat + 28);
         if (i != oyrepeat) {
             oyrepeat = i;
             //printf("1: %d %d\n", oyrepeat,yxaspect);

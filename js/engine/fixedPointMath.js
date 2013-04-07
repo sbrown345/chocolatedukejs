@@ -50,10 +50,10 @@ function dmulscale(input1, input2, input3, input4, input5) {
 }
 
 for (var i3 = 1; i3 <= 32; i3++) {
-    window["divScale" + i3] = new Function("i1", "i2", "return divScale(i1, i2, " + i3 + ");"); // todo: inline
+    window["divscale" + i3] = new Function("i1", "i2", "return divscale(i1, i2, " + i3 + ");"); // todo: inline
 }
 
-function divScale(i1, i2, i3) {
+function divscale(i1, i2, i3) {
     if ((i1 | 0) != i1) throw "i1 not an integer: " + i1;
     if ((i2 | 0) != i2) throw "i2 not an integer: " + i2;
     if ((i3 | 0) != i3) throw "i3 not an integer: " + i3;
