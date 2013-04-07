@@ -209,3 +209,50 @@ function setsectinterpolate(i) {
         }
     }
 }
+
+//1133
+function movedummyplayers() {
+    var i, p, nexti;
+
+    i = headspritestat[13];
+    while(i >= 0)
+    {
+
+        for (; ;) {
+            
+        }
+
+        nexti = nextspritestat[i];
+
+        p = sprite[sprite[i].owner].yvel;
+
+        if( ps[p].on_crane >= 0 || sector[ps[p].cursectnum].lotag != 1 || sprite[ps[p].i].extra <= 0 )
+        {
+            ps[p].dummyplayersprite = -1;
+            deletesprite(i);
+            i = nexti;
+            continue;
+        }
+        else
+        {
+            if(ps[p].on_ground && ps[p].on_warping_sector == 1 && sector[ps[p].cursectnum].lotag == 1 )
+            {
+                sprite[i].cstat = 257;
+                sprite[i].z = sector[sprite[i].sectnum].ceilingz+(27<<8);
+                sprite[i].ang = ps[p].ang;
+                if(hittype[i].temp_data[0] == 8)
+                    hittype[i].temp_data[0] = 0;
+                else hittype[i].temp_data[0]++;
+            }
+            else
+            {
+                if(sector[sprite[i].sectnum].lotag != 2) sprite[i].z = sector[sprite[i].sectnum].floorz;
+                sprite[i].cstat = -32768; //(short) 32768;
+            }
+        }
+
+        sprite[i].x += (ps[p].posx-ps[p].oposx);
+        sprite[i].y += (ps[p].posy-ps[p].oposy);
+        setsprite(i,sprite[i].x,sprite[i].y,sprite[i].z);
+    }
+}

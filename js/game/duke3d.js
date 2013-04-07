@@ -93,6 +93,14 @@ function Input() {
     this.bits = 0;
 }
 
+Input.prototype.copyTo = function(obj) {
+    obj.avel = this.avel;
+    obj.horz = this.horz;
+    obj.fvel = this.fvel;
+    obj.svel = this.svel;
+    obj.bits = this.bits;
+};
+
 ///* !!! FIXME: "sync" is defined in unistd.h ... :(  --ryan. */
 // todo fix: this is work around for macro: possibly confusing sync/duke_sync
 window.__defineSetter__("duke_sync", function (v) {

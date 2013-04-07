@@ -829,6 +829,12 @@ function FTA(q, p, mode) {
     }
 }
 
+//2415
+Game.cheatKeys = function (snum) {
+    //todo
+    console.log("todo cheatKeys");
+};
+
 //2680
 function moveclouds() {
     if (totalclock > cloudtotalclock || totalclock < (cloudtotalclock - 7)) {
@@ -3729,21 +3735,22 @@ Game.playBack = function () {
             console.log("demo loop");
             if (foundemo) {
                 while (totalclock >= (lockclock + TICSPERFRAME)) {
-                    debugger;
+                    
                     if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
                         i = 0;
                         l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
                         kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
                     }
-
+                    var idx;
                     for (j = connecthead; j >= 0; j = connectpoint2[j]) {
-                        copybufbyte(recsync[i], inputfifo[movefifoend[j] & (MOVEFIFOSIZ - 1)][j], 10);
+                        idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
+                        recsync[i].copyTo(inputfifo[idx][j]);
 
                         movefifoend[j]++;
                         i++;
                         ud.reccnt--;
                     }
-                    domovethings();
+                    Game.doMoveThings();
 
                     throw new Error("todo");
                 }
@@ -3842,6 +3849,186 @@ Game.playBack = function () {
         });
 
     // put no code here
+};
+
+//9495
+Game.doMoveThings = function() {
+    var i, j;
+    var ch;
+    debugger;
+    for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+        if (sync[i].bits & (1 << 17)) {
+            multiflag = 2;
+            multiwhat = (sync[i].bits >> 18) & 1;
+            multipos = toUint32(sync[i].bits >> 19) & 15;
+            multiwho = i;
+
+            if (multiwhat) {
+                // FIX_00058: Save/load game crash in both single and multiplayer
+                screencapt = 1;
+                Engine.displayRooms(myconnectindex, 65536);
+                savetemp("duke3d.tmp", tiles[MAXTILES - 1].data, 160 * 100);
+                screencapt = 0;
+
+                saveplayer(multipos);
+                multiflag = 0;
+
+                if (multiwho != myconnectindex) {
+                    fta_quotes[122] = ud.user_name[multiwho][0];
+                    fta_quotes[122] = "SAVED A MULTIPLAYER GAME";
+                    FTA(122, ps[myconnectindex], 1);
+                } else {
+                    fta_quotes[122] = "MULTIPLAYER GAME SAVED";
+                    FTA(122, ps[myconnectindex], 1);
+                }
+                break;
+            } else {
+                //            waitforeverybody();
+
+                j = loadplayer(multipos);
+
+                multiflag = 0;
+
+                if (j == 0) {
+                    if (multiwho != myconnectindex) {
+                        strcpy(fta_quotes[122], ud.user_name[multiwho][0]);
+                        strcat(fta_quotes[122], " LOADED A MULTIPLAYER GAME");
+                        FTA(122, ps[myconnectindex], 1);
+                    } else {
+                        strcpy(fta_quotes[122], "MULTIPLAYER GAME LOADED");
+                        FTA(122, ps[myconnectindex], 1);
+                    }
+                    return 1;
+                }
+            }
+        }
+    }
+
+    ud.camerasprite = -1;
+    lockclock += TICSPERFRAME;
+
+    if (earthquaketime > 0) earthquaketime--;
+    if (rtsplaying > 0) rtsplaying--;
+
+    for (i = 0; i < MAXUSERQUOTES; i++)
+        if (user_quote_time[i]) {
+            user_quote_time[i]--;
+            if (!user_quote_time[i]) pub = NUMPAGES;
+        }
+    if ((klabs(quotebotgoal - quotebot) <= 16) && (ud.screen_size <= 8))
+        quotebot += ksgn(quotebotgoal - quotebot);
+    else
+        quotebot = quotebotgoal;
+
+    if (show_shareware > 0) {
+        show_shareware--;
+        if (show_shareware == 0) {
+            pus = NUMPAGES;
+            pub = NUMPAGES;
+        }
+    }
+
+    everyothertime++;
+
+    for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+        inputfifo[movefifoplc & (MOVEFIFOSIZ - 1)][i].copyTo(sync[i]);
+    }
+    movefifoplc++;
+
+    updateinterpolations();
+
+    j = -1;
+    for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+        if ((sync[i].bits & (1 << 26)) == 0) {
+            j = i;
+            continue;
+        }
+
+        closedemowrite();
+
+        if (i == myconnectindex) throw new Error(" ");
+        if (screenpeek == i) {
+            screenpeek = connectpoint2[i];
+            if (screenpeek < 0) screenpeek = connecthead;
+        }
+
+        if (i == connecthead) connecthead = connectpoint2[connecthead];
+        else connectpoint2[j] = connectpoint2[i];
+
+        numplayers--;
+        ud.multimode--;
+
+        if (numplayers < 2)
+            sound(GENERIC_AMBIENCE17);
+
+        pub = NUMPAGES;
+        pus = NUMPAGES;
+        vscrn();
+
+        sprintf(buf, "%s is history!", ud.user_name[i]);
+
+        quickkill(ps[i]);
+        deletesprite(ps[i].i);
+
+        adduserquote(buf);
+
+        if (j < 0 && networkmode == 0)
+            throw new Error("The 'MASTER/First player' just quit the game.  All\nplayers are returned from the game. This only happens in 5-8\nplayer mode as a different network scheme is used.");
+    }
+
+    if ((numplayers >= 2) && ((movefifoplc & 7) == 7)) {
+        ch = toUint8(randomseed & 255);
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
+            ch += ((ps[i].posx + ps[i].posy + ps[i].posz + ps[i].ang + ps[i].horiz) & 255);
+        syncval[myconnectindex][syncvalhead[myconnectindex] & (MOVEFIFOSIZ - 1)] = ch;
+        syncvalhead[myconnectindex]++;
+
+
+    }
+
+    if (ud.recstat == 1) record();
+
+    if (ud.pause_on == 0) {
+        global_random = krand();
+        movedummyplayers(); //ST 13
+    }
+
+    for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+        Game.cheatKeys(i);
+
+        if (ud.pause_on == 0) {
+            processinput(i);
+            checksectors(i);
+        }
+    }
+
+    if (ud.pause_on == 0) {
+        movefta(); //ST 2
+        moveweapons(); //ST 5 (must be last)
+        movetransports(); //ST 9
+
+        moveplayers(); //ST 10
+        movefallers(); //ST 12
+        moveexplosions(); //ST 4
+
+        moveactors(); //ST 1
+        moveeffectors(); //ST 3
+
+        movestandables(); //ST 6
+        doanimations();
+        movefx(); //ST 11
+    }
+
+    fakedomovethingscorrect();
+
+    if ((everyothertime & 1) == 0) {
+        animatewalls();
+        movecyclers();
+        pan3dsound();
+    }
+
+
+    return 0;
 };
 
 //10434
