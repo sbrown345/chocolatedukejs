@@ -301,7 +301,10 @@ function scansector(sectnum) {
                 xs = spr.x - globalposx;
                 ys = spr.y - globalposy;
                 if ((spr.cstat & 48) || (xs * cosglobalang + ys * singlobalang > 0)) {
-                    copybufbyte(spr, 0, tsprite[spritesortcnt], 44);
+                    //copybufbyte(spr, 0, tsprite[spritesortcnt], 44);
+                    for (var key in spr) {  
+                        tsprite[spritesortcnt][key] = spr[key];
+                    }
                     tsprite[spritesortcnt++].owner = z;
                 }
             }
@@ -1649,7 +1652,7 @@ Engine.draWalls = function (bunch) {
                         smostwall[smostwallcnt] = z;
                         smostwalltype[smostwallcnt] = 2;   /* 2 for dmost */
                         smostwallcnt++;
-                        throw "todo: copybufbyte((int32_t *)&dmost[x1],(int32_t *)&smost[smostcnt],i*2);";
+                        copybufbyte(dmost, x1, smost, smostcnt, i * 2);
                         smostcnt += i;
                     }
                 }

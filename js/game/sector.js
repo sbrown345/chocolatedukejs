@@ -33,7 +33,7 @@ function isanearoperator(lotag) {
     case 25:
     case 26:
     case 29:
-//Toothed door
+        //Toothed door
         return 1;
     }
     return 0;
@@ -62,6 +62,72 @@ Sector.animateCamSprite = function () {
     else 
         hittype[i].temp_data[0]++;
 };
+
+//1808
+function checkplayerhurt(p, j)
+{
+    if( (j&49152) == 49152 )
+    {
+        j &= (MAXSPRITES-1);
+
+        switch(sprite[j].picnum)
+        {
+            case CACTUS:
+                if(p.hurt_delay < 8 )
+                {
+                    sprite[p.i].extra -= 5;
+
+                    p.hurt_delay = 16;
+                    p.pals_time = 32;
+                    p.pals[0] = 32;
+                    p.pals[1] = 0;
+                    p.pals[2] = 0;
+                    spritesound(DUKE_LONGTERM_PAIN,p.i);
+                }
+                break;
+        }
+        return;
+    }
+
+    if( (j&49152) != 32768) return;
+    j &= (MAXWALLS-1);
+
+    if( p.hurt_delay > 0 ) p.hurt_delay--;
+    else if( wall[j].cstat&85 ) switch(wall[j].overpicnum)
+    {
+        case W_FORCEFIELD:
+        case W_FORCEFIELD+1:
+        case W_FORCEFIELD+2:
+            sprite[p.i].extra -= 5;
+
+            p.hurt_delay = 16;
+            p.pals_time = 32;
+            p.pals[0] = 32;
+            p.pals[1] = 0;
+            p.pals[2] = 0;
+
+            p.posxv = -(sintable[(p.ang+512)&2047]<<8);
+            p.posyv = -(sintable[(p.ang)&2047]<<8);
+            spritesound(DUKE_LONGTERM_PAIN,p.i);
+
+            checkhitwall(p.i,j,
+                p.posx+(sintable[(p.ang+512)&2047]>>9),
+                p.posy+(sintable[p.ang&2047]>>9),
+                p.posz,-1);
+
+            break;
+
+        case BIGFORCE:
+            p.hurt_delay = 26;
+            checkhitwall(p.i,j,
+                p.posx+(sintable[(p.ang+512)&2047]>>9),
+                p.posy+(sintable[p.ang&2047]>>9),
+                p.posz,-1);
+            break;
+
+    }
+}
+
 
 //2383
 Sector.allignWarpElevators = function () {
