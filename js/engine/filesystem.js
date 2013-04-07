@@ -626,6 +626,50 @@ var lzwbuf1, lzwbuf4, lzwbuf5;
 var lzwbuflock = new Uint8Array(5);
 var lzwbuf2, lzwbuf3;
 
+//544
+function uncompress(lzwinbuf, compleng, lzwoutbuf) {
+    var strtot, currstr, numbits, oneupnumbits;
+    var i, dat, leng, bitcnt, outbytecnt, longptr = new Int32Array(lzwinbuf.buffer);
+    var shortptr;
+
+    shortptr = new Int16Array(lzwinbuf.buffer);
+    strtot = shortptr[1];
+    if (strtot == 0) {
+        copybuf((lzwinbuf + 4), (lzwoutbuf), ((compleng - 4) + 3) >> 2);
+        return (shortptr[0]); /* uncompleng */
+    }
+    for (i = 255; i >= 0; i--) { lzwbuf2[i] = i; lzwbuf3[i] = i; }
+    currstr = 256; bitcnt = (4 << 3); outbytecnt = 0;
+    numbits = 8; oneupnumbits = (1 << 8);
+
+    var lngPtrHelper_int32;
+    do {
+        lngPtrHelper_int32 = new Int32Array(lzwinbuf.buffer.slice(bitcnt >> 3, (bitcnt >> 3) + 4));
+
+        dat = ((lngPtrHelper_int32[0] >> (bitcnt & 7)) & (oneupnumbits - 1));
+        console.log("dat: %i", dat);
+        bitcnt += numbits;
+        if ((dat & ((oneupnumbits >> 1) - 1)) > ((currstr - 1) & ((oneupnumbits >> 1) - 1)))
+        { dat &= ((oneupnumbits >> 1) - 1); bitcnt--; }
+
+        lzwbuf3[currstr] = dat;
+
+        for (leng = 0; dat >= 256; leng++) {
+            dat = lzwbuf3[dat];
+            lzwbuf1[leng] = lzwbuf2[dat];
+        }
+
+        lzwoutbuf[outbytecnt++] = dat;
+        for (i = leng - 1; i >= 0; i--) lzwoutbuf[outbytecnt++] = lzwbuf1[i];
+
+        lzwbuf2[currstr - 1] = dat; lzwbuf2[currstr] = dat;
+        currstr++;
+        if (currstr > oneupnumbits) { numbits++; oneupnumbits <<= 1; }
+    } while (currstr < strtot);
+    return (shortptr[0]); /* uncompleng */
+}
+
+
 //584
 
 function kdfread(buffer, dasizeof, count, fil) {
@@ -635,24 +679,44 @@ function kdfread(buffer, dasizeof, count, fil) {
     var ptr;
 
     lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 200;
-    if (!lzwbuf1) lzwbuf1 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); // allocache(&lzwbuf1,LZWSIZE+(LZWSIZE>>4),&lzwbuflock[0]);
-    if (!lzwbuf2) lzwbuf2 = new Uint8Array((LZWSIZE + (LZWSIZE >> 4)) * 2); //allocache((uint8_t**)&lzwbuf2,(LZWSIZE+(LZWSIZE>>4))*2,&lzwbuflock[1]);
-    if (!lzwbuf3) lzwbuf3 = new Uint8Array((LZWSIZE + (LZWSIZE >> 4)) * 2); //allocache((uint8_t**)&lzwbuf3,(LZWSIZE+(LZWSIZE>>4))*2,&lzwbuflock[2]);
-    if (!lzwbuf4) lzwbuf4 = new Uint8Array(LZWSIZE); //allocache(&lzwbuf4,LZWSIZE,&lzwbuflock[3]);
-    if (!lzwbuf5) lzwbuf5 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); //allocache(&lzwbuf5,LZWSIZE+(LZWSIZE>>4),&lzwbuflock[4]);
+    if (!lzwbuf1) lzwbuf1 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4)); 
+    if (!lzwbuf2) lzwbuf2 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)) ); 
+    if (!lzwbuf3) lzwbuf3 = new Int16Array((LZWSIZE + (LZWSIZE >> 4)) ); 
+    if (!lzwbuf4) lzwbuf4 = new Uint8Array(LZWSIZE);
+    if (!lzwbuf5) lzwbuf5 = new Uint8Array(LZWSIZE + (LZWSIZE >> 4));
 
     if (dasizeof > LZWSIZE) {
         count *= dasizeof;
         dasizeof = 1;
     }
+    
     ptr = new PointerHelper(buffer);
 
-    kread(fil, leng, 2);
+    leng = kread16(fil, 2);
     kread(fil, lzwbuf5, leng);
     k = 0;
     kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
 
-    copybufbyte(lzwbuf4, ptr.array, dasizeof);
+    //copybufbyte(lzwbuf4, ptr.array, dasizeof);
+    var lzwbuf4_short = new Int16Array(lzwbuf4.buffer);
+    var lzwbuf4_uint32 = new Uint8Array(lzwbuf4.buffer);
+    for (var l = 0; l < lzwbuf4.length; l += 10) {
+        buffer[l].avel = toInt8(lzwbuf4[l]);
+        buffer[l].horz = toInt8(lzwbuf4[l + 1]);
+        buffer[l].fvel = lzwbuf4_short[((l + 2) / 2) | 0];
+        buffer[l].svel = lzwbuf4_short[((l + 4) / 2) | 0];
+        buffer[l].bits = lzwbuf4_uint32[((l + 6) / 4) | 0];
+        
+        throw "todo: better way!!!!!"
+        //var buffer = new ArrayBuffer(24);
+
+        //// ... read the data into the buffer ...
+
+        //var idView = new Uint32Array(buffer, 0, 1);
+        //var usernameView = new Uint8Array(buffer, 4, 16);
+        //var amountDueView = new Float32Array(buffer, 20, 1);
+    }
+
     k += dasizeof;
 
     for (i = 1; i < count; i++) {

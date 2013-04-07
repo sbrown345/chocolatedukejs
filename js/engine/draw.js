@@ -206,7 +206,6 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 //386
 var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {
-    console.log("todo test mvlineasm1 (breaks console text if not used)");
     console.assert(arguments.length == 8);
     console.assert(dest instanceof PointerHelper);
 
