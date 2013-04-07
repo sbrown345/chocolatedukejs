@@ -2,6 +2,44 @@
 
 var Sector = {};
 
+//156
+function isanunderoperator(lotag) {
+    switch (lotag & 0xff) {
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 22:
+    case 26:
+        return 1;
+    }
+    return 0;
+}
+
+//172
+function isanearoperator(lotag) {
+    switch (lotag & 0xff) {
+    case 9:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 25:
+    case 26:
+    case 29:
+//Toothed door
+        return 1;
+    }
+    return 0;
+}
+
+
 //385
 Sector.animateCamSprite = function () {
     var i;
