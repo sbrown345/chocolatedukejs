@@ -845,8 +845,259 @@ function ceilscan ( x1,  x2,  sectnum)
 
 /* renders non-parallaxed floors. --ryan. */
 //947
-function florscan(/*int32_t x1, int32_t x2, int32_t sectnum*/) {
-    console.log("todo florscan")
+function florscan(x1, x2, sectnum) {
+    var i, j, ox, oy, x, y1, y2, twall, bwall;
+    var sec;
+
+    //Retrieve the sector object
+    sec = sector[sectnum];
+    
+    //Retrieve the floor palette.
+    if (palookup[sec.floorpal] != globalpalwritten /*simon note: globalpalwritten is ptr to palookup!!!!!!, this is looking at first thing of it.. */)
+        globalpalwritten = palookup[sec.floorpal];
+
+    globalzd = globalposz-sec.floorz;
+    
+    //We are UNDER the floor: Do NOT render anything.
+    if (globalzd > 0)
+        return;
+    
+    //Retrive the floor texture.
+    globalpicnum = sec.floorpicnum;
+    if (globalpicnum >= MAXTILES)
+    globalpicnum = 0;
+    
+    //Lock the floor texture
+    setgotpic(globalpicnum);
+    
+    
+    //This tile has unvalid dimensions ( negative)
+    if ((tiles[globalpicnum].dim.width <= 0) ||
+        (tiles[globalpicnum].dim.height <= 0))
+        return;
+    
+    //If this is an animated texture: Animate it.
+    if (tiles[globalpicnum].animFlags&192)
+        globalpicnum += animateoffs(globalpicnum);
+
+    //If the texture is not in RAM: Load it !!
+    TILE_MakeAvailable(globalpicnum);
+    
+    //Check where is the texture in RAM
+    globalbufplc = tiles[globalpicnum].data;
+
+    //Retrieve the shade of the sector (illumination level).
+    globalshade = sec.floorshade;
+    
+    globvis = globalcisibility;
+    if (sec.visibility != 0)
+        globvis = mulscale4(globvis,((sec.visibility+16)));
+    
+    
+    globalorientation = sec.floorstat;
+
+
+    if ((globalorientation&64) == 0)
+    {
+        globalx1 = singlobalang;
+        globalx2 = singlobalang;
+        globaly1 = cosglobalang;
+        globaly2 = cosglobalang;
+        globalxpanning = (globalposx<<20);
+        globalypanning = -(globalposy<<20);
+    }
+    else
+    {
+        j = sec.wallptr;
+        ox = wall[wall[j].point2].x - wall[j].x;
+        oy = wall[wall[j].point2].y - wall[j].y;
+        i = nsqrtasm(ox*ox+oy*oy);
+        if (i == 0)
+            i = 1024;
+        else
+            i = 1048576/i;
+        globalx1 = mulscale10(dmulscale10(ox,singlobalang,-oy,cosglobalang),i);
+        globaly1 = mulscale10(dmulscale10(ox,cosglobalang,oy,singlobalang),i);
+        globalx2 = -globalx1;
+        globaly2 = -globaly1;
+
+        ox = ((wall[j].x-globalposx)<<6);
+        oy = ((wall[j].y-globalposy)<<6);
+        i = dmulscale14(oy,cosglobalang,-ox,singlobalang);
+        j = dmulscale14(ox,cosglobalang,oy,singlobalang);
+        ox = i;
+        oy = j;
+        globalxpanning = globalx1*ox - globaly1*oy;
+        globalypanning = globaly2*ox + globalx2*oy;
+    }
+    
+    
+    globalx2 = mulscale16(globalx2,viewingrangerecip);
+    globaly1 = mulscale16(globaly1,viewingrangerecip);
+    globalxshift = (8-(picsiz[globalpicnum]&15));
+    globalyshift = (8-(picsiz[globalpicnum]>>4));
+    if (globalorientation&8) {
+        globalxshift++;
+        globalyshift++;
+    }
+
+    if ((globalorientation&0x4) > 0)
+    {
+        i = globalxpanning;
+        globalxpanning = globalypanning;
+        globalypanning = i;
+        i = globalx2;
+        globalx2 = -globaly1;
+        globaly1 = -i;
+        i = globalx1;
+        globalx1 = globaly2;
+        globaly2 = i;
+    }
+    
+    
+    if ((globalorientation&0x10) > 0){
+        globalx1 = -globalx1;
+        globaly1 = -globaly1;
+        globalxpanning = -globalxpanning;
+    }
+    
+    if ((globalorientation&0x20) > 0){
+        globalx2 = -globalx2;
+        globaly2 = -globaly2;
+        globalypanning = -globalypanning;
+    }
+    
+    
+    globalx1 <<= globalxshift;
+    globaly1 <<= globalxshift;
+    globalx2 <<= globalyshift;
+    globaly2 <<= globalyshift;
+    globalxpanning <<= globalxshift;
+    globalypanning <<= globalyshift;
+    globalxpanning += ((sec.floorxpanning)<<24);
+    globalypanning += ((sec.floorypanning)<<24);
+    globaly1 = (-globalx1-globaly1)*halfxdimen;
+    globalx2 = (globalx2-globaly2)*halfxdimen;
+
+    //Setup the drawing routine paramters
+    sethlinesizes(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4,globalbufplc);
+
+    globalx2 += globaly2*(x1-1);
+    globaly1 += globalx1*(x1-1);
+    globalx1 = mulscale16(globalx1,globalzd);
+    globalx2 = mulscale16(globalx2,globalzd);
+    globaly1 = mulscale16(globaly1,globalzd);
+    globaly2 = mulscale16(globaly2,globalzd);
+    globvis = klabs(mulscale10(globvis,globalzd));
+
+    if (!(globalorientation&0x180))
+    {
+        y1 = Math.max(dplc[x1],umost[x1]);
+        y2 = y1;
+        for(x=x1; x<=x2; x++)
+        {
+            twall = Math.max(dplc[x],umost[x])-1;
+            bwall = dmost[x];
+            if (twall < bwall-1)
+            {
+                if (twall >= y2)
+                {
+                    while (y1 < y2-1)
+                        hline(x-1,++y1);
+                    y1 = twall;
+                }
+                else
+                {
+                    while (y1 < twall)
+                        hline(x-1,++y1);
+                    while (y1 > twall)
+                        lastx[y1--] = x;
+                }
+                while (y2 > bwall)
+                    hline(x-1,--y2);
+                while (y2 < bwall)
+                    lastx[y2++] = x;
+            }
+            else
+            {
+                while (y1 < y2-1) hline(x-1,++y1);
+                if (x == x2) {
+                    globalx2 += globaly2;
+                    globaly1 += globalx1;
+                    break;
+                }
+                y1 = Math.max(dplc[x+1],umost[x+1]);
+                y2 = y1;
+            }
+            globalx2 += globaly2;
+            globaly1 += globalx1;
+        }
+        while (y1 < y2-1)
+            hline(x2,++y1);
+        
+        faketimerhandler();
+        return;
+    }
+
+    switch(globalorientation&0x180)
+    {
+        case 128:
+            msethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+        case 256:
+            settrans(TRANS_NORMAL);
+            tsethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+        case 384:
+            settrans(TRANS_REVERSE);
+            tsethlineshift(picsiz[globalpicnum]&15,picsiz[globalpicnum]>>4);
+            break;
+    }
+
+    y1 = Math.max(dplc[x1],umost[x1]);
+    y2 = y1;
+    for(x=x1; x<=x2; x++)
+    {
+        twall = Math.max(dplc[x],umost[x])-1;
+        bwall = dmost[x];
+        if (twall < bwall-1)
+        {
+            if (twall >= y2)
+            {
+                while (y1 < y2-1) slowhline(x-1,++y1);
+                y1 = twall;
+            }
+            else
+            {
+                while (y1 < twall)
+                    slowhline(x-1,++y1);
+                while (y1 > twall)
+                    lastx[y1--] = x;
+            }
+            while (y2 > bwall)
+                slowhline(x-1,--y2);
+            while (y2 < bwall)
+                lastx[y2++] = x;
+        }
+        else
+        {
+            while (y1 < y2-1)
+                slowhline(x-1,++y1);
+            if (x == x2) {
+                globalx2 += globaly2;
+                globaly1 += globalx1;
+                break;
+            }
+            y1 = Math.max(dplc[x+1],umost[x+1]);
+            y2 = y1;
+        }
+        globalx2 += globaly2;
+        globaly1 += globalx1;
+    }
+    while (y1 < y2-1)
+        slowhline(x2,++y1);
+    
+    faketimerhandler();
 }
 
 /*
@@ -1063,12 +1314,351 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
 /* renders parallaxed skies/floors  --ryan. */
 function parascan(dax1, dax2, sectnum,  dastat, bunch) {
     console.log("TODO parascan");
+    //sectortype *sec;
+    //int32_t j, k, l, m, n, x, z, wallnum, nextsectnum, globalhorizbak;
+    //short *topptr, *botptr;
+
+    //sectnum = pvWalls[bunchfirst[bunch]].sectorId;
+    //sec = &sector[sectnum];
+
+    //globalhorizbak = globalhoriz;
+    //if (parallaxyscale != 65536)
+    //    globalhoriz = mulscale16(globalhoriz-(ydimen>>1),parallaxyscale) + (ydimen>>1);
+    //globvis = globalpisibility;
+    ///* globalorientation = 0L; */
+    //if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+
+    //if (dastat == 0)
+    //{
+    //    globalpal = sec.ceilingpal;
+    //    globalpicnum = sec.ceilingpicnum;
+    //    globalshade = (int32_t)sec.ceilingshade;
+    //    globalxpanning = (int32_t)sec.ceilingxpanning;
+    //    globalypanning = (int32_t)sec.ceilingypanning;
+    //    topptr = umost;
+    //    botptr = uplc;
+    //}
+    //else
+    //{
+    //    globalpal = sec.floorpal;
+    //    globalpicnum = sec.floorpicnum;
+    //    globalshade = (int32_t)sec.floorshade;
+    //    globalxpanning = (int32_t)sec.floorxpanning;
+    //    globalypanning = (int32_t)sec.floorypanning;
+    //    topptr = dplc;
+    //    botptr = dmost;
+    //}
+
+    //if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
+    
+    //if (tiles[globalpicnum].animFlags&192) 
+    //    globalpicnum += animateoffs(globalpicnum);
+    
+    //globalshiftval = (picsiz[globalpicnum]>>4);
+    
+    //if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+    //    globalshiftval++;
+    //globalshiftval = 32-globalshiftval;
+    //globalzd = (((tiles[globalpicnum].dim.height>>1)+parallaxyoffs)<<globalshiftval)+(globalypanning<<24);
+    //globalyscale = (8<<(globalshiftval-19));
+    ///*if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;*/
+
+    //k = 11 - (picsiz[globalpicnum]&15) - pskybits;
+    //x = -1;
+
+    //for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z])
+    //{
+    //    wallnum = pvWalls[z].worldWallId;
+    //    nextsectnum = wall[wallnum].nextsector;
+
+    //    if (dastat == 0) j = sector[nextsectnum].ceilingstat;
+    //    else j = sector[nextsectnum].floorstat;
+
+    //    if ((nextsectnum < 0) || (wall[wallnum].cstat&32) || ((j&1) == 0))
+    //    {
+    //        if (x == -1) x = pvWalls[z].screenSpaceCoo[0][VEC_COL];
+
+    //        if (parallaxtype == 0)
+    //        {
+    //            n = mulscale16(xdimenrecip,viewingrange);
+    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+    //                lplc[j] = (((mulscale23(j-halfxdimen,n)+globalang)&2047)>>k);
+    //        }
+    //        else
+    //        {
+    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+    //                lplc[j] = ((((int32_t)radarang2[j]+globalang)&2047)>>k);
+    //        }
+    //        if (parallaxtype == 2)
+    //        {
+    //            n = mulscale16(xdimscale,viewingrange);
+    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+    //                swplc[j] = mulscale14(sintable[((int32_t)radarang2[j]+512)&2047],n);
+    //        }
+    //        else
+    //            clearbuf(&swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
+    //    }
+    //    else if (x >= 0)
+    //    {
+    //        l = globalpicnum;
+    //        m = (picsiz[globalpicnum]&15);
+    //        globalpicnum = l+pskyoff[lplc[x]>>m];
+
+    //        if (((lplc[x]^lplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]-1])>>m) == 0)
+    //            wallscan(x,pvWalls[z].screenSpaceCoo[0][VEC_COL]-1,topptr,botptr,swplc,lplc);
+    //        else
+    //        {
+    //            j = x;
+    //            while (x < pvWalls[z].screenSpaceCoo[0][VEC_COL])
+    //            {
+    //                n = l+pskyoff[lplc[x]>>m];
+    //                if (n != globalpicnum)
+    //                {
+    //                    wallscan(j,x-1,topptr,botptr,swplc,lplc);
+    //                    j = x;
+    //                    globalpicnum = n;
+    //                }
+    //                x++;
+    //            }
+    //            if (j < x)
+    //                wallscan(j,x-1,topptr,botptr,swplc,lplc);
+    //        }
+
+    //        globalpicnum = l;
+    //        x = -1;
+    //    }
+    //}
+
+    //if (x >= 0)
+    //{
+    //    l = globalpicnum;
+    //    m = (picsiz[globalpicnum]&15);
+    //    globalpicnum = l+pskyoff[lplc[x]>>m];
+
+    //    if (((lplc[x]^lplc[pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL]])>>m) == 0)
+    //        wallscan(x,pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],topptr,botptr,swplc,lplc);
+    //    else
+    //    {
+    //        j = x;
+    //        while (x <= pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL])
+    //        {
+    //            n = l+pskyoff[lplc[x]>>m];
+    //            if (n != globalpicnum)
+    //            {
+    //                wallscan(j,x-1,topptr,botptr,swplc,lplc);
+    //                j = x;
+    //                globalpicnum = n;
+    //            }
+    //            x++;
+    //        }
+    //        if (j <= x)
+    //            wallscan(j,x,topptr,botptr,swplc,lplc);
+    //    }
+    //    globalpicnum = l;
+    //}
+    //globalhoriz = globalhorizbak;
 }
 
 //1729
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
     console.log("TODO grouscan");
+    //var i, j, l, x, y, dx, dy, wx, wy, y1, y2, daz;
+    //var daslope, dasqr;
+    //var shoffs, shinc, m1, m2, mptr1, mptr2, nptr1, nptr2;
+    //var wal;
+    //var sec;
+
+    //sec = sector[sectnum];
+
+    //if (dastat == 0)
+    //{
+    //    if (globalposz <= getceilzofslope(sectnum,globalposx,globalposy))
+    //        return;  /* Back-face culling */
+    //    globalorientation = sec.ceilingstat;
+    //    globalpicnum = sec.ceilingpicnum;
+    //    globalshade = sec.ceilingshade;
+    //    globalpal = sec.ceilingpal;
+    //    daslope = sec.ceilingheinum;
+    //    daz = sec.ceilingz;
+    //}
+    //else
+    //{
+    //    if (globalposz >= getflorzofslope(sectnum,globalposx,globalposy))
+    //        return;  /* Back-face culling */
+    //    globalorientation = sec.floorstat;
+    //    globalpicnum = sec.floorpicnum;
+    //    globalshade = sec.floorshade;
+    //    globalpal = sec.floorpal;
+    //    daslope = sec.floorheinum;
+    //    daz = sec.floorz;
+    //}
+
+    //if ((tiles[globalpicnum].animFlags&192) != 0)
+    //    globalpicnum += animateoffs(globalpicnum);
+    
+    //setgotpic(globalpicnum);
+    
+    //if ((tiles[globalpicnum].dim.width <= 0) ||
+    //    (tiles[globalpicnum].dim.height <= 0))
+    //    return;
+    
+    //TILE_MakeAvailable(globalpicnum);
+
+    //wal = wall[sec.wallptr];
+    //wx = wall[wal.point2].x - wal.x;
+    //wy = wall[wal.point2].y - wal.y;
+    //dasqr = krecipasm(nsqrtasm(wx*wx+wy*wy));
+    //i = mulscale21(daslope,dasqr);
+    //wx *= i;
+    //wy *= i;
+
+    //globalx = -mulscale19(singlobalang,xdimenrecip);
+    //globaly = mulscale19(cosglobalang,xdimenrecip);
+    //globalx1 = (globalposx<<8);
+    //globaly1 = -(globalposy<<8);
+    //i = (dax1-halfxdimen)*xdimenrecip;
+    //globalx2 = mulscale16(cosglobalang<<4,viewingrangerecip) - mulscale27(singlobalang,i);
+    //globaly2 = mulscale16(singlobalang<<4,viewingrangerecip) + mulscale27(cosglobalang,i);
+    //globalzd = (xdimscale<<9);
+    //globalzx = -dmulscale17(wx,globaly2,-wy,globalx2) + mulscale10(1-globalhoriz,globalzd);
+    //globalz = -dmulscale25(wx,globaly,-wy,globalx);
+
+    //if (globalorientation&64)  /* Relative alignment */
+    //{
+    //    dx = mulscale14(wall[wal.point2].x-wal.x,dasqr);
+    //    dy = mulscale14(wall[wal.point2].y-wal.y,dasqr);
+
+    //    i = nsqrtasm(daslope*daslope+16777216);
+
+    //    x = globalx;
+    //    y = globaly;
+    //    globalx = dmulscale16(x,dx,y,dy);
+    //    globaly = mulscale12(dmulscale16(-y,dx,x,dy),i);
+
+    //    x = ((wal.x-globalposx)<<8);
+    //    y = ((wal.y-globalposy)<<8);
+    //    globalx1 = dmulscale16(-x,dx,-y,dy);
+    //    globaly1 = mulscale12(dmulscale16(-y,dx,x,dy),i);
+
+    //    x = globalx2;
+    //    y = globaly2;
+    //    globalx2 = dmulscale16(x,dx,y,dy);
+    //    globaly2 = mulscale12(dmulscale16(-y,dx,x,dy),i);
+    //}
+    //if (globalorientation&0x4)
+    //{
+    //    i = globalx;
+    //    globalx = -globaly;
+    //    globaly = -i;
+    //    i = globalx1;
+    //    globalx1 = globaly1;
+    //    globaly1 = i;
+    //    i = globalx2;
+    //    globalx2 = -globaly2;
+    //    globaly2 = -i;
+    //}
+    //if (globalorientation&0x10) {
+    //    globalx1 = -globalx1, globalx2 = -globalx2, globalx = -globalx;
+    //}
+    //if (globalorientation&0x20) {
+    //    globaly1 = -globaly1, globaly2 = -globaly2, globaly = -globaly;
+    //}
+
+    //daz = dmulscale9(wx,globalposy-wal.y,-wy,globalposx-wal.x) + ((daz-globalposz)<<8);
+    //globalx2 = mulscale20(globalx2,daz);
+    //globalx = mulscale28(globalx,daz);
+    //globaly2 = mulscale20(globaly2,-daz);
+    //globaly = mulscale28(globaly,-daz);
+
+    //i = 8-(picsiz[globalpicnum]&15);
+    //j = 8-(picsiz[globalpicnum]>>4);
+    //if (globalorientation&8) {
+    //    i++;
+    //    j++;
+    //}
+    //globalx1 <<= (i+12);
+    //globalx2 <<= i;
+    //globalx <<= i;
+    //globaly1 <<= (j+12);
+    //globaly2 <<= j;
+    //globaly <<= j;
+
+    //if (dastat == 0)
+    //{
+    //    globalx1 += ((sec.ceilingxpanning)<<24);
+    //    globaly1 += ((sec.ceilingypanning)<<24);
+    //}
+    //else
+    //{
+    //    globalx1 += ((sec.floorxpanning)<<24);
+    //    globaly1 += ((sec.floorypanning)<<24);
+    //}
+
+    //asm1 = -(globalzd>>(16-BITSOFPRECISION));
+
+    //globvis = globalvisibility;
+    //if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+    //globvis = mulscale13(globvis,daz);
+    //globvis = mulscale16(globvis,xdimscale);
+    //j = palookup[globalpal];
+
+    //setupslopevlin(((int32_t)(picsiz[globalpicnum]&15))+(((int32_t)(picsiz[globalpicnum]>>4))<<8),tiles[globalpicnum].data,-ylookup[1]);
+
+    //l = (globalzd>>16);
+
+    //shinc = mulscale16(globalz,xdimenscale);
+    //if (shinc > 0)
+    //    shoffs = (4<<15);
+    //else
+    //    shoffs = ((16380-ydimen)<<15);	// JBF: was 2044     16380
+    //if (dastat == 0) y1 = umost[dax1];
+    //else y1 = Math.max(umost[dax1],dplc[dax1]);
+    //m1 = mulscale16(y1,globalzd) + (globalzx>>6);
+    ///* Avoid visibility overflow by crossing horizon */
+    //if (globalzd > 0) m1 += (globalzd>>16);
+    //else m1 -= (globalzd>>16);
+    //m2 = m1+l;
+    //mptr1 = (int32_t *)&slopalookup[y1+(shoffs>>15)];
+    //mptr2 = mptr1+1;
+
+    //for(x=dax1; x<=dax2; x++)
+    //{
+    //    if (dastat == 0) {
+    //        y1 = umost[x];
+    //        y2 = min(dmost[x],uplc[x])-1;
+    //    }
+    //    else {
+    //        y1 = Math.max(umost[x],dplc[x]);
+    //        y2 = dmost[x]-1;
+    //    }
+    //    if (y1 <= y2)
+    //    {
+    //        nptr1 = (int32_t *)&slopalookup[y1+(shoffs>>15)];
+    //        nptr2 = (int32_t *)&slopalookup[y2+(shoffs>>15)];
+    //        while (nptr1 <= mptr1)
+    //        {
+    //            *mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
+    //            m1 -= l;
+    //        }
+    //        while (nptr2 >= mptr2)
+    //        {
+    //            *mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
+    //            m2 += l;
+    //        }
+
+    //        globalx3 = (globalx2>>10);
+    //        globaly3 = (globaly2>>10);
+    //        asm3 = mulscale16(y2,globalzd) + (globalzx>>6);
+    //        slopevlin(ylookup[y2]+x+frameoffset,krecipasm(asm3>>3),(int32_t)nptr2,y2-y1+1,globalx1,globaly1);
+
+    //        if ((x&15) == 0) faketimerhandler();
+    //    }
+    //    globalx2 += globalx;
+    //    globaly2 += globaly;
+    //    globalzx += globalz;
+    //    shoffs += shinc;
+    //}
 }
 
 //1926
