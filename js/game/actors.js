@@ -264,6 +264,99 @@ function setsectinterpolate(i) {
     }
 }
 
+//908
+function movefta() {
+    var x, px, py, sx, sy;
+    var i, j, p, psect = new Ref(), ssect = new Ref(), nexti;
+    var s;
+
+    i = headspritestat[2];
+    while(i >= 0)
+    {
+        nexti = nextspritestat[i];
+
+        s = sprite[i];
+        var xRef = new Ref(x);
+        p = findplayer(s, xRef);
+        x = xRef.$;
+        
+        ssect.$ = psect.$ = s.sectnum;
+
+        if(sprite[ps[p].i].extra > 0 )
+        {
+            if( x < 30000 )
+            {
+                hittype[i].timetosleep++;
+                if( hittype[i].timetosleep >= (x>>8) )
+                {
+                    if(badguy(s))
+                    {
+                        px = ps[p].oposx+64-(krand()&127);
+                        py = ps[p].oposy+64-(krand()&127);
+                        updatesector(px,py,psect);
+                        if(psect.$ == -1)
+                        {
+                            i = nexti;
+                            continue;
+                        }
+                        sx = s.x+64-(krand()&127);
+                        sy = s.y+64-(krand()&127);
+                        updatesector(px,py,ssect);
+                        if (ssect.$ == -1)
+                        {
+                            i = nexti;
+                            continue;
+                        }
+                        j = cansee(sx,sy,s.z-(krand()%(52<<8)),s.sectnum,px,py,ps[p].oposz-(krand()%(32<<8)),ps[p].cursectnum);
+                    }
+                    else
+                        j = cansee(s.x,s.y,s.z-((krand()&31)<<8),s.sectnum,ps[p].oposx,ps[p].oposy,ps[p].oposz-((krand()&31)<<8),ps[p].cursectnum);
+
+                    //             j = 1;
+
+                    if(j) switch(s.picnum)
+                    {
+                        case RUBBERCAN:
+                        case EXPLODINGBARREL:
+                        case WOODENHORSE:
+                        case HORSEONSIDE:
+                        case CANWITHSOMETHING:
+                        case CANWITHSOMETHING2:
+                        case CANWITHSOMETHING3:
+                        case CANWITHSOMETHING4:
+                        case FIREBARREL:
+                        case FIREVASE:
+                        case NUKEBARREL:
+                        case NUKEBARRELDENTED:
+                        case NUKEBARRELLEAKED:
+                        case TRIPBOMB:
+                            if (sector[s.sectnum].ceilingstat&1)
+                                s.shade = sector[s.sectnum].ceilingshade;
+                            else s.shade = sector[s.sectnum].floorshade;
+
+                            hittype[i].timetosleep = 0;
+                            changespritestat(i,6);
+                            break;
+                        default:
+                            hittype[i].timetosleep = 0;
+                            check_fta_sounds(i);
+                            changespritestat(i,1);
+                            break;
+                    }
+                    else hittype[i].timetosleep = 0;
+                }
+            }
+            if( badguy( s ) )
+            {
+                if (sector[s.sectnum].ceilingstat&1)
+                    s.shade = sector[s.sectnum].ceilingshade;
+                else s.shade = sector[s.sectnum].floorshade;
+            }
+        }
+        i = nexti;
+    }
+}
+
 //1133
 function movedummyplayers() {
     var i, p, nexti;

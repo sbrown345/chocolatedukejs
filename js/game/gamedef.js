@@ -1424,32 +1424,29 @@ function passOne(readFromGrp) {
 }
 
 //1724
-function furthestangle( i, angs) {
-    var j, hitsect,hitwall,hitspr, furthest_angle, angincs;
-    var hx, hy, hz, d, greatestd;
+function furthestangle(i, angs) {
+    var j, hitsect = new Ref(), hitwall = new Ref(), hitspr = new Ref(), furthest_angle, angincs;
+    var hx = new Ref(), hy = new Ref(), hz = new Ref(), d, greatestd;
     var s = sprite[i];
 
-    greatestd = -(1<<30);
-    angincs = 2048/angs;
+    greatestd = -(1 << 30);
+    angincs = (2048 / angs) | 0;
 
-    if(s.picnum != APLAYER)
-        if( (g_t[0]&63) > 2 ) return( s.ang + 1024 );
+    if (s.picnum != APLAYER)
+        if ((g_t[0] & 63) > 2) return (s.ang + 1024);
 
-    for(j=s.ang;j<(2048+s.ang);j+=angincs)
-    {
-        throw "todo"
-        //hitscan(s.x, s.y, s.z-(8<<8), s.sectnum,
-        //    sintable[(j+512)&2047],
-        //    sintable[j&2047],0,
-        //    &hitsect,&hitwall,&hitspr,&hx,&hy,&hz,CLIPMASK1);
+    for (j = s.ang; j < (2048 + s.ang); j += angincs) {
+        hitscan(s.x, s.y, s.z - (8 << 8), s.sectnum,
+            sintable[(j + 512) & 2047],
+            sintable[j & 2047], 0,
+            hitsect, hitwall, hitspr, hx, hy, hz, CLIPMASK1);
 
-        //d = klabs(hx-s.x) + klabs(hy-s.y);
+        d = klabs(hx.$ - s.x) + klabs(hy.$ - s.y);
 
-        //if(d > greatestd)
-        //{
-        //    greatestd = d;
-        //    furthest_angle = j;
-        //}
+        if (d > greatestd) {
+            greatestd = d;
+            furthest_angle = j;
+        }
     }
-    return (furthest_angle&2047);
+    return (furthest_angle & 2047);
 }

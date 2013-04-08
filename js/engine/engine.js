@@ -1059,6 +1059,12 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     faketimerhandler();
 }
 
+//1580
+/* renders parallaxed skies/floors  --ryan. */
+function parascan(dax1, dax2, sectnum,  dastat, bunch) {
+    console.log("TODO parascan");
+}
+
 //1729
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
@@ -2377,24 +2383,6 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     return 0;
 };
 
-//4688
-function getangle(xvect,  yvect) {
-    if ((xvect|yvect) == 0)
-    return(0);
-    if (xvect == 0)
-        return(512+((yvect<0)<<10));
-    if (yvect == 0)
-        return(((xvect<0)<<10));
-    if (xvect == yvect)
-        return(256+((xvect<0)<<10));
-    if (xvect == -yvect)
-        return(768+((xvect>0)<<10));
-    if (klabs(xvect) > klabs(yvect))
-        return(((radarang[640+scale(160,yvect,xvect)]>>6)+((xvect<0)<<10))&2047);
-    
-    return(((radarang[640-scale(160,xvect,yvect)]>>6)+512+((yvect<0)<<10))&2047);
-}
-
 //3534
 Engine.initKSqrt = function () {
     var i, j, k;
@@ -2925,13 +2913,13 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                 if (dastat & 64) {
                     if ((bad != 0) || (u4 >= d4)) {
                         if (!(bad & 1))
-                            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + 0 + p.position, p.array);
+                            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + 0 + p.position, p);
                         if (!(bad & 2))
-                            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + 1 + p.position, p.array);
+                            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + 1 + p.position, p);
                         if (!(bad & 4))
-                            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + 2 + p.position, p.array);
+                            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + 2 + p.position, p);
                         if (!(bad & 8))
-                            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p.array);
+                            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p);
                         continue;
                     }
 
@@ -3350,12 +3338,31 @@ function inside(x, y, sectnum) {
     return wallCrossed >>> 31;
 }
 
+//4688
+function getangle(xvect, yvect) {
+    if ((xvect | yvect) == 0)
+        return (0);
+    if (xvect == 0)
+        return (512 + ((yvect < 0) << 10));
+    if (yvect == 0)
+        return (((xvect < 0) << 10));
+    if (xvect == yvect)
+        return (256 + ((xvect < 0) << 10));
+    if (xvect == -yvect)
+        return (768 + ((xvect > 0) << 10));
+    if (klabs(xvect) > klabs(yvect))
+        return (((radarang[640 + scale(160, yvect, xvect)] >> 6) + ((xvect < 0) << 10)) & 2047);
+
+    return (((radarang[640 - scale(160, xvect, yvect)] >> 6) + 512 + ((yvect < 0) << 10)) & 2047);
+}
+
 
 //4707
 function ksqrt(num) {
     return (nsqrtasm(num));
 }
 
+//5930
 function setsprite(spritenum, newx, newy, newz) {
     var tempsectnum;
 
@@ -3373,7 +3380,7 @@ function setsprite(spritenum, newx, newy, newz) {
     return (0);
 }
 
-//5867
+//5949
 Engine.initSpriteLists = function () {
     var i;
 
@@ -3403,12 +3410,13 @@ Engine.initSpriteLists = function () {
     nextspritestat[MAXSPRITES - 1] = -1;
 };
 
-//5899
+//5981
 Engine.insertSprite = function (sectNum, statNum) {
     Engine.insertSpriteStat(statNum);
     return Engine.insertSpriteSect(sectNum);
 };
 
+//5988
 Engine.insertSpriteSect = function (sectnum) {
     var blanktouse;
 
@@ -3433,6 +3441,7 @@ Engine.insertSpriteSect = function (sectnum) {
     return (blanktouse);
 };
 
+//6013
 Engine.insertSpriteStat = function (statnum) {
     var blanktouse;
 
@@ -3457,6 +3466,7 @@ Engine.insertSpriteStat = function (statnum) {
     return (blanktouse);
 };
 
+//6038
 function deletesprite(spriteNum) {
     Engine.deleteSpriteStat(spriteNum);
     return Engine.deleteSpriteSect(spriteNum);
@@ -3484,7 +3494,8 @@ Engine.deleteSpriteSect = function (deleteme) {
     sprite[deleteme].sectnum = MAXSECTORS;
     return (0);
 };
-//5053
+
+//6070
 Engine.deleteSpriteStat = function (deleteme) {
     if (sprite[deleteme].statnum == MAXSTATUS)
         return (-1);
@@ -3518,7 +3529,7 @@ function changespritesect(spritenum, newsectnum) {
     return(0);
 }
 
-
+//6106
 function changespritestat(spritenum, newstatnum) {
     if ((newstatnum < 0) || (newstatnum > MAXSTATUS)) return (-1);
     if (sprite[spritenum].statnum == newstatnum) return (0);
@@ -3527,6 +3538,76 @@ function changespritestat(spritenum, newstatnum) {
     Engine.insertSpriteStat(newstatnum);
     return (0);
 }
+
+//6184
+
+function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
+    var sec;
+    var wal, walIdx, wal2;
+    var i, cnt, nexts, x, y, z, cz = new Ref(), fz = new Ref(), dasectnum, dacnt, danum;
+    var x21, y21, z21, x31, y31, x34, y34, bot, t;
+
+    if ((x1 == x2) && (y1 == y2))
+        return(sect1 == sect2);
+
+    x21 = x2-x1;
+    y21 = y2-y1;
+    z21 = z2-z1;
+
+    clipsectorlist[0] = sect1;
+    danum = 1;
+    for(dacnt=0; dacnt<danum; dacnt++)
+    {
+        dasectnum = clipsectorlist[dacnt];
+        sec = sector[dasectnum];
+        walIdx = sec.wallptr;
+        for (cnt = sec.wallnum, wal = wall[walIdx]; cnt > 0; cnt--, wal = wall[walIdx++])
+        {
+            wal2 = wall[wal.point2];
+            x31 = wal.x-x1;
+            x34 = wal.x-wal2.x;
+            y31 = wal.y-y1;
+            y34 = wal.y-wal2.y;
+
+            bot = y21*x34-x21*y34;
+            if (bot <= 0)
+                continue;
+            
+            t = y21*x31-x21*y31;
+            if (t >= bot)
+                continue;
+            t = y31*x34-x31*y34;
+            if (t >= bot)
+                continue;
+
+            nexts = wal.nextsector;
+            if ((nexts < 0) || (wal.cstat&32)) return(0);
+
+            t = divscale24(t,bot);
+            x = x1 + mulscale24(x21,t);
+            y = y1 + mulscale24(y21,t);
+            z = z1 + mulscale24(z21,t);
+
+            getzsofslope(dasectnum,x,y,cz,fz);
+            if ((z <= cz.$) || (z >= fz.$))
+                return(0);
+            getzsofslope(nexts,x,y,cz,fz);
+            if ((z <= cz.$) || (z >= fz.$))
+                return(0);
+
+            for(i=danum-1; i>=0; i--)
+                if (clipsectorlist[i] == nexts)
+                    break;
+            if (i < 0)
+                clipsectorlist[danum++] = nexts;
+        }
+    }
+    for(i=danum-1; i>=0;i--)
+        if (clipsectorlist[i] == sect2)
+            return(1);
+    return(0);
+}
+
 
 function rintersect(x1, y1, z1, vx, vy, vz, x3, y3, x4, y4,
     intx, inty, intz) {

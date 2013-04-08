@@ -182,8 +182,10 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
 function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffset, destOffset, dest) {
     console.assert(arguments.length == 8);
 
-    if (dest.length === undefined)
-        throw "dest should have a length e.g. be an array";
+    if (!dest || dest.length === undefined) {
+        console.log(new Error().stack)
+        throw new Error("dest should have a length e.g. be an array");
+    }
 
     var temp;
 

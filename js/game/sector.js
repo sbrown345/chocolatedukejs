@@ -39,6 +39,35 @@ function isanearoperator(lotag) {
     return 0;
 }
 
+//222
+function findplayer(s,d) {
+    console.assert(d instanceof Ref);
+
+    var j, closest_player;
+    var x, closest;
+
+    if(ud.multimode < 2)
+    {
+        d.$ = klabs(ps[myconnectindex].oposx-s.x) + klabs(ps[myconnectindex].oposy-s.y) + ((klabs(ps[myconnectindex].oposz-s.z+(28<<8)))>>4);
+        return myconnectindex;
+    }
+
+    closest = 0x7fffffff;
+    closest_player = 0;
+
+    for(j=connecthead;j>=0;j=connectpoint2[j])
+    {
+        x = klabs(ps[j].oposx-s.x) + klabs(ps[j].oposy-s.y) + ((klabs(ps[j].oposz-s.z+(28<<8)))>>4);
+        if( x < closest && sprite[ps[j].i].extra > 0 )
+        {
+            closest_player = j;
+            closest = x;
+        }
+    }
+
+    d.$ = closest;
+    return closest_player;
+}
 
 //385
 Sector.animateCamSprite = function () {

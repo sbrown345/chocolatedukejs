@@ -151,6 +151,73 @@ function faketimerhandler() {
     throw new Error("todo");
 }
 
+//1234
+
+function check_fta_sounds(i) {
+    if (sprite[i].extra > 0) {
+        switch (sprite[i].picnum) {
+            case LIZTROOPONTOILET:
+            case LIZTROOPJUSTSIT:
+            case LIZTROOPSHOOT:
+            case LIZTROOPJETPACK:
+            case LIZTROOPDUCKING:
+            case LIZTROOPRUNNING:
+            case LIZTROOP:
+                spritesound(PRED_RECOG, i);
+                break;
+            case LIZMAN:
+            case LIZMANSPITTING:
+            case LIZMANFEEDING:
+            case LIZMANJUMP:
+                spritesound(CAPT_RECOG, i);
+                break;
+            case PIGCOP:
+            case PIGCOPDIVE:
+                spritesound(PIG_RECOG, i);
+                break;
+            case RECON:
+                spritesound(RECO_RECOG, i);
+                break;
+            case DRONE:
+                spritesound(DRON_RECOG, i);
+                break;
+            case COMMANDER:
+            case COMMANDERSTAYPUT:
+                spritesound(COMM_RECOG, i);
+                break;
+            case ORGANTIC:
+                spritesound(TURR_RECOG, i);
+                break;
+            case OCTABRAIN:
+            case OCTABRAINSTAYPUT:
+                spritesound(OCTA_RECOG, i);
+                break;
+            case BOSS1:
+                sound(BOS1_RECOG);
+                break;
+            case BOSS2:
+                if (sprite[i].pal == 1)
+                    sound(BOS2_RECOG);
+                else sound(WHIPYOURASS);
+                break;
+            case BOSS3:
+                if (sprite[i].pal == 1)
+                    sound(BOS3_RECOG);
+                else sound(RIPHEADNECK);
+                break;
+            case BOSS4:
+            case BOSS4STAYPUT:
+                if (sprite[i].pal == 1)
+                    sound(BOS4_RECOG);
+                sound(BOSS4_FIRSTSEE);
+                break;
+            case GREENSLIME:
+                spritesound(SLIM_RECOG, i);
+                break;
+        }
+    }
+}
+
 //1316
 
 function badguy(s) {
@@ -3674,6 +3741,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
 Game.whichDemo = 1;
+var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
 
@@ -3728,8 +3796,11 @@ Game.playBack = function () {
             return ud.reccnt > 0 || foundemo === 0;
         }, function () {
             q.setPositionAtStart();
-            console.log("demo loop");
-            if (foundemo) {
+            console.log("demo loopframeCount: %i", frameCount++);
+
+            q.addIf(function() {
+                return foundemo;
+            }, function() {
                 q.setPositionAtStart()
                     .addWhile(function() {
                         return totalclock >= (lockclock + TICSPERFRAME);
@@ -3752,87 +3823,90 @@ Game.playBack = function () {
                         }
                         Game.doMoveThings();
                     });
-            }
+            }).endIf()
+                .addIf(function() {
+                    return foundemo === 0;
+                }, function() {
+                    Game.drawBackground();
+                }).addElse(function() {
+                    if (Console.isActive()) {
+                        nonsharedkeys();
+                    } else {
+                        j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
 
-            if (foundemo === 0) {
-                Game.drawBackground();
-            } else {
-                if (Console.isActive()) {
-                    nonsharedkeys();
-                } else {
-                    j = Math.min(Math.max((totalclock - lockclock) * (65536 / TICSPERFRAME), 0), 65536);
-                    
-                    Game.displayRooms(screenpeek, j); //MAJOR BIT HERE!
-                    //appendImageDebug = true;
-                    displayrest(j);
-                    //appendImageDebug = false;
+                        Game.displayRooms(screenpeek, j);
+                        //appendImageDebug = true;
+                        displayrest(j);
+                        //appendImageDebug = false;
 
-                    if (ud.multimode > 1 && ps[myconnectindex].gm)
-                        getPackets();
-                    
-                    if( (ps[myconnectindex].gm&MODE_MENU) && (ps[myconnectindex].gm&MODE_EOL) )
-                    {
-                        console.log("playback(1) :: goto RECHECK:");
-                        throw "todo: goto RECHECK";
+                        if (ud.multimode > 1 && ps[myconnectindex].gm)
+                            getPackets();
                     }
+                }).endIf()
+                .addIf(function() {
+                    return (ps[myconnectindex].gm & MODE_MENU) && (ps[myconnectindex].gm & MODE_EOL);
+                }, function() {
+                    console.log("playback(1) :: goto RECHECK:");
+                    throw "todo: goto RECHECK";
+                })
+                .endIf()
+                .addIf(function() {
+                    return ps[myconnectindex].gm & MODE_TYPE;
+                }, function() {
+                    typemode();
+                    if ((ps[myconnectindex].gm & MODE_TYPE) != MODE_TYPE)
+                        ps[myconnectindex].gm = MODE_MENU;
+                })
+                .addElse(function() {
+                    console.warn("todo"); //todo
+                    //CONSOLE_HandleInput();
+                    //if( !CONSOLE_IsActive())
+                    //{
+                    //    menus();
+                    //}
+                    //CONSOLE_Render();
+                    //if( ud.multimode > 1 )
+                    //{
+                    //    ControlInfo noshareinfo;
+                    //    if( !CONSOLE_IsActive() )
+                    //    {
+                    //        CONTROL_GetInput( &noshareinfo );
+                    //        if( ACTION(gamefunc_SendMessage) )
+                    //        {
+                    //            KB_FlushKeyboardQueue();
+                    //            CONTROL_ClearAction( gamefunc_SendMessage );
+                    //            ps[myconnectindex].gm = MODE_TYPE;
+                    //            typebuf[0] = 0;
+                    //            inputloc = 0;
+                    //        }
+                    //    }
 
-                    if(ps[myconnectindex].gm&MODE_TYPE)
-                    {
-                        typemode();
-                        if((ps[myconnectindex].gm&MODE_TYPE) != MODE_TYPE)
-                            ps[myconnectindex].gm = MODE_MENU;
-                    }
-                    else {
-                        console.warn("todo");
-                        //CONSOLE_HandleInput();
-                        //if( !CONSOLE_IsActive())
-                        //{
-                        //    menus();
-                        //}
-                        //CONSOLE_Render();
-                        //if( ud.multimode > 1 )
-                        //{
-                        //    ControlInfo noshareinfo;
-                        //    if( !CONSOLE_IsActive() )
-                        //    {
-                        //        CONTROL_GetInput( &noshareinfo );
-                        //        if( ACTION(gamefunc_SendMessage) )
-                        //        {
-                        //            KB_FlushKeyboardQueue();
-                        //            CONTROL_ClearAction( gamefunc_SendMessage );
-                        //            ps[myconnectindex].gm = MODE_TYPE;
-                        //            typebuf[0] = 0;
-                        //            inputloc = 0;
-                        //        }
-                        //    }
-
-                        //}
-                    }
-
+                    //}
+                })
+                .endIf()
+                .add(function() {
                     operatefta();
 
-                    if(ud.last_camsprite != ud.camerasprite)
-                    {
+                    if (ud.last_camsprite != ud.camerasprite) {
                         ud.last_camsprite = ud.camerasprite;
-                        ud.camera_time = totalclock+(TICRATE*2);
+                        ud.camera_time = totalclock + (TICRATE * 2);
                     }
 
                     if (VOLUMEONE)
-                        if( ud.show_help == 0 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
-                            rotateSprite((320-50)<<16,9<<16,65536,0,BETAVERSION,0,0,2+8+16+128,0,0,xdim-1,ydim-1);
+                        if (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
+                            rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
 
                     getPackets();
                     nextpage();
 
-                    if( ps[myconnectindex].gm==MODE_END || ps[myconnectindex].gm==MODE_GAME )
-                    {
-                        if(foundemo)
+                    if (ps[myconnectindex].gm == MODE_END || ps[myconnectindex].gm == MODE_GAME) {
+                        if (foundemo)
                             kclose(recfilep);
                         ud.playing_demo_rev = 0;
+                        throw "todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??";
                         return 0;
                     }
-                }
-            }
+                });
         })
         .add(function () {
             throw new Error("todo");
@@ -4000,8 +4074,8 @@ Game.doMoveThings = function() {
     }
 
     if (ud.pause_on == 0) {
+        movefta(); //ST 2
         console.warn("todo: finishy move stuff")
-        //movefta(); //ST 2
         //moveweapons(); //ST 5 (must be last)
         //movetransports(); //ST 9
 
