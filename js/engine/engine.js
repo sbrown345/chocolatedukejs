@@ -2377,6 +2377,24 @@ Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectn
     return 0;
 };
 
+//4688
+function getangle(xvect,  yvect) {
+    if ((xvect|yvect) == 0)
+    return(0);
+    if (xvect == 0)
+        return(512+((yvect<0)<<10));
+    if (yvect == 0)
+        return(((xvect<0)<<10));
+    if (xvect == yvect)
+        return(256+((xvect<0)<<10));
+    if (xvect == -yvect)
+        return(768+((xvect>0)<<10));
+    if (klabs(xvect) > klabs(yvect))
+        return(((radarang[640+scale(160,yvect,xvect)]>>6)+((xvect<0)<<10))&2047);
+    
+    return(((radarang[640-scale(160,xvect,yvect)]>>6)+512+((yvect<0)<<10))&2047);
+}
+
 //3534
 Engine.initKSqrt = function () {
     var i, j, k;
@@ -3934,9 +3952,7 @@ function clipmove(x, y, z, sectnum,
                 j = hitwalls[i];
                 templong2 = dmulscale6(clipit[j].x2 - clipit[j].x1, oxvect, clipit[j].y2 - clipit[j].y1, oyvect);
                 if ((templong1 ^ templong2) < 0) {
-                    var sectnumRef = new Ref(sectnum);
-                    updatesector(x.$, y.$, sectnumRef);
-                    sectnum = sectnumRef.$;
+                    updatesector(x.$, y.$, sectnum);
                     return (retval);
                 }
             }
