@@ -1150,7 +1150,7 @@ Player.processInput = function(snum) {
 //                closedemowrite();
 
 //            if(s.pal != 1)
-//                p.dead_flag = (512-((TRAND&1)<<10)+(TRAND&255)-512)&2047;
+//                p.dead_flag = (512-((krand()&1)<<10)+(krand()&255)-512)&2047;
 
 //            p.jetpack_on = 0;
 //            p.holoduke_on = -1;
@@ -1434,7 +1434,7 @@ Player.processInput = function(snum) {
 //            p.poszv = 0;
 //        }
 
-//        if( p.scuba_on && (TRAND&255) < 8 )
+//        if( p.scuba_on && (krand()&255) < 8 )
 //        {
 //            j = spawn(pi,WATERBUBBLE);
 //            sprite[j].x +=
@@ -1544,7 +1544,7 @@ Player.processInput = function(snum) {
                         p.footprintcount--;
                         if( sector[p.cursectnum].lotag == 0 && sector[p.cursectnum].hitag == 0 )
                         {
-                            switch(TRAND&3)
+                            switch(krand()&3)
                             {
                                 case 0:  j = spawn(pi,FOOTPRINTS); break;
                                 case 1:  j = spawn(pi,FOOTPRINTS2); break;
@@ -1582,7 +1582,7 @@ Player.processInput = function(snum) {
                         else if( p.falling_counter > 9 )
                         {
                             j = p.falling_counter;
-                            s.extra -= j-(TRAND&3);
+                            s.extra -= j-(krand()&3);
                             if(s.extra <= 0)
                             {
                                 spritesound(SQUISHED,pi);
@@ -1775,7 +1775,7 @@ Player.processInput = function(snum) {
 //                                spritesound(DUKE_LONGTERM_PAIN,pi);
 //                            p.pals[0] = 64; p.pals[1] = 64; p.pals[2] = 64;
 //                            p.pals_time = 32;
-//                            s.extra -= 1+(TRAND&3);
+//                            s.extra -= 1+(krand()&3);
 //                            if(Sound[SHORT_CIRCUIT].num < 1)
 //                                spritesound(SHORT_CIRCUIT,pi);
 //                        }
@@ -1793,7 +1793,7 @@ Player.processInput = function(snum) {
 //                                spritesound(DUKE_LONGTERM_PAIN,pi);
 //                            p.pals[0] = 0; p.pals[1] = 8; p.pals[2] = 0;
 //                            p.pals_time = 32;
-//                            s.extra -= 1+(TRAND&3);
+//                            s.extra -= 1+(krand()&3);
 //                        }
 //                    }
 //                    break;
@@ -1809,7 +1809,7 @@ Player.processInput = function(snum) {
 //                                spritesound(DUKE_LONGTERM_PAIN,pi);
 //                            p.pals[0] = 8; p.pals[1] = 0; p.pals[2] = 0;
 //                            p.pals_time = 32;
-//                            s.extra -= 1+(TRAND&3);
+//                            s.extra -= 1+(krand()&3);
 //                        }
 //                    }
 //                    break;
@@ -2620,7 +2620,7 @@ Player.processInput = function(snum) {
 //                else if( (p.kickback_pic) == 14)
 //                {
 //                    if( sb_snum&(1<<2) )
-//                        p.kickback_pic = 1+(TRAND&3);
+//                        p.kickback_pic = 1+(krand()&3);
 //                    else p.kickback_pic = 0;
 //                }
 
