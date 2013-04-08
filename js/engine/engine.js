@@ -1313,150 +1313,149 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
 //1580
 /* renders parallaxed skies/floors  --ryan. */
 function parascan(dax1, dax2, sectnum,  dastat, bunch) {
-    console.log("TODO parascan");
-    //sectortype *sec;
-    //int32_t j, k, l, m, n, x, z, wallnum, nextsectnum, globalhorizbak;
-    //short *topptr, *botptr;
+    var sec;
+    var j, k, l, m, n, x, z, wallnum, nextsectnum, globalhorizbak;
+    var topptr, botptr;
 
-    //sectnum = pvWalls[bunchfirst[bunch]].sectorId;
-    //sec = &sector[sectnum];
+    sectnum = pvWalls[bunchfirst[bunch]].sectorId;
+    sec = sector[sectnum];
 
-    //globalhorizbak = globalhoriz;
-    //if (parallaxyscale != 65536)
-    //    globalhoriz = mulscale16(globalhoriz-(ydimen>>1),parallaxyscale) + (ydimen>>1);
-    //globvis = globalpisibility;
-    ///* globalorientation = 0L; */
-    //if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+    globalhorizbak = globalhoriz;
+    if (parallaxyscale != 65536)
+        globalhoriz = mulscale16(globalhoriz-(ydimen>>1),parallaxyscale) + (ydimen>>1);
+    globvis = globalpisibility;
+    /* globalorientation = 0L; */
+    if (sec.visibility != 0) globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
 
-    //if (dastat == 0)
-    //{
-    //    globalpal = sec.ceilingpal;
-    //    globalpicnum = sec.ceilingpicnum;
-    //    globalshade = (int32_t)sec.ceilingshade;
-    //    globalxpanning = (int32_t)sec.ceilingxpanning;
-    //    globalypanning = (int32_t)sec.ceilingypanning;
-    //    topptr = umost;
-    //    botptr = uplc;
-    //}
-    //else
-    //{
-    //    globalpal = sec.floorpal;
-    //    globalpicnum = sec.floorpicnum;
-    //    globalshade = (int32_t)sec.floorshade;
-    //    globalxpanning = (int32_t)sec.floorxpanning;
-    //    globalypanning = (int32_t)sec.floorypanning;
-    //    topptr = dplc;
-    //    botptr = dmost;
-    //}
+    if (dastat == 0)
+    {
+        globalpal = sec.ceilingpal;
+        globalpicnum = sec.ceilingpicnum;
+        globalshade = sec.ceilingshade;
+        globalxpanning = sec.ceilingxpanning;
+        globalypanning = sec.ceilingypanning;
+        topptr = umost;
+        botptr = uplc;
+    }
+    else
+    {
+        globalpal = sec.floorpal;
+        globalpicnum = sec.floorpicnum;
+        globalshade = sec.floorshade;
+        globalxpanning = sec.floorxpanning;
+        globalypanning = sec.floorypanning;
+        topptr = dplc;
+        botptr = dmost;
+    }
 
-    //if ((uint32_t)globalpicnum >= (uint32_t)MAXTILES) globalpicnum = 0;
+    if (globalpicnum >= MAXTILES) globalpicnum = 0;
     
-    //if (tiles[globalpicnum].animFlags&192) 
-    //    globalpicnum += animateoffs(globalpicnum);
+    if (tiles[globalpicnum].animFlags&192) 
+        globalpicnum += animateoffs(globalpicnum);
     
-    //globalshiftval = (picsiz[globalpicnum]>>4);
+    globalshiftval = (picsiz[globalpicnum]>>4);
     
-    //if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
-    //    globalshiftval++;
-    //globalshiftval = 32-globalshiftval;
-    //globalzd = (((tiles[globalpicnum].dim.height>>1)+parallaxyoffs)<<globalshiftval)+(globalypanning<<24);
-    //globalyscale = (8<<(globalshiftval-19));
-    ///*if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;*/
+    if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+        globalshiftval++;
+    globalshiftval = 32-globalshiftval;
+    globalzd = (((tiles[globalpicnum].dim.height>>1)+parallaxyoffs)<<globalshiftval)+(globalypanning<<24);
+    globalyscale = (8<<(globalshiftval-19));
+    /*if (globalorientation&256) globalyscale = -globalyscale, globalzd = -globalzd;*/
 
-    //k = 11 - (picsiz[globalpicnum]&15) - pskybits;
-    //x = -1;
+    k = 11 - (picsiz[globalpicnum]&15) - pskybits;
+    x = -1;
 
-    //for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z])
-    //{
-    //    wallnum = pvWalls[z].worldWallId;
-    //    nextsectnum = wall[wallnum].nextsector;
+    for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z])
+    {
+        wallnum = pvWalls[z].worldWallId;
+        nextsectnum = wall[wallnum].nextsector;
 
-    //    if (dastat == 0) j = sector[nextsectnum].ceilingstat;
-    //    else j = sector[nextsectnum].floorstat;
+        if (dastat == 0) j = sector[nextsectnum].ceilingstat;
+        else j = sector[nextsectnum].floorstat;
 
-    //    if ((nextsectnum < 0) || (wall[wallnum].cstat&32) || ((j&1) == 0))
-    //    {
-    //        if (x == -1) x = pvWalls[z].screenSpaceCoo[0][VEC_COL];
+        if ((nextsectnum < 0) || (wall[wallnum].cstat&32) || ((j&1) == 0))
+        {
+            if (x == -1) x = pvWalls[z].screenSpaceCoo[0][VEC_COL];
 
-    //        if (parallaxtype == 0)
-    //        {
-    //            n = mulscale16(xdimenrecip,viewingrange);
-    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
-    //                lplc[j] = (((mulscale23(j-halfxdimen,n)+globalang)&2047)>>k);
-    //        }
-    //        else
-    //        {
-    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
-    //                lplc[j] = ((((int32_t)radarang2[j]+globalang)&2047)>>k);
-    //        }
-    //        if (parallaxtype == 2)
-    //        {
-    //            n = mulscale16(xdimscale,viewingrange);
-    //            for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
-    //                swplc[j] = mulscale14(sintable[((int32_t)radarang2[j]+512)&2047],n);
-    //        }
-    //        else
-    //            clearbuf(&swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
-    //    }
-    //    else if (x >= 0)
-    //    {
-    //        l = globalpicnum;
-    //        m = (picsiz[globalpicnum]&15);
-    //        globalpicnum = l+pskyoff[lplc[x]>>m];
+            if (parallaxtype == 0)
+            {
+                n = mulscale16(xdimenrecip,viewingrange);
+                for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+                    lplc[j] = (((mulscale23(j-halfxdimen,n)+globalang)&2047)>>k);
+            }
+            else
+            {
+                for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+                    lplc[j] = (((radarang2[j]+globalang)&2047)>>k);
+            }
+            if (parallaxtype == 2)
+            {
+                n = mulscale16(xdimscale,viewingrange);
+                for(j=pvWalls[z].screenSpaceCoo[0][VEC_COL]; j<=pvWalls[z].screenSpaceCoo[1][VEC_COL]; j++)
+                    swplc[j] = mulscale14(sintable[(radarang2[j]+512)&2047],n);
+            }
+            else
+                clearbuf(swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
+        }
+        else if (x >= 0)
+        {
+            l = globalpicnum;
+            m = (picsiz[globalpicnum]&15);
+            globalpicnum = l+pskyoff[lplc[x]>>m];
 
-    //        if (((lplc[x]^lplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]-1])>>m) == 0)
-    //            wallscan(x,pvWalls[z].screenSpaceCoo[0][VEC_COL]-1,topptr,botptr,swplc,lplc);
-    //        else
-    //        {
-    //            j = x;
-    //            while (x < pvWalls[z].screenSpaceCoo[0][VEC_COL])
-    //            {
-    //                n = l+pskyoff[lplc[x]>>m];
-    //                if (n != globalpicnum)
-    //                {
-    //                    wallscan(j,x-1,topptr,botptr,swplc,lplc);
-    //                    j = x;
-    //                    globalpicnum = n;
-    //                }
-    //                x++;
-    //            }
-    //            if (j < x)
-    //                wallscan(j,x-1,topptr,botptr,swplc,lplc);
-    //        }
+            if (((lplc[x]^lplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]-1])>>m) == 0)
+                wallscan(x,pvWalls[z].screenSpaceCoo[0][VEC_COL]-1,topptr,botptr,swplc,lplc);
+            else
+            {
+                j = x;
+                while (x < pvWalls[z].screenSpaceCoo[0][VEC_COL])
+                {
+                    n = l+pskyoff[lplc[x]>>m];
+                    if (n != globalpicnum)
+                    {
+                        wallscan(j,x-1,topptr,botptr,swplc,lplc);
+                        j = x;
+                        globalpicnum = n;
+                    }
+                    x++;
+                }
+                if (j < x)
+                    wallscan(j,x-1,topptr,botptr,swplc,lplc);
+            }
 
-    //        globalpicnum = l;
-    //        x = -1;
-    //    }
-    //}
+            globalpicnum = l;
+            x = -1;
+        }
+    }
 
-    //if (x >= 0)
-    //{
-    //    l = globalpicnum;
-    //    m = (picsiz[globalpicnum]&15);
-    //    globalpicnum = l+pskyoff[lplc[x]>>m];
+    if (x >= 0)
+    {
+        l = globalpicnum;
+        m = (picsiz[globalpicnum]&15);
+        globalpicnum = l+pskyoff[lplc[x]>>m];
 
-    //    if (((lplc[x]^lplc[pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL]])>>m) == 0)
-    //        wallscan(x,pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],topptr,botptr,swplc,lplc);
-    //    else
-    //    {
-    //        j = x;
-    //        while (x <= pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL])
-    //        {
-    //            n = l+pskyoff[lplc[x]>>m];
-    //            if (n != globalpicnum)
-    //            {
-    //                wallscan(j,x-1,topptr,botptr,swplc,lplc);
-    //                j = x;
-    //                globalpicnum = n;
-    //            }
-    //            x++;
-    //        }
-    //        if (j <= x)
-    //            wallscan(j,x,topptr,botptr,swplc,lplc);
-    //    }
-    //    globalpicnum = l;
-    //}
-    //globalhoriz = globalhorizbak;
+        if (((lplc[x]^lplc[pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL]])>>m) == 0)
+            wallscan(x,pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL],topptr,botptr,swplc,lplc);
+        else
+        {
+            j = x;
+            while (x <= pvWalls[bunchlast[bunch]].screenSpaceCoo[1][VEC_COL])
+            {
+                n = l+pskyoff[lplc[x]>>m];
+                if (n != globalpicnum)
+                {
+                    wallscan(j,x-1,topptr,botptr,swplc,lplc);
+                    j = x;
+                    globalpicnum = n;
+                }
+                x++;
+            }
+            if (j <= x)
+                wallscan(j,x,topptr,botptr,swplc,lplc);
+        }
+        globalpicnum = l;
+    }
+    globalhoriz = globalhorizbak;
 }
 
 //1729
@@ -3514,13 +3513,13 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     }
 
                     if (u4 > y1ve[0])
-                        vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], bufplce[0], ylookup[y1ve[0]] + p + 0);
+                        vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + 0 + p.position, p);
                     if (u4 > y1ve[1])
-                        vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], bufplce[1], ylookup[y1ve[1]] + p + 1);
+                        vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + 1 + p.position, p);
                     if (u4 > y1ve[2])
-                        vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + p + 2);
+                        vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + 2 + p.position, p);
                     if (u4 > y1ve[3])
-                        vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + p + 3);
+                        vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p);
 
                     if (d4 >= u4) {
                         vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
@@ -3528,13 +3527,13 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
                     i = p.position + ylookup[d4 + 1];
                     if (y2ve[0] > d4)
-                        prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], bufplce[0], i + 0);
+                        prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], i + 0, p);
                     if (y2ve[1] > d4)
-                        prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], bufplce[1], i + 1);
+                        prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], i + 1, p);
                     if (y2ve[2] > d4)
-                        prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], bufplce[2], i + 2);
+                        prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], i + 2, p);
                     if (y2ve[3] > d4)
-                        prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], bufplce[3], i + 3);
+                        prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3, p);
                 }
                 else {
                     if ((bad != 0) || (u4 >= d4)) {
