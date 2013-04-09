@@ -401,6 +401,148 @@ function movedummyplayers() {
     }
 }
 
+
+var otherp;
+function moveplayers() //Players
+{
+    var i , nexti;
+    var otherx;
+    var s;
+    var p;
+
+    i = headspritestat[10];
+    while(i >= 0)
+    {
+        nexti = nextspritestat[i];
+
+        s = sprite[i];
+        p = ps[s.yvel];
+        if(s.owner >= 0)
+        {
+            if(p.newowner >= 0 ) //Looking thru the camera
+            {
+                s.x = p.oposx;
+                s.y = p.oposy;
+                hittype[i].bposz = s.z = p.oposz+PHEIGHT;
+                s.ang = p.oang;
+                setsprite(i,s.x,s.y,s.z);
+            }
+            else
+            {
+                if (ud.multimode > 1) {
+                    var otherxRef = new Ref(otherx);
+                    otherp = findotherplayer(s.yvel, otherxRef);
+                    otherx = otherxRef.$;
+                } else {
+                    otherp = s.yvel;
+                    otherx = 0;
+                }
+                
+                execute(i,s.yvel,otherx);
+
+                if(ud.multimode > 1)
+                    if( sprite[ps[otherp].i].extra > 0 )
+                    {
+                        if( s.yrepeat > 32 && sprite[ps[otherp].i].yrepeat < 32)
+                        {
+                            if( otherx < 1400 && p.knee_incs == 0 )
+                            {
+                                p.knee_incs = 1;
+                                p.weapon_pos = -1;
+                                p.actorsqu = ps[otherp].i;
+                            }
+                        }
+                    }
+                if(ud.god)
+                {
+                    s.extra = max_player_health;
+                    s.cstat = 257;
+                    p.jetpack_amount =     1599;
+                }
+
+
+                if( s.extra > 0 )
+                {
+                    hittype[i].owner = i;
+
+                    if(ud.god == 0)
+                        if( ceilingspace(s.sectnum) || floorspace(s.sectnum) )
+                            quickkill(p);
+                }
+                else
+                {
+                    
+                    p.posx = s.x;
+                    p.posy = s.y;
+                    p.posz = s.z-(20<<8);
+
+                    p.newowner = -1;
+
+                    if( p.wackedbyactor >= 0 && sprite[p.wackedbyactor].statnum < MAXSTATUS )
+                    {
+                        p.ang += getincangle(p.ang,getangle(sprite[p.wackedbyactor].x-p.posx,sprite[p.wackedbyactor].y-p.posy))>>1;
+                        p.ang &= 2047;
+                    }
+
+                }
+                s.ang = p.ang;
+            }
+        }
+        else
+        {
+            if(p.holoduke_on == -1)
+            {
+                deletesprite(i);
+                i = nexti; continue;
+            }
+
+            hittype[i].bposx = s.x;
+            hittype[i].bposy = s.y;
+            hittype[i].bposz = s.z;
+
+            s.cstat = 0;
+
+            if(s.xrepeat < 42)
+            {
+                s.xrepeat += 4;
+                s.cstat |= 2;
+            }
+            else s.xrepeat = 42;
+            if(s.yrepeat < 36)
+                s.yrepeat += 4;
+            else
+            {
+                s.yrepeat = 36;
+                if(sector[s.sectnum].lotag != 2)
+                    makeitfall(i);
+                if(s.zvel == 0 && sector[s.sectnum].lotag == 1)
+                    s.z += (32<<8);
+            }
+
+            if(s.extra < 8)
+            {
+                s.xvel = 128;
+                s.ang = p.ang;
+                s.extra++;
+                
+            }
+            else
+            {
+                s.ang = 2047-p.ang;
+                setsprite(i,s.x,s.y,s.z);
+            }
+        }
+
+        if (sector[s.sectnum].ceilingstat&1)
+            s.shade += (sector[s.sectnum].ceilingshade-s.shade)>>1;
+        else
+            s.shade += (sector[s.sectnum].floorshade-s.shade)>>1;
+
+        //BOLT:
+            i = nexti;
+    }
+}
+
 //2452
 
 function moveweapons()
@@ -748,5 +890,350 @@ function moveweapons()
         //BOLT:
             i = nexti;
 
+    }
+}
+
+//2797
+
+function movetransports()
+{
+    var warpspriteto;
+    var i, j, k, l, p, sect, sectlotag, nexti, nextj;
+    var ll,onfloorz,q;
+
+    i = headspritestat[9]; //Transporters
+
+
+    BOLT:
+    while (i >= 0)
+    {
+        sect = sprite[i].sectnum;
+        sectlotag = sector[sect].lotag;
+
+        nexti = nextspritestat[i];
+
+        if(sprite[i].owner == i)
+        {
+            i = nexti;
+            continue;
+        }
+
+        onfloorz = hittype[i].temp_data[4];
+
+        if(hittype[i].temp_data[0] > 0) hittype[i].temp_data[0]--;
+
+        j = headspritesect[sect];
+        while(j >= 0)
+        {
+            nextj = nextspritesect[j];
+
+            switch(sprite[j].statnum)
+            {
+                case 10:    // Player
+
+                    if( sprite[j].owner != -1 )
+                    {
+                        p = sprite[j].yvel;
+
+                        ps[p].on_warping_sector = 1;
+
+                        if( ps[p].transporter_hold == 0 && ps[p].jumping_counter == 0 )
+                        {
+                            if(ps[p].on_ground && sectlotag == 0 && onfloorz && ps[p].jetpack_on == 0 )
+                            {
+                                if(sprite[i].pal == 0)
+                                {
+                                    spawn(i,TRANSPORTERBEAM);
+                                    spritesound(TELEPORTER,i);
+                                }
+
+                                for(k=connecthead;k>=0;k=connectpoint2[k])
+                                    if(ps[k].cursectnum == sprite[sprite[i].owner].sectnum)
+                                    {
+                                        ps[k].frag_ps = p;
+                                        sprite[ps[k].i].extra = 0;
+                                    }
+
+                                ps[p].ang = sprite[sprite[i].owner].ang;
+
+                                if(sprite[sprite[i].owner].owner != sprite[i].owner)
+                                {
+                                    hittype[i].temp_data[0] = 13;
+                                    hittype[sprite[i].owner].temp_data[0] = 13;
+                                    ps[p].transporter_hold = 13;
+                                }
+
+                                ps[p].bobposx = ps[p].oposx = ps[p].posx = sprite[sprite[i].owner].x;
+                                ps[p].bobposy = ps[p].oposy = ps[p].posy = sprite[sprite[i].owner].y;
+                                ps[p].oposz = ps[p].posz = sprite[sprite[i].owner].z-PHEIGHT;
+
+                                changespritesect(j,sprite[sprite[i].owner].sectnum);
+                                ps[p].cursectnum = sprite[j].sectnum;
+
+                                if(sprite[i].pal == 0)
+                                {
+                                    k = spawn(sprite[i].owner,TRANSPORTERBEAM);
+                                    spritesound(TELEPORTER,k);
+                                }
+
+                                break;
+                            }
+                        }
+                        else if( !(sectlotag == 1 && ps[p].on_ground == 1)  ) break;
+
+                        if(onfloorz == 0 && klabs(sprite[i].z-ps[p].posz) < 6144 )
+                            if( (ps[p].jetpack_on == 0 ) || (ps[p].jetpack_on && (sync[p].bits&1) ) ||
+                                (ps[p].jetpack_on && (sync[p].bits&2) ) )
+                            {
+                                ps[p].oposx = ps[p].posx += sprite[sprite[i].owner].x-sprite[i].x;
+                                ps[p].oposy = ps[p].posy += sprite[sprite[i].owner].y-sprite[i].y;
+
+                                if( ps[p].jetpack_on && ( (sync[p].bits&1) || ps[p].jetpack_on < 11 ) )
+                                    ps[p].posz = sprite[sprite[i].owner].z-6144;
+                                else ps[p].posz = sprite[sprite[i].owner].z+6144;
+                                ps[p].oposz = ps[p].posz;
+
+                                hittype[ps[p].i].bposx = ps[p].posx;
+                                hittype[ps[p].i].bposy = ps[p].posy;
+                                hittype[ps[p].i].bposz = ps[p].posz;
+
+                                changespritesect(j,sprite[sprite[i].owner].sectnum);
+                                ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
+
+                                break;
+                            }
+
+                        k = 0;
+
+                        if( onfloorz && sectlotag == 1 && ps[p].on_ground && ps[p].posz > (sector[sect].floorz-(16<<8)) && ( (sync[p].bits&2) || ps[p].poszv > 2048 ) )
+                            //                        if( onfloorz && sectlotag == 1 && ps[p].posz > (sector[sect].floorz-(6<<8)) )
+                        {
+                            k = 1;
+                            if(screenpeek == p)
+                            {
+                                FX.stopAllSounds();
+                                clearsoundlocks();
+                            }
+                            if(sprite[ps[p].i].extra > 0)
+                                spritesound(DUKE_UNDERWATER,j);
+                            ps[p].oposz = ps[p].posz =
+                                sector[sprite[sprite[i].owner].sectnum].ceilingz+(7<<8);
+
+                            ps[p].posxv = 4096-(krand()&8192);
+                            ps[p].posyv = 4096-(krand()&8192);
+
+                        }
+
+                        if( onfloorz && sectlotag == 2 && ps[p].posz < (sector[sect].ceilingz+(6<<8)) )
+                        {
+                            k = 1;
+                            //                            if( sprite[j].extra <= 0) break;
+                            if(screenpeek == p)
+                            {
+                                FX.stopAllSounds();
+                                clearsoundlocks();
+                            }
+                            spritesound(DUKE_GASP,j);
+
+                            ps[p].oposz = ps[p].posz =
+                                sector[sprite[sprite[i].owner].sectnum].floorz-(7<<8);
+
+                            ps[p].jumping_toggle = 1;
+                            ps[p].jumping_counter = 0;
+                        }
+
+                        if(k == 1)
+                        {
+                            ps[p].oposx = ps[p].posx += sprite[sprite[i].owner].x-sprite[i].x;
+                            ps[p].oposy = ps[p].posy += sprite[sprite[i].owner].y-sprite[i].y;
+
+                            if(sprite[sprite[i].owner].owner != sprite[i].owner)
+                                ps[p].transporter_hold = -2;
+                            ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
+
+                            changespritesect(j,sprite[sprite[i].owner].sectnum);
+                            setsprite(ps[p].i,ps[p].posx,ps[p].posy,ps[p].posz+PHEIGHT);
+
+                            setpal(ps[p]);
+
+                            if( (krand()&255) < 32 )
+                                spawn(j,WATERSPLASH2);
+
+                            if(sectlotag == 1)
+                                for(l = 0;l < 9;l++)
+                                {
+                                    q = spawn(ps[p].i,WATERBUBBLE);
+                                    sprite[q].z += krand()&16383;
+                                }
+                        }
+                    }
+                    break;
+
+                case 1:
+                    switch(sprite[j].picnum)
+                    {
+                        case SHARK:
+                        case COMMANDER:
+                        case OCTABRAIN:
+                        case GREENSLIME:
+                        case GREENSLIME+1:
+                        case GREENSLIME+2:
+                        case GREENSLIME+3:
+                        case GREENSLIME+4:
+                        case GREENSLIME+5:
+                        case GREENSLIME+6:
+                        case GREENSLIME+7:
+                            if (sprite[j].extra > 0)
+                                j = nextj; continue;
+                    }
+                case 4:
+                case 5:
+                case 12:
+                case 13:
+
+                    ll = klabs(sprite[j].zvel);
+
+                    {
+                        warpspriteto = 0;
+                        if( ll && sectlotag == 2 && sprite[j].z < (sector[sect].ceilingz+ll) )
+                            warpspriteto = 1;
+
+                        if( ll && sectlotag == 1 && sprite[j].z > (sector[sect].floorz-ll) )
+                            warpspriteto = 1;
+
+                        if( sectlotag == 0 && ( onfloorz || klabs(sprite[j].z-sprite[i].z) < 4096) )
+                        {
+                            if( sprite[sprite[i].owner].owner != sprite[i].owner && onfloorz && hittype[i].temp_data[0] > 0 && sprite[j].statnum != 5 )
+                            {
+                                hittype[i].temp_data[0]++;
+                                debugger;
+                                i = nexti; continue BOLT;
+                            }
+                            warpspriteto = 1;
+                        }
+
+                        if( warpspriteto ) switch(sprite[j].picnum)
+                        {
+                            case TRANSPORTERSTAR:
+                            case TRANSPORTERBEAM:
+                            case TRIPBOMB:
+                            case BULLETHOLE:
+                            case WATERSPLASH2:
+                            case BURNING:
+                            case BURNING2:
+                            case FIRE:
+                            case FIRE2:
+                            case TOILETWATER:
+                            case LASERLINE:
+                                j = nextj; continue;
+                            case PLAYERONWATER:
+                                if(sectlotag == 2)
+                                {
+                                    sprite[j].cstat &= 32767;
+                                    break;
+                                }
+                            default:
+                                if(sprite[j].statnum == 5 && !(sectlotag == 1 || sectlotag == 2) )
+                                    break;
+
+                            case WATERBUBBLE:
+                                //                                if( rnd(192) && sprite[j].picnum == WATERBUBBLE)
+                                //                                 break;
+
+                                if(sectlotag > 0)
+                                {
+                                    k = spawn(j,WATERSPLASH2);
+                                    if( sectlotag == 1 && sprite[j].statnum == 4 )
+                                    {
+                                        sprite[k].xvel = sprite[j].xvel>>1;
+                                        sprite[k].ang = sprite[j].ang;
+                                        ssp(k,CLIPMASK0);
+                                    }
+                                }
+
+                                switch(sectlotag)
+                                {
+                                    case 0:
+                                        if(onfloorz)
+                                        {
+                                            if( sprite[j].statnum == 4 || ( checkcursectnums(sect) == -1 && checkcursectnums(sprite[sprite[i].owner].sectnum)  == -1 ) )
+                                            {
+                                                sprite[j].x += (sprite[sprite[i].owner].x-sprite[i].x);
+                                                sprite[j].y += (sprite[sprite[i].owner].y-sprite[i].y);
+                                                sprite[j].z -= sprite[i].z - sector[sprite[sprite[i].owner].sectnum].floorz;
+                                                sprite[j].ang = sprite[sprite[i].owner].ang;
+
+                                                hittype[j].bposx = sprite[j].x;
+                                                hittype[j].bposy = sprite[j].y;
+                                                hittype[j].bposz = sprite[j].z;
+
+                                                if(sprite[i].pal == 0)
+                                                {
+                                                    k = spawn(i,TRANSPORTERBEAM);
+                                                    spritesound(TELEPORTER,k);
+
+                                                    k = spawn(sprite[i].owner,TRANSPORTERBEAM);
+                                                    spritesound(TELEPORTER,k);
+                                                }
+
+                                                if( sprite[sprite[i].owner].owner != sprite[i].owner )
+                                                {
+                                                    hittype[i].temp_data[0] = 13;
+                                                    hittype[sprite[i].owner].temp_data[0] = 13;
+                                                }
+
+                                                changespritesect(j,sprite[sprite[i].owner].sectnum);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            sprite[j].x += (sprite[sprite[i].owner].x-sprite[i].x);
+                                            sprite[j].y += (sprite[sprite[i].owner].y-sprite[i].y);
+                                            sprite[j].z = sprite[sprite[i].owner].z+4096;
+
+                                            hittype[j].bposx = sprite[j].x;
+                                            hittype[j].bposy = sprite[j].y;
+                                            hittype[j].bposz = sprite[j].z;
+
+                                            changespritesect(j,sprite[sprite[i].owner].sectnum);
+                                        }
+                                        break;
+                                    case 1:
+                                        sprite[j].x += (sprite[sprite[i].owner].x-sprite[i].x);
+                                        sprite[j].y += (sprite[sprite[i].owner].y-sprite[i].y);
+                                        sprite[j].z = sector[sprite[sprite[i].owner].sectnum].ceilingz+ll;
+
+                                        hittype[j].bposx = sprite[j].x;
+                                        hittype[j].bposy = sprite[j].y;
+                                        hittype[j].bposz = sprite[j].z;
+
+                                        changespritesect(j,sprite[sprite[i].owner].sectnum);
+
+                                        break;
+                                    case 2:
+                                        sprite[j].x += (sprite[sprite[i].owner].x-sprite[i].x);
+                                        sprite[j].y += (sprite[sprite[i].owner].y-sprite[i].y);
+                                        sprite[j].z = sector[sprite[sprite[i].owner].sectnum].floorz-ll;
+
+                                        hittype[j].bposx = sprite[j].x;
+                                        hittype[j].bposy = sprite[j].y;
+                                        hittype[j].bposz = sprite[j].z;
+
+                                        changespritesect(j,sprite[sprite[i].owner].sectnum);
+
+                                        break;
+                                }
+
+                                break;
+                        }
+                    }
+                    break;
+
+            }
+            //JBOLT:
+                j = nextj;
+        }
+        //BOLT:
+            i = nexti;
     }
 }

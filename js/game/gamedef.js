@@ -1450,3 +1450,94 @@ function furthestangle(i, angs) {
     }
     return (furthest_angle & 2047);
 }
+
+//3154
+
+function execute( i, p, x) {
+    var  done;
+
+    g_i = i;
+    g_p = p;
+    g_x = x;
+    g_sp = sprite[g_i];
+    g_t = hittype[g_i].temp_data[0];
+
+    if( actorscrptr[g_sp.picnum] == 0 ) return;
+
+    insptr = 4 + (actorscrptr[g_sp.picnum]);
+
+    killit_flag = 0;
+
+    if(g_sp.sectnum < 0 || g_sp.sectnum >= MAXSECTORS)
+    {
+        if(badguy(g_sp))
+            ps[g_p].actors_killed++;
+        deletesprite(g_i);
+        return;
+    }
+
+
+    if(g_t[4])
+    {
+        g_sp.lotag += TICSPERFRAME;
+        if(g_sp.lotag > *(int32_t *)(g_t[4]+16) )
+        {
+            g_t[2]++;
+            g_sp.lotag = 0;
+            g_t[3] +=  *(int32_t *)( g_t[4]+12 );
+        }
+        if( klabs(g_t[3]) >= klabs( *(int32_t *)(g_t[4]+4) * *(int32_t *)(g_t[4]+12) ) )
+            g_t[3] = 0;
+    }
+
+    do
+        done = parse();
+    while( done == 0 );
+
+    if(killit_flag == 1)
+    {
+        if(ps[g_p].actorsqu == g_i)
+            ps[g_p].actorsqu = -1;
+        deletesprite(g_i);
+    }
+    else
+    {
+        move();
+
+        if( g_sp.statnum == 1)
+        {
+            if( badguy(g_sp) )
+            {
+                if( g_sp.xrepeat > 60 ) return;
+                if( ud.respawn_monsters == 1 && g_sp.extra <= 0 ) return;
+            }
+            else if( ud.respawn_items == 1 && (g_sp.cstat&32768) ) return;
+
+            if(hittype[g_i].timetosleep > 1)
+                hittype[g_i].timetosleep--;
+            else if(hittype[g_i].timetosleep == 1)
+                changespritestat(g_i,2);
+        }
+
+        else if(g_sp.statnum == 6)
+            switch(g_sp.picnum)
+            {
+                case RUBBERCAN:
+                case EXPLODINGBARREL:
+                case WOODENHORSE:
+                case HORSEONSIDE:
+                case CANWITHSOMETHING:
+                case FIREBARREL:
+                case NUKEBARREL:
+                case NUKEBARRELDENTED:
+                case NUKEBARRELLEAKED:
+                case TRIPBOMB:
+                case EGG:
+                    if(hittype[g_i].timetosleep > 1)
+                        hittype[g_i].timetosleep--;
+                    else if(hittype[g_i].timetosleep == 1)
+                        changespritestat(g_i,2);
+                    break;
+            }
+    }
+}

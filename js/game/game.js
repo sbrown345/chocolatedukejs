@@ -4068,7 +4068,6 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
-            debugger;
             Player.processInput(i);
             checksectors(i);
         }
