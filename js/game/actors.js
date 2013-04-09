@@ -401,7 +401,7 @@ function movedummyplayers() {
     }
 }
 
-
+//1179
 var otherp;
 function moveplayers() //Players
 {
@@ -537,6 +537,104 @@ function moveplayers() //Players
             s.shade += (sector[s.sectnum].ceilingshade-s.shade)>>1;
         else
             s.shade += (sector[s.sectnum].floorshade-s.shade)>>1;
+
+        //BOLT:
+            i = nexti;
+    }
+}
+
+//1418
+function movefallers() {
+    var i, nexti, sect, j;
+    var s;
+    var x;
+
+    i = headspritestat[12];
+    while(i >= 0)
+    {
+        nexti = nextspritestat[i];
+        s = sprite[i];
+
+        sect = s.sectnum;
+
+        if( hittype[i].temp_data[0] == 0 )
+        {
+            s.z -= (16<<8);
+            hittype[i].temp_data[1] = s.ang;
+            x = s.extra;
+            j=ifhitbyweapon(i);if(j >= 0)
+            {
+                if( j == FIREEXT || j == RPG || j == RADIUSEXPLOSION || j == SEENINE || j == OOZFILTER )
+                {
+                    if(s.extra <= 0)
+                    {
+                        hittype[i].temp_data[0] = 1;
+                        j = headspritestat[12];
+                        while(j >= 0)
+                        {
+                            if (sprite[j].hitag == sprite[i].hitag)
+                            {
+                                hittype[j].temp_data[0] = 1;
+                                sprite[j].cstat &= (65535-64);
+                                if(sprite[j].picnum == CEILINGSTEAM || sprite[j].picnum == STEAM)
+                                    sprite[j].cstat |= 32768;
+                            }
+                            j = nextspritestat[j];
+                        }
+                    }
+                }
+                else
+                {
+                    hittype[i].extra = 0;
+                    s.extra = x;
+                }
+            }
+            s.ang = hittype[i].temp_data[1];
+            s.z += (16<<8);
+        }
+        else if(hittype[i].temp_data[0] == 1)
+        {
+            if(s.lotag > 0)
+            {
+                s.lotag-=3;
+                if(s.lotag <= 0)
+                {
+                    s.xvel = (32+krand()&63);
+                    s.zvel = -(1024+(krand()&1023));
+                }
+            }
+            else
+            {
+                if( s.xvel > 0)
+                {
+                    s.xvel -= 8;
+                    ssp(i,CLIPMASK0);
+                }
+
+                if( floorspace(s.sectnum) ) x = 0;
+                else
+                {
+                    if(ceilingspace(s.sectnum))
+                        x = gc/6;
+                    else
+                        x = gc;
+                }
+
+                if( s.z < (sector[sect].floorz-FOURSLEIGHT) )
+                {
+                    s.zvel += x;
+                    if(s.zvel > 6144)
+                        s.zvel = 6144;
+                    s.z += s.zvel;
+                }
+                if( (sector[sect].floorz-s.z) < (16<<8) )
+                {
+                    j = 1+(krand()&7);
+                    for(x=0;x<j;x++) EGS(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
+                    {deletesprite(i);/*goto BOLT;*/}
+                }
+            }
+        }
 
         //BOLT:
             i = nexti;

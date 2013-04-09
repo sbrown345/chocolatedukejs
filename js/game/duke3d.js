@@ -63,6 +63,8 @@ var MAXCYCLERS = 256;
 var MAXSCRIPTSIZE = 20460;
 var MAXANIMATES = 64;
 
+window.__defineGetter__("TRAND", krand);
+
 //279
 var MAX_WEAPONS = 12;
 

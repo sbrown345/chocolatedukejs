@@ -7,9 +7,10 @@ var last_used_text;
 var num_squigilly_brackets;
 var last_used_size;
 
-//var g_i = 0, g_p = 0;
-//var g_x;
-//var g_t = new Int32Array(5);
+var g_i = 0, g_p = 0;
+var g_x;
+var g_t = new Int32Array(5);
+var g_sp;
 
 var NUMKEYWORDS = 112;
 
@@ -1460,7 +1461,7 @@ function execute( i, p, x) {
     g_p = p;
     g_x = x;
     g_sp = sprite[g_i];
-    g_t = hittype[g_i].temp_data[0];
+    g_t = hittype[g_i].temp_data;
 
     if( actorscrptr[g_sp.picnum] == 0 ) return;
 
@@ -1477,19 +1478,22 @@ function execute( i, p, x) {
     }
 
 
-    if(g_t[4])
-    {
+    if(g_t[4]) {
         g_sp.lotag += TICSPERFRAME;
-        if(g_sp.lotag > *(int32_t *)(g_t[4]+16) )
+        console.log("script[g_t[4]+4]: %i", script[g_t[4] + 4]);
+        if(g_sp.lotag > script[g_t[4] + 4]/**(int32_t *)(g_t[4]+16) */)
         {
             g_t[2]++;
             g_sp.lotag = 0;
-            g_t[3] +=  *(int32_t *)( g_t[4]+12 );
+            g_t[3] +=  script[g_t[4]+3];//*(int32_t *)( g_t[4]+12 );
         }
-        if( klabs(g_t[3]) >= klabs( *(int32_t *)(g_t[4]+4) * *(int32_t *)(g_t[4]+12) ) )
+        //if( klabs(g_t[3]) >= klabs( *(int32_t *)(g_t[4]+4) * *(int32_t *)(g_t[4]+12) ) )
+        if( klabs(g_t[3]) >= klabs( script[g_t[4]+1] * script[g_t[4]+3] /* *(int32_t *)(g_t[4]+12)*/ ) )
             g_t[3] = 0;
     }
 
+    console.warn("todo finish execute!!!!!!!!!!!");
+    return;
     do
         done = parse();
     while( done == 0 );
