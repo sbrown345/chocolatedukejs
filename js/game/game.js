@@ -960,8 +960,8 @@ function displayrest(smoothratio) {
 
     show2dsector[i>>3] |= (1<<(i&7));
     var walIdx = sector[i].wallptr;
-    for(j=sector[i].wallnum;j>0;j--) {
-        wal = wall[walIdx++];
+    wal = wall[walIdx];
+    for(j=sector[i].wallnum;j>0;j--,wal = wall[++walIdx]) {
         i = wal.nextsector;
         if (i < 0) continue;
         if (wal.cstat&0x0071) continue;
@@ -4068,6 +4068,7 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
+            debugger;
             Player.processInput(i);
             checksectors(i);
         }
@@ -4075,30 +4076,27 @@ Game.doMoveThings = function() {
 
     if (ud.pause_on == 0) {
         movefta(); //ST 2
-        console.warn("todo: finishy move stuff")
-        //moveweapons(); //ST 5 (must be last)
-        //movetransports(); //ST 9
+        moveweapons(); //ST 5 (must be last)
+        movetransports(); //ST 9
 
-        //moveplayers(); //ST 10
-        //movefallers(); //ST 12
-        //moveexplosions(); //ST 4
+        moveplayers(); //ST 10
+        movefallers(); //ST 12
+        moveexplosions(); //ST 4
 
-        //moveactors(); //ST 1
-        //moveeffectors(); //ST 3
+        moveactors(); //ST 1
+        moveeffectors(); //ST 3
 
-        //movestandables(); //ST 6
-        //doanimations();
-        //movefx(); //ST 11
+        movestandables(); //ST 6
+        doanimations();
+        movefx(); //ST 11
     }
 
-    console.warn("todo: fakedomovethingscorrect")
-    //fakedomovethingscorrect();
+    fakedomovethingscorrect();
 
     if ((everyothertime & 1) == 0) {
-        console.warn("todo: everyothertime stuff")
-        //animatewalls();
-        //movecyclers();
-        //pan3dsound();
+        animatewalls();
+        movecyclers();
+        pan3dsound();
     }
 
 

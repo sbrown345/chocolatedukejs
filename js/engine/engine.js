@@ -4150,7 +4150,7 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
         dasectnum = clipsectorlist[dacnt];
         sec = sector[dasectnum];
         walIdx = sec.wallptr;
-        for (cnt = sec.wallnum, wal = wall[walIdx]; cnt > 0; cnt--, wal = wall[walIdx++])
+        for (cnt = sec.wallnum, wal = wall[walIdx]; cnt > 0; cnt--, wal = wall[++walIdx])
         {
             wal2 = wall[wal.point2];
             x31 = wal.x-x1;
@@ -4376,7 +4376,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
 
         startwall = sec.wallptr;
         endwall = startwall + sec.wallnum;
-        for(z=startwall,wal=wall[startwall]; z<endwall; z++, wal = wall[walIdx++])
+        for(z=startwall,wal=wall[startwall]; z<endwall; z++, wal = wall[++walIdx])
         {
             wal2 = wall[wal.point2];
             x1 = wal.x;
@@ -5215,7 +5215,7 @@ function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, c
     console.assert(florhit instanceof Ref, "florhit must be ref");
 
     var sec;
-    var wal, wal2;
+    var wal, walIdx, wal2;
     var spr;
     var clipsectcnt, startwall, endwall, tilenum, xoff, yoff, dax, day;
     var xmin, ymin, xmax, ymax, i, j, k, l, daz, daz2, dx, dy;
@@ -5254,8 +5254,7 @@ function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, c
         sec = sector[clipsectorlist[clipsectcnt]];
         startwall = sec.wallptr;
         endwall = startwall + sec.wallnum;
-        for (j = startwall; j < endwall; j++) {
-            wal = wall[startwall];
+        for (j = startwall, wal = wall[walIdx = startwall]; j < endwall; j++, wal = wall[++walIdx]) {
             k = wal.nextsector;
             if (k >= 0) {
                 wal2 = wall[wal.point2];
