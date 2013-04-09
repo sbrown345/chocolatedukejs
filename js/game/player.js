@@ -2040,7 +2040,7 @@ Player.processInput = function(snum) {
         if( (sb_snum&(1<<13)) == 0 && (sb_snum&(1<<14)) == 0 )
         {
             p.return_to_center--;
-            p.horiz += 33-(p.horiz/3);
+            p.horiz += 33 - ((p.horiz / 3) | 0);
         }
 
     if(p.hard_landing > 0)
