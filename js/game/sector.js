@@ -39,6 +39,14 @@ function isanearoperator(lotag) {
     return 0;
 }
 
+//194
+function checkcursectnums(sect) {
+    var i;
+    for(i=connecthead;i>=0;i=connectpoint2[i])
+        if( sprite[ps[i].i].sectnum == sect ) return i;
+    return -1;
+}
+
 //222
 function findplayer(s,d) {
     console.assert(d instanceof Ref);

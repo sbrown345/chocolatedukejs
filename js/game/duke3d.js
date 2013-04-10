@@ -81,6 +81,8 @@ var FREEZE_WEAPON = 9;
 var HANDREMOTE_WEAPON = 10;
 var GROW_WEAPON = 11;
 
+function AFLAMABLE(X) { (X === BOX || X === TREE1 || X === TREE2 || X === TIRE || X === CONE); }
+
 //317
 function rnd(X) { ((TRAND >> 8) >= (255 - (X))); }
 
