@@ -320,152 +320,149 @@ function displayweapon(snum) {
             switch(cw)
             {
                 case KNEE_WEAPON:
-    throw "todo"
-    //                if( (p.kickback_pic) > 0 )
-    //                {
-    //                    if(sprite[p.i].pal == 1)
-    //                        pal = 1;
-    //                    else
-    //                    {
-    //                        pal = sector[p.cursectnum].floorpal;
-    //                        if(pal == 0)
-    //                            pal = p.palookup;
-    //                    }
+                    if( (p.kickback_pic) > 0 )
+                    {
+                        if(sprite[p.i].pal == 1)
+                            pal = 1;
+                        else
+                        {
+                            pal = sector[p.cursectnum].floorpal;
+                            if(pal == 0)
+                                pal = p.palookup;
+                        }
 
-    //                    if( (p.kickback_pic) < 5 || (p.kickback_pic) > 9 )
-    //                        myospal(weapon_xoffset+220-(p.look_ang>>1),
-    //                            looking_arc+250-gun_pos,KNEE,gs,o,pal);
-    //                    else
-    //                        myospal(weapon_xoffset+160-(p.look_ang>>1),
-    //                        looking_arc+214-gun_pos,KNEE+1,gs,o,pal);
-    //                }
-    //                break;
+                        if( (p.kickback_pic) < 5 || (p.kickback_pic) > 9 )
+                            myospal(weapon_xoffset+220-(p.look_ang>>1),
+                                looking_arc+250-gun_pos,KNEE,gs,o,pal);
+                        else
+                            myospal(weapon_xoffset+160-(p.look_ang>>1),
+                            looking_arc+214-gun_pos,KNEE+1,gs,o,pal);
+                    }
+                    break;
 
                 case TRIPBOMB_WEAPON:
-    throw "todo"
-    //                if(sprite[p.i].pal == 1)
-    //                    pal = 1;
-    //                else
-    //                    pal = sector[p.cursectnum].floorpal;
+                    if(sprite[p.i].pal == 1)
+                        pal = 1;
+                    else
+                        pal = sector[p.cursectnum].floorpal;
 
-    //                weapon_xoffset += 8;
-    //                gun_pos -= 10;
+                    weapon_xoffset += 8;
+                    gun_pos -= 10;
 
-    //                if((p.kickback_pic) > 6)
-    //                    looking_arc += ((p.kickback_pic)<<3);
-    //                else if((p.kickback_pic) < 4)
-    //                    myospal(weapon_xoffset+142-(p.look_ang>>1),
-    //                            looking_arc+234-gun_pos,HANDHOLDINGLASER+3,gs,o,pal);
+                    if((p.kickback_pic) > 6)
+                        looking_arc += ((p.kickback_pic)<<3);
+                    else if((p.kickback_pic) < 4)
+                        myospal(weapon_xoffset+142-(p.look_ang>>1),
+                                looking_arc+234-gun_pos,HANDHOLDINGLASER+3,gs,o,pal);
 
-    //                myospal(weapon_xoffset+130-(p.look_ang>>1),
-    //                        looking_arc+249-gun_pos,
-    //                        HANDHOLDINGLASER+((p.kickback_pic)>>2),gs,o,pal);
-    //                myospal(weapon_xoffset+152-(p.look_ang>>1),
-    //                        looking_arc+249-gun_pos,
-    //                        HANDHOLDINGLASER+((p.kickback_pic)>>2),gs,o|4,pal);
+                    myospal(weapon_xoffset+130-(p.look_ang>>1),
+                            looking_arc+249-gun_pos,
+                            HANDHOLDINGLASER+((p.kickback_pic)>>2),gs,o,pal);
+                    myospal(weapon_xoffset+152-(p.look_ang>>1),
+                            looking_arc+249-gun_pos,
+                            HANDHOLDINGLASER+((p.kickback_pic)>>2),gs,o|4,pal);
 
-    //                break;
+                    break;
 
                 case RPG_WEAPON:
-    throw "todo"
-    //                if(sprite[p.i].pal == 1)
-    //                    pal = 1;
-    //                else pal = sector[p.cursectnum].floorpal;
+                    if(sprite[p.i].pal == 1)
+                        pal = 1;
+                    else pal = sector[p.cursectnum].floorpal;
 
-    //                weapon_xoffset -= sintable[(768+((p.kickback_pic)<<7))&2047]>>11;
-    //                gun_pos += sintable[(768+((p.kickback_pic)<<7)&2047)]>>11;
+                    weapon_xoffset -= sintable[(768+((p.kickback_pic)<<7))&2047]>>11;
+                    gun_pos += sintable[(768+((p.kickback_pic)<<7)&2047)]>>11;
 
-    //                if(p.kickback_pic > 0)
-    //                {
-    //                    if(p.kickback_pic < 8)
-    //                    {
-    //                        myospal(weapon_xoffset+164,(looking_arc<<1)+176-gun_pos,
-    //                                RPGGUN+((p.kickback_pic)>>1),gs,o,pal);
-    //                    }
-    //                }
+                    if(p.kickback_pic > 0)
+                    {
+                        if(p.kickback_pic < 8)
+                        {
+                            myospal(weapon_xoffset+164,(looking_arc<<1)+176-gun_pos,
+                                    RPGGUN+((p.kickback_pic)>>1),gs,o,pal);
+                        }
+                    }
 
-    //                myospal(weapon_xoffset+164,(looking_arc<<1)+176-gun_pos,
-    //                        RPGGUN,gs,o,pal);
+                    myospal(weapon_xoffset+164,(looking_arc<<1)+176-gun_pos,
+                            RPGGUN,gs,o,pal);
 
-    //                break;
+                    break;
 
                 case SHOTGUN_WEAPON:
-    throw "todo"
-    //                if(sprite[p.i].pal == 1)
-    //                    pal = 1;
-    //                else
-    //                    pal = sector[p.cursectnum].floorpal;
+                    throw "todo"
+                    //if(sprite[p.i].pal == 1)
+                    //    pal = 1;
+                    //else
+                    //    pal = sector[p.cursectnum].floorpal;
 
-    //                weapon_xoffset -= 8;
+                    //weapon_xoffset -= 8;
 
-    //                switch(p.kickback_pic)
-    //                {
-    //                    case 1:
-    //                    case 2:
-    //                        myospal(weapon_xoffset+168-(p.look_ang>>1),looking_arc+201-gun_pos,
-    //                        SHOTGUN+2,-128,o,pal);
-    //                    case 0:
-    //                    case 6:
-    //                    case 7:
-    //                    case 8:
-    //                        myospal(weapon_xoffset+146-(p.look_ang>>1),looking_arc+202-gun_pos,
-    //                            SHOTGUN,gs,o,pal);
-    //                        break;
-    //                    case 3:
-    //                    case 4:
-    //                    case 5:
-    //                    case 9:
-    //                    case 10:
-    //                    case 11:
-    //                    case 12:
-    //                        if( p.kickback_pic > 1 && p.kickback_pic < 5 )
-    //                        {
-    //                            gun_pos -= 40;
-    //                            weapon_xoffset += 20;
+                    //switch(p.kickback_pic)
+                    //{
+                    //    case 1:
+                    //    case 2:
+                    //        myospal(weapon_xoffset+168-(p.look_ang>>1),looking_arc+201-gun_pos,
+                    //        SHOTGUN+2,-128,o,pal);
+                    //    case 0:
+                    //    case 6:
+                    //    case 7:
+                    //    case 8:
+                    //        myospal(weapon_xoffset+146-(p.look_ang>>1),looking_arc+202-gun_pos,
+                    //            SHOTGUN,gs,o,pal);
+                    //        break;
+                    //    case 3:
+                    //    case 4:
+                    //    case 5:
+                    //    case 9:
+                    //    case 10:
+                    //    case 11:
+                    //    case 12:
+                    //        if( p.kickback_pic > 1 && p.kickback_pic < 5 )
+                    //        {
+                    //            gun_pos -= 40;
+                    //            weapon_xoffset += 20;
 
-    //                            myospal(weapon_xoffset+178-(p.look_ang>>1),looking_arc+194-gun_pos,
-    //                                SHOTGUN+1+((*(kb)-1)>>1),-128,o,pal);
-    //                        }
+                    //            myospal(weapon_xoffset+178-(p.look_ang>>1),looking_arc+194-gun_pos,
+                    //                SHOTGUN+1+((*(kb)-1)>>1),-128,o,pal);
+                    //        }
 
-    //                        myospal(weapon_xoffset+158-(p.look_ang>>1),looking_arc+220-gun_pos,
-    //                            SHOTGUN+3,gs,o,pal);
+                    //        myospal(weapon_xoffset+158-(p.look_ang>>1),looking_arc+220-gun_pos,
+                    //            SHOTGUN+3,gs,o,pal);
 
-    //                        break;
-    //                    case 13:
-    //                    case 14:
-    //                    case 15:
-    //                        myospal(32+weapon_xoffset+166-(p.look_ang>>1),looking_arc+210-gun_pos,
-    //                            SHOTGUN+4,gs,o,pal);
-    //                        break;
-    //                    case 16:
-    //                    case 17:
-    //                    case 18:
-    //                    case 19:
-    //                        myospal(64+weapon_xoffset+170-(p.look_ang>>1),looking_arc+196-gun_pos,
-    //                            SHOTGUN+5,gs,o,pal);
-    //                        break;
-    //                    case 20:
-    //                    case 21:
-    //                    case 22:
-    //                    case 23:
-    //                        myospal(64+weapon_xoffset+176-(p.look_ang>>1),looking_arc+196-gun_pos,
-    //                            SHOTGUN+6,gs,o,pal);
-    //                        break;
-    //                    case 24:
-    //                    case 25:
-    //                    case 26:
-    //                    case 27:
-    //                        myospal(64+weapon_xoffset+170-(p.look_ang>>1),looking_arc+196-gun_pos,
-    //                            SHOTGUN+5,gs,o,pal);
-    //                        break;
-    //                    case 28:
-    //                    case 29:
-    //                    case 30:
-    //                        myospal(32+weapon_xoffset+156-(p.look_ang>>1),looking_arc+206-gun_pos,
-    //                            SHOTGUN+4,gs,o,pal);
-    //                        break;
-    //                }
-    //                break;
+                    //        break;
+                    //    case 13:
+                    //    case 14:
+                    //    case 15:
+                    //        myospal(32+weapon_xoffset+166-(p.look_ang>>1),looking_arc+210-gun_pos,
+                    //            SHOTGUN+4,gs,o,pal);
+                    //        break;
+                    //    case 16:
+                    //    case 17:
+                    //    case 18:
+                    //    case 19:
+                    //        myospal(64+weapon_xoffset+170-(p.look_ang>>1),looking_arc+196-gun_pos,
+                    //            SHOTGUN+5,gs,o,pal);
+                    //        break;
+                    //    case 20:
+                    //    case 21:
+                    //    case 22:
+                    //    case 23:
+                    //        myospal(64+weapon_xoffset+176-(p.look_ang>>1),looking_arc+196-gun_pos,
+                    //            SHOTGUN+6,gs,o,pal);
+                    //        break;
+                    //    case 24:
+                    //    case 25:
+                    //    case 26:
+                    //    case 27:
+                    //        myospal(64+weapon_xoffset+170-(p.look_ang>>1),looking_arc+196-gun_pos,
+                    //            SHOTGUN+5,gs,o,pal);
+                    //        break;
+                    //    case 28:
+                    //    case 29:
+                    //    case 30:
+                    //        myospal(32+weapon_xoffset+156-(p.look_ang>>1),looking_arc+206-gun_pos,
+                    //            SHOTGUN+4,gs,o,pal);
+                    //        break;
+                    //}
+                    //break;
 
 
                 case CHAINGUN_WEAPON:
@@ -2609,21 +2606,20 @@ Player.processInput = function(snum) {
 //                else (p.kickback_pic)++;
 //                break;
             case KNEE_WEAPON:
-                throw "todo"
         
-//                (p.kickback_pic)++;
+                (p.kickback_pic)++;
 
-//                if( (p.kickback_pic) == 7) shoot(pi,KNEE);
-//                else if( (p.kickback_pic) == 14)
-//                {
-//                    if( sb_snum&(1<<2) )
-//                        p.kickback_pic = 1+(krand()&3);
-//                    else p.kickback_pic = 0;
-//                }
+                if( (p.kickback_pic) == 7) shoot(pi,KNEE);
+                else if( (p.kickback_pic) == 14)
+                {
+                    if( sb_snum&(1<<2) )
+                        p.kickback_pic = 1+(krand()&3);
+                    else p.kickback_pic = 0;
+                }
 
-//                if(p.wantweaponfire >= 0)
-//                    checkavailweapon(p);
-//                break;
+                if(p.wantweaponfire >= 0)
+                    checkavailweapon(p);
+                break;
 
             case RPG_WEAPON:
                 throw "todo"
