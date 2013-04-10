@@ -123,12 +123,11 @@ window.__defineGetter__("duke_sync", function () {
 
 //extern int32_t movefifosendplc;
 
-//typedef struct
-//{
-//    uint8_t  *ptr;
-//    uint8_t  lock;
-//    int  length, num;
-//} SAMPLE;
+function SAMPLE() {
+    this.ptr = null;
+    this.lock = 0;
+    this.length = 0, this.num = 0;
+}
 
 function AnimWall() {
     this.wallnum = 0;

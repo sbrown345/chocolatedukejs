@@ -789,7 +789,7 @@ function  doincrements(p)
             p.heat_on = 0;
             checkavailinven(p);
             spritesound(NITEVISION_ONOFF,p.i);
-            setpal(p);
+            Player.setPal(p);
         }
     }
 
@@ -1381,117 +1381,114 @@ Player.processInput = function(snum) {
     i = 40;
 
     if( psectlotag == 2) {
-        debugger;
-        throw "todo"
-//        p.jumping_counter = 0;
+        p.jumping_counter = 0;
 
-//        p.pycount += 32;
-//        p.pycount &= 2047;
-//        p.pyoff = sintable[p.pycount]>>7;
+        p.pycount += 32;
+        p.pycount &= 2047;
+        p.pyoff = sintable[p.pycount]>>7;
 
-//        if( Sound[DUKE_UNDERWATER].num == 0 )
-//            spritesound(DUKE_UNDERWATER,pi);
+        if( Sound[DUKE_UNDERWATER].num == 0 )
+            spritesound(DUKE_UNDERWATER,pi);
 
-//        if ( sb_snum&1 )
-//        {
-//            if(p.poszv > 0) p.poszv = 0;
-//            p.poszv -= 348;
-//            if(p.poszv < -(256*6)) p.poszv = -(256*6);
-//        }
-//        else if (sb_snum&(1<<1))
-//        {
-//            if(p.poszv < 0) p.poszv = 0;
-//            p.poszv += 348;
-//            if(p.poszv > (256*6)) p.poszv = (256*6);
-//        }
-//        else
-//        {
-//            if(p.poszv < 0)
-//            {
-//                p.poszv += 256;
-//                if(p.poszv > 0)
-//                    p.poszv = 0;
-//            }
-//            if(p.poszv > 0)
-//            {
-//                p.poszv -= 256;
-//                if(p.poszv < 0)
-//                    p.poszv = 0;
-//            }
-//        }
+        if ( sb_snum&1 )
+        {
+            if(p.poszv > 0) p.poszv = 0;
+            p.poszv -= 348;
+            if(p.poszv < -(256*6)) p.poszv = -(256*6);
+        }
+        else if (sb_snum&(1<<1))
+        {
+            if(p.poszv < 0) p.poszv = 0;
+            p.poszv += 348;
+            if(p.poszv > (256*6)) p.poszv = (256*6);
+        }
+        else
+        {
+            if(p.poszv < 0)
+            {
+                p.poszv += 256;
+                if(p.poszv > 0)
+                    p.poszv = 0;
+            }
+            if(p.poszv > 0)
+            {
+                p.poszv -= 256;
+                if(p.poszv < 0)
+                    p.poszv = 0;
+            }
+        }
 
-//        if(p.poszv > 2048)
-//            p.poszv >>= 1;
+        if(p.poszv > 2048)
+            p.poszv >>= 1;
 
-//        p.posz += p.poszv;
+        p.posz += p.poszv;
 
-//        if(p.posz > (fz-(15<<8)) )
-//            p.posz += ((fz-(15<<8))-p.posz)>>1;
+        if(p.posz > (fz-(15<<8)) )
+            p.posz += ((fz-(15<<8))-p.posz)>>1;
 
-//        if(p.posz < (cz+(4<<8)) )
-//        {
-//            p.posz = cz+(4<<8);
-//            p.poszv = 0;
-//        }
+        if(p.posz < (cz+(4<<8)) )
+        {
+            p.posz = cz+(4<<8);
+            p.poszv = 0;
+        }
 
-//        if( p.scuba_on && (krand()&255) < 8 )
-//        {
-//            j = spawn(pi,WATERBUBBLE);
-//            sprite[j].x +=
-//                sintable[(p.ang+512+64-(global_random&128))&2047]>>6;
-//            sprite[j].y +=
-//                sintable[(p.ang+64-(global_random&128))&2047]>>6;
-//            sprite[j].xrepeat = 3;
-//            sprite[j].yrepeat = 2;
-//            sprite[j].z = p.posz+(8<<8);
-//        }
+        if( p.scuba_on && (krand()&255) < 8 )
+        {
+            j = spawn(pi,WATERBUBBLE);
+            sprite[j].x +=
+                sintable[(p.ang+512+64-(global_random&128))&2047]>>6;
+            sprite[j].y +=
+                sintable[(p.ang+64-(global_random&128))&2047]>>6;
+            sprite[j].xrepeat = 3;
+            sprite[j].yrepeat = 2;
+            sprite[j].z = p.posz+(8<<8);
+        }
     }
 
     else if(p.jetpack_on)
     {
-        throw "todo jetpack"
-//        p.on_ground = 0;
-//        p.jumping_counter = 0;
-//        p.hard_landing = 0;
-//        p.falling_counter = 0;
+        p.on_ground = 0;
+        p.jumping_counter = 0;
+        p.hard_landing = 0;
+        p.falling_counter = 0;
 
-//        p.pycount += 32;
-//        p.pycount &= 2047;
-//        p.pyoff = sintable[p.pycount]>>7;
+        p.pycount += 32;
+        p.pycount &= 2047;
+        p.pyoff = sintable[p.pycount]>>7;
 
-//        if(p.jetpack_on < 11)
-//        {
-//            p.jetpack_on++;
-//            p.posz -= (p.jetpack_on<<7); //Goin up
-//        }
-//        else if(p.jetpack_on == 11 && Sound[DUKE_JETPACK_IDLE].num < 1)
-//            spritesound(DUKE_JETPACK_IDLE,pi);
+        if(p.jetpack_on < 11)
+        {
+            p.jetpack_on++;
+            p.posz -= (p.jetpack_on<<7); //Goin up
+        }
+        else if(p.jetpack_on == 11 && Sound[DUKE_JETPACK_IDLE].num < 1)
+            spritesound(DUKE_JETPACK_IDLE,pi);
 
-//        if(shrunk) j = 512;
-//        else j = 2048;
+        if(shrunk) j = 512;
+        else j = 2048;
 
-//        if ( sb_snum&1 )                            //A (soar high)
-//        {
-//            p.posz -= j;
-//            p.crack_time = 777;
-//        }
+        if ( sb_snum&1 )                            //A (soar high)
+        {
+            p.posz -= j;
+            p.crack_time = 777;
+        }
 
-//        if (sb_snum&(1<<1))                            //Z (soar low)
-//        {
-//            p.posz += j;
-//            p.crack_time = 777;
-//        }
+        if (sb_snum&(1<<1))                            //Z (soar low)
+        {
+            p.posz += j;
+            p.crack_time = 777;
+        }
 
-//        if( shrunk == 0 && (psectlotag == 0 || psectlotag == 2)) k = 32;
-//        else k = 16;
+        if( shrunk == 0 && (psectlotag == 0 || psectlotag == 2)) k = 32;
+        else k = 16;
 
-//        if( psectlotag != 2 && p.scuba_on == 1 )
-//            p.scuba_on = 0;
+        if( psectlotag != 2 && p.scuba_on == 1 )
+            p.scuba_on = 0;
 
-//        if(p.posz > (fz-(k<<8)) )
-//            p.posz += ((fz-(k<<8))-p.posz)>>1;
-//        if(p.posz < (hittype[pi].ceilingz+(18<<8)) )
-//            p.posz = hittype[pi].ceilingz+(18<<8);
+        if(p.posz > (fz-(k<<8)) )
+            p.posz += ((fz-(k<<8))-p.posz)>>1;
+        if(p.posz < (hittype[pi].ceilingz+(18<<8)) )
+            p.posz = hittype[pi].ceilingz+(18<<8);
 
     }
     else if( psectlotag != 2 )

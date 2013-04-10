@@ -88,6 +88,7 @@ function findplayer(s,d) {
     return closest_player;
 }
 
+//267
 function doanimations() {
     var i, j, a, p, v, dasect;
 
@@ -150,6 +151,7 @@ function doanimations() {
     }
 }
 
+//338
 function getanimationgoal(animptr)
 {
     var i, j;
@@ -189,6 +191,101 @@ Sector.animateCamSprite = function () {
     else 
         hittype[i].temp_data[0]++;
 };
+
+
+function animatewalls() {
+    var i, j, p, t;
+
+    for(p=0;p < numanimwalls ;p++)
+        //    for(p=numanimwalls-1;p>=0;p--)
+    {
+        i = animwall[p].wallnum;
+        j = wall[i].picnum;
+
+        switch(j)
+        {
+            case SCREENBREAK1:
+            case SCREENBREAK2:
+            case SCREENBREAK3:
+            case SCREENBREAK4:
+            case SCREENBREAK5:
+
+            case SCREENBREAK9:
+            case SCREENBREAK10:
+            case SCREENBREAK11:
+            case SCREENBREAK12:
+            case SCREENBREAK13:
+            case SCREENBREAK14:
+            case SCREENBREAK15:
+            case SCREENBREAK16:
+            case SCREENBREAK17:
+            case SCREENBREAK18:
+            case SCREENBREAK19:
+
+                if( (krand()&255) < 16)
+                {
+                    animwall[p].tag = wall[i].picnum;
+                    wall[i].picnum = SCREENBREAK6;
+                }
+
+                continue;
+
+            case SCREENBREAK6:
+            case SCREENBREAK7:
+            case SCREENBREAK8:
+
+                if(animwall[p].tag >= 0 && wall[i].extra != FEMPIC2 && wall[i].extra != FEMPIC3 )
+                    wall[i].picnum = animwall[p].tag;
+                else
+                {
+                    wall[i].picnum++;
+                    if(wall[i].picnum == (SCREENBREAK6+3) )
+                        wall[i].picnum = SCREENBREAK6;
+                }
+                continue;
+
+        }
+
+        if(wall[i].cstat&16)
+            switch(wall[i].overpicnum)
+            {
+                case W_FORCEFIELD:
+                case W_FORCEFIELD+1:
+                case W_FORCEFIELD+2:
+
+                    t = animwall[p].tag;
+
+                    if(wall[i].cstat&254)
+                    {
+                        wall[i].xpanning -= t>>10; // sintable[(t+512)&2047]>>12;
+                        wall[i].ypanning -= t>>10; // sintable[t&2047]>>12;
+
+                        if(wall[i].extra == 1)
+                        {
+                            wall[i].extra = 0;
+                            animwall[p].tag = 0;
+                        }
+                        else
+                            animwall[p].tag+=128;
+
+                        if( animwall[p].tag < (128<<4) )
+                        {
+                            if( animwall[p].tag&128 )
+                                wall[i].overpicnum = W_FORCEFIELD;
+                            else wall[i].overpicnum = W_FORCEFIELD+1;
+                        }
+                        else
+                        {
+                            if( (krand()&255) < 32 )
+                                animwall[p].tag = 128<<(krand()&3);
+                            else wall[i].overpicnum = W_FORCEFIELD+1;
+                        }
+                    }
+
+                    break;
+            }
+    }
+}
 
 //1808
 function checkplayerhurt(p, j)
@@ -520,7 +617,7 @@ function checksectors(snum) {
 
     //                            j = p.cursectnum;
     //                            p.cursectnum = sprite[i].sectnum;
-    //                            setpal(p);
+        //                            Player.setPal(p);
     //                            p.cursectnum = j;
 
     //                            // parallaxtype = 2;
@@ -542,7 +639,7 @@ function checksectors(snum) {
     //                        p.newowner = -1;
 
     //                        updatesector(p.posx,p.posy,&p.cursectnum);
-    //                        setpal(p);
+        //                        Player.setPal(p);
 
 
     //                        i = headspritestat[1];

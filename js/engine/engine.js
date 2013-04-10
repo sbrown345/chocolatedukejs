@@ -915,7 +915,7 @@ function florscan(x1, x2, sectnum) {
         if (i == 0)
             i = 1024;
         else
-            i = 1048576/i;
+            i = (1048576/i)|0;
         globalx1 = mulscale10(dmulscale10(ox,singlobalang,-oy,cosglobalang),i);
         globaly1 = mulscale10(dmulscale10(ox,cosglobalang,oy,singlobalang),i);
         globalx2 = -globalx1;

@@ -129,7 +129,7 @@ var sounds = new Array(NUM_SOUNDS);
 
 //fx_device device;
 
-//SAMPLE Sound[ NUM_SOUNDS ];
+var Sound = structArray(SAMPLE, NUM_SOUNDS);
 //SOUNDOWNER SoundOwner[NUM_SOUNDS][4];
 
 var numplayersprites, earthquaketime;

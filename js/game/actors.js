@@ -1,5 +1,7 @@
 ﻿'use strict';
 
+var actor_tog = 0;
+
 function updateinterpolations() {
     // todo
     //for (var i = numinterpolations - 1; i >= 0; i--) {
@@ -472,6 +474,44 @@ function ifhitbyweapon(sn)
     hittype[sn].extra = -1;
     return -1;
 }
+
+//1096
+function movecyclers() {
+    var q, j, x, t, s, c;
+    var wal;
+    var  cshade;
+
+    for(q=numcyclers-1;q>=0;q--)
+    {
+
+        c = cyclers[q];
+        s = c[0];
+        
+        t = c[3];
+        j = t+(sintable[c[1]&2047]>>10);
+        cshade = c[2];
+
+        if( j < cshade ) j = cshade;
+        else if( j > t )  j = t;
+
+        c[1] += sector[s].extra;
+        if(c[5])
+        {
+            wal = wall[sector[s].wallptr];
+            for(x = sector[s].wallnum;x>0;x--,wal++)
+                if( wal.hitag != 1 )
+                {
+                    wal.shade = j;
+
+                    if( (wal.cstat&2) && wal.nextwall >= 0)
+                        wall[wal.nextwall].shade = j;
+
+                }
+            sector[s].floorshade = sector[s].ceilingshade = j;
+        }
+    }
+}
+
 
 //1133
 function movedummyplayers() {
@@ -2298,7 +2338,7 @@ function movetransports()
                             changespritesect(j,sprite[sprite[i].owner].sectnum);
                             setsprite(ps[p].i,ps[p].posx,ps[p].posy,ps[p].posz+PHEIGHT);
 
-                            setpal(ps[p]);
+                            Player.setPal(ps[p]);
 
                             if( (krand()&255) < 32 )
                                 spawn(j,WATERSPLASH2);
@@ -3085,7 +3125,7 @@ function moveactors()
                         ps[p].ang = ps[p].oang;
 
                         updatesector(ps[p].posx,ps[p].posy,ps[p].cursectnum);
-                        setpal(ps[p]);
+                        Player.setPal(ps[p]);
 
                         j = headspritestat[1];
                         while(j >= 0)
