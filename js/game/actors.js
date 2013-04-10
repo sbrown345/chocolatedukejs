@@ -1428,36 +1428,38 @@ function movestandables()
                 x = xRef.$;
                 if( x > 20480 ) {i = nexti; continue BOLT;}
 
-                throw  "todo"
-                //CLEAR_THE_BOLT2:
-                //    if(t[2])
-                //    {
-                //        t[2]--;
-                //        {i = nexti; continue BOLT;}
-                //    }
-                //if( (s.xrepeat|s.yrepeat) == 0 )
-                //{
-                //    s.xrepeat=t[0];
-                //    s.yrepeat=t[1];
-                //}
-                //if( (krand()&8) == 0 )
-                //{
-                //    t[0]=s.xrepeat;
-                //    t[1]=s.yrepeat;
-                //    t[2] = global_random&4;
-                //    s.xrepeat=s.yrepeat=0;
-                //    goto CLEAR_THE_BOLT2;
-                //}
-                //s.picnum++;
+                CLEAR_THE_BOLT2:
+                while (true) {
+                    if (t[2]) {
+                        t[2]--;
+                        {
+                            i = nexti;
+                            continue BOLT;
+                        }
+                    }
+                    if ((s.xrepeat | s.yrepeat) == 0) {
+                        s.xrepeat = t[0];
+                        s.yrepeat = t[1];
+                    }
+                    if ((krand() & 8) == 0) {
+                        t[0] = s.xrepeat;
+                        t[1] = s.yrepeat;
+                        t[2] = global_random & 4;
+                        s.xrepeat = s.yrepeat = 0;
+                        continue CLEAR_THE_BOLT2;
+                    }
+                   break;
+                }
+                s.picnum++;
 
-                //if(l&1) s.cstat ^= 2; // l not defined here. Line is met in 2nd demo with l = 0.
+                if(l&1) s.cstat ^= 2; // l not defined here. Line is met in 2nd demo with l = 0.
 
-                //if( (krand()&1) && sector[sect].floorpicnum == HURTRAIL )
-                //    spritesound(SHORT_CIRCUIT,i);
+                if( (krand()&1) && sector[sect].floorpicnum == HURTRAIL )
+                    spritesound(SHORT_CIRCUIT,i);
 
-                //if(s.picnum == SIDEBOLT1+4) s.picnum = SIDEBOLT1;
+                if(s.picnum == SIDEBOLT1+4) s.picnum = SIDEBOLT1;
 
-                //{i = nexti; continue BOLT;}
+                {i = nexti; continue BOLT;}
 
             case BOLT1:
             case BOLT1+1:
@@ -1470,51 +1472,53 @@ function movestandables()
 
                 if( t[3] == 0 )
                     t[3]=sector[sect].floorshade;
-                throw  "todo"
-                //CLEAR_THE_BOLT:
-                //    if(t[2])
-                //    {
-                //        t[2]--;
-                //        sector[sect].floorshade = 20;
-                //        sector[sect].ceilingshade = 20;
-                //        {i = nexti; continue BOLT;}
-                //    }
-                //if( (s.xrepeat|s.yrepeat) == 0 )
-                //{
-                //    s.xrepeat=t[0];
-                //    s.yrepeat=t[1];
-                //}
-                //else if( (krand()&8) == 0 )
-                //{
-                //    t[0]=s.xrepeat;
-                //    t[1]=s.yrepeat;
-                //    t[2] = global_random&4;
-                //    s.xrepeat=s.yrepeat=0;
-                //    goto CLEAR_THE_BOLT;
-                //}
-                //s.picnum++;
+                CLEAR_THE_BOLT:
+                while (true) {
+                    if(t[2])
+                    {
+                        t[2]--;
+                        sector[sect].floorshade = 20;
+                        sector[sect].ceilingshade = 20;
+                        {i = nexti; continue BOLT;}
+                    }
+                    if( (s.xrepeat|s.yrepeat) == 0 )
+                    {
+                        s.xrepeat=t[0];
+                        s.yrepeat=t[1];
+                    }
+                    else if( (krand()&8) == 0 )
+                    {
+                        t[0]=s.xrepeat;
+                        t[1]=s.yrepeat;
+                        t[2] = global_random&4;
+                        s.xrepeat=s.yrepeat=0;
+                        continue CLEAR_THE_BOLT;
+                    }
+                    break;
+                }
+                s.picnum++;
 
-                //l = global_random&7;
-                //s.xrepeat=l+8;
+                l = global_random&7;
+                s.xrepeat=l+8;
 
-                //if(l&1) s.cstat ^= 2;
+                if(l&1) s.cstat ^= 2;
 
-                //if( s.picnum == (BOLT1+1) && (krand()&7) == 0 && sector[sect].floorpicnum == HURTRAIL )
-                //    spritesound(SHORT_CIRCUIT,i);
+                if( s.picnum == (BOLT1+1) && (krand()&7) == 0 && sector[sect].floorpicnum == HURTRAIL )
+                    spritesound(SHORT_CIRCUIT,i);
 
-                //if(s.picnum==BOLT1+4) s.picnum=BOLT1;
+                if(s.picnum==BOLT1+4) s.picnum=BOLT1;
 
-                //if(s.picnum&1)
-                //{
-                //    sector[sect].floorshade = 0;
-                //    sector[sect].ceilingshade = 0;
-                //}
-                //else
-                //{
-                //    sector[sect].floorshade = 20;
-                //    sector[sect].ceilingshade = 20;
-                //}
-                //{i = nexti; continue BOLT;}
+                if(s.picnum&1)
+                {
+                    sector[sect].floorshade = 0;
+                    sector[sect].ceilingshade = 0;
+                }
+                else
+                {
+                    sector[sect].floorshade = 20;
+                    sector[sect].ceilingshade = 20;
+                }
+                {i = nexti; continue BOLT;}
                 
             case WATERDRIP:
 
