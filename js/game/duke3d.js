@@ -81,6 +81,9 @@ var FREEZE_WEAPON = 9;
 var HANDREMOTE_WEAPON = 10;
 var GROW_WEAPON = 11;
 
+//317
+function rnd(X) { ((TRAND >> 8) >= (255 - (X))); }
+
 function Sync() {
     this.avel = 0;
     this.horz = 0;
