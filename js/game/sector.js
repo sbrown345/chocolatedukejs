@@ -47,6 +47,17 @@ function checkcursectnums(sect) {
     return -1;
 }
 
+
+//194
+function dist(s1,s2)
+{
+    var vx,vy,vz;
+    vx = s1.x - s2.x;
+    vy = s1.y - s2.y;
+    vz = s1.z - s2.z;
+    return(FindDistance3D(vx,vy,vz>>4));
+}
+
 //222
 function findplayer(s,d) {
     console.assert(d instanceof Ref);
@@ -75,6 +86,68 @@ function findplayer(s,d) {
 
     d.$ = closest;
     return closest_player;
+}
+
+function doanimations() {
+    var i, j, a, p, v, dasect;
+
+    for(i=animatecnt-1;i>=0;i--)
+    {
+        throw "todo"
+        //a = *animateptr[i];
+        //v = animatevel[i]*TICSPERFRAME;
+        //dasect = animatesect[i];
+
+        //if (a == animategoal[i])
+        //{
+        //    stopinterpolation(animateptr[i]);
+
+        //    animatecnt--;
+        //    animateptr[i] = animateptr[animatecnt];
+        //    animategoal[i] = animategoal[animatecnt];
+        //    animatevel[i] = animatevel[animatecnt];
+        //    animatesect[i] = animatesect[animatecnt];
+        //    if( sector[animatesect[i]].lotag == 18 || sector[animatesect[i]].lotag == 19 )
+        //        if(animateptr[i] == sector[animatesect[i]].ceilingz)
+        //            continue;
+
+        //    if( (sector[dasect].lotag&0xff) != 22 )
+        //        callsound(dasect,-1);
+
+        //    continue;
+        //}
+
+        //if (v > 0) { a = min(a+v,animategoal[i]); }
+        //else { a = max(a+v,animategoal[i]); }
+
+        //if( animateptr[i] == sector[animatesect[i]].floorz)
+        //{
+        //    for(p=connecthead;p>=0;p=connectpoint2[p])
+        //        if (ps[p].cursectnum == dasect)
+        //            if ((sector[dasect].floorz-ps[p].posz) < (64<<8))
+        //                if (sprite[ps[p].i].owner >= 0)
+        //                {
+        //                    ps[p].posz += v;
+        //                    ps[p].poszv = 0;
+        //                    if (p == myconnectindex)
+        //                    {
+        //                        myz += v;
+        //                        myzvel = 0;
+        //                        myzbak[((movefifoplc-1)&(MOVEFIFOSIZ-1))] = ps[p].posz;
+        //                    }
+        //                }
+
+        //    for(j=headspritesect[dasect];j>=0;j=nextspritesect[j])
+        //        if (sprite[j].statnum != 3)
+        //        {
+        //            hittype[j].bposz = sprite[j].z;
+        //            sprite[j].z += v;
+        //            hittype[j].floorz = sector[dasect].floorz+v;
+        //        }
+        //}
+
+        //*animateptr[i] = a;
+    }
 }
 
 function getanimationgoal(animptr)

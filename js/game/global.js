@@ -208,7 +208,7 @@ var  myjumpingtoggle, myonground, myhardlanding, myreturntocenter;
 var multiwho, multipos, multiwhat, multiflag;
 
 var fakemovefifoplc, movefifoplc;
-//int32_t myxbak[MOVEFIFOSIZ], myybak[MOVEFIFOSIZ], myzbak[MOVEFIFOSIZ];
+var myxbak = new Int32Array(MOVEFIFOSIZ), myybak = new Int32Array(MOVEFIFOSIZ), myzbak = new Int32Array(MOVEFIFOSIZ);
 var myhorizbak = new Int32Array(MOVEFIFOSIZ), dukefriction = 0xcc00, show_shareware;
 
 //short myangbak[MOVEFIFOSIZ];
@@ -228,3 +228,30 @@ var numinterpolations = 0, startofdynamicinterpolations = 0;
 var oldipos = new Int32Array(MAXINTERPOLATIONS);
 var bakipos = new Int32Array(MAXINTERPOLATIONS);
 var curipos = new Int32Array(MAXINTERPOLATIONS);
+
+
+function FindDistance3D(ix, iy, iz) {
+   var t;
+
+    ix= Math.abs(ix);           /* absolute values */
+    iy= Math.abs(iy);
+    iz= Math.abs(iz);
+
+    if (ix<iy)
+    {
+        var tmp = ix;
+        ix = iy;
+        iy = tmp;
+    }
+
+    if (ix<iz)
+    {
+        var tmp = ix;
+        ix = iz;
+        iz = tmp;
+    }
+
+    t = iy + iz;
+
+    return (ix - (ix>>4) + (t>>2) + (t>>3));
+}

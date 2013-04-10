@@ -659,6 +659,109 @@ function moveplayers() //Players
     }
 }
 
+//1316
+function movefx() {
+    var i, j, nexti, p;
+    var x, ht;
+    var s;
+
+    i = headspritestat[11];
+    BOLT:
+    while(i >= 0)
+    {
+        s = sprite[i];
+
+        nexti = nextspritestat[i];
+
+        switch(s.picnum)
+        {
+            case RESPAWN:
+                if(sprite[i].extra == 66)
+                {
+                    j = spawn(i,sprite[i].hitag);
+                    //                    sprite[j].pal = sprite[i].pal;
+                    {deletesprite(i);{i = nexti; continue BOLT;}}
+                }
+                else if(sprite[i].extra > (66-13))
+                    sprite[i].extra++;
+                break;
+
+            case MUSICANDSFX:
+
+                ht = s.hitag;
+
+                if(hittype[i].temp_data[1] != SoundToggle)
+                {
+                    hittype[i].temp_data[1] = SoundToggle;
+                    hittype[i].temp_data[0] = 0;
+                }
+
+                if(s.lotag >= 1000 && s.lotag < 2000)
+                {
+                    x = ldist(sprite[ps[screenpeek].i],s);
+                    if( x < ht && hittype[i].temp_data[0] == 0 )
+                    {
+                        FX_SetReverb( s.lotag - 1000 );
+                        hittype[i].temp_data[0] = 1;
+                    }
+                    if( x >= ht && hittype[i].temp_data[0] == 1 )
+                    {
+                        FX_SetReverb(0);
+                        FX_SetReverbDelay(0);
+                        hittype[i].temp_data[0] = 0;
+                    }
+                }
+                else if(s.lotag < 999 && (toUint32(sector[s.sectnum].lotag)) < 9 && AmbienceToggle && sector[sprite[i].sectnum].floorz != sector[sprite[i].sectnum].ceilingz)
+                {
+                    if( (soundm[s.lotag]&2) )
+                    {
+                        x = dist(sprite[ps[screenpeek].i],s);
+                        if( x < ht && hittype[i].temp_data[0] == 0 && FX_VoiceAvailable(soundpr[s.lotag]-1) )
+                        {
+                            if(numenvsnds == NumVoices)
+                            {
+                                j = headspritestat[11];
+                                while(j >= 0)
+                                {
+                                    if( sprite[i].picnum == MUSICANDSFX && j != i && sprite[j].lotag < 999 && hittype[j].temp_data[0] == 1 && dist(sprite[j],sprite[ps[screenpeek].i]) > x )
+                                    {
+                                        stopenvsound(sprite[j].lotag,j);
+                                        break;
+                                    }
+                                    j = nextspritestat[j];
+                                }
+                                if(j == -1) {i = nexti; continue BOLT;}
+                            }
+                            spritesound(s.lotag,i);
+                            hittype[i].temp_data[0] = 1;
+                        }
+                        if( x >= ht && hittype[i].temp_data[0] == 1 )
+                        {
+                            hittype[i].temp_data[0] = 0;
+                            stopenvsound(s.lotag,i);
+                        }
+                    }
+                    if( (soundm[s.lotag]&16) )
+                    {
+                        if(hittype[i].temp_data[4] > 0) hittype[i].temp_data[4]--;
+                        else for(p=connecthead;p>=0;p=connectpoint2[p])
+                            if( p == myconnectindex && ps[p].cursectnum == s.sectnum )
+                            {
+                                j = s.lotag+(toUint32(global_random)%(s.hitag+1));
+                                sound(j);
+                                hittype[i].temp_data[4] =  26*40 + (global_random%(26*40));
+                            }
+                    }
+                }
+                break;
+        }
+        //BOLT:
+            i = nexti;
+    }
+}
+
+
+
 //1418
 function movefallers() {
     var i, nexti, sect, j;
