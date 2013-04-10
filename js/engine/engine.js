@@ -4590,7 +4590,68 @@ function hitscan( xs,  ys,  zs,  sectnum,
     return(0);
 }
 
+
+function dragpoint(pointhighlight, dax, day)
+{
+    var cnt, tempshort;
+
+    wall[pointhighlight].x = dax;
+    wall[pointhighlight].y = day;
+
+    cnt = MAXWALLS;
+    tempshort = pointhighlight;    /* search points CCW */
+    do
+    {
+        if (wall[tempshort].nextwall >= 0)
+        {
+            tempshort = wall[wall[tempshort].nextwall].point2;
+            wall[tempshort].x = dax;
+            wall[tempshort].y = day;
+        }
+        else
+        {
+            tempshort = pointhighlight;    /* search points CW if not searched all the way around */
+            do
+            {
+                if (wall[lastwall(tempshort)].nextwall >= 0)
+                {
+                    tempshort = wall[lastwall(tempshort)].nextwall;
+                    wall[tempshort].x = dax;
+                    wall[tempshort].y = day;
+                }
+                else
+                {
+                    break;
+                }
+                cnt--;
+            }
+            while ((tempshort != pointhighlight) && (cnt > 0));
+            break;
+        }
+        cnt--;
+    }
+    while ((tempshort != pointhighlight) && (cnt > 0));
+}
+
 //6856
+function lastwall(point)
+{
+    var i, j, cnt;
+
+    if ((point > 0) && (wall[point-1].point2 == point)) return(point-1);
+    i = point;
+    cnt = MAXWALLS;
+    do
+    {
+        j = wall[i].point2;
+        if (j == point) return(i);
+        i = j;
+        cnt--;
+    } while (cnt > 0);
+    return(point);
+}
+
+//6873
 function addclipline(dax1, day1, dax2, day2, daoval) {
     clipit[clipnum].x1 = dax1;
     clipit[clipnum].y1 = day1;
@@ -4600,7 +4661,7 @@ function addclipline(dax1, day1, dax2, day2, daoval) {
     clipnum++;
 }
 
-//6865
+//6880
 Engine.keepaway = function (x, y, w) {
     console.assert(x instanceof Ref);
     console.assert(y instanceof Ref);
@@ -4625,7 +4686,7 @@ Engine.keepaway = function (x, y, w) {
     }
 };
 
-//6887
+//6904
 Engine.raytrace = function (x3, y3, x4, y4) {
     var x1, y1, x2, y2, bot, topu, nintx, ninty, cnt, z, hitwall;
     var x21, y21, x43, y43;
@@ -5199,6 +5260,23 @@ function updatesector(x, y, lastKnownSector) {
     // (x,y) is contained in NO sector. (x,y) is likely out of the map.
     lastKnownSector.$ = -1;
 }
+
+//7492
+function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
+{
+    console.assert(x2 instanceof Ref, "x2 must be ref");
+    console.assert(y2 instanceof Ref, "y2 must be ref");
+    var dacos, dasin;
+
+    dacos = sintable[(daang+2560)&2047];
+    dasin = sintable[(daang+2048)&2047];
+    x -= xpivot;
+    y -= ypivot;
+    x2.$ = dmulscale14(x,dacos,-y,dasin) + xpivot;
+    y2.$ = dmulscale14(y,dacos,x,dasin) + ypivot;
+}
+
+
 
 //7795
 function krand() {

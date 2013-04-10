@@ -149,6 +149,7 @@ function Sprite() {
     this.lotag = 0;
     this.hitag = 0;
     this.extra = 0;
+    // todo: a load of these are (short) so they might
 }
 
 var sector = structArray(SectorType, MAXSECTORS);

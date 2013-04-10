@@ -92,7 +92,7 @@ var ud = {
 
 var animwall = structArray(AnimWall, MAXANIMWALLS);
 var numanimwalls;
-var /**animateptr[MAXANIMATES], animategoal[MAXANIMATES], animatevel[MAXANIMATES], */animatecnt;
+var animateptr = new Int32Array(MAXANIMATES), animategoal= new Int32Array(MAXANIMATES), animatevel= new Int32Array(MAXANIMATES), animatecnt;
 //// int32_t oanimateval[MAXANIMATES];
 //short animatesect[MAXANIMATES];
 var msx = new Int32Array(2048), msy = new Int32Array(2048);

@@ -69,6 +69,23 @@ function findplayer(s,d) {
     return closest_player;
 }
 
+function getanimationgoal(animptr)
+{
+    var i, j;
+
+    j = -1;
+    for(i=animatecnt-1;i>=0;i--) {
+        throw "todo"
+        //if (animptr == (int32_t *)animateptr[i])
+        //{
+        //    j = i;
+        //    break;
+        //}
+    }
+    return(j);
+}
+
+
 //385
 Sector.animateCamSprite = function () {
     var i;
