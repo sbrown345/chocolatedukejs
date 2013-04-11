@@ -183,7 +183,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
     console.assert(arguments.length == 8);
 
     if (!dest || dest.length === undefined) {
-        console.log(new Error().stack)
+        console.log(new Error().stack);
         throw new Error("dest should have a length e.g. be an array");
     }
 
@@ -193,20 +193,19 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
         return vplce;
 
     numPixels++;
-    while (numPixels)
-    {
+    while (numPixels) {
         temp = vplce >>> mach3_al;
 
         temp = texture[textureOffset + temp];
-      
+
         if (pixelsAllowed-- > 0)
             dest[destOffset] = palookupoffse.getByte(temp);
-	    
+
         vplce += vince;
         destOffset += bytesperline;
         numPixels--;
     }
-    
+
     return vplce;
 }
 
@@ -233,7 +232,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
         vplce += vince;
         destPosition += bytesperline;
     }
-    
+
     texture.position = texturePosition;
     return vplce;
 }
@@ -252,7 +251,7 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
     if (arguments.length != 4) {
         throw new Error("todo: vlineasm4 should have 4 arguments");
     }
-    
+
     frameBuffer.position += frameBufferPosition;
 
     var i;
@@ -290,7 +289,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     var index = frameBufferPosition + ylookup[columnIndex];
     var dest = new PointerHelper(frameplace.array, -ylookup[columnIndex]);
     var destArray = dest.array;
-    for (; i < ((dest.position >>> 0) - bytesperline) < (dest.position >>> 0); dest.position += bytesperline) {
+    for (; i < ((dest.position >>> 0) - bytesperline) < (dest.position >>> 0) ; dest.position += bytesperline) {
         for (i = 0; i < 4; i++) {
             temp = (vplce[i]) >>> mach3_al;
             temp = tiles[globalpicnum].data[bufplce[i] + temp];
@@ -298,7 +297,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
             //if (pixelsAllowed-- > 0) {
             destArray[dest.position + index + i] = palookupoffse[i].getByte(temp);
             //}
-            
+
             //appendCanvasImageToPage((dest.position + index + i) + "=" + palookup[palookupoffse[i]][temp]);
             vplce[i] += vince[i];
         }
@@ -387,13 +386,13 @@ function DrawSpriteVerticalLine(/*int32_t i2, int32_t numPixels, uint32_t i4, ui
     //        dest += bytesperline;
     //    }
 
-} 
+}
 /* END---------------  SPRITE RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/
 
 
 
 //646
-var  tspal;
+var tspal;
 var tsmach_eax1;
 var adder;
 var tsmach_eax3;
@@ -408,6 +407,42 @@ function tsetupspritevline(palette, i2, i3, i4, i5) {
 
 /* ---------------  FLOOR/CEILING RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/
 //739
-function settrans(type){
-	transrev = type;
+function settrans(type) {
+    transrev = type;
+}
+
+//850
+var slopemach_ebx;
+var slopemach_ecx;
+var slopemach_edx;
+var slopemach_ah1;
+var slopemach_ah2;
+var asm2_f;
+function bitwisef2i() {
+    this.i = 0;
+    this.f = 0.0;
+}
+
+function setupslopevlin(i1, i2, i3) {
+    var c = new bitwisef2i();
+    slopemach_ebx = i2;
+    slopemach_ecx = i3;
+    slopemach_edx = (1 << (i1 & 0x1f)) - 1;
+    slopemach_edx <<= ((i1 & 0x1f00) >> 8);
+    slopemach_ah1 = 32 - ((i1 & 0x1f00) >> 8);
+    slopemach_ah2 = (slopemach_ah1 - (i1 & 0x1f)) & 0x1f;
+    c.f = asm2_f = /*(float)*/asm1;
+    asm2 = c.i;
+}
+
+//870
+//extern int32_t reciptable[2048];
+//extern int32_t globalx3, globaly3;
+//extern int32_t fpuasm;
+//#define low32(a) ((a&0xffffffff))
+//#define high32(a) ((int)(((__int64)a&(__int64)0xffffffff00000000)>>32))
+
+//FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
+function slopevlin(i1, i2, i3, i4, i5, i6) {
+    throw "todo";
 }
