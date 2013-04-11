@@ -3619,7 +3619,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    logo();
+                    //logo();
                 })
             .endIf();
 
@@ -3858,30 +3858,29 @@ Game.playBack = function () {
                         ps[myconnectindex].gm = MODE_MENU;
                 })
                 .addElse(function() {
-                    console.warn("todo"); //todo
-                    //CONSOLE_HandleInput();
-                    //if( !CONSOLE_IsActive())
-                    //{
-                    //    menus();
-                    //}
-                    //CONSOLE_Render();
-                    //if( ud.multimode > 1 )
-                    //{
-                    //    ControlInfo noshareinfo;
-                    //    if( !CONSOLE_IsActive() )
-                    //    {
-                    //        CONTROL_GetInput( &noshareinfo );
-                    //        if( ACTION(gamefunc_SendMessage) )
-                    //        {
-                    //            KB_FlushKeyboardQueue();
-                    //            CONTROL_ClearAction( gamefunc_SendMessage );
-                    //            ps[myconnectindex].gm = MODE_TYPE;
-                    //            typebuf[0] = 0;
-                    //            inputloc = 0;
-                    //        }
-                    //    }
-
-                    //}
+                    Console.handleInput();
+                    if( !Console.isActive())
+                    {
+                        menus();
+                    }
+                    Console.render();
+                    if( ud.multimode > 1 )
+                    {
+                       throw "todo"
+                        //ControlInfo noshareinfo;
+                        //if( !CONSOLE_IsActive() )
+                        //{
+                        //    CONTROL_GetInput( &noshareinfo );
+                        //    if( ACTION(gamefunc_SendMessage) )
+                        //    {
+                        //        KB_FlushKeyboardQueue();
+                        //        CONTROL_ClearAction( gamefunc_SendMessage );
+                        //        ps[myconnectindex].gm = MODE_TYPE;
+                        //        typebuf[0] = 0;
+                        //        inputloc = 0;
+                        //    }
+                        //}
+                    }
                 })
                 .endIf()
                 .add(function() {
@@ -3896,6 +3895,7 @@ Game.playBack = function () {
                         if (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
                             rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
 
+                    debugger;
                     getPackets();
                     nextpage();
 

@@ -97,15 +97,16 @@ Console.getArgc = function () {
     return argc;
 };
 
+//611
 Console.getArgv = function ($var) {
     return argv[$var];
 };
 
+//617
 Console.isActive = function (i) {
     return nConsole_Active;
 };
-
+//624
 Console.setActive = function (i) {
     nConsole_Active = (i == 0) ? 0 : 1;
 };
-

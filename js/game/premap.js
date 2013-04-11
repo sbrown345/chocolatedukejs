@@ -57,7 +57,9 @@ function cacheit() {
 
 function docacheit() {
     console.log("todo docacheit");
-    // todo
+    // todo...
+    getPackets();
+    // todo...
 }
 
 //357

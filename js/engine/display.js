@@ -25,7 +25,11 @@ var total_rendered_frames = 0;
 
 function _platform_init(argc, argv, title, iconName) {
 
-    var timeElapsed = Date.now() * 0.001;
+    var i;
+    var timeElapsed;
+    var dummyString = "";
+
+    timeElapsed = Timer.getPlatformTicks();
 
     // todo: Setup_UnstableNetworking, command line args
 
@@ -391,6 +395,13 @@ function getTicks() {
 
 var Timer = { initTime: Date.now(), ticksInOneSecond: 1000 };
 
+//Timer.getPlatformTicks = function () {
+//    return Date.now() - Timer.initTime;
+//}
+
+var fakeTime = 0;
 Timer.getPlatformTicks = function () {
-    return Date.now() - Timer.initTime;
+    fakeTime += 50;
+    console.log("fakeTime: %i", fakeTime);
+    return fakeTime;
 }
