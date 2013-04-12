@@ -257,9 +257,8 @@ function krecipasm(i) { // Ken did this
     var f = new Float32Array(ab);
     f[0] = i;
     i = new Int32Array(ab)[0];
-    return ((recipTable[(i[0] >> 12) & 2047] >> (((i - 0x3f800000) >> 23) & 31)) ^ (i >> 31));
+    return ((recipTable[(i >> 12) & 2047] >> (((i - 0x3f800000) >> 23) & 31)) ^ (i >> 31));
 }
-
 
 //329
 

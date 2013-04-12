@@ -3895,7 +3895,6 @@ Game.playBack = function () {
                         if (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
                             rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
 
-                    debugger;
                     getPackets();
                     nextpage();
 
