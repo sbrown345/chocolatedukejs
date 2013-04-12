@@ -126,7 +126,8 @@ window.__defineGetter__("duke_sync", function () {
 function SAMPLE() {
     this.ptr = null;
     this.lock = 0;
-    this.length = 0, this.num = 0;
+    this.length = 0;
+    this.num = 0;
 }
 
 function AnimWall() {

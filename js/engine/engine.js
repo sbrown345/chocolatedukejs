@@ -252,11 +252,12 @@ function nsqrtasm(param) {
     return param;
 }
 
+krecipasm.ab = new ArrayBuffer(4);
+krecipasm.f = new Float32Array(krecipasm.ab);
+krecipasm.i = new Int32Array(krecipasm.ab);
 function krecipasm(i) { // Ken did this
-    var ab = new ArrayBuffer(4);
-    var f = new Float32Array(ab);
-    f[0] = i;
-    i = new Int32Array(ab)[0];
+    krecipasm.f[0] = i;
+    i = krecipasm.i[0];
     return ((recipTable[(i >> 12) & 2047] >> (((i - 0x3f800000) >> 23) & 31)) ^ (i >> 31));
 }
 
@@ -1464,6 +1465,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
 //1729
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
+    console.log("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, ", dax1, dax2, sectnum, dastat);
     var i, j, l, x, y, dx, dy, wx, wy, y1, y2, daz;
     var daslope, dasqr;
     var shoffs, shinc, m1, m2, mptr1, mptr2, nptr1, nptr2;
@@ -1633,6 +1635,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
+        console.log2(printfFormatter("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2));
         if (y1 <= y2) {
             nptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
             nptr2 = new PointerHelper(slopalookup, y2+(shoffs>>15));//(int32_t *)&slopalookup[y2+(shoffs>>15)];

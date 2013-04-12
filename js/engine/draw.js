@@ -483,7 +483,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     //    ecx = (eax>>24);	//  exponent
     //    eax = ((eax&0xffe000)>>11);
     //    ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
-    //    eax = reciptable[eax/4];
+    //    eax = reciptable[(eax/4)|0];
     //    eax >>= (ecx&0x1f);
     //    eax ^= edx;
     //    // -------------
