@@ -118,8 +118,8 @@ function doanimations() {
         //    continue;
         //}
 
-        //if (v > 0) { a = min(a+v,animategoal[i]); }
-        //else { a = max(a+v,animategoal[i]); }
+        //if (v > 0) { a = Math.min(a+v,animategoal[i]); }
+        //else { a = Math.max(a+v,animategoal[i]); }
 
         //if( animateptr[i] == sector[animatesect[i]].floorz)
         //{

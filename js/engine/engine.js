@@ -4378,9 +4378,9 @@ function drawsprite (snum) {
 
             dalx2 = pvWalls[j].screenSpaceCoo[0][VEC_COL];
             darx2 = pvWalls[j].screenSpaceCoo[1][VEC_COL];
-            if (max(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > min(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+            if (max(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.min(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
             {
-                if (min(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > max(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+                if (min(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.max(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
                 {
                     x = 0x80000000;
                 }
@@ -4741,8 +4741,8 @@ function drawsprite (snum) {
         rx = ((rmax+65535)>>16);
         for(x=lx; x<=rx; x++)
         {
-            uwall[x] = max(uwall[x],startumost[x+windowx1]-windowy1);
-            dwall[x] = min(dwall[x],startdmost[x+windowx1]-windowy1);
+            uwall[x] = Math.max(uwall[x],startumost[x+windowx1]-windowy1);
+            dwall[x] = Math.min(dwall[x],startdmost[x+windowx1]-windowy1);
         }
 
         /* Additional uwall/dwall clipping goes here */
@@ -4763,8 +4763,8 @@ function drawsprite (snum) {
             if ((yp > pvWalls[j].screenSpaceCoo[0][VEC_DIST]) && (yp > pvWalls[j].screenSpaceCoo[1][VEC_DIST])) x = -1;
             if ((x >= 0) && ((x != 0) || (wall[pvWalls[j].worldWallId].nextsector != tspr.sectnum))) continue;
 
-            dalx2 = max(pvWalls[j].screenSpaceCoo[0][VEC_COL],lx);
-            darx2 = min(pvWalls[j].screenSpaceCoo[1][VEC_COL],rx);
+            dalx2 = Math.max(pvWalls[j].screenSpaceCoo[0][VEC_COL],lx);
+            darx2 = Math.min(pvWalls[j].screenSpaceCoo[1][VEC_COL],rx);
 
             switch(smostwalltype[i])
             {
@@ -6678,7 +6678,7 @@ function setviewback() {
     //if (setviewcnt == 0)
     //    k = bakxsiz[0];
     //else
-    //    k = max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
+    //    k = Math.max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
     //j = 0;
     //for(i=0; i<=k; i++) ylookup[i] = j, j += bytesperline;
     //setBytesPerLine(bytesperline);
