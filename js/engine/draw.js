@@ -417,10 +417,26 @@ var slopemach_ecx;
 var slopemach_edx;
 var slopemach_ah1;
 var slopemach_ah2;
-var asm2_f;
+var asm2_f = new Float32Array(1);
 function bitwisef2i() {
-    this.i = 0;
-    this.f = 0.0;
+    var uintArray = new Uint32Array(1);
+    var floatArray = new Float32Array(uintArray.buffer);
+    
+    this.__defineGetter__("i", function () {
+        return uintArray[0];
+    });
+
+    this.__defineSetter__("i", function (val) {
+        uintArray[0] = val;
+    });
+    
+    this.__defineGetter__("f", function () {
+        return floatArray[0];
+    });
+
+    this.__defineSetter__("f", function (val) {
+        floatArray[0] = val;
+    });
 }
 
 function setupslopevlin(i1, i2, i3) {
@@ -431,7 +447,7 @@ function setupslopevlin(i1, i2, i3) {
     slopemach_edx <<= ((i1 & 0x1f00) >> 8);
     slopemach_ah1 = 32 - ((i1 & 0x1f00) >> 8);
     slopemach_ah2 = (slopemach_ah1 - (i1 & 0x1f)) & 0x1f;
-    c.f = asm2_f = /*(float)*/asm1;
+    c.f = asm2_f[0] = /*(float)*/asm1;
     asm2 = c.i;
 }
 
@@ -448,7 +464,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     var c;
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
-    //float a = (float)(int32_t) asm3 + asm2_f; // look @ krecipasm for float stuff
+    //float a = (float)(int32_t) asm3 + asm2_f[0]; // look @ krecipasm for float stuff
     //i1 -= slopemach_ecx;
     //esi = i5 + low32((__int64)globalx3 * (__int64)(i2<<3));
     //edi = i6 + low32((__int64)globaly3 * (__int64)(i2<<3));
@@ -476,7 +492,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     //    eax -= edx;
     //    ecx = low32((__int64)globalx3 * (__int64)eax);
     //    eax = low32((__int64)globaly3 * (__int64)eax);
-    //    a += asm2_f;
+    //    a += asm2_f[0];
 
     //    asm4 = ebx;
     //    ecx = ((ecx&0xffffff00)|(ebx&0xff));
@@ -492,7 +508,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     //        ebx &= slopemach_edx;
     //        edi += eax;
     //        i1 += slopemach_ecx;
-    //        edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx])));
+    //        edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
     //        ebx = *((uint32_t*)i3); // register trickery
     //        i3 -= 4;
     //        eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
