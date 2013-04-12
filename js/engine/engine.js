@@ -479,6 +479,8 @@ function scansector(sectnum) {
 
     } while (numSectorsToVisit > 0);
     // do this until the stack of sectors to visit if empty.
+    
+    console.log("pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
 }
 
 
@@ -1635,7 +1637,8 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
-        console.log2(printfFormatter("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2));
+        console.log2(printfFormatter("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2)); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+
         if (y1 <= y2) {
             nptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
             nptr2 = new PointerHelper(slopalookup, y2+(shoffs>>15));//(int32_t *)&slopalookup[y2+(shoffs>>15)];
@@ -3752,7 +3755,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     break;
             }
 
-            p = ylookup[y1] + x + frameplace.position;
+            p = new PointerHelper(frameplace.array, ylookup[y1] + x);
 
             if ((dastat & 1) == 0) {
                 if (dastat & 64)

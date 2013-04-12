@@ -1453,7 +1453,7 @@ function furthestangle(i, angs) {
 }
 
 //3154
-
+var warnexe = false;
 function execute( i, p, x) {
     var  done;
 
@@ -1480,7 +1480,7 @@ function execute( i, p, x) {
 
     if(g_t[4]) {
         g_sp.lotag += TICSPERFRAME;
-        console.log("script[g_t[4]+4]: %i", script[g_t[4] + 4]);
+        //console.log("script[g_t[4]+4]: %i", script[g_t[4] + 4]);
         if(g_sp.lotag > script[g_t[4] + 4]/**(int32_t *)(g_t[4]+16) */)
         {
             g_t[2]++;
@@ -1492,7 +1492,9 @@ function execute( i, p, x) {
             g_t[3] = 0;
     }
 
-    console.warn("todo finish execute!!!!!!!!!!!");
+    if (!warnexe)
+        console.warn("todo finish execute!!!!!!!!!!!");
+    warnexe = true;
     return;
     do
         done = parse();

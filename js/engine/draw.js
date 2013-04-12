@@ -341,50 +341,49 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
  FCS: Draw a sprite vertical line of pixels.
  */
 //665
-function DrawSpriteVerticalLine(/*int32_t i2, int32_t numPixels, uint32_t i4, uint8_t  * texture, uint8_t  * dest*/) {
+function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, dest) {
     // todo
-    console.log("todo DrawSpriteVerticalLine");
-    //uint8_t colorIndex;
+    var colorIndex;
+    texture = texture.array;
 
-    //while (numPixels)
-    //{
-    //    numPixels--;
+    //todo: for loop
+    while (numPixels) {
+        numPixels--;
 
-    //    if (numPixels != 0)
-    //    {
+        if (numPixels != 0) {
 
-    //        i4 += tsmach_ecx;
+            i4 += tsmach_ecx;
 
-    //        if (i4 < (i4 - tsmach_ecx)) 
-    //            adder = tsmach_eax3;
+            if (i4 < (i4 - tsmach_ecx))
+                adder = tsmach_eax3;
 
-    //        colorIndex = *texture;
+            colorIndex = texture[textureOffset];
 
-    //        i2 += tsmach_eax1;
-    //        if (i2 < (i2 - tsmach_eax1)) 
-    //            texture++;
+            i2 = (i2 + tsmach_eax1) | 0;
+            if ((i2 >>> 0) < (i2 - tsmach_eax1) >>> 0)
+                textureOffset++;
 
-    //        texture += adder;
+            textureOffset += adder;
 
-    //        //255 is the index of the transparent color: Do not draw it.
-    //        if (colorIndex != 255)
-    //        {
-    //            uint16_t val;
-    //            val = tspal[colorIndex];
-    //            val |= (*dest)<<8;
+            //255 is the index of the transparent color: Do not draw it.
+            if (colorIndex != 255) {
+                var val;
+                val = tspal.array[colorIndex];
+                val |= dest.getByte() << 8;
 
-    //            if (transrev) 
-    //                val = ((val>>8)|(val<<8));
+                if (transrev)
+                    val = ((val >> 8) | (val << 8));
 
-    //            colorIndex = transluc[val];
+                colorIndex = transluc[val];
 
-    //            if (pixelsAllowed-- > 0)
-    //                *dest = colorIndex;
-    //        }
+                if (pixelsAllowed-- > 0)
+                    dest.setByte(colorIndex);
+            }
 
-    //        //Move down one pixel on the framebuffer
-    //        dest += bytesperline;
-    //    }
+            //Move down one pixel on the framebuffer
+            dest.position += bytesperline;
+        }
+    }
 
 }
 /* END---------------  SPRITE RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/

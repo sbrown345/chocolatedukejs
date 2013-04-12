@@ -1742,7 +1742,7 @@ function spawn(j, pn) {
             //    {
             //        sp.xrepeat = 48;
             //        sp.yrepeat = 64;
-            //        if(sprite[j].statnum == 10 || badguy(&sprite[j]) )
+            //        if(sprite[j].statnum == 10 || badguy(sprite[j]) )
             //            sp.z -= (32<<8);
             //    }
             //}
@@ -3245,9 +3245,727 @@ function spawn(j, pn) {
 }
 
 //5413
-function animatesprites(/*int32_t x,int32_t y,short a,int32_t smoothratio*/) {
-    //todo animatesprites
-    console.log("todo: animatesprites");
+
+function animatesprites( x, y, a, smoothratio) {
+
+	var i, j, k, p, sect;
+    var l, t1,t3,t4;
+    var s,t;
+    for(j=0;j < spritesortcnt; j++)
+    {
+        debugger;
+        t = tsprite[j];
+        i = t.owner;
+        s = sprite[t.owner];
+
+        switch(t.picnum)
+        {
+            case BLOODPOOL:
+            case PUKE:
+            case FOOTPRINTS:
+            case FOOTPRINTS2:
+            case FOOTPRINTS3:
+            case FOOTPRINTS4:
+                if(t.shade == 127) continue;
+                break;
+            case RESPAWNMARKERRED:
+            case RESPAWNMARKERYELLOW:
+            case RESPAWNMARKERGREEN:
+                if(ud.marker == 0)
+                    t.xrepeat = t.yrepeat = 0;
+                continue;
+            case CHAIR3:
+
+                k = (((t.ang+3072+128-a)&2047)>>8)&7;
+                if(k>4)
+                {
+                    k = 8-k;
+                    t.cstat |= 4;
+                }
+                else t.cstat &= ~4;
+                t.picnum = s.picnum+k;
+                break;
+            case BLOODSPLAT1:
+            case BLOODSPLAT2:
+            case BLOODSPLAT3:
+            case BLOODSPLAT4:
+                if(ud.lockout) t.xrepeat = t.yrepeat = 0;
+                else if(t.pal == 6)
+                {
+                    t.shade = -127;
+                    continue;
+                }
+            case BULLETHOLE:
+            case CRACK1:
+            case CRACK2:
+            case CRACK3:
+            case CRACK4:
+                t.shade = 16;
+                continue;
+            case NEON1:
+            case NEON2:
+            case NEON3:
+            case NEON4:
+            case NEON5:
+            case NEON6:
+                continue;
+            case GREENSLIME:
+            case GREENSLIME+1:
+            case GREENSLIME+2:
+            case GREENSLIME+3:
+            case GREENSLIME+4:
+            case GREENSLIME+5:
+            case GREENSLIME+6:
+            case GREENSLIME+7:
+                break;
+            default:
+                if( ( (t.cstat&16) ) || ( badguy(t) && t.extra > 0) || t.statnum == 10)
+                    continue;
+        }
+
+        if (sector[t.sectnum].ceilingstat&1)
+            l = sector[t.sectnum].ceilingshade;
+        else
+            l = sector[t.sectnum].floorshade;
+
+        if(l < -127) l = -127;
+        if(l > 128) l =  127;
+        t.shade = l;
+    }
+
+
+    for(j=0;j < spritesortcnt; j++ )  //Between drawrooms() and drawmasks()
+    {                             //is the perfect time to animate sprites
+        t = tsprite[j];
+        i = t.owner;
+        s = sprite[i];
+
+        switch(s.picnum)
+        {
+            case SECTOREFFECTOR:
+                if(t.lotag == 27 && ud.recstat == 1)
+                {
+                    t.picnum = 11+((totalclock>>3)&1);
+                    t.cstat |= 128;
+                }
+                else
+                    t.xrepeat = t.yrepeat = 0;
+                break;
+            case NATURALLIGHTNING:
+                t.shade = -127;
+                break;
+            case FEM1:
+            case FEM2:
+            case FEM3:
+            case FEM4:
+            case FEM5:
+            case FEM6:
+            case FEM7:
+            case FEM8:
+            case FEM9:
+            case FEM10:
+            case MAN:
+            case MAN2:
+            case WOMAN:
+            case NAKED1:
+            case PODFEM1:
+            case FEMMAG1:
+            case FEMMAG2:
+            case FEMPIC1:
+            case FEMPIC2:
+            case FEMPIC3:
+            case FEMPIC4:
+            case FEMPIC5:
+            case FEMPIC6:
+            case FEMPIC7:
+            case BLOODYPOLE:
+            case FEM6PAD:
+            case STATUE:
+            case STATUEFLASH:
+            case OOZ:
+            case OOZ2:
+            case WALLBLOOD1:
+            case WALLBLOOD2:
+            case WALLBLOOD3:
+            case WALLBLOOD4:
+            case WALLBLOOD5:
+            case WALLBLOOD7:
+            case WALLBLOOD8:
+            case SUSHIPLATE1:
+            case SUSHIPLATE2:
+            case SUSHIPLATE3:
+            case SUSHIPLATE4:
+            case FETUS:
+            case FETUSJIB:
+            case FETUSBROKE:
+            case HOTMEAT:
+            case FOODOBJECT16:
+            case DOLPHIN1:
+            case DOLPHIN2:
+            case TOUGHGAL:
+            case TAMPON:
+            case XXXSTACY:
+            case 4946:
+            case 4947:
+            case 693:
+            case 2254:
+            case 4560:
+            case 4561:
+            case 4562:
+            case 4498:
+            case 4957:
+                if(ud.lockout)
+                {
+                    t.xrepeat = t.yrepeat = 0;
+                    continue;
+                }
+        }
+
+        if( t.statnum == 99 ) continue;
+        if( s.statnum != 1 && s.picnum == APLAYER && ps[s.yvel].newowner == -1 && s.owner >= 0 )
+        {
+            t.x -= mulscale16(65536-smoothratio,ps[s.yvel].posx-ps[s.yvel].oposx);
+            t.y -= mulscale16(65536-smoothratio,ps[s.yvel].posy-ps[s.yvel].oposy);
+            t.z = ps[s.yvel].oposz + mulscale16(smoothratio,ps[s.yvel].posz-ps[s.yvel].oposz);
+            t.z += (40<<8);
+        }
+        else if( ( s.statnum == 0 && s.picnum != CRANEPOLE) || s.statnum == 10 || s.statnum == 6 || s.statnum == 4 || s.statnum == 5 || s.statnum == 1 )
+        {
+            t.x -= mulscale16(65536-smoothratio,s.x-hittype[i].bposx);
+            t.y -= mulscale16(65536-smoothratio,s.y-hittype[i].bposy);
+            t.z -= mulscale16(65536-smoothratio,s.z-hittype[i].bposz);
+        }
+
+        sect = s.sectnum;
+        t1 = hittype[i].temp_data[1];t3 = hittype[i].temp_data[3];t4 = hittype[i].temp_data[4];
+
+        switch(s.picnum)
+        {
+            case DUKELYINGDEAD:
+                t.z += (24<<8);
+                break;
+            case BLOODPOOL:
+            case FOOTPRINTS:
+            case FOOTPRINTS2:
+            case FOOTPRINTS3:
+            case FOOTPRINTS4:
+                if(t.pal == 6)
+                    t.shade = -127;
+            case PUKE:
+            case MONEY:
+            case MONEY+1:
+            case MAIL:
+            case MAIL+1:
+            case PAPER:
+            case PAPER+1:
+                if(ud.lockout && s.pal == 2)
+                {
+                    t.xrepeat = t.yrepeat = 0;
+                    continue;
+                }
+                break;
+            case TRIPBOMB:
+                continue;
+            case FORCESPHERE:
+                if(t.statnum == 5)
+                {
+                    var sqa,sqb;
+
+                    sqa =
+					    getangle(
+					    sprite[s.owner].x-ps[screenpeek].posx,
+					    sprite[s.owner].y-ps[screenpeek].posy);
+                    sqb =
+					    getangle(
+					    sprite[s.owner].x-t.x,
+					    sprite[s.owner].y-t.y);
+
+                    if( klabs(getincangle(sqa,sqb)) > 512 )
+                        if( ldist(sprite[s.owner],t) < ldist(sprite[ps[screenpeek].i],sprite[s.owner]) )
+                            t.xrepeat = t.yrepeat = 0;
+                }
+                continue;
+            case BURNING:
+            case BURNING2:
+                if( sprite[s.owner].statnum == 10 )
+                {
+                    if( display_mirror == 0 && sprite[s.owner].yvel == screenpeek && ps[sprite[s.owner].yvel].over_shoulder_on == 0 )
+                        t.xrepeat = 0;
+                    else
+                    {
+                        t.ang = getangle(x-t.x,y-t.y);
+                        t.x = sprite[s.owner].x;
+                        t.y = sprite[s.owner].y;
+                        t.x += sintable[(t.ang+512)&2047]>>10;
+                        t.y += sintable[t.ang&2047]>>10;
+                    }
+                }
+                break;
+
+            case ATOMICHEALTH:
+                t.z -= (4<<8);
+                break;
+            case CRYSTALAMMO:
+                t.shade = (sintable[(totalclock<<4)&2047]>>10);
+                continue;
+            case VIEWSCREEN:
+            case VIEWSCREEN2:
+                if(camsprite >= 0 && hittype[sprite[i].owner].temp_data[0] == 1)
+                {
+                    t.picnum = STATIC;
+                    t.cstat |= (rand()&12);
+                    t.xrepeat += 8;
+                    t.yrepeat += 8;
+                }
+                break;
+
+            case SHRINKSPARK:
+                t.picnum = SHRINKSPARK+( (totalclock>>4)&3 );
+                break;
+            case GROWSPARK:
+                t.picnum = GROWSPARK+( (totalclock>>4)&3 );
+                break;
+            case RPG:
+                k = getangle(s.x-x,s.y-y);
+                k = (((s.ang+3072+128-k)&2047)/170) | 0;
+                if(k > 6)
+                {
+                    k = 12-k;
+                    t.cstat |= 4;
+                }
+                else t.cstat &= ~4;
+                t.picnum = RPG+k;
+                break;
+
+            case RECON:
+
+                k = getangle(s.x-x,s.y-y);
+                if( hittype[i].temp_data[0] < 4 )
+                    k = (((s.ang+3072+128-k)&2047)/170)| 0;
+                else k = (((s.ang+3072+128-k)&2047)/170)| 0;
+
+                if(k>6)
+                {
+                    k = 12-k;
+                    t.cstat |= 4;
+                }
+                else t.cstat &= ~4;
+
+                if( klabs(t3) > 64 ) k += 7;
+                t.picnum = RECON+k;
+
+                break;
+
+            case APLAYER:
+
+                p = s.yvel;
+
+                if(t.pal == 1) t.z -= (18<<8);
+
+                if(ps[p].over_shoulder_on > 0 && ps[p].newowner < 0 )
+                {
+                    t.cstat |= 2;
+                    if ( screenpeek == myconnectindex && numplayers >= 2 )
+                    {
+                        t.x = omyx+mulscale16((int32_t)(myx-omyx),smoothratio);
+                        t.y = omyy+mulscale16((int32_t)(myy-omyy),smoothratio);
+                        t.z = omyz+mulscale16((int32_t)(myz-omyz),smoothratio)+(40<<8);
+                        t.ang = omyang+mulscale16((int32_t)(((myang+1024-omyang)&2047)-1024),smoothratio);
+                        t.sectnum = mycursectnum;
+                    }
+                }
+
+                if( ( display_mirror == 1 || screenpeek != p || s.owner == -1 ) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0 )
+                {
+                    throw "memcpy((spritetype *)tsprite[spritesortcnt],(spritetype *)t,sizeof(spritetype));" //copyTo method?
+
+                    tsprite[spritesortcnt].statnum = 99;
+
+                    tsprite[spritesortcnt].yrepeat = ( t.yrepeat>>3 );
+                    if(t.yrepeat < 4) t.yrepeat = 4;
+
+                    tsprite[spritesortcnt].shade = t.shade;
+                    tsprite[spritesortcnt].cstat = 0;
+
+                    switch(ps[p].curr_weapon)
+                    {
+                        case PISTOL_WEAPON:      tsprite[spritesortcnt].picnum = FIRSTGUNSPRITE;       break;
+                        case SHOTGUN_WEAPON:     tsprite[spritesortcnt].picnum = SHOTGUNSPRITE;        break;
+                        case CHAINGUN_WEAPON:    tsprite[spritesortcnt].picnum = CHAINGUNSPRITE;       break;
+                        case RPG_WEAPON:         tsprite[spritesortcnt].picnum = RPGSPRITE;            break;
+                        case HANDREMOTE_WEAPON:
+                        case HANDBOMB_WEAPON:    tsprite[spritesortcnt].picnum = HEAVYHBOMB;           break;
+                        case TRIPBOMB_WEAPON:    tsprite[spritesortcnt].picnum = TRIPBOMBSPRITE;       break;
+                        case GROW_WEAPON:        tsprite[spritesortcnt].picnum = GROWSPRITEICON;       break;
+                        case SHRINKER_WEAPON:    tsprite[spritesortcnt].picnum = SHRINKERSPRITE;       break;
+                        case FREEZE_WEAPON:      tsprite[spritesortcnt].picnum = FREEZESPRITE;         break;
+                        case DEVISTATOR_WEAPON:  tsprite[spritesortcnt].picnum = DEVISTATORSPRITE;     break;
+                    }
+
+                    if(s.owner >= 0)
+                        tsprite[spritesortcnt].z = ps[p].posz-(12<<8);
+                    else tsprite[spritesortcnt].z = s.z-(51<<8);
+                    if(ps[p].curr_weapon == HANDBOMB_WEAPON)
+                    {
+                        tsprite[spritesortcnt].xrepeat = 10;
+                        tsprite[spritesortcnt].yrepeat = 10;
+                    }
+                    else
+                    {
+                        tsprite[spritesortcnt].xrepeat = 16;
+                        tsprite[spritesortcnt].yrepeat = 16;
+                    }
+                    tsprite[spritesortcnt].pal = 0;
+                    spritesortcnt++;
+                }
+
+                if(s.owner == -1)
+                {
+                    k = (((s.ang+3072+128-a)&2047)>>8)&7;
+                    if(k>4)
+                    {
+                        k = 8-k;
+                        t.cstat |= 4;
+                    }
+                    else t.cstat &= ~4;
+
+                    if(sector[t.sectnum].lotag == 2) k += 1795-1405;
+                    else if( (hittype[i].floorz-s.z) > (64<<8) ) k += 60;
+
+                    t.picnum += k;
+                    t.pal = ps[p].palookup;
+
+                    throw "goto PALONLY;";
+                }
+
+                if( ps[p].on_crane == -1 && (sector[s.sectnum].lotag&0x7ff) != 1 )
+                {
+                    l = s.z-hittype[ps[p].i].floorz+(3<<8);
+                    if( l > 1024 && s.yrepeat > 32 && s.extra > 0 )
+                        s.yoffset = toInt8(l/(s.yrepeat<<2));
+                    else s.yoffset=0;
+                }
+                throw "todo"
+                //if(ps[p].newowner > -1)
+                //{
+                //    t4 = *(actorscrptr[APLAYER]+1);
+                //    t3 = 0;
+                //    t1 = *(actorscrptr[APLAYER]+2);
+                //}
+
+                if(ud.camerasprite == -1 && ps[p].newowner == -1)
+                    if(s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0 )
+                        if( ud.multimode < 2 || ( ud.multimode > 1 && p == screenpeek ) )
+                        {
+                            t.owner = -1;
+                            t.xrepeat = t.yrepeat = 0;
+                            continue;
+                        }
+
+                //PALONLY:
+
+                    if( sector[sect].floorpal )
+                        t.pal = sector[sect].floorpal;
+
+                if(s.owner == -1) continue;
+
+                if( t.z > hittype[i].floorz && t.xrepeat < 32 )
+                    t.z = hittype[i].floorz;
+
+                break;
+
+            case JIBS1:
+            case JIBS2:
+            case JIBS3:
+            case JIBS4:
+            case JIBS5:
+            case JIBS6:
+            case HEADJIB1:
+            case LEGJIB1:
+            case ARMJIB1:
+            case LIZMANHEAD1:
+            case LIZMANARM1:
+            case LIZMANLEG1:
+            case DUKELEG:
+            case DUKEGUN:
+            case DUKETORSO:
+                if(ud.lockout)
+                {
+                    t.xrepeat = t.yrepeat = 0;
+                    continue;
+                }
+                if(t.pal == 6) t.shade = -120;
+
+            case SCRAP1:
+            case SCRAP2:
+            case SCRAP3:
+            case SCRAP4:
+            case SCRAP5:
+            case SCRAP6:
+            case SCRAP6+1:
+            case SCRAP6+2:
+            case SCRAP6+3:
+            case SCRAP6+4:
+            case SCRAP6+5:
+            case SCRAP6+6:
+            case SCRAP6+7:
+
+                if(hittype[i].picnum == BLIMP && t.picnum == SCRAP1 && s.yvel >= 0)
+                    t.picnum = s.yvel;
+                else t.picnum += hittype[i].temp_data[0];
+                t.shade -= 6;
+
+                if( sector[sect].floorpal )
+                    t.pal = sector[sect].floorpal;
+                break;
+
+            case WATERBUBBLE:
+                if(sector[t.sectnum].floorpicnum == FLOORSLIME)
+                {
+                    t.pal = 7;
+                    break;
+                }
+            default:
+
+                if( sector[sect].floorpal )
+                    t.pal = sector[sect].floorpal;
+                break;
+        }
+
+        if( actorscrptr[s.picnum] )
+        {
+            if(t4>10000)
+                // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
+                // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
+                // close to blimp bug (search for BLIMP)
+                // . t4 aka macro hittype[i].temp_data[4] is incremented at DETONATEB: in actor.c
+                // for a time counter. Instead we want an address.
+                // Issue happens in confessn.map (do a dnclip + dnkroz + dncoords,
+                // start with duke3d_w32 /m /q2 -map confessn.map)
+                // go through the Guilty logo till x = -2932, y = 42174, z = 18416.
+                // blow up the bomb. Wait in the water. Look at the respawn sign
+                // at the bottom of the chain. Crashes when it's about to respawn.
+                // Lame fix. ok for w32. Doesn't work for other plateform.
+                // How to make a differene between a timer and an address??
+            {
+                throw "todo"
+                //l = *(int32_t *)(t4+8);
+
+                switch( l )
+                {
+                    case 2:
+                        k = (((s.ang+3072+128-a)&2047)>>8)&1;
+                        break;
+
+                    case 3:
+                    case 4:
+                        k = (((s.ang+3072+128-a)&2047)>>7)&7;
+                        if(k > 3)
+                        {
+                            t.cstat |= 4;
+                            k = 7-k;
+                        }
+                        else t.cstat &= ~4;
+                        break;
+
+                    case 5:
+                        k = getangle(s.x-x,s.y-y);
+                        k = (((s.ang+3072+128-k)&2047)>>8)&7;
+                        if(k>4)
+                        {
+                            k = 8-k;
+                            t.cstat |= 4;
+                        }
+                        else t.cstat &= ~4;
+                        break;
+                    case 7:
+                        k = getangle(s.x-x,s.y-y);
+                        k = (((s.ang+3072+128-k)&2047)/170)|0;
+                        if(k>6)
+                        {
+                            k = 12-k;
+                            t.cstat |= 4;
+                        }
+                        else t.cstat &= ~4;
+                        break;
+                    case 8:
+                        k = (((s.ang+3072+128-a)&2047)>>8)&7;
+                        t.cstat &= ~4;
+                        break;
+                    default:
+                        k = 0;
+                        break;
+                }
+
+                throw "todo"
+                //t.picnum += k + ( *(int32_t *)t4 ) + l * t3;
+
+                if(l > 0)
+                    while(tiles[t.picnum].dim.width == 0 && t.picnum > 0 )
+                        t.picnum -= l;       //Hack, for actors
+
+                if( hittype[i].dispicnum >= 0)
+                    hittype[i].dispicnum = t.picnum;
+            }
+            else if(display_mirror == 1)
+                t.cstat |= 4;
+        }
+
+        if( s.statnum == 13 || badguy(s) || (s.picnum == APLAYER && s.owner >= 0) )
+            if(t.statnum != 99 && s.picnum != EXPLOSION2 && s.picnum != HANGLIGHT && s.picnum != DOMELITE)
+                if(s.picnum != HOTMEAT)
+                {
+                    if( hittype[i].dispicnum < 0 )
+                    {
+                        hittype[i].dispicnum++;
+                        continue;
+                    }
+                    else if( ud.shadows && spritesortcnt < (MAXSPRITESONSCREEN-2))
+                    {
+                        var daz,xrep,yrep;
+
+                        if( (sector[sect].lotag&0xff) > 2 || s.statnum == 4 || s.statnum == 5 || s.picnum == DRONE || s.picnum == COMMANDER )
+                            daz = sector[sect].floorz;
+                        else
+                            daz = hittype[i].floorz;
+
+                        if( (s.z-daz) < (8<<8) )
+                            if( ps[screenpeek].posz < daz )
+                            {
+                                throw "memcpy((spritetype *)tsprite[spritesortcnt],(spritetype *)t,sizeof(spritetype));" //copyTo method????
+
+                                tsprite[spritesortcnt].statnum = 99;
+
+                                tsprite[spritesortcnt].yrepeat = ( t.yrepeat>>3 );
+                                if(t.yrepeat < 4) t.yrepeat = 4;
+
+                                tsprite[spritesortcnt].shade = 127;
+                                tsprite[spritesortcnt].cstat |= 2;
+
+                                tsprite[spritesortcnt].z = daz;
+                                xrep = tsprite[spritesortcnt].xrepeat;// - (klabs(daz-t.z)>>11);
+                                tsprite[spritesortcnt].xrepeat = xrep;
+                                tsprite[spritesortcnt].pal = 4;
+
+                                yrep = tsprite[spritesortcnt].yrepeat;// - (klabs(daz-t.z)>>11);
+                                tsprite[spritesortcnt].yrepeat = yrep;
+                                spritesortcnt++;
+                            }
+                    }
+
+                    if( ps[screenpeek].heat_amount > 0 && ps[screenpeek].heat_on )
+                    {
+                        t.pal = 6;
+                        t.shade = 0;
+                    }
+                }
+
+
+        switch(s.picnum)
+        {
+            case LASERLINE:
+                if(sector[t.sectnum].lotag == 2) t.pal = 8;
+                t.z = sprite[s.owner].z-(3<<8);
+                if(lasermode == 2 && ps[screenpeek].heat_on == 0 )
+                    t.yrepeat = 0;
+            case EXPLOSION2:
+            case EXPLOSION2BOT:
+            case FREEZEBLAST:
+            case ATOMICHEALTH:
+            case FIRELASER:
+            case SHRINKSPARK:
+            case GROWSPARK:
+            case CHAINGUN:
+            case SHRINKEREXPLOSION:
+            case RPG:
+            case FLOORFLAME:
+                if(t.picnum == EXPLOSION2)
+                {
+                    ps[screenpeek].visibility = -127;
+                    lastvisinc = totalclock+32;
+                    restorepalette = 1;
+                }
+                t.shade = -127;
+                break;
+            case FIRE:
+            case FIRE2:
+            case BURNING:
+            case BURNING2:
+                if( sprite[s.owner].picnum != TREE1 && sprite[s.owner].picnum != TREE2 )
+                    t.z = sector[t.sectnum].floorz;
+                t.shade = -127;
+                break;
+            case COOLEXPLOSION1:
+                t.shade = -127;
+                t.picnum += (s.shade>>1);
+                break;
+            case PLAYERONWATER:
+
+                k = (((t.ang+3072+128-a)&2047)>>8)&7;
+                if(k>4)
+                {
+                    k = 8-k;
+                    t.cstat |= 4;
+                }
+                else t.cstat &= ~4;
+
+                t.picnum = s.picnum+k+((hittype[i].temp_data[0]<4)*5);
+                t.shade = sprite[s.owner].shade;
+
+                break;
+
+            case WATERSPLASH2:
+                t.picnum = WATERSPLASH2+t1;
+                break;
+            case REACTOR2:
+                t.picnum = s.picnum + hittype[i].temp_data[2];
+                break;
+            case SHELL:
+                t.picnum = s.picnum+(hittype[i].temp_data[0]&1);
+            case SHOTGUNSHELL:
+                t.cstat |= 12;
+                if(hittype[i].temp_data[0] > 1) t.cstat &= ~4;
+                if(hittype[i].temp_data[0] > 2) t.cstat &= ~12;
+                break;
+            case FRAMEEFFECT1:
+            case FRAMEEFFECT1_13CON:
+                if(s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS)
+                {
+                    if(sprite[s.owner].picnum == APLAYER)
+                        if(ud.camerasprite == -1)
+                            if(screenpeek == sprite[s.owner].yvel && display_mirror == 0)
+                            {
+                                t.owner = -1;
+                                break;
+                            }
+                    if( (sprite[s.owner].cstat&32768) == 0 )
+                    {
+                        t.picnum = hittype[s.owner].dispicnum;
+                        t.pal = sprite[s.owner].pal;
+                        t.shade = sprite[s.owner].shade;
+                        t.ang = sprite[s.owner].ang;
+                        t.cstat = 2|sprite[s.owner].cstat;
+                    }
+                }
+                break;
+
+            case CAMERA1:
+            case RAT:
+                k = (((t.ang+3072+128-a)&2047)>>8)&7;
+                if(k>4)
+                {
+                    k = 8-k;
+                    t.cstat |= 4;
+                }
+                else t.cstat &= ~4;
+                t.picnum = s.picnum+k;
+                break;
+        }
+
+        hittype[i].dispicnum = t.picnum;
+        if(sector[t.sectnum].floorpicnum == MIRROR)
+            t.xrepeat = t.yrepeat = 0;
+    }
 }
 
 //5775
@@ -4037,7 +4755,7 @@ function fakedomovethings() {
     //        psectlotag = 0;
     //        spritebridge = 1;
     //    }
-    //    if(badguy(&sprite[j]) && sprite[j].xrepeat > 24 && klabs(sprite[p.i].z-sprite[j].z) < (84<<8) )
+    //    if(badguy(sprite[j]) && sprite[j].xrepeat > 24 && klabs(sprite[p.i].z-sprite[j].z) < (84<<8) )
     //    {
     //        j = getangle( sprite[j].x-myx,sprite[j].y-myy);
     //        myxvel -= sintable[(j+512)&2047]<<4;
