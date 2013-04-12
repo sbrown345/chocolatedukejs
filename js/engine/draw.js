@@ -459,7 +459,6 @@ function setupslopevlin(i1, i2, i3) {
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 function slopevlin(i1, i2, i3, i4, i5, i6) {
-    debugger;
     var c;
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!

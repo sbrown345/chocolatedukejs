@@ -3577,7 +3577,7 @@ function animatesprites( x, y, a, smoothratio) {
 
                 if( ( display_mirror == 1 || screenpeek != p || s.owner == -1 ) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0 )
                 {
-                    throw "memcpy((spritetype *)tsprite[spritesortcnt],(spritetype *)t,sizeof(spritetype));" //copyTo method?
+                    t.copyTo(tsprite[spritesortcnt]);
 
                     tsprite[spritesortcnt].statnum = 99;
 
@@ -3830,9 +3830,8 @@ function animatesprites( x, y, a, smoothratio) {
                             daz = hittype[i].floorz;
 
                         if( (s.z-daz) < (8<<8) )
-                            if( ps[screenpeek].posz < daz )
-                            {
-                                throw "memcpy((spritetype *)tsprite[spritesortcnt],(spritetype *)t,sizeof(spritetype));" //copyTo method????
+                            if( ps[screenpeek].posz < daz ) {
+                                t.copyTo(tsprite[spritesortcnt]);
 
                                 tsprite[spritesortcnt].statnum = 99;
 

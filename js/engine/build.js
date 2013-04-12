@@ -152,6 +152,32 @@ function Sprite() {
     // todo: a load of these are (short) so they might
 }
 
+Sprite.prototype.copyTo = function (obj) {
+    obj.x = this.x;
+    obj.y = this.y;
+    obj.z = this.z;
+    obj.cstat = this.cstat;
+    obj.picnum = this.picnum;
+    obj.shade = this.shade;
+    obj.pal = this.pal;
+    obj.clipdist = this.clipdist;
+    obj.filler = this.filler;
+    obj.xrepeat = this.xrepeat;
+    obj.yrepeat = this.yrepeat;
+    obj.xoffset = this.xoffset;
+    obj.yoffset = this.yoffset;
+    obj.sectnum = this.sectnum;
+    obj.statnum = this.statnum;
+    obj.ang = this.ang;
+    obj.owner = this.owner;
+    obj.xvel = this.xvel;
+    obj.yvel = this.yvel;
+    obj.zvel = this.zvel;
+    obj.lotag = this.lotag;
+    obj.hitag = this.hitag;
+    obj.extra = this.extra;
+};
+
 var sector = structArray(SectorType, MAXSECTORS);
 var wall = structArray(Wall, MAXSPRITES);
 var sprite = structArray(Sprite, MAXSPRITES);
