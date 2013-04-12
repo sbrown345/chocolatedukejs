@@ -94,6 +94,12 @@ function toUint8(v) {
     return toUint8.helper[0];
 }
 
+toInt16.helper = new Int16Array(1);
+function toInt16(v) {
+    toInt16.helper[0] = v;
+    return toInt16.helper[0];
+}
+
 toUint32.helper = new Uint32Array(1);
 function toUint32(v) {
     toUint32.helper[0] = v;

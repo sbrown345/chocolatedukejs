@@ -3253,7 +3253,6 @@ function animatesprites( x, y, a, smoothratio) {
     var s,t;
     for(j=0;j < spritesortcnt; j++)
     {
-        debugger;
         t = tsprite[j];
         i = t.owner;
         s = sprite[t.owner];
@@ -3969,8 +3968,146 @@ function animatesprites( x, y, a, smoothratio) {
 
 //5775
 function drawmasks() {
-    //todo drawmasks
-    console.log("todo: drawmasks");
+    var i, j, k, l, gap, xs, ys, xp, yp, yoff, yspan;
+    /* int32_t zs, zp; */
+
+    //Copy sprite address in a sprite proxy structure (pointers are easier to re-arrange than structs).
+    for(i=spritesortcnt-1; i>=0; i--)
+        tspriteptr[i] = tsprite[i];
+    
+    
+    //Generate screenspace coordinate (X column and Y distance).
+    for(i=spritesortcnt-1; i>=0; i--)
+    {
+        //Translate and rotate the sprite in Camera space coordinate.
+        xs = tspriteptr[i].x - globalposx;         //todo: check xs and ys
+        ys = tspriteptr[i].y-globalposy;
+        yp = dmulscale6(xs,cosviewingrangeglobalang,ys,sinviewingrangeglobalang);
+        
+        if (yp > (4<<8))
+        {
+            xp = dmulscale6(ys,cosglobalang,-xs,singlobalang);
+            spritesx[i] = scale(xp+yp,xdimen<<7,yp);
+        }
+        else if ((tspriteptr[i].cstat&48) == 0)
+        {
+            spritesortcnt--;  /* Delete face sprite if on wrong side! */
+            //Move the sprite at the end of the array and decrease array length.
+            if (i != spritesortcnt)
+            {
+                tspriteptr[i] = tspriteptr[spritesortcnt];
+                spritesx[i] = spritesx[spritesortcnt];
+                spritesy[i] = spritesy[spritesortcnt];
+            }
+            continue;
+        }
+        spritesy[i] = yp;
+    }
+
+    //FCS: Bubble sort ?! REally ?!?!?
+    gap = 1;
+    while (gap < spritesortcnt) gap = (gap<<1)+1;
+    for(gap>>=1; gap>0; gap>>=1)    /* Sort sprite list */
+        for(i=0; i<spritesortcnt-gap; i++)
+            for(l=i; l>=0; l-=gap)
+            {
+                if (spritesy[l] <= spritesy[l+gap])
+                    break;
+                
+                throw "swaplong((int32_t *)tspriteptr[l],(int32_t *)tspriteptr[l+gap]);"
+                swaplong(spritesx[l],spritesx[l+gap]);
+                swaplong(spritesy[l],spritesy[l+gap]);
+            }
+
+    if (spritesortcnt > 0)
+        spritesy[spritesortcnt] = (spritesy[spritesortcnt-1]^1);
+
+    ys = spritesy[0];
+    i = 0;
+    for(j=1; j<=spritesortcnt; j++)
+    {
+        if (spritesy[j] == ys)
+            continue;
+        
+        ys = spritesy[j];
+        if (j > i+1)
+        {
+            for(k=i; k<j; k++)
+            {
+                spritesz[k] = tspriteptr[k].z;
+                if ((tspriteptr[k].cstat&48) != 32)
+                {
+                    yoff = (toInt8((tiles[tspriteptr[k].picnum].animFlags>>16)&255))+(tspriteptr[k].yoffset);
+                    spritesz[k] -= ((yoff*tspriteptr[k].yrepeat)<<2);
+                    yspan = (tiles[tspriteptr[k].picnum].dim.height*tspriteptr[k].yrepeat<<2);
+                    if (!(tspriteptr[k].cstat&128))
+                        spritesz[k] -= (yspan>>1);
+                    if (klabs(spritesz[k]-globalposz) < (yspan>>1))
+                        spritesz[k] = globalposz;
+                }
+            }
+            for(k=i+1; k<j; k++)
+                for(l=i; l<k; l++)
+                    if (klabs(spritesz[k]-globalposz) < klabs(spritesz[l]-globalposz))
+                    {
+                        throw "swaplong((int32_t *)tspriteptr[k],(int32_t *)tspriteptr[l]);"
+                        swaplong(spritesx[k],spritesx[l]);
+                        swaplong(spritesy[k],spritesy[l]);
+                        swaplong(spritesz[k],spritesz[l]);
+                    }
+            for(k=i+1; k<j; k++)
+                for(l=i; l<k; l++)
+                    if (tspriteptr[k].statnum < tspriteptr[l].statnum)
+                    {
+                        throw "swaplong((int32_t *)tspriteptr[k],(int32_t *)tspriteptr[l]);"
+                        swaplong(spritesx[k],spritesx[l]);
+                        swaplong(spritesy[k],spritesy[l]);
+                    }
+        }
+        i = j;
+    }
+
+    while ((spritesortcnt > 0) && (maskwallcnt > 0))  /* While BOTH > 0 */
+    {
+        j = maskwall[maskwallcnt-1];
+        if (spritewallfront(tspriteptr[spritesortcnt-1],pvWalls[j].worldWallId) == 0)
+            drawsprite(--spritesortcnt);
+        else
+        {
+            /* Check to see if any sprites behind the masked wall... */
+            k = -1;
+            gap = 0;
+            for(i=spritesortcnt-2; i>=0; i--)
+                if ((pvWalls[j].screenSpaceCoo[0][VEC_COL] <= (spritesx[i]>>8)) && ((spritesx[i]>>8) <= pvWalls[j].screenSpaceCoo[1][VEC_COL]))
+                    if (spritewallfront(tspriteptr[i],pvWalls[j].worldWallId) == 0)
+                    {
+                        drawsprite(i);
+                        tspriteptr[i].owner = -1;
+                        k = i;
+                        gap++;
+                    }
+            if (k >= 0)       /* remove holes in sprite list */
+            {
+                for(i=k; i<spritesortcnt; i++)
+                    if (tspriteptr[i].owner >= 0)
+                    {
+                        if (i > k)
+                        {
+                            tspriteptr[k] = tspriteptr[i];
+                            spritesx[k] = spritesx[i];
+                            spritesy[k] = spritesy[i];
+                        }
+                        k++;
+                    }
+                spritesortcnt -= gap;
+            }
+
+            /* finally safe to draw the masked wall */
+            drawmaskwall(--maskwallcnt);
+        }
+    }
+    while (spritesortcnt > 0) drawsprite(--spritesortcnt);
+    while (maskwallcnt > 0) drawmaskwall(--maskwallcnt);
 }
 
 //7486

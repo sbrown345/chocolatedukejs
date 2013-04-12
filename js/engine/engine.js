@@ -112,10 +112,10 @@ var smostwalltype = new Uint8Array(MAXWALLSB);
 var smostwall = new Int32Array(MAXWALLSB), smostwallcnt = -1;
 
 var maskwall = new Int16Array(MAXWALLSB), maskwallcnt;
-//static int32_t spritesx[MAXSPRITESONSCREEN];
-//static int32_t spritesy[MAXSPRITESONSCREEN+1];
-//static int32_t spritesz[MAXSPRITESONSCREEN];
-//static spritetype *tspriteptr[MAXSPRITESONSCREEN];
+var spritesx = new Int32Array(MAXSPRITESONSCREEN);
+var spritesy = new Int32Array(MAXSPRITESONSCREEN+1);
+var spritesz = new Int32Array(MAXSPRITESONSCREEN);
+var tspriteptr = structArray(Sprite, MAXSPRITESONSCREEN);//*tspriteptr[MAXSPRITESONSCREEN];
 
 ////FCS: (up-most pixel on column x that can still be drawn to)
 var umost = new Int16Array(MAXXDIM + 1);
@@ -2780,6 +2780,18 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     console.log("check todo");
 }
 
+//3051
+function spritewallfront (s, w) {
+    var wal;
+    var x1, y1;
+
+    wal = wall[w];
+    x1 = wal.x;
+    y1 = wal.y;
+    wal = wall[wal.point2];
+    return (dmulscale32(wal.x-x1,s.y-y1,-(s.x-x1),wal.y-y1) >= 0);
+}
+
 //3179
 Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectnum) {
     var x = 0;
@@ -3960,6 +3972,877 @@ function getangle(xvect, yvect) {
 //4707
 function ksqrt(num) {
     return (nsqrtasm(num));
+}
+
+
+function drawsprite (snum) {
+    var tspr;
+    var sec;
+    var startum, startdm, sectnum, xb, yp, cstat;
+    var siz, xsiz, ysiz, xoff, yoff;
+    var spriteDim = new Dimensions();
+    var x1, y1, x2, y2, lx, rx, dalx2, darx2, i, j, k, x, linum, linuminc;
+    var yinc, z, z1, z2, xp1, yp1, xp2, yp2;
+    var xv, yv, top, topinc, bot, botinc, hplc, hinc;
+    var cosang, sinang, dax, day, lpoint, lmax, rpoint, rmax, dax1, dax2, y;
+    var npoints, npoints2, zz, t, zsgn, zzsgn;
+    var tilenum, spritenum;
+    var  swapped, daclip;
+
+    tspr = tspriteptr[snum];
+
+    xb = spritesx[snum];
+    yp = spritesy[snum];
+    tilenum = tspr.picnum;
+    spritenum = tspr.owner;
+    cstat = tspr.cstat;
+
+    if ((cstat&48) != 48)
+    {
+        if (tiles[tilenum].animFlags&192)
+            tilenum += animateoffs(tilenum);
+        
+        if ((tiles[tilenum].dim.width <= 0) || (tiles[tilenum].dim.height <= 0) || (spritenum < 0))
+            return;
+    }
+    if ((tspr.xrepeat <= 0) || (tspr.yrepeat <= 0)) return;
+
+    sectnum = tspr.sectnum;
+    sec = sector[sectnum];
+    globalpal = tspr.pal;
+    // FIX_00088: crash on maps using a bad palette index (like the end of roch3.map)
+    if (!palookup[globalpal])
+        globalpal = 0; // seem to crash when globalpal > 25
+    globalshade = tspr.shade;
+    if (cstat&2)
+    {
+
+        if (cstat&512) 
+            settrans(TRANS_REVERSE);
+        else 
+            settrans(TRANS_NORMAL);
+    }
+
+    xoff = (toInt8((tiles[tilenum].animFlags>>8)&255))+(tspr.xoffset);
+    yoff = (toInt8((tiles[tilenum].animFlags>>16)&255))+(tspr.yoffset);
+
+    if ((cstat&48) == 0)
+    {
+        if (yp <= (4<<8))
+            return;
+
+        siz = divscale19(xdimenscale,yp);
+
+        xv = mulscale16((tspr.xrepeat)<<16,xyaspect);
+
+        spriteDim.width = tiles[tilenum].dim.width;
+        spriteDim.height = tiles[tilenum].dim.height;
+        
+        xsiz = mulscale30(siz,xv * spriteDim.width);
+        ysiz = mulscale14(siz,tspr.yrepeat * spriteDim.height);
+
+        if (((tiles[tilenum].dim.width>>11) >= xsiz) || (spriteDim.height >= (ysiz>>1)))
+            return;  /* Watch out for divscale overflow */
+
+        x1 = xb-(xsiz>>1);
+        if (spriteDim.width & 1)
+            x1 += mulscale31(siz,xv);  /* Odd xspans */
+        i = mulscale30(siz,xv*xoff);
+        if ((cstat&4) == 0)
+            x1 -= i;
+        else
+            x1 += i;
+
+        y1 = mulscale16(tspr.z-globalposz,siz);
+        y1 -= mulscale14(siz,tspr.yrepeat*yoff);
+        y1 += (globalhoriz<<8)-ysiz;
+        if (cstat&128)
+        {
+            y1 += (ysiz>>1);
+            if (spriteDim.height&1) y1 += mulscale15(siz,tspr.yrepeat);  /* Odd yspans */
+        }
+
+        x2 = x1+xsiz-1;
+        y2 = y1+ysiz-1;
+        if ((y1|255) >= (y2|255)) return;
+
+        lx = (x1>>8)+1;
+        if (lx < 0) lx = 0;
+        rx = (x2>>8);
+        if (rx >= xdimen) rx = xdimen-1;
+        if (lx > rx) return;
+
+        yinc = divscale32(spriteDim.height,ysiz);
+
+        if ((sec.ceilingstat&3) == 0)
+            startum = globalhoriz+mulscale24(siz,sec.ceilingz-globalposz)-1;
+        else
+            startum = 0;
+        
+        if ((sec.floorstat&3) == 0)
+            startdm = globalhoriz+mulscale24(siz,sec.floorz-globalposz)+1;
+        else
+            startdm = 0x7fffffff;
+        
+        if ((y1>>8) > startum) startum = (y1>>8);
+        if ((y2>>8) < startdm) startdm = (y2>>8);
+
+        if (startum < -32768) startum = -32768;
+        if (startdm > 32767) startdm = 32767;
+        if (startum >= startdm) return;
+
+        if ((cstat&4) == 0)
+        {
+            linuminc = divscale24(spriteDim.width,xsiz);
+            linum = mulscale8((lx<<8)-x1,linuminc);
+        }
+        else
+        {
+            linuminc = -divscale24(spriteDim.width,xsiz);
+            linum = mulscale8((lx<<8)-x2,linuminc);
+        }
+        if ((cstat&8) > 0)
+        {
+            yinc = -yinc;
+            i = y1;
+            y1 = y2;
+            y2 = i;
+        }
+
+        for(x=lx; x<=rx; x++)
+        {
+            uwall[x] = Math.max(startumost[x+windowx1]-windowy1,toInt16(startum));
+            dwall[x] = Math.min(startdmost[x+windowx1]-windowy1,toInt16(startdm));
+        }
+        daclip = 0;
+        for(i=smostwallcnt-1; i>=0; i--)
+        {
+            if (smostwalltype[i]&daclip)
+                continue;
+            
+            j = smostwall[i];
+            if ((pvWalls[j].screenSpaceCoo[0][VEC_COL] > rx) || (pvWalls[j].screenSpaceCoo[1][VEC_COL] < lx))
+                continue;
+            
+            if ((yp <= pvWalls[j].screenSpaceCoo[0][VEC_DIST]) && (yp <= pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+                continue;
+            
+            if (spritewallfront(tspr,pvWalls[j].worldWallId) && ((yp <= pvWalls[j].screenSpaceCoo[0][VEC_DIST]) || (yp <= pvWalls[j].screenSpaceCoo[1][VEC_DIST])))
+                continue;
+
+            dalx2 = Math.max(pvWalls[j].screenSpaceCoo[0][VEC_COL],lx);
+            darx2 = Math.min(pvWalls[j].screenSpaceCoo[1][VEC_COL],rx);
+
+            switch(smostwalltype[i])
+            {
+                case 0:
+                    if (dalx2 <= darx2)
+                    {
+                        if ((dalx2 == lx) && (darx2 == rx))
+                            return;
+                        clearbufbyte(dwall, dalx2,(darx2-dalx2+1)*2,0);
+                    }
+                    break;
+                case 1:
+                    k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                    for(x=dalx2; x<=darx2; x++)
+                        if (smost[k+x] > uwall[x]) uwall[x] = smost[k+x];
+                    if ((dalx2 == lx) && (darx2 == rx)) daclip |= 1;
+                    break;
+                case 2:
+                    k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                    for(x=dalx2; x<=darx2; x++)
+                        if (smost[k+x] < dwall[x]) dwall[x] = smost[k+x];
+                    if ((dalx2 == lx) && (darx2 == rx)) daclip |= 2;
+                    break;
+            }
+        }
+
+        if (uwall[rx] >= dwall[rx])
+        {
+            for(x=lx; x<rx; x++)
+                if (uwall[x] < dwall[x]) break;
+            if (x == rx) return;
+        }
+
+        /* sprite */
+        if ((searchit >= 1) && (searchx >= lx) && (searchx <= rx))
+            if ((searchy >= uwall[searchx]) && (searchy < dwall[searchx]))
+            {
+                searchsector = sectnum;
+                searchwall = spritenum;
+                searchstat = 3;
+                searchit = 1;
+            }
+
+        z2 = tspr.z - ((yoff*tspr.yrepeat)<<2);
+        if (cstat&128)
+        {
+            z2 += ((spriteDim.height*tspr.yrepeat)<<1);
+            if (spriteDim.height&1) z2 += (tspr.yrepeat<<1);        /* Odd yspans */
+        }
+        z1 = z2 - ((spriteDim.height*tspr.yrepeat)<<2);
+
+        globalorientation = 0;
+        globalpicnum = tilenum;
+        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+        globalxpanning = 0;
+        globalypanning = 0;
+        globvis = globalvisibility;
+        if (sec.visibility != 0) globvis = mulscale4(globvis,toUint8(sec.visibility+16));
+        globalshiftval = (picsiz[globalpicnum]>>4);
+        if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height)
+            globalshiftval++;
+        
+        globalshiftval = 32-globalshiftval;
+        globalyscale = divscale(512,tspr.yrepeat,globalshiftval-19);
+        globalzd = (((globalposz-z1)*globalyscale)<<8);
+        if ((cstat&8) > 0)
+        {
+            globalyscale = -globalyscale;
+            globalzd = (((globalposz-z2)*globalyscale)<<8);
+        }
+
+        qinterpolatedown16(lwall[lx],rx-lx+1,linum,linuminc);
+        clearbuf(swall[lx],rx-lx+1,mulscale19(yp,xdimscale));
+
+        if ((cstat&2) == 0)
+            maskwallscan(lx,rx,uwall,dwall,swall,lwall);
+        else
+            transmaskwallscan(lx,rx);
+    }
+    else if ((cstat&48) == 16)
+    {
+        if ((cstat&4) > 0) xoff = -xoff;
+        if ((cstat&8) > 0) yoff = -yoff;
+
+        spriteDim.width = tiles[tilenum].dim.width;
+        spriteDim.height = tiles[tilenum].dim.height;
+        
+        xv = tspr.xrepeat*sintable[(tspr.ang+2560+1536)&2047];
+        yv = tspr.xrepeat*sintable[(tspr.ang+2048+1536)&2047];
+        i = (spriteDim.width >>1)+xoff;
+        x1 = tspr.x-globalposx-mulscale16(xv,i);
+        x2 = x1+mulscale16(xv,spriteDim.width );
+        y1 = tspr.y-globalposy-mulscale16(yv,i);
+        y2 = y1+mulscale16(yv,spriteDim.width );
+
+        yp1 = dmulscale6(x1,cosviewingrangeglobalang,y1,sinviewingrangeglobalang);
+        yp2 = dmulscale6(x2,cosviewingrangeglobalang,y2,sinviewingrangeglobalang);
+        if ((yp1 <= 0) && (yp2 <= 0)) return;
+        xp1 = dmulscale6(y1,cosglobalang,-x1,singlobalang);
+        xp2 = dmulscale6(y2,cosglobalang,-x2,singlobalang);
+
+        x1 += globalposx;
+        y1 += globalposy;
+        x2 += globalposx;
+        y2 += globalposy;
+
+        swapped = 0;
+        if (dmulscale32(xp1,yp2,-xp2,yp1) >= 0)  /* If wall's NOT facing you */
+        {
+            if ((cstat&64) != 0) return;
+            i = xp1, xp1 = xp2, xp2 = i;
+            i = yp1, yp1 = yp2, yp2 = i;
+            i = x1, x1 = x2, x2 = i;
+            i = y1, y1 = y2, y2 = i;
+            swapped = 1;
+        }
+
+        if (xp1 >= -yp1)
+        {
+            if (xp1 > yp1) return;
+
+            if (yp1 == 0) return;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL] = halfxdimen + scale(xp1,halfxdimen,yp1);
+            if (xp1 >= 0) pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]++;   /* Fix for SIGNED divide */
+            if (pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL] >= xdimen) pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL] = xdimen-1;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST] = yp1;
+        }
+        else
+        {
+            if (xp2 < -yp2) return;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL] = 0;
+            i = yp1-yp2+xp1-xp2;
+            if (i == 0) return;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST] = yp1 + scale(yp2-yp1,xp1+yp1,i);
+        }
+        if (xp2 <= yp2)
+        {
+            if (xp2 < -yp2) return;
+
+            if (yp2 == 0) return;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL] = halfxdimen + scale(xp2,halfxdimen,yp2) - 1;
+            if (xp2 >= 0) pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]++;   /* Fix for SIGNED divide */
+            if (pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL] >= xdimen) pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL] = xdimen-1;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST] = yp2;
+        }
+        else
+        {
+            if (xp1 > yp1) return;
+
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL] = xdimen-1;
+            i = xp2-xp1+yp1-yp2;
+            if (i == 0) return;
+            pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST] = yp1 + scale(yp2-yp1,yp1-xp1,i);
+        }
+
+        if ((pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST] < 256) || (pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST] < 256) || (pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL] > pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]))
+            return;
+
+        topinc = -mulscale10(yp1,spriteDim.width);
+        top = (((mulscale10(xp1,xdimen) - mulscale9(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]-halfxdimen,yp1))*spriteDim.width)>>3);
+        botinc = ((yp2-yp1)>>8);
+        bot = mulscale11(xp1-xp2,xdimen) + mulscale2(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]-halfxdimen,botinc);
+
+        j = pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]+3;
+        z = mulscale20(top,krecipasm(bot));
+        lwall[pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]] = (z>>8);
+        for(x=pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]+4; x<=j; x+=4)
+        {
+            top += topinc;
+            bot += botinc;
+            zz = z;
+            z = mulscale20(top,krecipasm(bot));
+            lwall[x] = (z>>8);
+            i = ((z+zz)>>1);
+            lwall[x-2] = (i>>8);
+            lwall[x-3] = ((i+zz)>>9);
+            lwall[x-1] = ((i+z)>>9);
+        }
+
+        if (lwall[pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]] < 0) lwall[pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]] = 0;
+        if (lwall[pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]] >= spriteDim.width) lwall[pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]] = spriteDim.width-1;
+
+        if ((swapped^((cstat&4)>0)) > 0)
+        {
+            j = spriteDim.width-1;
+            for(x=pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]; x<=pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]; x++)
+                lwall[x] = j-lwall[x];
+        }
+
+        pvWalls[MAXWALLSB-1].cameraSpaceCoo[0][VEC_X] = xp1 ;
+        pvWalls[MAXWALLSB-1].cameraSpaceCoo[0][VEC_Y] = yp1 ;
+        pvWalls[MAXWALLSB-1].cameraSpaceCoo[1][VEC_X] = xp2 ;
+        pvWalls[MAXWALLSB-1].cameraSpaceCoo[1][VEC_Y] = yp2 ;
+
+        
+        hplc = divscale19(xdimenscale,pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST]);
+        hinc = divscale19(xdimenscale,pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]);
+        hinc = ((hinc-hplc)/(pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]-pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]+1))|0;
+
+        z2 = tspr.z - ((yoff*tspr.yrepeat)<<2);
+        if (cstat&128)
+        {
+            z2 += ((spriteDim.height*tspr.yrepeat)<<1);
+            if (spriteDim.height&1) z2 += (tspr.yrepeat<<1);        /* Odd yspans */
+        }
+        z1 = z2 - ((spriteDim.height*tspr.yrepeat)<<2);
+
+        globalorientation = 0;
+        globalpicnum = tilenum;
+        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+        globalxpanning = 0;
+        globalypanning = 0;
+        globvis = globalvisibility;
+        if (sec.visibility != 0) globvis = mulscale4(globvis,(int32_t)((uint8_t )(sec.visibility+16)));
+        globalshiftval = (picsiz[globalpicnum]>>4);
+        if (pow2long[globalshiftval] != tiles[globalpicnum].dim.height) globalshiftval++;
+        globalshiftval = 32-globalshiftval;
+        globalyscale = divscale(512,tspr.yrepeat,globalshiftval-19);
+        globalzd = (((globalposz-z1)*globalyscale)<<8);
+        if ((cstat&8) > 0)
+        {
+            globalyscale = -globalyscale;
+            globalzd = (((globalposz-z2)*globalyscale)<<8);
+        }
+
+        if (((sec.ceilingstat&1) == 0) && (z1 < sec.ceilingz))
+            z1 = sec.ceilingz;
+        if (((sec.floorstat&1) == 0) && (z2 > sec.floorz))
+            z2 = sec.floorz;
+
+        owallmost(uwall,(MAXWALLSB-1),z1-globalposz);
+        owallmost(dwall,(MAXWALLSB-1),z2-globalposz);
+        for(i=pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]; i<=pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]; i++)
+        {
+            swall[i] = (krecipasm(hplc)<<2);
+            hplc += hinc;
+        }
+
+        for(i=smostwallcnt-1; i>=0; i--)
+        {
+            j = smostwall[i];
+
+            if ((pvWalls[j].screenSpaceCoo[0][VEC_COL] > pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]) || (pvWalls[j].screenSpaceCoo[1][VEC_COL] < pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL])) continue;
+
+            dalx2 = pvWalls[j].screenSpaceCoo[0][VEC_COL];
+            darx2 = pvWalls[j].screenSpaceCoo[1][VEC_COL];
+            if (max(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > min(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+            {
+                if (min(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > max(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+                {
+                    x = 0x80000000;
+                }
+                else
+                {
+                    x = pvWalls[j].worldWallId;
+                    xp1 = wall[x].x;
+                    yp1 = wall[x].y;
+                    x = wall[x].point2;
+                    xp2 = wall[x].x;
+                    yp2 = wall[x].y;
+
+                    z1 = (xp2-xp1)*(y1-yp1) - (yp2-yp1)*(x1-xp1);
+                    z2 = (xp2-xp1)*(y2-yp1) - (yp2-yp1)*(x2-xp1);
+                    if ((z1^z2) >= 0)
+                        x = (z1+z2);
+                    else
+                    {
+                        z1 = (x2-x1)*(yp1-y1) - (y2-y1)*(xp1-x1);
+                        z2 = (x2-x1)*(yp2-y1) - (y2-y1)*(xp2-x1);
+
+                        if ((z1^z2) >= 0)
+                            x = -(z1+z2);
+                        else
+                        {
+                            if ((xp2-xp1)*(tspr.y-yp1) == (tspr.x-xp1)*(yp2-yp1))
+                            {
+                                if (wall[pvWalls[j].worldWallId].nextsector == tspr.sectnum)
+                                    x = 0x80000000;
+                                else
+                                    x = 0x7fffffff;
+                            }
+                            else
+                            {   /* INTERSECTION! */
+                                x = (xp1-globalposx) + scale(xp2-xp1,z1,z1-z2);
+                                y = (yp1-globalposy) + scale(yp2-yp1,z1,z1-z2);
+
+                                yp1 = dmulscale14(x,cosglobalang,y,singlobalang);
+                                if (yp1 > 0)
+                                {
+                                    xp1 = dmulscale14(y,cosglobalang,-x,singlobalang);
+
+                                    x = halfxdimen + scale(xp1,halfxdimen,yp1);
+                                    if (xp1 >= 0) x++;   /* Fix for SIGNED divide */
+
+                                    if (z1 < 0)
+                                    {
+                                        if (dalx2 < x) dalx2 = x;
+                                    }
+                                    else
+                                    {
+                                        if (darx2 > x) darx2 = x;
+                                    }
+                                    x = 0x80000001;
+                                }
+                                else
+                                    x = 0x7fffffff;
+                            }
+                        }
+                    }
+                }
+                if (x < 0)
+                {
+                    if (dalx2 < pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]) dalx2 = pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL];
+                    if (darx2 > pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]) darx2 = pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL];
+                    switch(smostwalltype[i])
+                    {
+                        case 0:
+                            if (dalx2 <= darx2)
+                            {
+                                if ((dalx2 == pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]) && (darx2 == pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL])) return;
+                                clearbufbyte(dwall[dalx2],(darx2-dalx2+1)*sizeof(dwall[0]),0);
+                            }
+                            break;
+                        case 1:
+                            k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                            for(x=dalx2; x<=darx2; x++)
+                                if (smost[k+x] > uwall[x]) uwall[x] = smost[k+x];
+                            break;
+                        case 2:
+                            k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                            for(x=dalx2; x<=darx2; x++)
+                                if (smost[k+x] < dwall[x]) dwall[x] = smost[k+x];
+                            break;
+                    }
+                }
+            }
+        }
+
+        /* sprite */
+        if ((searchit >= 1) && (searchx >= pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]) && (searchx <= pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]))
+            if ((searchy >= uwall[searchx]) && (searchy <= dwall[searchx]))
+            {
+                searchsector = sectnum;
+                searchwall = spritenum;
+                searchstat = 3;
+                searchit = 1;
+            }
+
+        if ((cstat&2) == 0)
+            maskwallscan(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL],uwall,dwall,swall,lwall);
+        else
+            transmaskwallscan(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL]);
+    }
+    else if ((cstat&48) == 32)
+    {
+        if ((cstat&64) != 0)
+            if ((globalposz > tspr.z) == ((cstat&8)==0))
+                return;
+
+        if ((cstat&4) > 0) xoff = -xoff;
+        if ((cstat&8) > 0) yoff = -yoff;
+        spriteDim.width = tiles[tilenum].dim.width;
+        spriteDim.height = tiles[tilenum].dim.height;
+
+        /* Rotate center point */
+        dax = tspr.x-globalposx;
+        day = tspr.y-globalposy;
+        rzi[0] = dmulscale10(cosglobalang,dax,singlobalang,day);
+        rxi[0] = dmulscale10(cosglobalang,day,-singlobalang,dax);
+
+        /* Get top-left corner */
+        i = ((tspr.ang+2048-globalang)&2047);
+        cosang = sintable[(i+512)&2047];
+        sinang = sintable[i];
+        dax = ((spriteDim.width>>1)+xoff)*tspr.xrepeat;
+        day = ((spriteDim.height>>1)+yoff)*tspr.yrepeat;
+        rzi[0] += dmulscale12(sinang,dax,cosang,day);
+        rxi[0] += dmulscale12(sinang,day,-cosang,dax);
+
+        /* Get other 3 corners */
+        dax = spriteDim.width*tspr.xrepeat;
+        day = spriteDim.height*tspr.yrepeat;
+        rzi[1] = rzi[0]-mulscale12(sinang,dax);
+        rxi[1] = rxi[0]+mulscale12(cosang,dax);
+        dax = -mulscale12(cosang,day);
+        day = -mulscale12(sinang,day);
+        rzi[2] = rzi[1]+dax;
+        rxi[2] = rxi[1]+day;
+        rzi[3] = rzi[0]+dax;
+        rxi[3] = rxi[0]+day;
+
+        /* Put all points on same z */
+        ryi[0] = scale((tspr.z-globalposz),yxaspect,320<<8);
+        if (ryi[0] == 0) return;
+        ryi[1] = ryi[2] = ryi[3] = ryi[0];
+
+        if ((cstat&4) == 0)
+        {
+            z = 0;
+            z1 = 1;
+            z2 = 3;
+        }
+        else
+        {
+            z = 1;
+            z1 = 0;
+            z2 = 2;
+        }
+
+        dax = rzi[z1]-rzi[z];
+        day = rxi[z1]-rxi[z];
+        bot = dmulscale8(dax,dax,day,day);
+        if (((klabs(dax)>>13) >= bot) || ((klabs(day)>>13) >= bot)) return;
+        globalx1 = divscale18(dax,bot);
+        globalx2 = divscale18(day,bot);
+
+        dax = rzi[z2]-rzi[z];
+        day = rxi[z2]-rxi[z];
+        bot = dmulscale8(dax,dax,day,day);
+        if (((klabs(dax)>>13) >= bot) || ((klabs(day)>>13) >= bot)) return;
+        globaly1 = divscale18(dax,bot);
+        globaly2 = divscale18(day,bot);
+
+        /* Calculate globals for hline texture mapping function */
+        globalxpanning = (rxi[z]<<12);
+        globalypanning = (rzi[z]<<12);
+        globalzd = (ryi[z]<<12);
+
+        rzi[0] = mulscale16(rzi[0],viewingrange);
+        rzi[1] = mulscale16(rzi[1],viewingrange);
+        rzi[2] = mulscale16(rzi[2],viewingrange);
+        rzi[3] = mulscale16(rzi[3],viewingrange);
+
+        if (ryi[0] < 0)   /* If ceilsprite is above you, reverse order of points */
+        {
+            i = rxi[1];
+            rxi[1] = rxi[3];
+            rxi[3] = i;
+            i = rzi[1];
+            rzi[1] = rzi[3];
+            rzi[3] = i;
+        }
+
+
+        /* Clip polygon in 3-space */
+        npoints = 4;
+
+        /* Clip edge 1 */
+        npoints2 = 0;
+        zzsgn = rxi[0]+rzi[0];
+        for(z=0; z<npoints; z++)
+        {
+            zz = z+1;
+            if (zz == npoints) zz = 0;
+            zsgn = zzsgn;
+            zzsgn = rxi[zz]+rzi[zz];
+            if (zsgn >= 0)
+            {
+                rxi2[npoints2] = rxi[z];
+                ryi2[npoints2] = ryi[z];
+                rzi2[npoints2] = rzi[z];
+                npoints2++;
+            }
+            if ((zsgn^zzsgn) < 0)
+            {
+                t = divscale30(zsgn,zsgn-zzsgn);
+                rxi2[npoints2] = rxi[z] + mulscale30(t,rxi[zz]-rxi[z]);
+                ryi2[npoints2] = ryi[z] + mulscale30(t,ryi[zz]-ryi[z]);
+                rzi2[npoints2] = rzi[z] + mulscale30(t,rzi[zz]-rzi[z]);
+                npoints2++;
+            }
+        }
+        if (npoints2 <= 2) return;
+
+        /* Clip edge 2 */
+        npoints = 0;
+        zzsgn = rxi2[0]-rzi2[0];
+        for(z=0; z<npoints2; z++)
+        {
+            zz = z+1;
+            if (zz == npoints2) zz = 0;
+            zsgn = zzsgn;
+            zzsgn = rxi2[zz]-rzi2[zz];
+            if (zsgn <= 0)
+            {
+                rxi[npoints] = rxi2[z];
+                ryi[npoints] = ryi2[z];
+                rzi[npoints] = rzi2[z];
+                npoints++;
+            }
+            if ((zsgn^zzsgn) < 0)
+            {
+                t = divscale30(zsgn,zsgn-zzsgn);
+                rxi[npoints] = rxi2[z] + mulscale30(t,rxi2[zz]-rxi2[z]);
+                ryi[npoints] = ryi2[z] + mulscale30(t,ryi2[zz]-ryi2[z]);
+                rzi[npoints] = rzi2[z] + mulscale30(t,rzi2[zz]-rzi2[z]);
+                npoints++;
+            }
+        }
+        if (npoints <= 2) return;
+
+        /* Clip edge 3 */
+        npoints2 = 0;
+        zzsgn = ryi[0]*halfxdimen + (rzi[0]*(globalhoriz-0));
+        for(z=0; z<npoints; z++)
+        {
+            zz = z+1;
+            if (zz == npoints) zz = 0;
+            zsgn = zzsgn;
+            zzsgn = ryi[zz]*halfxdimen + (rzi[zz]*(globalhoriz-0));
+            if (zsgn >= 0)
+            {
+                rxi2[npoints2] = rxi[z];
+                ryi2[npoints2] = ryi[z];
+                rzi2[npoints2] = rzi[z];
+                npoints2++;
+            }
+            if ((zsgn^zzsgn) < 0)
+            {
+                t = divscale30(zsgn,zsgn-zzsgn);
+                rxi2[npoints2] = rxi[z] + mulscale30(t,rxi[zz]-rxi[z]);
+                ryi2[npoints2] = ryi[z] + mulscale30(t,ryi[zz]-ryi[z]);
+                rzi2[npoints2] = rzi[z] + mulscale30(t,rzi[zz]-rzi[z]);
+                npoints2++;
+            }
+        }
+        if (npoints2 <= 2) return;
+
+        /* Clip edge 4 */
+        npoints = 0;
+        zzsgn = ryi2[0]*halfxdimen + (rzi2[0]*(globalhoriz-ydimen));
+        for(z=0; z<npoints2; z++)
+        {
+            zz = z+1;
+            if (zz == npoints2) zz = 0;
+            zsgn = zzsgn;
+            zzsgn = ryi2[zz]*halfxdimen + (rzi2[zz]*(globalhoriz-ydimen));
+            if (zsgn <= 0)
+            {
+                rxi[npoints] = rxi2[z];
+                ryi[npoints] = ryi2[z];
+                rzi[npoints] = rzi2[z];
+                npoints++;
+            }
+            if ((zsgn^zzsgn) < 0)
+            {
+                t = divscale30(zsgn,zsgn-zzsgn);
+                rxi[npoints] = rxi2[z] + mulscale30(t,rxi2[zz]-rxi2[z]);
+                ryi[npoints] = ryi2[z] + mulscale30(t,ryi2[zz]-ryi2[z]);
+                rzi[npoints] = rzi2[z] + mulscale30(t,rzi2[zz]-rzi2[z]);
+                npoints++;
+            }
+        }
+        if (npoints <= 2) return;
+
+        /* Project onto screen */
+        lpoint = -1;
+        lmax = 0x7fffffff;
+        rpoint = -1;
+        rmax = 0x80000000;
+        for(z=0; z<npoints; z++)
+        {
+            xsi[z] = scale(rxi[z],xdimen<<15,rzi[z]) + (xdimen<<15);
+            ysi[z] = scale(ryi[z],xdimen<<15,rzi[z]) + (globalhoriz<<16);
+            if (xsi[z] < 0) xsi[z] = 0;
+            if (xsi[z] > (xdimen<<16)) xsi[z] = (xdimen<<16);
+            if (ysi[z] < (0<<16)) ysi[z] = (0<<16);
+            if (ysi[z] > (ydimen<<16)) ysi[z] = (ydimen<<16);
+            if (xsi[z] < lmax) lmax = xsi[z], lpoint = z;
+            if (xsi[z] > rmax) rmax = xsi[z], rpoint = z;
+        }
+
+        /* Get uwall arrays */
+        for(z=lpoint; z!=rpoint; z=zz)
+        {
+            zz = z+1;
+            if (zz == npoints) zz = 0;
+
+            dax1 = ((xsi[z]+65535)>>16);
+            dax2 = ((xsi[zz]+65535)>>16);
+            if (dax2 > dax1)
+            {
+                yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
+                y = ysi[z] + mulscale16((dax1<<16)-xsi[z],yinc);
+                throw "qinterpolatedown16short((int32_t *)(&uwall[dax1]),dax2-dax1,y,yinc);"
+            }
+        }
+
+        /* Get dwall arrays */
+        for(; z!=lpoint; z=zz)
+        {
+            zz = z+1;
+            if (zz == npoints) zz = 0;
+
+            dax1 = ((xsi[zz]+65535)>>16);
+            dax2 = ((xsi[z]+65535)>>16);
+            if (dax2 > dax1)
+            {
+                yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
+                y = ysi[zz] + mulscale16((dax1<<16)-xsi[zz],yinc);
+                throw "qinterpolatedown16short((int32_t *)(&dwall[dax1]),dax2-dax1,y,yinc)";
+            }
+        }
+
+
+        lx = ((lmax+65535)>>16);
+        rx = ((rmax+65535)>>16);
+        for(x=lx; x<=rx; x++)
+        {
+            uwall[x] = max(uwall[x],startumost[x+windowx1]-windowy1);
+            dwall[x] = min(dwall[x],startdmost[x+windowx1]-windowy1);
+        }
+
+        /* Additional uwall/dwall clipping goes here */
+        for(i=smostwallcnt-1; i>=0; i--)
+        {
+            j = smostwall[i];
+            if ((pvWalls[j].screenSpaceCoo[0][VEC_COL] > rx) || (pvWalls[j].screenSpaceCoo[1][VEC_COL] < lx)) continue;
+            if ((yp <= pvWalls[j].screenSpaceCoo[0][VEC_DIST]) && (yp <= pvWalls[j].screenSpaceCoo[1][VEC_DIST])) continue;
+
+            /* if (spritewallfront(tspr,thewall[j]) == 0) */
+            x = pvWalls[j].worldWallId;
+            xp1 = wall[x].x;
+            yp1 = wall[x].y;
+            x = wall[x].point2;
+            xp2 = wall[x].x;
+            yp2 = wall[x].y;
+            x = (xp2-xp1)*(tspr.y-yp1)-(tspr.x-xp1)*(yp2-yp1);
+            if ((yp > pvWalls[j].screenSpaceCoo[0][VEC_DIST]) && (yp > pvWalls[j].screenSpaceCoo[1][VEC_DIST])) x = -1;
+            if ((x >= 0) && ((x != 0) || (wall[pvWalls[j].worldWallId].nextsector != tspr.sectnum))) continue;
+
+            dalx2 = max(pvWalls[j].screenSpaceCoo[0][VEC_COL],lx);
+            darx2 = min(pvWalls[j].screenSpaceCoo[1][VEC_COL],rx);
+
+            switch(smostwalltype[i])
+            {
+                case 0:
+                    if (dalx2 <= darx2)
+                    {
+                        if ((dalx2 == lx) && (darx2 == rx)) return;
+                        clearbufbyte(dwall[dalx2],(darx2-dalx2+1)*sizeof(dwall[0]),0);
+                    }
+                    break;
+                case 1:
+                    k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                    for(x=dalx2; x<=darx2; x++)
+                        if (smost[k+x] > uwall[x]) uwall[x] = smost[k+x];
+                    break;
+                case 2:
+                    k = smoststart[i] - pvWalls[j].screenSpaceCoo[0][VEC_COL];
+                    for(x=dalx2; x<=darx2; x++)
+                        if (smost[k+x] < dwall[x]) dwall[x] = smost[k+x];
+                    break;
+            }
+        }
+
+        /* sprite */
+        if ((searchit >= 1) && (searchx >= lx) && (searchx <= rx))
+            if ((searchy >= uwall[searchx]) && (searchy <= dwall[searchx]))
+            {
+                searchsector = sectnum;
+                searchwall = spritenum;
+                searchstat = 3;
+                searchit = 1;
+            }
+
+        globalorientation = cstat;
+        globalpicnum = tilenum;
+        if (globalpicnum >= MAXTILES)
+        globalpicnum = 0;
+
+        TILE_MakeAvailable(globalpicnum);
+        
+        setgotpic(globalpicnum);
+        globalbufplc = tiles[globalpicnum].data;
+
+        globvis = mulscale16(globalhisibility,viewingrange);
+        if (sec.visibility != 0) globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
+
+        x = picsiz[globalpicnum];
+        y = ((x>>4)&15);
+        x &= 15;
+        if (pow2long[x] != spriteDim.width)
+        {
+            x++;
+            globalx1 = mulscale(globalx1,spriteDim.width,x);
+            globalx2 = mulscale(globalx2,spriteDim.width,x);
+        }
+
+        dax = globalxpanning;
+        day = globalypanning;
+        globalxpanning = -dmulscale6(globalx1,day,globalx2,dax);
+        globalypanning = -dmulscale6(globaly1,day,globaly2,dax);
+
+        globalx2 = mulscale16(globalx2,viewingrange);
+        globaly2 = mulscale16(globaly2,viewingrange);
+        globalzd = mulscale16(globalzd,viewingrangerecip);
+
+        globalx1 = (globalx1-globalx2)*halfxdimen;
+        globaly1 = (globaly1-globaly2)*halfxdimen;
+
+        if ((cstat&2) == 0)
+            msethlineshift(x,y);
+        else
+            tsethlineshift(x,y);
+
+        /* Draw it! */
+        ceilspritescan(lx,rx-1);
+    }
+
+    if (automapping == 1) show2dsprite[spritenum>>3] |= pow2char[spritenum&7];
 }
 
 //5930
