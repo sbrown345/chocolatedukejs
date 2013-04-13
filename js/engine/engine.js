@@ -6170,8 +6170,6 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
 
 //7795
 function krand() {
-    return 50000; //TEMP TO SEE IF THIS FIXES OTHER BUG, THEN GET ON WITH THIS KRAND BUG(it is run different times so some bit of code that calls this is broken)
-
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     console.log("result: %i", randomseed >>> 16);
     return randomseed >>> 16;
