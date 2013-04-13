@@ -927,6 +927,7 @@ Player.processInput = function(snum) {
         refSectnum = new Ref();
 
     p = ps[snum];
+    console.log("start of processInput: p.posyv: %i", p.posyv)
     pi = p.i;
     s = sprite[pi];
 
@@ -1019,6 +1020,7 @@ Player.processInput = function(snum) {
             j = getangle(sprite[j].x-p.posx,sprite[j].y-p.posy);
             p.posxv -= sintable[(j+512)&2047]<<4;
             p.posyv -= sintable[j&2047]<<4;
+            console.log("negate 1022- p.posyv: %i", p.posyv)
         }
     }
 
@@ -1866,7 +1868,7 @@ Player.processInput = function(snum) {
         
         if(p.jetpack_on == 0 && p.steroids_amount > 0 && p.steroids_amount < 400)
             doubvel <<= 1;
-
+        console.log("b4 p.posyv: %i", p.posyv)
         p.posxv += ((sync[snum].fvel*doubvel)<<6);
         p.posyv += ((sync[snum].svel*doubvel)<<6);
 
@@ -1889,6 +1891,7 @@ Player.processInput = function(snum) {
             }
         }
 
+        console.log("middle p.posyv: %i", p.posyv)
         if (Math.abs(p.posxv) < 2048 && Math.abs(p.posyv) < 2048)
             p.posxv = p.posyv = 0;
 
@@ -1899,6 +1902,7 @@ Player.processInput = function(snum) {
             p.posyv =
                 mulscale16(p.posyv,dukefriction-(dukefriction>>1)+(dukefriction>>2));
         }
+        console.log("after p.posyv: %i", p.posyv)
     }
 
 //    HORIZONLY:

@@ -54,7 +54,6 @@ var sendmessagecommand = -1;
 
 //152
 function gametext(x, y, t, s, dabits) {
-    console.log(t);
     var ac, newx;
     var oldt;
     var centre;
@@ -899,7 +898,6 @@ function FTA(q, p, mode) {
 //2415
 Game.cheatKeys = function (snum) {
     //todo
-    console.log("todo cheatKeys");
 };
 
 //2680
@@ -4653,7 +4651,7 @@ Game.playBack = function () {
             return ud.reccnt > 0 || foundemo === 0;
         }, function () {
             q.setPositionAtStart();
-            console.log("demo loopframeCount: %i", frameCount++);
+            //console.log("demo loopframeCount: %i", frameCount++);
 
             q.addIf(function() {
                 return foundemo;
@@ -5385,6 +5383,7 @@ Game.doMoveThings = function() {
 
     if (ud.recstat == 1) record();
 
+    console.log("b4 movedummy ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
     if (ud.pause_on == 0) {
         global_random = krand();
         movedummyplayers(); //ST 13
@@ -5394,9 +5393,9 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
-            console.log("b4 ps[0].posy: %i", ps[0].posy);
+            console.log("b4 ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
             Player.processInput(i);
-            console.log("after ps[0].posy: %i", ps[0].posy);
+            console.log("after ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
             checksectors(i);
         }
     }
