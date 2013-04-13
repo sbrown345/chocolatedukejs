@@ -1210,7 +1210,8 @@ Game.displayRooms = function (snum, smoothratio) {
     var tang;
 
     p = ps[snum];
-
+    console.log("snum: %i, p.posx: %i, p.posy: %i, p.posz: %i", snum, p.posx, p.posy, p.posz);
+    
     if (pub > 0) {
         if (ud.screen_size > 8) {
             Game.drawBackground();
@@ -1317,6 +1318,8 @@ Game.displayRooms = function (snum, smoothratio) {
             //view(p,&cposx,&cposy,&cposz,&sect,cang,choriz);
         }
 
+        console.log("snum: %i, cposx: %i, cposy: %i, cposz: %i", snum, cposx, cposy, cposz);
+        
         cz = hittype[p.i].ceilingz;
         fz = hittype[p.i].floorz;
 
@@ -1347,8 +1350,8 @@ Game.displayRooms = function (snum, smoothratio) {
         }
 
         if(choriz > 299) choriz = 299;
-        else if(choriz < -99) choriz = -99;
-
+        else if (choriz < -99) choriz = -99;
+        
         Game.se40code(cposx, cposy, cposz, cang, choriz, smoothratio);
 
         if ((gotpic[MIRROR >> 3] & (1 << (MIRROR & 7))) > 0) {
@@ -5391,7 +5394,9 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
+            console.log("b4 ps[0].posy: %i", ps[0].posy);
             Player.processInput(i);
+            console.log("after ps[0].posy: %i", ps[0].posy);
             checksectors(i);
         }
     }

@@ -269,7 +269,7 @@ function krecipasm(i) { // Ken did this
  Flood is prevented if a portal does not face the POV.
  */
 function scansector(sectnum) {
-    var wal, wal2;
+    var wal, walIdx, wal2;
     var spr;
     var xs, ys, x1, y1, x2, y2, xp1, yp1, xp2 = 0, yp2 = 0, tempint;
     var z, zz, startwall, endwall, numscansbefore, scanfirst, bunchfrst;
@@ -288,6 +288,7 @@ function scansector(sectnum) {
     if (sectnum < 0)
         return;
 
+    console.log("start scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
     if (automapping)
         show2dsector[sectnum >> 3] |= pow2char[sectnum & 7];
 
@@ -325,8 +326,7 @@ function scansector(sectnum) {
         scanfirst = numscans;
 
 
-        for (z = startwall; z < endwall; z++) {
-            wal = wall[z];
+        for (z = startwall, walIdx = z, wal = wall[walIdx]; z < endwall; z++, wal = wall[++walIdx]) {
             nextsectnum = wal.nextsector;
 
             wal2 = wall[wal.point2];
@@ -339,6 +339,7 @@ function scansector(sectnum) {
 
             x2 = wal2.x - globalposx;
             y2 = wal2.y - globalposy;
+            console.log("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
 
             // If this is a portal...
             if ((nextsectnum >= 0) && ((wal.cstat & 32) == 0))
@@ -447,7 +448,7 @@ function scansector(sectnum) {
             pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
-            //console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+            console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
 
             bunchWallsList[numscans] = numscans + 1;
             numscans++;
@@ -480,7 +481,7 @@ function scansector(sectnum) {
     } while (numSectorsToVisit > 0);
     // do this until the stack of sectors to visit if empty.
     
-    console.log("pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
+    console.log("end scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
 }
 
 
@@ -1637,7 +1638,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
-        console.log2(printfFormatter("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2)); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+        console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
 
         if (y1 <= y2) {
             nptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
@@ -2600,6 +2601,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     globalposx = daposx;
     globalposy = daposy;
     globalposz = daposz;
+    console.log("dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
     globalang = (daang & 2047); //FCS: Mask and keep only 11 bits of angle value.
 
     globalhoriz = mulscale16(dahoriz - 100, xdimenscale) + (ydimen >> 1);
@@ -5634,7 +5636,7 @@ var clipmoveboxtracenum = 3;
 function clipmove(x, y, z, sectnum,
                xvect, yvect, walldist, ceildist,
                flordist, cliptype) {
-    var wal, wal2;
+    var wal, walIdx, wal2;
     var spr;
     var sec, sec2;
     var i, j, templong1, templong2;
@@ -5684,9 +5686,7 @@ function clipmove(x, y, z, sectnum,
         sec = sector[dasect];
         startwall = sec.wallptr;
         endwall = startwall + sec.wallnum;
-        for (j = startwall; j < endwall; j++) {
-            wal = wall[startwall];
-
+        for (j = startwall, wal = wall[walIdx = startwall]; j < endwall; j++, wal = wall[++walIdx]) {
             wal2 = wall[wal.point2];
             if ((wal.x < xmin) && (wal2.x < xmin)) continue;
             if ((wal.x > xmax) && (wal2.x > xmax)) continue;
@@ -5760,7 +5760,6 @@ function clipmove(x, y, z, sectnum,
                     if (wal.nextsector == clipsectorlist[i]) break;
                 if (i < 0) clipsectorlist[clipsectnum++] = wal.nextsector;
             }
-            startwall++;
         }
 
         for (j = headspritesect[dasect]; j >= 0; j = nextspritesect[j]) {
@@ -6007,7 +6006,7 @@ function pushmove( x,  y,  z,  sectnum, walldist,  ceildist,  flordist, cliptype
     console.assert(z instanceof Ref, "z must be Ref");
     console.assert(sectnum instanceof Ref, "sectnum must be Ref");
     var sec, sec2;
-    var wal;
+    var wal, walIdx;
     var i, j, k, t, dx, dy, dax, day, daz, daz2, bad, dir;
     var dasprclipmask, dawalclipmask;
     var startwall, endwall, clipsectcnt;
@@ -6035,9 +6034,8 @@ function pushmove( x,  y,  z,  sectnum, walldist,  ceildist,  flordist, cliptype
             else
                 endwall = sec.wallptr, startwall = endwall + sec.wallnum;
 
-            var walIdx = startwall;
-            for (i = startwall; i != endwall; i += dir) {
-                wal = wall[walIdx];
+            for (i = startwall, wal = wall[walIdx = startwall]; i != endwall; i += dir, walIdx += dir, wal = wall[walIdx]) {
+                console.log("pushmove: i: %i, picnum: %i, nextsector: %i", i, wal.picnum, wal.nextsector);
                 if (clipinsidebox(x.$, y.$, i, walldist - 4) == 1) {
                     j = 0;
                     if (wal.nextsector < 0) j = 1;
