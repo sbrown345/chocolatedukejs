@@ -2734,7 +2734,6 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
     // When every bunches have been tested for rendition.
     while ((numbunches > 0) && (numhits > 0)) {
-        if (numbunches == 2) debugger;
         console.log("drawrooms numbunches: %i", numbunches)
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.

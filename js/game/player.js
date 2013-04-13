@@ -48,6 +48,114 @@ function incur_damage(p) {
     }
 }
 
+
+function aim(s, aang, auto_aim) {
+    var  gotshrinker,gotfreezer;
+    var i, j, a, k, cans;
+    var aimstats = [10,13,1,2];
+    var dx1, dy1, dx2, dy2, dx3, dy3, smax, sdist;
+    var xv, yv;
+
+    a = s.ang;
+
+    j = -1;
+    //    if(s.picnum == APLAYER && ps[s.yvel].aim_mode) return -1;
+
+    gotshrinker = s.picnum == APLAYER && ps[s.yvel].curr_weapon == SHRINKER_WEAPON;
+    gotfreezer = s.picnum == APLAYER && ps[s.yvel].curr_weapon == FREEZE_WEAPON;
+
+    smax = 0x7fffffff;
+
+    dx1 = sintable[(a+512-aang)&2047];
+    dy1 = sintable[(a-aang)&2047];
+    dx2 = sintable[(a+512+aang)&2047];
+    dy2 = sintable[(a+aang)&2047];
+
+    dx3 = sintable[(a+512)&2047];
+    dy3 = sintable[a&2047];
+
+    // FIX_00015: Backward compliance with older demos (down to demos v27, 28, 116 and 117 only)
+
+    //if player has AutoAim ON do the function.
+    if((auto_aim && nHostForceDisableAutoaim == 0)||
+        ud.playing_demo_rev == BYTEVERSION_27     ||
+        ud.playing_demo_rev == BYTEVERSION_28     || 
+        ud.playing_demo_rev == BYTEVERSION_116    || 
+        ud.playing_demo_rev == BYTEVERSION_117) 
+        // don't disable any autoaim in case we are playing an old demo
+    {
+        for(k=0;k<4;k++)
+        {
+            if( j >= 0 )
+                break;
+            for(i=headspritestat[aimstats[k]];i >= 0;i=nextspritestat[i])
+                if( sprite[i].xrepeat > 0 && sprite[i].extra >= 0 && (sprite[i].cstat&(257+32768)) == 257)
+                    if( badguy(sprite[i]) || k < 2 )
+                    {
+                        if(badguy(sprite[i]) || sprite[i].picnum == APLAYER || sprite[i].picnum == SHARK)
+                        {
+                            if( sprite[i].picnum == APLAYER &&
+                                //							  ud.ffire == 0 &&
+							    ud.coop == 1 &&
+							    s.picnum == APLAYER &&
+							    s != sprite[i])
+                                continue;
+	
+                            if(gotshrinker && sprite[i].xrepeat < 30 )
+                            {
+                                switch(sprite[i].picnum)
+                                {
+                                    case SHARK:
+                                        if(sprite[i].xrepeat < 20) continue;
+                                        continue;
+                                    case GREENSLIME:
+                                    case GREENSLIME+1:
+                                    case GREENSLIME+2:
+                                    case GREENSLIME+3:
+                                    case GREENSLIME+4:
+                                    case GREENSLIME+5:
+                                    case GREENSLIME+6:
+                                    case GREENSLIME+7:
+                                        break;
+                                    default:
+                                        continue;
+                                }
+                            }
+                            if(gotfreezer && sprite[i].pal == 1) continue;
+                        }
+	
+                        xv = (sprite[i].x-s.x);
+                        yv = (sprite[i].y-s.y);
+	
+                        if( (dy1*xv) <= (dx1*yv) )
+                            if( ( dy2*xv ) >= (dx2*yv) )
+                            {
+                                sdist = mulscale(dx3,xv,14) + mulscale(dy3,yv,14);
+                                if( sdist > 512 && sdist < smax )
+                                {
+                                    if(s.picnum == APLAYER)
+                                        a = (klabs(scale(sprite[i].z-s.z,10,sdist)-(ps[s.yvel].horiz+ps[s.yvel].horizoff-100)) < 100);
+                                    else a = 1;
+	
+                                    if(sprite[i].picnum == ORGANTIC || sprite[i].picnum == ROTATEGUN )
+                                        cans = cansee(sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].sectnum,s.x,s.y,s.z-(32<<8),s.sectnum);
+                                    else cans = cansee(sprite[i].x,sprite[i].y,sprite[i].z-(32<<8),sprite[i].sectnum,s.x,s.y,s.z-(32<<8),s.sectnum);
+	
+                                    if( a && cans )
+                                    {
+                                        smax = sdist;
+                                        j = i;
+                                    }
+                                }
+                            }
+                    }
+        }
+    }
+
+    return j;
+}
+
+
 //313
 function shoot(i,atwith) {
     var sect, hitsect, hitspr, hitwall, l, sa, p, j, k, scount;
@@ -378,60 +486,64 @@ function shoot(i,atwith) {
                 }
                 else if( hitwall >= 0 )
                 {
-                    spawn(k,SMALLSMOKE);
+                    for (;; ) {
+                        
+                        spawn(k,SMALLSMOKE);
 
-                    if( isadoorwall(wall[hitwall].picnum) == 1 )
-                        goto SKIPBULLETHOLE;
-                    if(p >= 0 && (
-                        wall[hitwall].picnum == DIPSWITCH ||
-                        wall[hitwall].picnum == DIPSWITCH+1 ||
-                        wall[hitwall].picnum == DIPSWITCH2 ||
-                        wall[hitwall].picnum == DIPSWITCH2+1 ||
-                        wall[hitwall].picnum == DIPSWITCH3 ||
-                        wall[hitwall].picnum == DIPSWITCH3+1 ||
-                        wall[hitwall].picnum == HANDSWITCH ||
-                        wall[hitwall].picnum == HANDSWITCH+1) )
-                    {
-                        checkhitswitch(p,hitwall,0);
-                        return;
-                    }
+                        if( isadoorwall(wall[hitwall].picnum) == 1 )
+                            break;//goto SKIPBULLETHOLE;
+                        if(p >= 0 && (
+                            wall[hitwall].picnum == DIPSWITCH ||
+                            wall[hitwall].picnum == DIPSWITCH+1 ||
+                            wall[hitwall].picnum == DIPSWITCH2 ||
+                            wall[hitwall].picnum == DIPSWITCH2+1 ||
+                            wall[hitwall].picnum == DIPSWITCH3 ||
+                            wall[hitwall].picnum == DIPSWITCH3+1 ||
+                            wall[hitwall].picnum == HANDSWITCH ||
+                            wall[hitwall].picnum == HANDSWITCH+1) )
+                        {
+                            checkhitswitch(p,hitwall,0);
+                            return;
+                        }
 
-                    if(wall[hitwall].hitag != 0 || ( wall[hitwall].nextwall >= 0 && wall[wall[hitwall].nextwall].hitag != 0 ) )
-                        goto SKIPBULLETHOLE;
+                        if(wall[hitwall].hitag != 0 || ( wall[hitwall].nextwall >= 0 && wall[wall[hitwall].nextwall].hitag != 0 ) )
+                            break;//goto SKIPBULLETHOLE;
 
-                    if( hitsect >= 0 && sector[hitsect].lotag == 0 )
-                        if( wall[hitwall].overpicnum != BIGFORCE )
-                            if( (wall[hitwall].nextsector >= 0 && sector[wall[hitwall].nextsector].lotag == 0 ) ||
-                                ( wall[hitwall].nextsector == -1 && sector[hitsect].lotag == 0 ) )
-                                if( (wall[hitwall].cstat&16) == 0)
-                                {
-                                    if(wall[hitwall].nextsector >= 0)
+                        if( hitsect >= 0 && sector[hitsect].lotag == 0 )
+                            if( wall[hitwall].overpicnum != BIGFORCE )
+                                if( (wall[hitwall].nextsector >= 0 && sector[wall[hitwall].nextsector].lotag == 0 ) ||
+                                    ( wall[hitwall].nextsector == -1 && sector[hitsect].lotag == 0 ) )
+                                    if( (wall[hitwall].cstat&16) == 0)
                                     {
-                                        l = headspritesect[wall[hitwall].nextsector];
+                                        if(wall[hitwall].nextsector >= 0)
+                                        {
+                                            l = headspritesect[wall[hitwall].nextsector];
+                                            while(l >= 0)
+                                            {
+                                                if(sprite[l].statnum == 3 && sprite[l].lotag == 13)
+                                                    break;//goto SKIPBULLETHOLE;
+                                                l = nextspritesect[l];
+                                            }
+                                        }
+
+                                        l = headspritestat[5];
                                         while(l >= 0)
                                         {
-                                            if(sprite[l].statnum == 3 && sprite[l].lotag == 13)
-                                                goto SKIPBULLETHOLE;
-                                            l = nextspritesect[l];
+                                            if(sprite[l].picnum == BULLETHOLE)
+                                                if(dist(sprite[l],sprite[k]) < (12+(TRAND&7)) )
+                                                    break;//goto SKIPBULLETHOLE;
+                                            l = nextspritestat[l];
                                         }
+                                        l = spawn(k,BULLETHOLE);
+                                        sprite[l].xvel = -1;
+                                        sprite[l].ang = getangle(wall[hitwall].x-wall[wall[hitwall].point2].x,
+                                            wall[hitwall].y-wall[wall[hitwall].point2].y)+512;
+                                        ssp(l,CLIPMASK0);
                                     }
-
-                                    l = headspritestat[5];
-                                    while(l >= 0)
-                                    {
-                                        if(sprite[l].picnum == BULLETHOLE)
-                                            if(dist(sprite[l],sprite[k]) < (12+(TRAND&7)) )
-                                                goto SKIPBULLETHOLE;
-                                        l = nextspritestat[l];
-                                    }
-                                    l = spawn(k,BULLETHOLE);
-                                    sprite[l].xvel = -1;
-                                    sprite[l].ang = getangle(wall[hitwall].x-wall[wall[hitwall].point2].x,
-                                        wall[hitwall].y-wall[wall[hitwall].point2].y)+512;
-                                    ssp(l,CLIPMASK0);
-                                }
-
-                    SKIPBULLETHOLE:
+                        
+                        break;
+                    }
+                    //SKIPBULLETHOLE:
 
                         if( wall[hitwall].cstat&2 )
                             if(wall[hitwall].nextsector >= 0)
