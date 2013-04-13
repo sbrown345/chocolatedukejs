@@ -1627,7 +1627,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
     m2 = m1+l;
     mptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
     mptr2 = new PointerHelper(mptr1.position+1);
-    debugger;//todo mptr1 int32, but pointer helper converts it to uint8???
+    
     for(x=dax1; x<=dax2; x++)
     {
         if (dastat == 0) {
@@ -1940,7 +1940,7 @@ Engine.draWalls = function (bunch) {
     var z, wallnum, sectnum, nextsectnum;
     var startsmostwallcnt, startsmostcnt, gotswall;
     var andwstat1, andwstat2;
-
+    if (bunch == 2) debugger;
     console.log("drawalls %i", bunch);
     z = bunchfirst[bunch];
     sectnum = pvWalls[z].sectorId;
@@ -2734,9 +2734,11 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
     // When every bunches have been tested for rendition.
     while ((numbunches > 0) && (numhits > 0)) {
+        if (numbunches == 2) debugger;
+        console.log("drawrooms numbunches: %i", numbunches)
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.
-        clearbuf(tempbuf, 0, ((numbunches + 3) >> 2));
+        clearbuf(tempbuf,((numbunches+3)>>2),0);
 
         /* Almost works, but not quite :( */
         closest = 0;
@@ -2753,6 +2755,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
 
         /* Double-check */
         for (i = 0; i < numbunches; i++) {
+            console.log("drawrooms  Double-check i: %i, tempbuf[i]: %i", i, tempbuf[i]);
             if (tempbuf[i])
                 continue;
             if ((j = bunchfront(i, closest)) < 0)

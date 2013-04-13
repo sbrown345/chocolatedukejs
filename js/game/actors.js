@@ -916,7 +916,6 @@ function movestandables()
         t = hittype[i].temp_data;
         s = sprite[i];
         sect = s.sectnum;
-        if (i == 122 && sect == 188) debugger;
         console.log("movestandables, i: %i, sect: %i",i, sect);
         
         if (sect < 0) { deletesprite(i); { i = nexti; continue BOLT; } }

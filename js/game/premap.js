@@ -1003,17 +1003,17 @@ preMap.clearFifo = function () {
     avgfvel = avgsvel = avgavel = avghorz = avgbits = 0;
     otherminlag = mymaxlag = 0;
 
-    clearbuf(myminlag, 0, myminlag.length);
+    clearbufbyte(myminlag,0, MAXPLAYERS<<2,0);
     loc = new Input();
     sync = structArray(Sync, MAXPLAYERS);
     inputfifo = new Array(MOVEFIFOSIZ);
     for (var i = 0; i < inputfifo.length; i++) {
         inputfifo[i] = structArray(Input, MAXPLAYERS);
     }
-
-    clearbuf(movefifoend, 0, movefifoend.length);
-    clearbuf(syncvalhead, 0, syncvalhead.length);
-    clearbuf(myminlag, 0, myminlag.length);
+    
+    clearbuf(movefifoend,MAXPLAYERS,0);
+    clearbuf(syncvalhead,MAXPLAYERS,0);
+    clearbuf(myminlag,MAXPLAYERS,0);
 };
 
 //1434
