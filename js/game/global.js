@@ -229,6 +229,24 @@ var oldipos = new Int32Array(MAXINTERPOLATIONS);
 var bakipos = new Int32Array(MAXINTERPOLATIONS);
 var curipos = new Int32Array(MAXINTERPOLATIONS);
 
+function FindDistance2D(ix,  iy) {
+  var   t;
+
+  ix = Math.abs(ix);        /* absolute values */
+  iy = Math.abs(iy);
+
+    if (ix<iy)
+    {
+        var tmp = ix;
+        ix = iy;
+        iy = tmp;
+    }
+
+    t = iy + (iy>>1);
+
+    return (ix - (ix>>5) - (ix>>7)  + (t>>2) + (t>>6));
+}
+
 
 function FindDistance3D(ix, iy, iz) {
    var t;

@@ -58,6 +58,13 @@ function dist(s1,s2)
     return(FindDistance3D(vx,vy,vz>>4));
 }
 
+function ldist(s1,s2) {
+    var vx,vy;
+    vx = s1.x - s2.x;
+    vy = s1.y - s2.y;
+    return(FindDistance2D(vx,vy) + 1);
+}
+
 //222
 function findplayer(s,d) {
     console.assert(d instanceof Ref);

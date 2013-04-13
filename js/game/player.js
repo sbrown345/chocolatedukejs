@@ -49,8 +49,867 @@ function incur_damage(p) {
 }
 
 //313
-function shoot(i, atwith) {
-    console.log("todo: shoot")
+function shoot(i,atwith) {
+    var sect, hitsect, hitspr, hitwall, l, sa, p, j, k, scount;
+    var sx, sy, sz, vel, zvel, hitx, hity, hitz, x, xRef = new Ref(), oldzvel, dal;
+    var  sizx,sizy;
+    var s;
+
+    s = sprite[i];
+    sect = s.sectnum;
+    zvel = 0;
+
+    if( s.picnum == APLAYER )
+    {
+        p = s.yvel;
+
+        sx = ps[p].posx;
+        sy = ps[p].posy;
+        sz = ps[p].posz+ps[p].pyoff+(4<<8);
+        sa = ps[p].ang;
+
+        ps[p].crack_time = 777;
+
+    }
+    else
+    {
+        p = -1;
+        sa = s.ang;
+        sx = s.x;
+        sy = s.y;
+        sz = s.z-((s.yrepeat*tiles[s.picnum].dim.height)<<1)+(4<<8);
+        if(s.picnum != ROTATEGUN)
+        {
+            sz -= (7<<8);
+            if(badguy(s) && sprite[i].picnum != COMMANDER)
+            {
+                sx += (sintable[(sa+1024+96)&2047]>>7);
+                sy += (sintable[(sa+512+96)&2047]>>7);
+            }
+        }
+    }
+
+    switch(atwith)
+    {
+        case BLOODSPLAT1:
+        case BLOODSPLAT2:
+        case BLOODSPLAT3:
+        case BLOODSPLAT4:
+
+            if(p >= 0)
+                sa += 64 - (TRAND&127);
+            else sa += 1024 + 64 - (TRAND&127);
+            zvel = 1024-(TRAND&2047);
+        case KNEE:
+            if(atwith == KNEE )
+            {
+                if(p >= 0)
+                {
+                    zvel = (100-ps[p].horiz-ps[p].horizoff)<<5;
+                    sz += (6<<8);
+                    sa += 15;
+                }
+                else {
+                    xRef.$ = x;
+                    j = ps[findplayer(s,xRef)].i;
+                    x = xRef.$;
+                    zvel = (( (sprite[j].z-sz)<<8 ) / (x+1))|0;
+                    sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+            }
+            var hitsectRef = new Ref(hitsect);
+            var hitwallRef = new Ref(hitwall);
+            var hitsprRef = new Ref(hitspr);
+            var hitxRef = new Ref(hitx);
+            var hityRef = new Ref(hity);
+            var hitzRef = new Ref(hitz);
+            hitscan(sx,sy,sz,sect,
+                sintable[(sa+512)&2047],
+                sintable[sa&2047],zvel<<6,
+                hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
+            hitsect = hitsectRef.$;
+            hitwall = hitwallRef.$;
+            hitspr = hitsprRef.$;
+            hitx = hitxRef.$;
+            hity = hityRef.$;
+            hitz = hitzRef.$;
+
+            if( atwith == BLOODSPLAT1 ||
+                atwith == BLOODSPLAT2 ||
+                atwith == BLOODSPLAT3 ||
+                atwith == BLOODSPLAT4 )
+            {
+                if( FindDistance2D(sx-hitx,sy-hity) < 1024 )
+                    if( hitwall >= 0 && wall[hitwall].overpicnum != BIGFORCE )
+                        if( ( wall[hitwall].nextsector >= 0 && hitsect >= 0 &&
+                            sector[wall[hitwall].nextsector].lotag == 0 &&
+                                sector[hitsect].lotag == 0 &&
+                                    sector[wall[hitwall].nextsector].lotag == 0 &&
+                                        (sector[hitsect].floorz-sector[wall[hitwall].nextsector].floorz) > (16<<8) ) ||
+                                            ( wall[hitwall].nextsector == -1 && sector[hitsect].lotag == 0 ) )
+                            if( (wall[hitwall].cstat&16) == 0)
+                            {
+                                if(wall[hitwall].nextsector >= 0)
+                                {
+                                    k = headspritesect[wall[hitwall].nextsector];
+                                    while(k >= 0)
+                                    {
+                                        if(sprite[k].statnum == 3 && sprite[k].lotag == 13)
+                                            return;
+                                        k = nextspritesect[k];
+                                    }
+                                }
+
+                                if( wall[hitwall].nextwall >= 0 &&
+                                    wall[wall[hitwall].nextwall].hitag != 0 )
+                                    return;
+
+                                if(wall[hitwall].hitag == 0)
+                                {
+                                    k = spawn(i,atwith);
+                                    sprite[k].xvel = -12;
+                                    sprite[k].ang = getangle(wall[hitwall].x-wall[wall[hitwall].point2].x,
+                                        wall[hitwall].y-wall[wall[hitwall].point2].y)+512;
+                                    sprite[k].x = hitx;
+                                    sprite[k].y = hity;
+                                    sprite[k].z = hitz;
+                                    sprite[k].cstat |= (TRAND&4);
+                                    ssp(k,CLIPMASK0);
+                                    setsprite(k,sprite[k].x,sprite[k].y,sprite[k].z);
+                                    if( sprite[i].picnum == OOZFILTER || sprite[i].picnum == NEWBEAST )
+                                        sprite[k].pal = 6;
+                                }
+                            }
+                return;
+            }
+
+            if(hitsect < 0) break;
+
+            if( ( klabs(sx-hitx)+klabs(sy-hity) ) < 1024 )
+            {
+                if(hitwall >= 0 || hitspr >= 0)
+                {
+                    j = EGS(hitsect,hitx,hity,hitz,KNEE,-15,0,0,sa,32,0,i,4);
+                    sprite[j].extra += (TRAND&7);
+                    if(p >= 0)
+                    {
+                        k = spawn(j,SMALLSMOKE);
+                        sprite[k].z -= (8<<8);
+                        spritesound(KICK_HIT,j);
+                    }
+
+                    if ( p >= 0 && ps[p].steroids_amount > 0 && ps[p].steroids_amount < 400 )
+                        sprite[j].extra += (max_player_health>>2);
+
+                    if( hitspr >= 0 && sprite[hitspr].picnum != ACCESSSWITCH && sprite[hitspr].picnum != ACCESSSWITCH2 )
+                    {
+                        checkhitsprite(hitspr,j);
+                        if(p >= 0) checkhitswitch(p,hitspr,1);
+                    }
+
+                    else if( hitwall >= 0 )
+                    {
+                        if( wall[hitwall].cstat&2 )
+                            if(wall[hitwall].nextsector >= 0)
+                                if(hitz >= (sector[wall[hitwall].nextsector].floorz) )
+                                    hitwall = wall[hitwall].nextwall;
+
+                        if( hitwall >= 0 && wall[hitwall].picnum != ACCESSSWITCH && wall[hitwall].picnum != ACCESSSWITCH2 )
+                        {
+                            checkhitwall(j,hitwall,hitx,hity,hitz,atwith);
+                            if(p >= 0) checkhitswitch(p,hitwall,0);
+                        }
+                    }
+                }
+                else if(p >= 0 && zvel > 0 && sector[hitsect].lotag == 1)
+                {
+                    j = spawn(ps[p].i,WATERSPLASH2);
+                    sprite[j].x = hitx;
+                    sprite[j].y = hity;
+                    sprite[j].ang = ps[p].ang; // Total tweek
+                    sprite[j].xvel = 32;
+                    ssp(i,CLIPMASK0);
+                    sprite[j].xvel = 0;
+
+                }
+            }
+
+            break;
+
+        case SHOTSPARK1:
+        case SHOTGUN:
+        case CHAINGUN:
+
+            if( s.extra >= 0 ) s.shade = -96;
+
+            if(p >= 0)
+            {
+                j = aim( s, AUTO_AIM_ANGLE, ps[p].auto_aim!= 0 );
+                if(j >= 0)
+                {
+                    dal = ((sprite[j].xrepeat*tiles[sprite[j].picnum].dim.height)<<1)+(5<<8);
+                    switch(sprite[j].picnum)
+                    {
+                        case GREENSLIME:
+                        case GREENSLIME+1:
+                        case GREENSLIME+2:
+                        case GREENSLIME+3:
+                        case GREENSLIME+4:
+                        case GREENSLIME+5:
+                        case GREENSLIME+6:
+                        case GREENSLIME+7:
+                        case ROTATEGUN:
+                            dal -= (8<<8);
+                            break;
+                    }
+                    zvel = (( ( sprite[j].z-sz-dal )<<8 ) / ldist(sprite[ps[p].i], sprite[j]) )|0;
+                    sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+
+                if(atwith == SHOTSPARK1)
+                {
+                    if(j == -1)
+                    {
+                        sa += 16-(TRAND&31);
+                        zvel = (100-ps[p].horiz-ps[p].horizoff)<<5;
+                        zvel += 128-(TRAND&255);
+                    }
+                }
+                else
+                {
+                    sa += 16-(TRAND&31);
+                    if(j == -1) zvel = (100-ps[p].horiz-ps[p].horizoff)<<5;
+                    zvel += 128-(TRAND&255);
+                }
+                sz -= (2<<8);
+            }
+            else
+            {
+                xRef.$ = x;
+                j = findplayer(s,xRef);
+                x = xRef.$;
+                sz -= (4<<8);
+                zvel = (( (ps[j].posz-sz) <<8 ) / (ldist(sprite[ps[j].i], s ) )) | 0;
+                if(s.picnum != BOSS1)
+                {
+                    zvel += 128-(TRAND&255);
+                    sa += 32-(TRAND&63);
+                }
+                else
+                {
+                    zvel += 128-(TRAND&255);
+                    sa = getangle(ps[j].posx-sx,ps[j].posy-sy)+64-(TRAND&127);
+                }
+            }
+
+            s.cstat &= ~257;
+            var hitsectRef = new Ref(hitsect);
+            var hitwallRef = new Ref(hitwall);
+            var hitsprRef = new Ref(hitspr);
+            var hitxRef = new Ref(hitx);
+            var hityRef = new Ref(hity);
+            var hitzRef = new Ref(hitz);
+            hitscan(sx,sy,sz,sect,
+                sintable[(sa+512)&2047],
+                sintable[sa&2047],
+                zvel<<6,hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
+            hitsect = hitsectRef.$;
+            hitwall = hitwallRef.$;
+            hitspr = hitsprRef.$;
+            hitx = hitxRef.$;
+            hity = hityRef.$;
+            hitz = hitzRef.$;
+            s.cstat |= 257;
+
+            if(hitsect < 0) return;
+
+            if( (TRAND&15) == 0 && sector[hitsect].lotag == 2 )
+                tracers(hitx,hity,hitz,sx,sy,sz,8-(ud.multimode>>1));
+
+            if(p >= 0)
+            {
+                k = EGS(hitsect,hitx,hity,hitz,SHOTSPARK1,-15,10,10,sa,0,0,i,4);
+                sprite[k].extra = script[actorscrptr[atwith]]; //*actorscrptr[atwith];
+                sprite[k].extra += (TRAND%6);
+
+                if( hitwall == -1 && hitspr == -1)
+                {
+                    if( zvel < 0 )
+                    {
+                        if( sector[hitsect].ceilingstat&1 )
+                        {
+                            sprite[k].xrepeat = 0;
+                            sprite[k].yrepeat = 0;
+                            return;
+                        }
+                        else
+                            checkhitceiling(hitsect);
+                    }
+                    spawn(k,SMALLSMOKE);
+                }
+
+                if(hitspr >= 0)
+                {
+                    checkhitsprite(hitspr,k);
+                    if( sprite[hitspr].picnum == APLAYER && (ud.coop != 1 || ud.ffire == 1) )
+                    {
+                        l = spawn(k,JIBS6);
+                        sprite[k].xrepeat = sprite[k].yrepeat = 0;
+                        sprite[l].z += (4<<8);
+                        sprite[l].xvel = 16;
+                        sprite[l].xrepeat = sprite[l].yrepeat = 24;
+                        sprite[l].ang += 64-(TRAND&127);
+                    }
+                    else spawn(k,SMALLSMOKE);
+
+                    if(p >= 0 && (
+                        sprite[hitspr].picnum == DIPSWITCH ||
+                        sprite[hitspr].picnum == DIPSWITCH+1 ||
+                        sprite[hitspr].picnum == DIPSWITCH2 ||
+                        sprite[hitspr].picnum == DIPSWITCH2+1 ||
+                        sprite[hitspr].picnum == DIPSWITCH3 ||
+                        sprite[hitspr].picnum == DIPSWITCH3+1 ||
+                        sprite[hitspr].picnum == HANDSWITCH ||
+                        sprite[hitspr].picnum == HANDSWITCH+1) )
+                    {
+                        checkhitswitch(p,hitspr,1);
+                        return;
+                    }
+                }
+                else if( hitwall >= 0 )
+                {
+                    spawn(k,SMALLSMOKE);
+
+                    if( isadoorwall(wall[hitwall].picnum) == 1 )
+                        goto SKIPBULLETHOLE;
+                    if(p >= 0 && (
+                        wall[hitwall].picnum == DIPSWITCH ||
+                        wall[hitwall].picnum == DIPSWITCH+1 ||
+                        wall[hitwall].picnum == DIPSWITCH2 ||
+                        wall[hitwall].picnum == DIPSWITCH2+1 ||
+                        wall[hitwall].picnum == DIPSWITCH3 ||
+                        wall[hitwall].picnum == DIPSWITCH3+1 ||
+                        wall[hitwall].picnum == HANDSWITCH ||
+                        wall[hitwall].picnum == HANDSWITCH+1) )
+                    {
+                        checkhitswitch(p,hitwall,0);
+                        return;
+                    }
+
+                    if(wall[hitwall].hitag != 0 || ( wall[hitwall].nextwall >= 0 && wall[wall[hitwall].nextwall].hitag != 0 ) )
+                        goto SKIPBULLETHOLE;
+
+                    if( hitsect >= 0 && sector[hitsect].lotag == 0 )
+                        if( wall[hitwall].overpicnum != BIGFORCE )
+                            if( (wall[hitwall].nextsector >= 0 && sector[wall[hitwall].nextsector].lotag == 0 ) ||
+                                ( wall[hitwall].nextsector == -1 && sector[hitsect].lotag == 0 ) )
+                                if( (wall[hitwall].cstat&16) == 0)
+                                {
+                                    if(wall[hitwall].nextsector >= 0)
+                                    {
+                                        l = headspritesect[wall[hitwall].nextsector];
+                                        while(l >= 0)
+                                        {
+                                            if(sprite[l].statnum == 3 && sprite[l].lotag == 13)
+                                                goto SKIPBULLETHOLE;
+                                            l = nextspritesect[l];
+                                        }
+                                    }
+
+                                    l = headspritestat[5];
+                                    while(l >= 0)
+                                    {
+                                        if(sprite[l].picnum == BULLETHOLE)
+                                            if(dist(sprite[l],sprite[k]) < (12+(TRAND&7)) )
+                                                goto SKIPBULLETHOLE;
+                                        l = nextspritestat[l];
+                                    }
+                                    l = spawn(k,BULLETHOLE);
+                                    sprite[l].xvel = -1;
+                                    sprite[l].ang = getangle(wall[hitwall].x-wall[wall[hitwall].point2].x,
+                                        wall[hitwall].y-wall[wall[hitwall].point2].y)+512;
+                                    ssp(l,CLIPMASK0);
+                                }
+
+                    SKIPBULLETHOLE:
+
+                        if( wall[hitwall].cstat&2 )
+                            if(wall[hitwall].nextsector >= 0)
+                                if(hitz >= (sector[wall[hitwall].nextsector].floorz) )
+                                    hitwall = wall[hitwall].nextwall;
+
+                    checkhitwall(k,hitwall,hitx,hity,hitz,SHOTSPARK1);
+                }
+            }
+            else
+            {
+                k = EGS(hitsect,hitx,hity,hitz,SHOTSPARK1,-15,24,24,sa,0,0,i,4);
+                sprite[k].extra = script[actorscrptr[atwith]];// *actorscrptr[atwith];
+
+                if( hitspr >= 0 )
+                {
+                    checkhitsprite(hitspr,k);
+                    if( sprite[hitspr].picnum != APLAYER )
+                        spawn(k,SMALLSMOKE);
+                    else sprite[k].xrepeat = sprite[k].yrepeat = 0;
+                }
+                else if( hitwall >= 0 )
+                    checkhitwall(k,hitwall,hitx,hity,hitz,SHOTSPARK1);
+            }
+
+            if( (TRAND&255) < 4 )
+                xyzsound(PISTOL_RICOCHET,k,hitx,hity,hitz);
+
+            return;
+
+        case FIRELASER:
+        case SPIT:
+        case COOLEXPLOSION1:
+
+            if( s.extra >= 0 ) s.shade = -96;
+
+            scount = 1;
+            if(atwith == SPIT) vel = 292;
+            else
+            {
+                if(atwith == COOLEXPLOSION1)
+                {
+                    if(s.picnum == BOSS2) vel = 644;
+                    else vel = 348;
+                    sz -= (4<<7);
+                }
+                else
+                {
+                    vel = 840;
+                    sz -= (4<<7);
+                }
+            }
+
+            if(p >= 0)
+            {
+                j = aim( s, AUTO_AIM_ANGLE, ps[p].auto_aim==2 );
+                if(j >= 0)
+                {
+                    dal = ((sprite[j].xrepeat*tiles[sprite[j].picnum].dim.height)<<1)-(12<<8);
+                    zvel = (((sprite[j].z-sz-dal)*vel ) / ldist(sprite[ps[p].i], sprite[j]) )|0;
+                    sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+                else
+                    zvel = (100-ps[p].horiz-ps[p].horizoff)*98;
+            }
+            else
+            {
+                xRef.$ = x;
+                j = findplayer(s,xRef);
+                x = xRef.$;
+                //                sa = getangle(ps[j].oposx-sx,ps[j].oposy-sy);
+                sa += 16-(TRAND&31);
+                zvel = (( ( (ps[j].oposz - sz + (3<<8) ) )*vel ) / ldist(sprite[ps[j].i],s))|0;
+            }
+
+            oldzvel = zvel;
+
+            if(atwith == SPIT) { sizx = 18;sizy = 18,sz -= (10<<8); }
+            else
+            {
+                if( atwith == FIRELASER )
+                {
+                    if(p >= 0)
+                    {
+                        
+                        sizx = 34;
+                        sizy = 34;
+                    }
+                    else
+                    {
+                        sizx = 18;
+                        sizy = 18;
+                    }
+                }
+                else
+                {
+                    sizx = 18;
+                    sizy = 18;
+                }
+            }
+
+            if(p >= 0) sizx = 7,sizy = 7;
+
+            while(scount > 0)
+            {
+                j = EGS(sect,sx,sy,sz,atwith,-127,sizx,sizy,sa,vel,zvel,i,4);
+                sprite[j].extra += (TRAND&7);
+
+                if(atwith == COOLEXPLOSION1)
+                {
+                    sprite[j].shade = 0;
+                    if(sprite[i].picnum == BOSS2)
+                    {
+                        l = sprite[j].xvel;
+                        sprite[j].xvel = 1024;
+                        ssp(j,CLIPMASK0);
+                        sprite[j].xvel = l;
+                        sprite[j].ang += 128-(TRAND&255);
+                    }
+                }
+
+                sprite[j].cstat = 128;
+                sprite[j].clipdist = 4;
+
+                sa = s.ang+32-(TRAND&63);
+                zvel = oldzvel+512-(TRAND&1023);
+
+                scount--;
+            }
+
+            return;
+
+        case FREEZEBLAST:
+            sz += (3<<8);
+        case RPG:
+
+            if( s.extra >= 0 ) s.shade = -96;
+
+            scount = 1;
+            vel = 644;
+
+            j = -1;
+
+            if(p >= 0)
+            {
+                j = aim( s, 48, ps[p].auto_aim==2);
+                if(j >= 0)
+                {
+                    dal = ((sprite[j].xrepeat*tiles[sprite[j].picnum].dim.height)<<1)+(8<<8);
+                    zvel = (( (sprite[j].z-sz-dal)*vel ) / ldist(sprite[ps[p].i], sprite[j]))|0;
+                    if( sprite[j].picnum != RECON )
+                        sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+                else zvel = (100-ps[p].horiz-ps[p].horizoff)*81;
+                if(atwith == RPG)
+                    spritesound(RPG_SHOOT,i);
+
+            }
+            else
+            {
+                xRef.$ = x;
+                j = findplayer(s,xRef);
+                x = xRef.$;
+                sa = getangle(ps[j].oposx-sx,ps[j].oposy-sy);
+                if(sprite[i].picnum == BOSS3)
+                    sz -= (32<<8);
+                else if(sprite[i].picnum == BOSS2)
+                {
+                    vel += 128;
+                    sz += 24<<8;
+                }
+
+                l = ldist(sprite[ps[j].i],s);
+                zvel = (( (ps[j].oposz-sz)*vel) / l)|0;
+
+                if( badguy(s) && (s.hitag&face_player_smart) )
+                    sa = s.ang+(TRAND&31)-16;
+            }
+
+            if( p >= 0 && j >= 0)
+                l = j;
+            else l = -1;
+
+            j = EGS(sect,
+                sx+((sintable[(348+sa+512)&2047]/448)|0),
+                sy+((sintable[(sa+348)&2047]/448)|0),
+                sz-(1<<8),atwith,0,14,14,sa,vel,zvel,i,4);
+
+            sprite[j].extra += (TRAND&7);
+            if(atwith != FREEZEBLAST)
+                sprite[j].yvel = l;
+            else
+            {
+                sprite[j].yvel = numfreezebounces;
+                sprite[j].xrepeat >>= 1;
+                sprite[j].yrepeat >>= 1;
+                sprite[j].zvel -= (2<<4);
+            }
+
+            if(p == -1)
+            {
+                if(sprite[i].picnum == BOSS3)
+                {
+                    if(TRAND&1)
+                    {
+                        sprite[j].x -= sintable[sa&2047]>>6;
+                        sprite[j].y -= sintable[(sa+1024+512)&2047]>>6;
+                        sprite[j].ang -= 8;
+                    }
+                    else
+                    {
+                        sprite[j].x += sintable[sa&2047]>>6;
+                        sprite[j].y += sintable[(sa+1024+512)&2047]>>6;
+                        sprite[j].ang += 4;
+                    }
+                    sprite[j].xrepeat = 42;
+                    sprite[j].yrepeat = 42;
+                }
+                else if(sprite[i].picnum == BOSS2)
+                {
+                    sprite[j].x -= (sintable[sa&2047]/56)|0;
+                    sprite[j].y -= (sintable[(sa+1024+512)&2047]/56)|0;
+                    sprite[j].ang -= 8+(TRAND&255)-128;
+                    sprite[j].xrepeat = 24;
+                    sprite[j].yrepeat = 24;
+                }
+                else if(atwith != FREEZEBLAST)
+                {
+                    sprite[j].xrepeat = 30;
+                    sprite[j].yrepeat = 30;
+                    sprite[j].extra >>= 2;
+                }
+            }
+            else if(ps[p].curr_weapon == DEVISTATOR_WEAPON)
+            {
+                sprite[j].extra >>= 2;
+                sprite[j].ang += 16-(TRAND&31);
+                sprite[j].zvel += 256-(TRAND&511);
+
+                if( ps[p].hbomb_hold_delay )
+                {
+                    sprite[j].x -= (sintable[sa&2047]/644)|0;
+                    sprite[j].y -= (sintable[(sa+1024+512)&2047]/644)|0;
+                }
+                else
+                {
+                    sprite[j].x += sintable[sa&2047]>>8;
+                    sprite[j].y += sintable[(sa+1024+512)&2047]>>8;
+                }
+                sprite[j].xrepeat >>= 1;
+                sprite[j].yrepeat >>= 1;
+            }
+
+            sprite[j].cstat = 128;
+            if(atwith == RPG)
+                sprite[j].clipdist = 4;
+            else
+                sprite[j].clipdist = 40;
+
+            break;
+
+        case HANDHOLDINGLASER:
+
+            if(p >= 0)
+                zvel = (100-ps[p].horiz-ps[p].horizoff)*32;
+            else zvel = 0;
+            
+            var hitsectRef = new Ref(hitsect);
+            var hitwallRef = new Ref(hitwall);
+            var hitsprRef = new Ref(hitspr);
+            var hitxRef = new Ref(hitx);
+            var hityRef = new Ref(hity);
+            var hitzRef = new Ref(hitz);
+            hitscan(sx,sy,sz-ps[p].pyoff,sect,
+                sintable[(sa+512)&2047],
+                sintable[sa&2047],
+                zvel<<6,hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
+            hitsect = hitsectRef.$;
+            hitwall = hitwallRef.$;
+            hitspr = hitsprRef.$;
+            hitx = hitxRef.$;
+            hity = hityRef.$;
+            hitz = hitzRef.$;
+
+            j = 0;
+            if(hitspr >= 0) break;
+
+            if(hitwall >= 0 && hitsect >= 0)
+                if( ((hitx-sx)*(hitx-sx)+(hity-sy)*(hity-sy)) < (290*290) )
+                {
+                    if( wall[hitwall].nextsector >= 0)
+                    {
+                        if( sector[wall[hitwall].nextsector].lotag <= 2 && sector[hitsect].lotag <= 2 )
+                            j = 1;
+                    }
+                    else if( sector[hitsect].lotag <= 2 )
+                        j = 1;
+                }
+
+            if(j == 1)
+            {
+                k = EGS(hitsect,hitx,hity,hitz,TRIPBOMB,-16,4,5,sa,0,0,i,6);
+
+                sprite[k].hitag = k;
+                spritesound(LASERTRIP_ONWALL,k);
+                sprite[k].xvel = -20;
+                ssp(k,CLIPMASK0);
+                sprite[k].cstat = 16;
+                hittype[k].temp_data[5] = sprite[k].ang = getangle(wall[hitwall].x-wall[wall[hitwall].point2].x,wall[hitwall].y-wall[wall[hitwall].point2].y)-512;
+
+                if(p >= 0)
+                    ps[p].ammo_amount[TRIPBOMB_WEAPON]--;
+
+            }
+            return;
+
+        case BOUNCEMINE:
+        case MORTER:
+
+            if( s.extra >= 0 ) s.shade = -96;
+
+            xRef.$ = x;
+            j = ps[findplayer(s,xRef)].i;
+            x = xRef.$;
+            x = ldist(sprite[j],s);
+
+            zvel = -x>>1;
+
+            if(zvel < -4096)
+                zvel = -2048;
+            vel = x>>4;
+
+            EGS(sect,
+                sx+(sintable[(512+sa+512)&2047]>>8),
+                sy+(sintable[(sa+512)&2047]>>8),
+                sz+(6<<8),atwith,-64,32,32,sa,vel,zvel,i,1);
+            break;
+
+        case GROWSPARK:
+
+            if(p >= 0)
+            {
+                j = aim( s, AUTO_AIM_ANGLE, ps[p].auto_aim==2);
+                if(j >= 0)
+                {
+                    dal = ((sprite[j].xrepeat*tiles[sprite[j].picnum].dim.height)<<1)+(5<<8);
+                    switch(sprite[j].picnum)
+                    {
+                        case GREENSLIME:
+                        case GREENSLIME+1:
+                        case GREENSLIME+2:
+                        case GREENSLIME+3:
+                        case GREENSLIME+4:
+                        case GREENSLIME+5:
+                        case GREENSLIME+6:
+                        case GREENSLIME+7:
+                        case ROTATEGUN:
+                            dal -= (8<<8);
+                            break;
+                    }
+                    zvel = (( ( sprite[j].z-sz-dal )<<8 ) / (ldist(sprite[ps[p].i], sprite[j]) ))|0;
+                    sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+                else
+                {
+                    sa += 16-(TRAND&31);
+                    zvel = (100-ps[p].horiz-ps[p].horizoff)<<5;
+                    zvel += 128-(TRAND&255);
+                }
+
+                sz -= (2<<8);
+            }
+            else
+            {
+                xRef.$ = x;
+                j = findplayer(s,xRef);
+                x = xRef.$;
+                sz -= (4<<8);
+                zvel = ( (ps[j].posz-sz) <<8 ) / (ldist(sprite[ps[j].i], s ) );
+                zvel += 128-(TRAND&255);
+                sa += 32-(TRAND&63);
+            }
+
+            k = 0;
+
+            //            RESHOOTGROW:
+
+            s.cstat &= ~257;
+            var hitsectRef = new Ref(hitsect);
+            var hitwallRef = new Ref(hitwall);
+            var hitsprRef = new Ref(hitspr);
+            var hitxRef = new Ref(hitx);
+            var hityRef = new Ref(hity);
+            var hitzRef = new Ref(hitz);
+            hitscan(sx,sy,sz,sect,
+                sintable[(sa+512)&2047],
+                sintable[sa&2047],
+                zvel<<6,hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
+            hitsect = hitsectRef.$;
+            hitwall = hitwallRef.$;
+            hitspr = hitsprRef.$;
+            hitx = hitxRef.$;
+            hity = hityRef.$;
+            hitz = hitzRef.$;
+
+            s.cstat |= 257;
+
+            j = EGS(sect,hitx,hity,hitz,GROWSPARK,-16,28,28,sa,0,0,i,1);
+
+            sprite[j].pal = 2;
+            sprite[j].cstat |= 130;
+            sprite[j].xrepeat = sprite[j].yrepeat = 1;
+
+            if( hitwall == -1 && hitspr == -1 && hitsect >= 0)
+            {
+                if( zvel < 0 && (sector[hitsect].ceilingstat&1) == 0)
+                    checkhitceiling(hitsect);
+            }
+            else if(hitspr >= 0) checkhitsprite(hitspr,j);
+            else if(hitwall >= 0 && wall[hitwall].picnum != ACCESSSWITCH && wall[hitwall].picnum != ACCESSSWITCH2 )
+            {
+                /*    if(wall[hitwall].overpicnum == MIRROR && k == 0)
+                    {
+                        l = getangle(
+                            wall[wall[hitwall].point2].x-wall[hitwall].x,
+                            wall[wall[hitwall].point2].y-wall[hitwall].y);
+    
+                        sx = hitx;
+                        sy = hity;
+                        sz = hitz;
+                        sect = hitsect;
+                        sa = ((l<<1) - sa)&2047;
+                        sx += sintable[(sa+512)&2047]>>12;
+                        sy += sintable[sa&2047]>>12;
+    
+                        k++;
+                        goto RESHOOTGROW;
+                    }
+                    else */
+                checkhitwall(j,hitwall,hitx,hity,hitz,atwith);
+            }
+
+            break;
+        case SHRINKER:
+            if( s.extra >= 0 ) s.shade = -96;
+            if(p >= 0)
+            {
+                j = aim( s, AUTO_AIM_ANGLE, ps[p].auto_aim==2);
+                if(j >= 0)
+                {
+                    dal = ((sprite[j].xrepeat*tiles[sprite[j].picnum].dim.height)<<1);
+                    zvel = (( (sprite[j].z-sz-dal-(4<<8))*768) / (ldist( sprite[ps[p].i], sprite[j])))|0;
+                    sa = getangle(sprite[j].x-sx,sprite[j].y-sy);
+                }
+                else zvel = (100-ps[p].horiz-ps[p].horizoff)*98;
+            }
+            else if(s.statnum != 3)
+            {
+                xRef.$ = x;
+                j = findplayer(s,xRef);
+                x = xRef.$;
+                l = ldist(sprite[ps[j].i],s);
+                zvel = (( (ps[j].oposz-sz)*512) / l )|0;
+            }
+            else zvel = 0;
+
+            j = EGS(sect,
+                sx+(sintable[(512+sa+512)&2047]>>12),
+                sy+(sintable[(sa+512)&2047]>>12),
+                sz+(2<<8),SHRINKSPARK,-16,28,28,sa,768,zvel,i,4);
+
+            sprite[j].cstat = 128;
+            sprite[j].clipdist = 32;
+
+
+            return;
+    }
+    return;
 }
 
 //1117
@@ -2086,9 +2945,9 @@ Player.processInput = function(snum) {
 //            p.holster_weapon = 0;
 //            if(p.weapon_pos < 0)
 //                p.weapon_pos = -p.weapon_pos;
-//            if(p.actorsqu >= 0 && dist(&sprite[pi],&sprite[p.actorsqu]) < 1400 )
+//            if(p.actorsqu >= 0 && dist(sprite[pi],sprite[p.actorsqu]) < 1400 )
 //            {
-//                guts(&sprite[p.actorsqu],JIBS6,7,myconnectindex);
+//                guts(sprite[p.actorsqu],JIBS6,7,myconnectindex);
 //                spawn(p.actorsqu,BLOODPOOL);
 //                spritesound(SQUISHED,p.actorsqu);
 //                switch(sprite[p.actorsqu].picnum)
@@ -2116,7 +2975,7 @@ Player.processInput = function(snum) {
 //                    quickkill(&ps[sprite[p.actorsqu].yvel]);
 //                    ps[sprite[p.actorsqu].yvel].frag_ps = snum;
 //                }
-//                else if(badguy(&sprite[p.actorsqu]))
+//                else if(badguy(sprite[p.actorsqu]))
 //                {
 //                    deletesprite(p.actorsqu);
 //                    p.actors_killed++;
@@ -2213,10 +3072,22 @@ Player.processInput = function(snum) {
                         var sx,sy,sz;
                         var sect,hw,hitsp;
                         throw "todo"
+                        var hitsectRef = new Ref(hitsect);
+                        var hitwallRef = new Ref(hitwall);
+                        var hitsprRef = new Ref(hitspr);
+                        var hitxRef = new Ref(hitx);
+                        var hityRef = new Ref(hity);
+                        var hitzRef = new Ref(hitz);
                         //hitscan( p.posx, p.posy, p.posz,
                         //            p.cursectnum, sintable[(p.ang+512)&2047],
                         //            sintable[p.ang&2047], (100-p.horiz-p.horizoff)*32,
-                        //            &sect, &hw, &hitsp, &sx, &sy, &sz,CLIPMASK1);
+                        //            hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
+                        hitsect = hitsectRef.$;
+                        hitwall = hitwallRef.$;
+                        hitspr = hitsprRef.$;
+                        hitx = hitxRef.$;
+                        hity = hityRef.$;
+                        hitz = hitzRef.$;
 
                         //if(sect < 0 || hitsp >= 0)
                         //    break;
