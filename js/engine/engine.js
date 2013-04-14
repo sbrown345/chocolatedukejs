@@ -1662,7 +1662,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             globalx3 = (globalx2>>10);
             globaly3 = (globaly2>>10);
             asm3 = mulscale16(y2,globalzd) + (globalzx>>6);
-            slopevlin(ylookup[y2]+x+frameoffset.position,krecipasm(asm3>>3),nptr2.position,y2-y1+1,globalx1,globaly1);
+            slopevlin(ylookup[y2]+x,krecipasm(asm3>>3)>>>0,nptr2,y2-y1+1,globalx1,globaly1);
 
             if ((x&15) == 0) faketimerhandler();
         }

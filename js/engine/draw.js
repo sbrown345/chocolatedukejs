@@ -454,76 +454,77 @@ function setupslopevlin(i1, i2, i3) {
 //extern int32_t reciptable[2048];
 //extern int32_t globalx3, globaly3;
 //extern int32_t fpuasm;
-//#define low32(a) ((a&0xffffffff))
+function low32(a) { return (a & 0xffffffff); }
 //#define high32(a) ((int)(((__int64)a&(__int64)0xffffffff00000000)>>32))
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 function slopevlin(i1, i2, i3, i4, i5, i6) {
-    var c;
+    var c = new bitwisef2i();
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
-    //float a = (float)(int32_t) asm3 + asm2_f[0]; // look @ krecipasm for float stuff
-    //i1 -= slopemach_ecx;
-    //esi = i5 + low32((__int64)globalx3 * (__int64)(i2<<3));
-    //edi = i6 + low32((__int64)globaly3 * (__int64)(i2<<3));
-    //ebx = i4;
+    var a = asm3 + asm2_f[0]; // look @ krecipasm for float stuff
+    console.log("a: %i\n", a);
+    i1 -= slopemach_ecx;
+    esi = i5 + low32(globalx3 * (i2<<3));
+    edi = i6 + low32(globaly3 * (i2<<3));
+    ebx = i4;
 
-    //if (!RENDER_SLOPPED_CEILING_AND_FLOOR)
-    //    return;
+    if (!RENDER_SLOPPED_CEILING_AND_FLOOR)
+        return;
 
-    //do {
-    //    // -------------
-    //    // All this is calculating a fixed point approx. of 1/a
-    //    c.f = a;
-    //    fpuasm = eax = c.i;
-    //    edx = (((int32_t)eax) < 0) ? 0xffffffff : 0;
-    //    eax = eax << 1;
-    //    ecx = (eax>>24);	//  exponent
-    //    eax = ((eax&0xffe000)>>11);
-    //    ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
-    //    eax = reciptable[(eax/4)|0];
-    //    eax >>= (ecx&0x1f);
-    //    eax ^= edx;
-    //    // -------------
-    //    edx = i2;
-    //    i2 = eax;
-    //    eax -= edx;
-    //    ecx = low32((__int64)globalx3 * (__int64)eax);
-    //    eax = low32((__int64)globaly3 * (__int64)eax);
-    //    a += asm2_f[0];
+    do {
+        // -------------
+        // All this is calculating a fixed point approx. of 1/a
+        c.f = a;
+        fpuasm = eax = c.i;
+        edx = ((eax|0) < 0) ? 0xffffffff : 0;
+        eax = eax << 1;
+        ecx = (eax>>24);	//  exponent
+        eax = ((eax&0xffe000)>>11);
+        ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
+        eax = recipTable[(eax/4)|0];
+        eax >>= (ecx&0x1f);
+        eax ^= edx;
+        // -------------
+        edx = i2;
+        i2 = eax;
+        eax -= edx;
+        ecx = low32(globalx3 * eax);
+        eax = low32(globaly3 * eax);
+        a += asm2_f[0];
 
-    //    asm4 = ebx;
-    //    ecx = ((ecx&0xffffff00)|(ebx&0xff));
-    //    if (ebx >= 8) ecx = ((ecx&0xffffff00)|8);
+        asm4 = ebx;
+        ecx = ((ecx&0xffffff00)|(ebx&0xff));
+        if (ebx >= 8) ecx = ((ecx&0xffffff00)|8);
 
-    //    ebx = esi;
-    //    edx = edi;
-    //    while ((ecx&0xff))
-    //    {
-    //        ebx >>= slopemach_ah2;
-    //        esi += ecx;
-    //        edx >>= slopemach_ah1;
-    //        ebx &= slopemach_edx;
-    //        edi += eax;
-    //        i1 += slopemach_ecx;
-    //        edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
-    //        ebx = *((uint32_t*)i3); // register trickery
-    //        i3 -= 4;
-    //        eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
-    //        ebx = esi;
+        ebx = esi;
+        edx = edi;
+        while ((ecx&0xff))
+        {
+            ebx >>= slopemach_ah2;
+            esi += ecx;
+            edx >>= slopemach_ah1;
+            ebx &= slopemach_edx;
+            edi += eax;
+            i1 += slopemach_ecx;
+            //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
+            //ebx = *((uint32_t*)i3); // register trickery
+            //i3 -= 4;
+            //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
+            //ebx = esi;
 
-    //        if (pixelsAllowed-- > 0)
-    //            *((uint8_t  *)i1) = (eax&0xff);
+            //if (pixelsAllowed-- > 0)
+            //    *((uint8_t  *)i1) = (eax&0xff);
 
-    //        edx = edi;
-    //        ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
+            //edx = edi;
+            //ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
 
 			
-    //    }
-    //    ebx = asm4;
-    //    ebx -= 8;	// BITSOFPRECISIONPOW
+        }
+        ebx = asm4;
+        ebx -= 8;	// BITSOFPRECISIONPOW
 
 		
 
-    //} while ((int32_tebx > 0);
+    } while (ebx > 0);
 }
