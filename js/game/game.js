@@ -1356,7 +1356,7 @@ Game.displayRooms = function (snum, smoothratio) {
             throw "todo"
         }
         
-        console.log("todo cehck drawrooms") //todo
+        //todo check drawrooms
         drawrooms(cposx, cposy, cposz, cang, choriz, sect);
         animatesprites(cposx, cposy, cang, smoothratio);
         drawmasks();
@@ -4014,7 +4014,6 @@ function drawmasks() {
             {
                 if (spritesy[l] <= spritesy[l+gap])
                     break;
-                
                 throw "swaplong((int32_t *)tspriteptr[l],(int32_t *)tspriteptr[l+gap]);"
                 swaplong(spritesx[l],spritesx[l+gap]);
                 swaplong(spritesy[l],spritesy[l+gap]);
@@ -5383,7 +5382,7 @@ Game.doMoveThings = function() {
 
     if (ud.recstat == 1) record();
 
-    console.log("b4 movedummy ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
+    console.log("b4 movedummy ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
     if (ud.pause_on == 0) {
         global_random = krand();
         movedummyplayers(); //ST 13
@@ -5393,24 +5392,31 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
-            console.log("b4 ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
+            console.log("b4 ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
             Player.processInput(i);
-            console.log("after ps[0].posy: %i, ps[0].posyv: %i", ps[0].posy, ps[0].posyv);
+            console.log("after ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
             checksectors(i);
         }
     }
 
     if (ud.pause_on == 0) {
+        console.log("b4 fta sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
         movefta(); //ST 2
+        console.log("b4 moveweapons sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
         moveweapons(); //ST 5 (must be last)
+        console.log("b4 movetransports sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
         movetransports(); //ST 9
 
+        console.log("b4 moveplayers sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
         moveplayers(); //ST 10
+        console.log("after moveplayers sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
         movefallers(); //ST 12
         moveexplosions(); //ST 4
 
         moveactors(); //ST 1
+        console.log("after moveactors sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
         moveeffectors(); //ST 3
+        console.log("after moveeffectors sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
 
         movestandables(); //ST 6
         doanimations();

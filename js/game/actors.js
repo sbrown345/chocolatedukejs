@@ -2204,14 +2204,16 @@ function movetransports()
         }
 
         onfloorz = hittype[i].temp_data[4];
-
+        console.log("movetransports onfloorz: %i, i: %i", onfloorz, i);
         if(hittype[i].temp_data[0] > 0) hittype[i].temp_data[0]--;
 
         j = headspritesect[sect];
+        console.log("j: %i, sect: %i, headspritesect[137]: %i", j, sect,  headspritesect[137]);
+        JBOLT:
         while(j >= 0)
         {
             nextj = nextspritesect[j];
-
+            console.log("nextj: %i", nextj)
             switch(sprite[j].statnum)
             {
                 case 10:    // Player
@@ -2252,7 +2254,8 @@ function movetransports()
                                 ps[p].bobposy = ps[p].oposy = ps[p].posy = sprite[sprite[i].owner].y;
                                 ps[p].oposz = ps[p].posz = sprite[sprite[i].owner].z-PHEIGHT;
 
-                                changespritesect(j,sprite[sprite[i].owner].sectnum);
+                                console.log("2257 changespritesect: %i", sprite[sprite[i].owner].sectnum);
+                                changespritesect(j, sprite[sprite[i].owner].sectnum);
                                 ps[p].cursectnum = sprite[j].sectnum;
 
                                 if(sprite[i].pal == 0)
@@ -2282,6 +2285,7 @@ function movetransports()
                                 hittype[ps[p].i].bposy = ps[p].posy;
                                 hittype[ps[p].i].bposz = ps[p].posz;
 
+                                console.log("2288 changespritesect: %i", sprite[sprite[i].owner].sectnum);
                                 changespritesect(j,sprite[sprite[i].owner].sectnum);
                                 ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
 
@@ -2336,7 +2340,8 @@ function movetransports()
                                 ps[p].transporter_hold = -2;
                             ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
 
-                            changespritesect(j,sprite[sprite[i].owner].sectnum);
+                            console.log("2343 changespritesect: %i", sprite[sprite[i].owner].sectnum);
+                            changespritesect(j, sprite[sprite[i].owner].sectnum);
                             setsprite(ps[p].i,ps[p].posx,ps[p].posy,ps[p].posz+PHEIGHT);
 
                             Player.setPal(ps[p]);
@@ -2368,8 +2373,9 @@ function movetransports()
                         case GREENSLIME+5:
                         case GREENSLIME+6:
                         case GREENSLIME+7:
-                            if (sprite[j].extra > 0)
-                                j = nextj; continue;
+                            if (sprite[j].extra > 0) {
+                                j = nextj;continue JBOLT;
+                            }
                     }
                 case 4:
                 case 5:
@@ -2391,7 +2397,6 @@ function movetransports()
                             if( sprite[sprite[i].owner].owner != sprite[i].owner && onfloorz && hittype[i].temp_data[0] > 0 && sprite[j].statnum != 5 )
                             {
                                 hittype[i].temp_data[0]++;
-                                debugger;
                                 i = nexti; continue BOLT;
                             }
                             warpspriteto = 1;
@@ -2410,7 +2415,7 @@ function movetransports()
                             case FIRE2:
                             case TOILETWATER:
                             case LASERLINE:
-                                j = nextj; continue;
+                                j = nextj; continue JBOLT;
                             case PLAYERONWATER:
                                 if(sectlotag == 2)
                                 {
@@ -2516,10 +2521,10 @@ function movetransports()
 
             }
             //JBOLT:
-                j = nextj;
+            j = nextj;
         }
         //BOLT:
-            i = nexti;
+        i = nexti;
     }
 }
 

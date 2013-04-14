@@ -310,6 +310,7 @@ function scansector(sectnum) {
                     for (var key in spr) {  
                         tsprite[spritesortcnt][key] = spr[key];
                     }
+                    //tsprite[spritesortcnt].copyTo(spr);
                     tsprite[spritesortcnt++].owner = z;
                 }
             }
@@ -2781,7 +2782,6 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         bunchfirst[closest] = bunchfirst[numbunches];
         bunchlast[closest] = bunchlast[numbunches];
     }
-    console.log("check todo");
 }
 
 //3051
@@ -4912,6 +4912,7 @@ Engine.insertSpriteSect = function (sectnum) {
     }
 
     blanktouse = headspritesect[MAXSECTORS];
+    console.log("insertspritesect blanktouse: %i, nextspritesect[blanktouse]: %i", blanktouse, nextspritesect[blanktouse]);
 
     headspritesect[MAXSECTORS] = nextspritesect[blanktouse];
     if (headspritesect[MAXSECTORS] >= 0)
@@ -4976,7 +4977,9 @@ Engine.deleteSpriteSect = function (deleteme) {
         prevspritesect[headspritesect[MAXSECTORS]] = deleteme;
     prevspritesect[deleteme] = -1;
     nextspritesect[deleteme] = headspritesect[MAXSECTORS];
+    console.log("b4 del headspritesect[MAXSECTORS]: %i, deleteme: %i", headspritesect[MAXSECTORS],deleteme)
     headspritesect[MAXSECTORS] = deleteme;
+    console.log("after del headspritesect[MAXSECTORS]: %i", headspritesect[MAXSECTORS])
 
     sprite[deleteme].sectnum = MAXSECTORS;
     return (0);
@@ -5008,10 +5011,14 @@ Engine.deleteSpriteStat = function (deleteme) {
 
 // 6084
 function changespritesect(spritenum, newsectnum) {
-    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return(-1);
+    if (newsectnum == 137) {
+        debugger;
+    }
+    console.log("changespritesect newsectnum: %i", newsectnum);
+    if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return (-1);
     if (sprite[spritenum].sectnum == newsectnum) return(0);
     if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
-    if (Engine.deleteSpriteStat(spritenum) < 0) return (-1);
+    if (Engine.deleteSpriteSect(spritenum) < 0) return (-1);
     Engine.insertSpriteSect(newsectnum);
     return(0);
 }

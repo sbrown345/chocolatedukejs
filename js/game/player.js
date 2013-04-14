@@ -196,6 +196,8 @@ function shoot(i,atwith) {
             }
         }
     }
+    console.log("atwith: %i, i: %i", atwith, i);
+    console.log("start shoot headspritesect[137]: %i", headspritesect[137]);
 
     switch(atwith)
     {
@@ -1021,6 +1023,7 @@ function shoot(i,atwith) {
 
             return;
     }
+    console.log("end shoot headspritesect[137]: %i", headspritesect[137]);
     return;
 }
 
