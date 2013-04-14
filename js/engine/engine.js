@@ -1941,7 +1941,6 @@ Engine.draWalls = function (bunch) {
     var z, wallnum, sectnum, nextsectnum;
     var startsmostwallcnt, startsmostcnt, gotswall;
     var andwstat1, andwstat2;
-    if (bunch == 2) debugger;
     console.log("drawalls %i", bunch);
     z = bunchfirst[bunch];
     sectnum = pvWalls[z].sectorId;
@@ -4207,7 +4206,7 @@ function drawsprite (snum) {
             globalzd = (((globalposz-z2)*globalyscale)<<8);
         }
 
-        qinterpolatedown16(lwall[lx],rx-lx+1,linum,linuminc);
+        qinterpolatedown16(lwall, lx, rx - lx + 1, linum, linuminc);
         clearbuf(swall[lx],rx-lx+1,mulscale19(yp,xdimscale));
 
         if ((cstat&2) == 0)
@@ -5011,9 +5010,6 @@ Engine.deleteSpriteStat = function (deleteme) {
 
 // 6084
 function changespritesect(spritenum, newsectnum) {
-    if (newsectnum == 137) {
-        debugger;
-    }
     console.log("changespritesect newsectnum: %i", newsectnum);
     if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return (-1);
     if (sprite[spritenum].sectnum == newsectnum) return(0);

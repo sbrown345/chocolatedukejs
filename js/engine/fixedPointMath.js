@@ -153,6 +153,20 @@ function copybufbyte(s, sPos, d, dPos, c) {
     }
 }
 
+
+function qinterpolatedown16(buffer, bufferOffset, num, val, add) {
+    console.log("qinterpolatedown16 num: %i, val: %i, numadd: %i", num, val, add);
+    if (typeof qinterpolatedown16short === "number") throw "wrong type, should be array";
+    if (arguments.length !== 5) throw "bad args";
+
+    // ...maybe the same person who provided this too?
+    for (var i = 0; i < num; i++) {
+        buffer[bufferOffset + i] = (val >> 16);
+        console.log("buffer[%i] = %i", i, buffer[i]);
+        val += add;
+    }
+}
+
 function qinterpolatedown16short(buffer, bufferOffset, num, val, add) {
     if (typeof qinterpolatedown16short === "number") throw "wrong type, should be array";
     if (arguments.length !== 5) throw "bad args";

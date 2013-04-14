@@ -3969,7 +3969,7 @@ function animatesprites( x, y, a, smoothratio) {
 
 //5775
 function drawmasks() {
-    var i, j, k, l, gap, xs, ys, xp, yp, yoff, yspan;
+    var i, j, k, l, gap, xs, ys, xp, yp, yoff, yspan, tempSwap, tempSwapLong;
     /* int32_t zs, zp; */
 
     //Copy sprite address in a sprite proxy structure (pointers are easier to re-arrange than structs).
@@ -4046,22 +4046,41 @@ function drawmasks() {
                         spritesz[k] = globalposz;
                 }
             }
-            for(k=i+1; k<j; k++)
+            for (k = i + 1; k < j; k++)
                 for(l=i; l<k; l++)
                     if (klabs(spritesz[k]-globalposz) < klabs(spritesz[l]-globalposz))
                     {
-                        throw "swaplong((int32_t *)tspriteptr[k],(int32_t *)tspriteptr[l]);"
-                        swaplong(spritesx[k],spritesx[l]);
-                        swaplong(spritesy[k],spritesy[l]);
-                        swaplong(spritesz[k],spritesz[l]);
+                        tempSwap = tspriteptr[k]; // doesn't seem right, maybe tspriteptr should be an array of ints that are used to access "sprite" or "spritesz"
+                        tspriteptr[k] = tspriteptr[l];
+                        tspriteptr[l] = tempSwap;
+                        
+                        tempSwapLong = spritesx[k];
+                        spritesx[k] = spritesx[l];
+                        spritesx[l] = tempSwapLong;
+                        
+                        tempSwapLong = spritesy[k];
+                        spritesy[k] = spritesy[l];
+                        spritesy[l] = tempSwapLong;
+                        
+                        tempSwapLong = spritesz[k];
+                        spritesz[k] = spritesz[l];
+                        spritesz[l] = tempSwapLong;
                     }
             for(k=i+1; k<j; k++)
                 for(l=i; l<k; l++)
                     if (tspriteptr[k].statnum < tspriteptr[l].statnum)
                     {
-                        throw "swaplong((int32_t *)tspriteptr[k],(int32_t *)tspriteptr[l]);"
-                        swaplong(spritesx[k],spritesx[l]);
-                        swaplong(spritesy[k],spritesy[l]);
+                        tempSwap = tspriteptr[k];
+                        tspriteptr[k] = tspriteptr[l];
+                        tspriteptr[l] = tempSwap;
+
+                        tempSwapLong = spritesx[k];
+                        spritesx[k] = spritesx[l];
+                        spritesx[l] = tempSwapLong;
+                        
+                        tempSwapLong = spritesy[k];
+                        spritesy[k] = spritesy[l];
+                        spritesy[l] = tempSwapLong;
                     }
         }
         i = j;
