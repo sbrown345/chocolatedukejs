@@ -1,7 +1,14 @@
-﻿console.log2 = function(msg) {
-    console.log2.output.push(msg);
+﻿console.log2 = function() {
+    var args = Array.prototype.slice.call(arguments), format;
+    format = args.shift();
+    var formatter = new Formatter(format);
+    var string = formatter.format.apply(formatter, args);
+
+    console.log2.output.push(string);
     console.log2.output.push("\n");
 };
+
+console.log = console.log2;
 
 console.log2.output = [];
 
@@ -13,9 +20,24 @@ console.log2.concat = function (arr) {
 };
 
 console.log2flush = function() {
-    console.log(console.log2.concat(console.log2.output));
+    var logText = console.log2.concat(console.log2.output);
+    //console.log(logText);
+    sendTextNew(logText);
     console.log2.output = [];
+    
 };
+
+function sendTextNew(txt) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'log.aspx', true);
+    xhr.responseType = 'text';
+    xhr.onload = function (e) {
+        if (this.status == 200) {
+            console.log(this.response);
+        }
+    };
+    xhr.send(txt);
+}
 
 
 //var util = require('util');
