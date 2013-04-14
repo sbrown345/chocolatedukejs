@@ -1663,7 +1663,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             globaly3 = (globaly2>>10);
             asm3 = mulscale16(y2,globalzd) + (globalzx>>6);
             slopevlin(ylookup[y2]+x,krecipasm(asm3>>3)>>>0,nptr2,y2-y1+1,globalx1,globaly1);
-
+      
             if ((x&15) == 0) faketimerhandler();
         }
         globalx2 += globalx;
@@ -1876,7 +1876,6 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 iy2 = inty;
                 ix2 = xcross;
             }
-            debugger;
             clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, 0);
         }
         else {
@@ -1885,7 +1884,6 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 iy1 = inty;
                 ix1 = xcross;
             }
-            debugger;
             clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, 0);
         }
     }
@@ -1903,7 +1901,6 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 iy2 = inty;
                 ix2 = xcross;
             }
-            debugger;
             clearbufbyte(mostbuf, xcross + 1, (pvWalls[w].screenSpaceCoo[1][VEC_COL] - xcross) * 2, ydimen + (ydimen << 16));
         }
         else {
@@ -1912,7 +1909,6 @@ function wallmost(mostbuf, w, sectnum, dastat) {
                 iy1 = inty;
                 ix1 = xcross;
             }
-            debugger;
             clearbufbyte(mostbuf, pvWalls[w].screenSpaceCoo[0][VEC_COL], (xcross - pvWalls[w].screenSpaceCoo[0][VEC_COL] + 1) * 2, ydimen + (ydimen << 16));
         }
     }

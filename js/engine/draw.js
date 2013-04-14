@@ -413,6 +413,7 @@ function settrans(type) {
 //850
 var slopemach_ebx;
 var slopemach_ecx;
+//var slopemach_ecx_32;
 var slopemach_edx;
 var slopemach_ah1;
 var slopemach_ah2;
@@ -442,6 +443,7 @@ function setupslopevlin(i1, i2, i3) {
     var c = new bitwisef2i();
     slopemach_ebx = i2;
     slopemach_ecx = i3;
+    //slopemach_ecx_32 = new Int32Array(slopemach_ecx.buffer);
     slopemach_edx = (1 << (i1 & 0x1f)) - 1;
     slopemach_edx <<= ((i1 & 0x1f00) >> 8);
     slopemach_ah1 = 32 - ((i1 & 0x1f00) >> 8);
@@ -463,7 +465,6 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
     var a = asm3 + asm2_f[0]; // look @ krecipasm for float stuff
-    console.log("a: %i\n", a);
     i1 -= slopemach_ecx;
     esi = i5 + low32(globalx3 * (i2<<3));
     edi = i6 + low32(globaly3 * (i2<<3));
@@ -472,19 +473,22 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     if (!RENDER_SLOPPED_CEILING_AND_FLOOR)
         return;
 
+    var doCount = 0;
+    var whileCount = 0;
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
         c.f = a;
         fpuasm = eax = c.i;
         edx = ((eax|0) < 0) ? 0xffffffff : 0;
-        eax = eax << 1;
-        ecx = (eax>>24);	//  exponent
-        eax = ((eax&0xffe000)>>11);
+        eax = (eax << 1)>>>0;
+        ecx = (eax>>>24);	//  exponent
+        eax = ((eax&0xffe000)>>>11);
         ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
         eax = recipTable[(eax/4)|0];
-        eax >>= (ecx&0x1f);
+        eax >>>= (ecx&0x1f);
         eax ^= edx;
+        eax >>>= 0;
         // -------------
         edx = i2;
         i2 = eax;
@@ -499,32 +503,36 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
 
         ebx = esi;
         edx = edi;
-        while ((ecx&0xff))
+        printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
+        while ((ecx & 0xff))
         {
-            ebx >>= slopemach_ah2;
+            ebx >>>= slopemach_ah2;
             esi += ecx;
-            edx >>= slopemach_ah1;
+            edx >>>= slopemach_ah1;
             ebx &= slopemach_edx;
             edi += eax;
             i1 += slopemach_ecx;
-            //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
-            //ebx = *((uint32_t*)i3); // register trickery
-            //i3 -= 4;
-            //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
-            //ebx = esi;
+            edx = ((edx & 0xffffff00) | slopemach_ebx[ebx + edx]); //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
+            printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
+            ebx = i3.position;//i3.getUint32((i3.position / 4) | 0);//ebx = *((uint32_t*)i3); // register trickery
+            i3.position -= 4;
+            printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
+            eax = ((eax & 0xffffff00) | slopemach_ebx[edx]);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
+            printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
+            ebx = esi;
 
-            //if (pixelsAllowed-- > 0)
-            //    *((uint8_t  *)i1) = (eax&0xff);
-
-            //edx = edi;
-            //ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
-
-			
+            if (pixelsAllowed-- > 0) {
+                frameplace[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
+                console.log("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
+            }
+            edx = edi;
+            ecx = ((ecx & 0xffffff00) | ((ecx - 1) & 0xff));
+            whileCount++;
         }
         ebx = asm4;
         ebx -= 8;	// BITSOFPRECISIONPOW
 
-		
 
+        doCount++;
     } while (ebx > 0);
 }

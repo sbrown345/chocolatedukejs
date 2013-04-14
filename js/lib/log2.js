@@ -12,6 +12,15 @@ console.log = console.log2;
 
 console.log2.output = [];
 
+function printf() {
+    var args = Array.prototype.slice.call(arguments), format;
+    format = args.shift();
+    var formatter = new Formatter(format.replace(/%u/g, "%i"));
+    var string = formatter.format.apply(formatter, args);
+
+    console.log2.output.push(string);
+}
+
 console.log2.concat = function (arr) {
     var s, len, i;
     len = arr.length;
@@ -29,8 +38,8 @@ console.log2flush = function() {
 
 function sendTextNew(txt) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'log.aspx', true);
-    xhr.responseType = 'text';
+    xhr.open('POST', 'log.aspx', false);
+    //xhr.responseType = 'text';
     xhr.onload = function (e) {
         if (this.status == 200) {
             console.log(this.response);
@@ -38,9 +47,6 @@ function sendTextNew(txt) {
     };
     xhr.send(txt);
 }
-
-
-//var util = require('util');
 
 var tokenize = function (/*String*/ str, /*RegExp*/ re, /*Function?*/ parseDelim, /*Object?*/ instance) {
     // summary:

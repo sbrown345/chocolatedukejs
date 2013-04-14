@@ -291,8 +291,15 @@ function PointerHelper(array, position) {
 PointerHelper.prototype.setByte = function (v) {
     this.array[this.position] = v;
 };
+
 PointerHelper.prototype.getByte = function (offset) {
     return this.array[this.position + (offset || 0)];
+};
+
+PointerHelper.prototype.getUint32 = function () {
+    if (!this.uint32Array)
+        this.uint32Array = new Uint32Array(this.array.buffer);
+    return this.uint32Array[(this.position / 4) | 0];
 };
 
 function _nextpage() {
