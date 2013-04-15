@@ -1627,7 +1627,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
     else m1 -= (globalzd>>16);
     m2 = m1+l;
     mptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
-    mptr2 = new PointerHelper(mptr1.position+1);
+    mptr2 = new PointerHelper(mptr1.position+4);
     
     for(x=dax1; x<=dax2; x++)
     {
@@ -1647,15 +1647,15 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             while (nptr1.position <= mptr1.position)
             {
                 //*mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
-                mptr1.setByte(j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
-                mptr1.position--;
+                mptr1.setInt32(j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
+                mptr1.position-=4;
                 m1 -= l;
             }
             while (nptr2.position >= mptr2.position)
             {
                 //*mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
-                mptr2.setByte(j + (getpalookup(mulscale24(krecipasm(m2),globvis),globalshade)<<8));
-                mptr2.position++;
+                mptr2.setInt32(j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
+                mptr2.position+=4;
                 m2 += l;
             }
 

@@ -506,6 +506,9 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
         while ((ecx & 0xff))
         {
+            if(doCount== 0 && whileCount== 3)
+                debugger;
+
             ebx >>>= slopemach_ah2;
             esi += ecx;
             edx >>>= slopemach_ah1;
@@ -522,8 +525,9 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             ebx = esi;
 
             if (pixelsAllowed-- > 0) {
-                frameplace[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
+                frameplace.array[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
                 console.log("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
+                wrote++;
             }
             edx = edi;
             ecx = ((ecx & 0xffffff00) | ((ecx - 1) & 0xff));
@@ -535,4 +539,13 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
 
         doCount++;
     } while (ebx > 0);
+
+
+    if (wrote > 20 && !flushed) {
+        console.log2flush();
+        flushed = true;
+    }
 }
+
+var flushed = false;
+var wrote = 0;

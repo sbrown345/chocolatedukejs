@@ -302,6 +302,12 @@ PointerHelper.prototype.getUint32 = function () {
     return this.uint32Array[(this.position / 4) | 0];
 };
 
+PointerHelper.prototype.setInt32 = function (v) {
+    if (!this.int32Array)
+        this.int32Array = new Int32Array(this.array.buffer);
+    this.int32Array[(this.position / 4) | 0] = v;
+};
+
 function _nextpage() {
     var ticks;
 
