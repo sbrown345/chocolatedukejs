@@ -1470,7 +1470,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
     console.log("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, ", dax1, dax2, sectnum, dastat);
-    var i, j, l, x, y, dx, dy, wx, wy, y1, y2, daz;
+    var i, j, j_, l, x, y, dx, dy, wx, wy, y1, y2, daz;
     var daslope, dasqr;
     var shoffs, shinc, m1, m2, mptr1, mptr2, nptr1, nptr2;
     var wal;
@@ -1608,7 +1608,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
     if (sec.visibility != 0) globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
     globvis = mulscale13(globvis,daz);
     globvis = mulscale16(globvis,xdimscale);
-    j = globalpal;//palookup[globalpal];
+    j_ = palookup[globalpal];
 
     setupslopevlin(((picsiz[globalpicnum]&15))+(((picsiz[globalpicnum]>>4))<<8),tiles[globalpicnum].data,-ylookup[1]);
 
@@ -1640,6 +1640,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y2 = dmost[x]-1;
         }
         console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+        throw "bug is around here somewhere!"
 
         if (y1 <= y2) {
             nptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
@@ -1647,14 +1648,18 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             while (nptr1.position <= mptr1.position)
             {
                 //*mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
-                mptr1.setInt32(j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
+                printf("while1: j:%i %i\n",j, j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
+                //mptr1.setInt32(j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
+                mptr1.setInt32(j_[(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8)]);
                 mptr1.position-=4;
                 m1 -= l;
             }
             while (nptr2.position >= mptr2.position)
             {
                 //*mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
-                mptr2.setInt32(j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
+                printf("while2: j:%i %i\n",j, j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
+                //mptr2.setInt32(j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
+                mptr2.setInt32(j_[(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8)]);
                 mptr2.position+=4;
                 m2 += l;
             }
