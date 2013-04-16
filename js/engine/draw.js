@@ -503,7 +503,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
 
         ebx = esi;
         edx = edi;
-        //printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
+        printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
         while ((ecx & 0xff))
         {
             if(doCount== 0 && whileCount== 3)
@@ -516,17 +516,18 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             edi += eax;
             i1 += slopemach_ecx;
             edx = ((edx & 0xffffff00) | slopemach_ebx[ebx + edx]); //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
-            //printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
-            ebx = i3.position;//i3.getUint32((i3.position / 4) | 0);//ebx = *((uint32_t*)i3); // register trickery
-            i3.position -= 4;
-            //printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
-            eax = ((eax & 0xffffff00) | slopemach_ebx[edx]);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
-            //printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
+            printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
+            ebx = i3.getUint32();//i3.getUint32((i3.position / 4) | 0);//ebx = *((uint32_t*)i3); // register trickery
+            printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
+            i3.position--;//getByte does the  /4 stuff!
+            printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
+            eax = ((eax & 0xffffff00) | slopemach_ebx[edx]/*todo: its something here!!*/);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
+            printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
             ebx = esi;
 
             if (pixelsAllowed-- > 0) {
                 frameplace.array[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
-                //console.log("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
+                console.log("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
                 wrote++;
             }
             edx = edi;
@@ -541,7 +542,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     } while (ebx > 0);
 
 
-    if (wrote > 200 && !flushed) {
+    if (wrote > 2000 && !flushed) {
         console.log2flush();
         flushed = true;
     }

@@ -1663,7 +1663,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
                 printf("while2: mptr2.position: %i, %i\n", mptr2.position,(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
                 //mptr2.setInt32(j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
                 mptr2.setInt32(j_[(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8)]);
-                mptr2.position++;
+                mptr2.position++; // pointer helper getByte does the /4 stuff
                 m2 += l;
             }
 
