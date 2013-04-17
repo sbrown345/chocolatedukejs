@@ -519,11 +519,11 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             i1 += slopemach_ecx;
             edx = ((edx & 0xffffff00) | slopemach_ebx[ebx + edx]); //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
             printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
-            ebx = i3.getInt32();//ebx = *((uint32_t*)i3); // register trickery       (ebx is a pointer to a pointer ( which is used later on with edx))
+            ebx = i3.getInt32();  //SHOUDL BE 2560!!!!   //ebx = *((uint32_t*)i3); // register trickery       (ebx is a pointer to a pointer ( which is used later on with edx))
             printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
             i3.position-=4;
             printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
-            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + 2560 /*npr thingy val?!*/])//[slopemach_ebx[edx]]);// slopemach_ebx[edx]/*todo: its something here!!*/);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
+            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + ebx /*npr thingy val?!*/])//[slopemach_ebx[edx]]);// slopemach_ebx[edx]/*todo: its something here!!*/);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
             printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
             ebx = esi;
 

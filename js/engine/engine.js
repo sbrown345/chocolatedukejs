@@ -1653,7 +1653,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
                 //*mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
                 printf("while1: mptr1.position: %i, %i\n", mptr1.position,(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8));
                 //todo: mptr1 and mptr2 values are wrong
-                mptr1.setInt32(j_[((getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8))]);
+                mptr1.setInt32(((getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8)));
                 mptr1.position-=4;
                 m1 -= l;
             }
@@ -1662,7 +1662,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
                 //*mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
                 printf("while2: mptr2.position: %i, %i\n", mptr2.position,(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
                 //todo: mptr1 and mptr2 values are wrong
-                mptr2.setInt32(j_[(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8) ]);
+                mptr2.setInt32((getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8) );
                 mptr2.position+=4; 
                 m2 += l;
             }
