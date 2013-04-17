@@ -296,10 +296,16 @@ PointerHelper.prototype.getByte = function (offset) {
     return this.array[this.position + (offset || 0)];
 };
 
-PointerHelper.prototype.getUint32 = function () {
+PointerHelper.prototype.getUint32 = function() {
     if (!this.uint32Array)
         this.uint32Array = new Uint32Array(this.array.buffer);
     return this.uint32Array[(this.position / 4) | 0];
+};
+
+PointerHelper.prototype.getInt32 = function () {
+    if (!this.int32Array)
+        this.int32Array = new Int32Array(this.array.buffer);
+    return this.int32Array[(this.position / 4) | 0];
 };
 
 PointerHelper.prototype.setInt32 = function (v) {

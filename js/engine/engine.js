@@ -1626,8 +1626,8 @@ function grouscan(dax1, dax2, sectnum, dastat) {
     if (globalzd > 0) m1 += (globalzd>>16);
     else m1 -= (globalzd>>16);
     m2 = m1+l;
-    mptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
-    mptr2 = new PointerHelper(slopalookup, mptr1.position + 1);
+    mptr1 = new PointerHelper(slopalookup, (y1 + (shoffs >> 15))*4); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
+    mptr2 = new PointerHelper(slopalookup, (mptr1.position + (1 * 4)));
     
     for(x=dax1; x<=dax2; x++)
     {
@@ -1641,36 +1641,36 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y2 = dmost[x]-1;
         }
         console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
-        if (sectnum == 55 && x == 28 && y1 == 0 && y2 == 1)
-            debugger;
+        //if (sectnum == 55 && x == 28 && y1 == 0 && y2 == 1)
+        //    debugger;
         if (y1 <= y2) {
-            nptr1 = new PointerHelper(slopalookup, y1 + (shoffs >> 15)); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
-            nptr2 = new PointerHelper(slopalookup, y2 + (shoffs >> 15));//(int32_t *)&slopalookup[y2+(shoffs>>15)];
+            nptr1 = new PointerHelper(slopalookup,(y1 + (shoffs >> 15))*4); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
+            nptr2 = new PointerHelper(slopalookup,(y2 + (shoffs >> 15))*4);//(int32_t *)&slopalookup[y2+(shoffs>>15)];
             printf("nptr1.position: %i, mptr1.position: %i \n", nptr1.position, mptr1.position);
             printf("nptr2.position: %i, mptr2.position: %i \n", nptr2.position, mptr2.position);
             while (nptr1.position <= mptr1.position)
             {
                 //*mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
                 printf("while1: mptr1.position: %i, %i\n", mptr1.position,(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8));
-                //mptr1.setInt32(j + (getpalookup(mulscale24(krecipasm(m1),globvis),globalshade)<<8));
-                mptr1.setInt32(j_[(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8)]);
-                mptr1.position--;
+                //todo: mptr1 and mptr2 values are wrong
+                mptr1.setInt32(j_[((getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8))]);
+                mptr1.position-=4;
                 m1 -= l;
             }
             while (nptr2.position >= mptr2.position)
             {
                 //*mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
                 printf("while2: mptr2.position: %i, %i\n", mptr2.position,(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
-                //mptr2.setInt32(j + (getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
-                mptr2.setInt32(j_[(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8)]);
-                mptr2.position++; // pointer helper getByte does the /4 stuff
+                //todo: mptr1 and mptr2 values are wrong
+                mptr2.setInt32(j_[(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8) ]);
+                mptr2.position+=4; 
                 m2 += l;
             }
 
             globalx3 = (globalx2>>10);
             globaly3 = (globaly2>>10);
             asm3 = mulscale16(y2,globalzd) + (globalzx>>6);
-            slopevlin(ylookup[y2]+x,krecipasm(asm3>>3)>>>0,nptr2,y2-y1+1,globalx1,globaly1);
+            slopevlin(ylookup[y2] + x, krecipasm(asm3 >> 3) >>> 0, new PointerHelper(nptr2.array, nptr2.position), y2 - y1 + 1, globalx1, globaly1);
       
             if ((x&15) == 0) faketimerhandler();
         }

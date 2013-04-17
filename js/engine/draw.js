@@ -460,7 +460,10 @@ function low32(a) { return (a & 0xffffffff); }
 //#define high32(a) ((int)(((__int64)a&(__int64)0xffffffff00000000)>>32))
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
+var slopevlinCount = 0;
 function slopevlin(i1, i2, i3, i4, i5, i6) {
+    var doCount = 0;
+    var whileCount = 0;
     var c = new bitwisef2i();
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
@@ -473,8 +476,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     if (!RENDER_SLOPPED_CEILING_AND_FLOOR)
         return;
 
-    var doCount = 0;
-    var whileCount = 0;
+    printf("slopevlinCount: %i\n", slopevlinCount);
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
@@ -506,7 +508,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
         while ((ecx & 0xff))
         {
-            if(doCount== 0 && whileCount== 3)
+            if(doCount== 0 && whileCount== 3 && slopevlinCount==6)
                 debugger;
 
             ebx >>>= slopemach_ah2;
@@ -517,11 +519,11 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             i1 += slopemach_ecx;
             edx = ((edx & 0xffffff00) | slopemach_ebx[ebx + edx]); //edx = ((edx&0xffffff00)|((((uint8_t  *)(ebx+edx))[slopemach_ebx]))); //slopemach_ebx=texture data
             printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
-            ebx = i3.getUint32();//i3.getUint32((i3.position / 4) | 0);//ebx = *((uint32_t*)i3); // register trickery
+            ebx = i3.getInt32();//ebx = *((uint32_t*)i3); // register trickery       (ebx is a pointer to a pointer ( which is used later on with edx))
             printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
-            i3.position--;//getByte does the  /4 stuff!
+            i3.position-=4;
             printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
-            eax = ((eax & 0xffffff00) | slopemach_ebx[edx]/*todo: its something here!!*/);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
+            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + 2560 /*npr thingy val?!*/])//[slopemach_ebx[edx]]);// slopemach_ebx[edx]/*todo: its something here!!*/);//((eax & 0xffffff00) | (ebx + edx)); //eax = ((eax&0xffffff00)|(*((uint8_t  *)(ebx+edx))));
             printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
             ebx = esi;
 
@@ -546,6 +548,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         console.log2flush();
         flushed = true;
     }
+    slopevlinCount++;
 }
 
 var flushed = false;
