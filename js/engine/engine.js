@@ -1631,7 +1631,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
     
     for(x=dax1; x<=dax2; x++)
     {
-        printf("x: %i, globalx2: %i, globaly2: %i, globalzx: %i, shoffs: %i\n", x, globalx2, globaly2, globalzx, shoffs);
+        //printf("x: %i, globalx2: %i, globaly2: %i, globalzx: %i, shoffs: %i\n", x, globalx2, globaly2, globalzx, shoffs);
         if (dastat == 0) {
             y1 = umost[x];
             y2 = Math.min(dmost[x],uplc[x])-1;
@@ -1640,18 +1640,18 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
-        console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+        //console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
         //if (sectnum == 55 && x == 28 && y1 == 0 && y2 == 1)
         //    debugger;
         if (y1 <= y2) {
             nptr1 = new PointerHelper(slopalookup,(y1 + (shoffs >> 15))*4); //(int32_t *)&slopalookup[y1+(shoffs>>15)];
             nptr2 = new PointerHelper(slopalookup,(y2 + (shoffs >> 15))*4);//(int32_t *)&slopalookup[y2+(shoffs>>15)];
-            printf("nptr1.position: %i, mptr1.position: %i \n", nptr1.position, mptr1.position);
-            printf("nptr2.position: %i, mptr2.position: %i \n", nptr2.position, mptr2.position);
+            //printf("nptr1.position: %i, mptr1.position: %i \n", nptr1.position, mptr1.position);
+            //printf("nptr2.position: %i, mptr2.position: %i \n", nptr2.position, mptr2.position);
             while (nptr1.position <= mptr1.position)
             {
                 //*mptr1-- = j + (getpalookup((int32_t)mulscale24(krecipasm(m1),globvis),globalshade)<<8);
-                printf("while1: mptr1.position: %i, %i\n", mptr1.position,(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8));
+                //printf("while1: mptr1.position: %i, %i\n", mptr1.position,(getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8));
                 //todo: mptr1 and mptr2 values are wrong
                 mptr1.setInt32(((getpalookup(mulscale24(krecipasm(m1), globvis), globalshade) << 8)));
                 mptr1.position-=4;
@@ -1660,7 +1660,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             while (nptr2.position >= mptr2.position)
             {
                 //*mptr2++ = j + (getpalookup((int32_t)mulscale24(krecipasm(m2),globvis),globalshade)<<8);
-                printf("while2: mptr2.position: %i, %i\n", mptr2.position,(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
+                //printf("while2: mptr2.position: %i, %i\n", mptr2.position,(getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8));
                 //todo: mptr1 and mptr2 values are wrong
                 mptr2.setInt32((getpalookup(mulscale24(krecipasm(m2), globvis), globalshade) << 8) );
                 mptr2.position+=4; 
