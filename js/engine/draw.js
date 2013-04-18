@@ -310,7 +310,7 @@ function setupmvlineasm(i1) {
     machmv = (i1 & 0x1f);
 }
 
-function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
+function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
     if (arguments.length != 4) {
         throw new Error("todo: mvlineasm4 should have 4 arguments");
     }
@@ -320,7 +320,6 @@ function mvlineasm4(column, bufplc, framebufferOffset, frameBuffer) {
     var index = (framebufferOffset + ylookup[column]);
     var dest = -ylookup[column];
     var frameBufferArray = frameBuffer.array;
-    var bufplcArray = bufplc.array;
     //do {
     for (; dest !== 0; dest += bytesperline) {
         for (i = 0; i < 4; i++) {
@@ -443,7 +442,6 @@ function setupslopevlin(i1, i2, i3) {
     var c = new bitwisef2i();
     slopemach_ebx = i2;
     slopemach_ecx = i3;
-    //slopemach_ecx_32 = new Int32Array(slopemach_ecx.buffer);
     slopemach_edx = (1 << (i1 & 0x1f)) - 1;
     slopemach_edx <<= ((i1 & 0x1f00) >> 8);
     slopemach_ah1 = 32 - ((i1 & 0x1f00) >> 8);
@@ -453,14 +451,10 @@ function setupslopevlin(i1, i2, i3) {
 }
 
 //870
-//extern int32_t reciptable[2048];
-//extern int32_t globalx3, globaly3;
-//extern int32_t fpuasm;
 function low32(a) { return (a & 0xffffffff); }
-//#define high32(a) ((int)(((__int64)a&(__int64)0xffffffff00000000)>>32))
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
-var slopevlinCount = 0;
+//var slopevlinCount = 0;
 function slopevlin(i1, i2, i3, i4, i5, i6) {
     var doCount = 0;
     var whileCount = 0;
@@ -476,7 +470,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     if (!RENDER_SLOPPED_CEILING_AND_FLOOR)
         return;
 
-    printf("slopevlinCount: %i\n", slopevlinCount);
+    //printf("slopevlinCount: %i\n", slopevlinCount);
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
@@ -508,9 +502,6 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         //printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
         while ((ecx & 0xff))
         {
-            if(doCount== 0 && whileCount== 3 && slopevlinCount==6)
-                debugger;
-
             ebx >>>= slopemach_ah2;
             esi += ecx;
             edx >>>= slopemach_ah1;
@@ -523,7 +514,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             //printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
             i3.position-=4;
             //printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
-            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + ebx /*npr thingy val?!*/])
+            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + ebx]);
             //printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
             ebx = esi;
 
@@ -544,11 +535,11 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     } while (ebx > 0);
 
 
-    if (wrote > 2000 && !flushed) {
-        console.log2flush();
-        flushed = true;
-    }
-    slopevlinCount++;
+    //if (wrote > 2000 && !flushed) {
+    //    console.log2flush();
+    //    flushed = true;
+    //}
+    //slopevlinCount++;
 }
 
 var flushed = false;

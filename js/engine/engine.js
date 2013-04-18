@@ -1318,6 +1318,171 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     faketimerhandler();
 }
 
+
+/* this renders masking sprites. See wallscan(). --ryan. */
+function maskwallscan(x1, x2,
+                         uwal, dwal,
+                         swal, lwal)
+{
+    //todo!!
+
+    var i, x, startx, xnice, ynice;
+    var fpalookup;
+    var y1ve = new Int32Array(4), y2ve = new Int32Array(4), u4, d4, dax, z, tileWidth, tileHeight;
+    var  p;
+    var  bad;
+    debugger;
+    tileWidth = tiles[globalpicnum].dim.width;
+    tileHeight = tiles[globalpicnum].dim.height;
+    setgotpic(globalpicnum);
+    
+    if ((tileWidth <= 0) || (tileHeight <= 0))
+        return;
+    if ((uwal[x1] > ydimen) && (uwal[x2] > ydimen))
+        return;
+    if ((dwal[x1] < 0) && (dwal[x2] < 0))
+        return;
+
+    TILE_MakeAvailable(globalpicnum);
+
+    startx = x1;
+
+    xnice = (pow2long[picsiz[globalpicnum]&15] == tileWidth);
+    if (xnice)
+        tileWidth = (tileWidth-1);
+    
+    ynice = (pow2long[picsiz[globalpicnum]>>4] == tileHeight);
+    if (ynice)
+        tileHeight = (picsiz[globalpicnum]>>4);
+
+    fpalookup = palookup[globalpal];
+
+    setupmvlineasm(globalshiftval);
+
+    x = startx;
+    while ((startumost[x+windowx1] > startdmost[x+windowx1]) && (x <= x2)) x++;
+
+    p = new PointerHelper(frameoffset, x);
+
+    for(; (x<=x2)&&p; x++,p.position++)
+    {
+        y1ve[0] = Math.max(uwal[x],startumost[x+windowx1]-windowy1);
+        y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);
+        if (y2ve[0] <= y1ve[0]) continue;
+
+        palookupoffse[0] = new PointerHelper(fpalookup, (getpalookup(mulscale16(swal[x],globvis),globalshade)<<8));
+
+        bufplce[0] = lwal[x] + globalxpanning;
+        if (bufplce[0] >= tileWidth) {
+            if (xnice == 0) bufplce[0] %= tileWidth;
+            else bufplce[0] &= tileWidth;
+        }
+        if (ynice == 0)
+            bufplce[0] *= tileHeight;
+        else
+            bufplce[0] <<= tileHeight;
+
+        vince[0] = swal[x]*globalyscale;
+        vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
+
+        mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]],p);
+    }
+    for(; x<=x2-3; x+=4,p+=4)
+    {
+        bad = 0;
+        for(z=3,dax=x+3; z>=0; z--,dax--)
+        {
+            y1ve[z] = Math.max(uwal[dax],startumost[dax+windowx1]-windowy1);
+            y2ve[z] = Math.min(dwal[dax],startdmost[dax+windowx1]-windowy1)-1;
+            if (y2ve[z] < y1ve[z]) {
+                bad += pow2char[z];
+                continue;
+            }
+
+            i = lwal[dax] + globalxpanning;
+            if (i >= tileWidth) {
+                if (xnice == 0) i %= tileWidth;
+                else i &= tileWidth;
+            }
+            
+            if (ynice == 0)
+                i *= tileHeight;
+            else
+                i <<= tileHeight;
+            
+            bufplce[z] = tiles[globalpicnum].data+i;
+
+            vince[z] = swal[dax]*globalyscale;
+            vplce[z] = globalzd + vince[z]*(y1ve[z]-globalhoriz+1);
+        }
+        if (bad == 15) continue;
+
+        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+        palookupoffse[3] = fpalookup[(getpalookup(mulscale16(swal[x+3],globvis),globalshade)<<8)];
+
+        if ((palookupoffse[0] == palookupoffse[3]) && ((bad&0x9) == 0))
+        {
+            palookupoffse[1] = palookupoffse[0];
+            palookupoffse[2] = palookupoffse[0];
+        }
+        else
+        {
+            palookupoffse[1] = fpalookup[(getpalookup(mulscale16(swal[x+1],globvis),globalshade)<<8)];
+            palookupoffse[2] = fpalookup[(getpalookup(mulscale16(swal[x+2],globvis),globalshade)<<8)];
+        }
+
+        u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
+        d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
+
+        if ((bad > 0) || (u4 >= d4))
+        {
+            if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+0,p);
+            if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+1,p);
+            if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+2,p);
+            if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+3,p);
+            continue;
+        }
+
+        if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+0,p);
+        if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+1,p);
+        if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+2,p);
+        if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+3,p);
+
+        if (d4 >= u4) 
+            mvlineasm4(d4 - u4 + 1, tiles[globalpicnum].data, ylookup[u4] + p.position, p);
+
+        i = p+ylookup[d4+1];
+        if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
+        if (y2ve[1] > d4) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
+        if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
+        if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+    }
+    for(; x<=x2; x++,p++)
+    {
+        y1ve[0] = Math.max(uwal[x],startumost[x+windowx1]-windowy1);
+        y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);
+        if (y2ve[0] <= y1ve[0]) continue;
+
+        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+
+        bufplce[0] = lwal[x] + globalxpanning;
+        if (bufplce[0] >= tileWidth) {
+            if (xnice == 0) bufplce[0] %= tileWidth;
+            else bufplce[0] &= tileWidth;
+        }
+        if (ynice == 0)
+            bufplce[0] *= tileHeight;
+        else
+            bufplce[0] <<= tileHeight;
+
+        vince[0] = swal[x]*globalyscale;
+        vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
+
+        mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data,bufplce[0], p.position + ylookup[y1ve[0]], p);
+    }
+    faketimerhandler();
+}
+
 //1580
 /* renders parallaxed skies/floors  --ryan. */
 function parascan(dax1, dax2, sectnum,  dastat, bunch) {
@@ -3283,7 +3448,7 @@ function clipPoly4(cx1, cy1, cx2, cy2) {
     return (n);
 }
 
-//3781
+//3874
 function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2) {
     var cosang, sinang, v, nextv, dax1, dax2, oy, bx, by, ny1, ny2;
     var i, x, y, x1, y1, x2, y2, gx1, gy1;
@@ -3579,7 +3744,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], bufplce[2], ylookup[y1ve[2]] + 2, p);
                     if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], bufplce[3], ylookup[y1ve[3]] + 3, p);
 
-                    if (d4 >= u4) mvlineasm4(d4 - u4 + 1, bufplc, ylookup[u4] + p.position, p);
+                    if (d4 >= u4) mvlineasm4(d4 - u4 + 1, bufplc.array, ylookup[u4] + p.position, p);
 
                     i = p.position + ylookup[d4 + 1];
                     if (y2ve[0] > d4) mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], bufplce[0], i + 0);

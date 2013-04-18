@@ -8,17 +8,18 @@
     console.log2.output.push("\n");
 };
 
-console.log = console.log2;
-
-console.log2.output = [];
-
-function printf() {
+printf = function() {
     var args = Array.prototype.slice.call(arguments), format;
     format = args.shift();
     var formatter = new Formatter(format.replace(/%u/g, "%i"));
     var string = formatter.format.apply(formatter, args);
 
     console.log2.output.push(string);
+};
+
+var overrideDefaultConsole = false;
+if (overrideDefaultConsole) {
+    console.log = console.log2;
 }
 
 console.log2.concat = function (arr) {
@@ -28,7 +29,9 @@ console.log2.concat = function (arr) {
     return s;
 };
 
-console.log2flush = function() {
+console.log2.output = [];
+
+console.log2flush = function () {
     var logText = console.log2.concat(console.log2.output);
     //console.log(logText);
     sendTextNew(logText);
