@@ -17,7 +17,7 @@ printf = function() {
     console.log2.output.push(string);
 };
 
-var overrideDefaultConsole = false;
+var overrideDefaultConsole = true;
 if (overrideDefaultConsole) {
     console.log = console.log2;
 }

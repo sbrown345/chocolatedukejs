@@ -286,6 +286,7 @@ var framePlacePointerHelper;
 function PointerHelper(array, position) {
     this.array = array instanceof Uint8Array ? array : new Uint8Array(array.buffer);
     this.position = position || 0;
+    //this.bytesPerElement = array.BYTES_PER_ELEMENT;
 }
 
 PointerHelper.prototype.setByte = function (v) {

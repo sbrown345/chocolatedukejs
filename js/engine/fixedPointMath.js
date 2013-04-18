@@ -145,6 +145,8 @@ function clearbufbyte(buffer, offset, c, a) {
 
 function copybufbyte(s, sPos, d, dPos, c) {
     if (arguments.length != 5) throw "arg error";
+    sPos = sPos * s.BYTES_PER_ELEMENT;
+    dPos = dPos * d.BYTES_PER_ELEMENT;
     var p = new PointerHelper(s, sPos), q = new PointerHelper(d, dPos);
     while ((c--) > 0) {
         q.setByte(p.getByte());

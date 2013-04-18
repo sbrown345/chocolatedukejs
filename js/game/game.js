@@ -3645,6 +3645,7 @@ function animatesprites( x, y, a, smoothratio) {
                         s.yoffset = toInt8(l/(s.yrepeat<<2));
                     else s.yoffset=0;
                 }
+                console.log2flush()
                 throw "todo"
                 //if(ps[p].newowner > -1)
                 //{

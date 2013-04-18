@@ -1172,8 +1172,8 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     while ((umost[x] > dmost[x]) && (x <= x2))
         x++;
 
-    for (; (x <= x2) && ((x + frameoffset.position) & 3); x++)
-    {
+    for (; (x <= x2) && ((x/*+ frameoffset.position*/) & 3); x++) {
+        printf("x without frameoffset.position: %i, x2: %i\n", x, x2);
         y1ve[0] = Math.max(uwal[x],umost[x]);
         y2ve[0] = Math.min(dwal[x],dmost[x]);
         if (y2ve[0] <= y1ve[0])
@@ -1185,7 +1185,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         
         if (bufplce[0] >= tileWidth)
         {
-            if (xnice == 0)
+            if (!xnice)
                 bufplce[0] %= tileWidth;
             else
                 bufplce[0] &= tileWidth;
@@ -1215,6 +1215,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
                 bad += pow2char[z];
                 continue;
             }
+            printf("y2ve[z]: %i\n", y2ve[z]);
 
             i = lwal[x+z] + globalxpanning;
             if (i >= tileWidth) {
@@ -1234,6 +1235,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         if (bad == 15)
             continue;
 
+        printf("bad: %i\n", bad);
         palookupoffse[0] = new PointerHelper(fpalookup, getpalookup(mulscale16(swal[x], globvis), globalshade) << 8);
         palookupoffse[3] = new PointerHelper(fpalookup, getpalookup(mulscale16(swal[x + 3], globvis), globalshade) << 8);
 
@@ -1250,6 +1252,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
         d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
 
+        printf("d4: %i\n", d4);
         if ((bad != 0) || (u4 >= d4))
         {
             if (!(bad&1))
@@ -2103,6 +2106,7 @@ function wallmost(mostbuf, w, sectnum, dastat) {
 }
 
 //2191
+var drawallsCount=0;
 Engine.draWalls = function (bunch) {
     var sec, nextsec;
     var wal;
@@ -2110,7 +2114,8 @@ Engine.draWalls = function (bunch) {
     var z, wallnum, sectnum, nextsectnum;
     var startsmostwallcnt, startsmostcnt, gotswall;
     var andwstat1, andwstat2;
-    console.log("drawalls %i", bunch);
+    drawallsCount++;
+    printf("drawalls %i, drawallsCount: %i\n", bunch, drawallsCount);
     z = bunchfirst[bunch];
     sectnum = pvWalls[z].sectorId;
     sec = sector[sectnum];
@@ -2428,7 +2433,7 @@ Engine.draWalls = function (bunch) {
                         smostwall[smostwallcnt] = z;
                         smostwalltype[smostwallcnt] = 2;   /* 2 for dmost */
                         smostwallcnt++;
-                        copybufbyte(dmost, x1, smost, smostcnt, i * 2);
+                        copybufbyte( dmost, x1, smost, smostcnt, i * 2);
                         smostcnt += i;
                     }
                 }
@@ -2516,8 +2521,8 @@ Engine.draWalls = function (bunch) {
                 gotswall = 1;
                 prepwall(z,wal);
             }
-
-            wallscan(x1,x2,uplc,dplc,swall,lwall);
+            printf("2591 wallscan x1: %i, x2: %i\n", x1, x2);
+            wallscan(x1, x2, uplc, dplc, swall, lwall);
 
             for(x=x1; x<=x2; x++)
                 if (umost[x] <= dmost[x])
@@ -4163,6 +4168,7 @@ function drawsprite (snum) {
 
     tspr = tspriteptr[snum];
 
+    printf("drawsprite: %i \n", snum);
     xb = spritesx[snum];
     yp = spritesy[snum];
     tilenum = tspr.picnum;
@@ -4285,6 +4291,7 @@ function drawsprite (snum) {
         {
             uwall[x] = Math.max(startumost[x+windowx1]-windowy1,toInt16(startum));
             dwall[x] = Math.min(startdmost[x+windowx1]-windowy1,toInt16(startdm));
+            printf("first x: %i, uwall[x]: %i dwall[x]: %i\n", x, uwall[x], dwall[x]);
         }
         daclip = 0;
         for(i=smostwallcnt-1; i>=0; i--)
@@ -4332,9 +4339,13 @@ function drawsprite (snum) {
 
         if (uwall[rx] >= dwall[rx])
         {
-            for(x=lx; x<rx; x++)
-                if (uwall[x] < dwall[x]) break;
-            if (x == rx) return;
+            for (x = lx; x < rx; x++) {
+                printf("x: %i, uwall[x]: %i dwall[x]: %i\n", x,uwall[x], dwall[x]);
+                if (uwall[x] < dwall[x])
+                    break;
+            }
+            if (x == rx)
+                return;
         }
 
         /* sprite */
@@ -4347,7 +4358,8 @@ function drawsprite (snum) {
                 searchit = 1;
             }
 
-        z2 = tspr.z - ((yoff*tspr.yrepeat)<<2);
+        z2 = tspr.z - ((yoff * tspr.yrepeat) << 2);
+        printf("z2: %i\n", z2);
         if (cstat&128)
         {
             z2 += ((spriteDim.height*tspr.yrepeat)<<1);
@@ -4375,6 +4387,7 @@ function drawsprite (snum) {
             globalzd = (((globalposz-z2)*globalyscale)<<8);
         }
 
+        printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
         qinterpolatedown16(lwall, lx, rx - lx + 1, linum, linuminc);
         clearbuf(swall[lx],rx-lx+1,mulscale19(yp,xdimscale));
 
