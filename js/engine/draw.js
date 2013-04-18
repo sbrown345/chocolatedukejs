@@ -209,6 +209,81 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
     return vplce;
 }
 
+static uint8_t  tran2shr;
+static uint32_t tran2pal_ebx;
+static uint32_t tran2pal_ecx;
+void setuptvlineasm2(int32_t i1, int32_t i2, int32_t i3)
+{
+	tran2shr = (i1&0x1f);
+tran2pal_ebx = i2;
+tran2pal_ecx = i3;
+} /* */
+
+void tvlineasm2(uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4, uint32_t i5, uint32_t i6)
+{
+	uint32_t ebp = i1;
+    uint32_t tran2inca = i2;
+    uint32_t tran2incb = asm1;
+    uint32_t tran2bufa = i3;
+    uint32_t tran2bufb = i4;
+    uint32_t tran2edi = asm2;
+    uint32_t tran2edi1 = asm2 + 1;
+
+    i6 -= asm2;
+
+    do {
+		
+        i1 = i5 >> tran2shr;
+        i2 = ebp >> tran2shr;
+        i5 += tran2inca;
+        ebp += tran2incb;
+        i3 = ((uint8_t  *)tran2bufa)[i1];
+        i4 = ((uint8_t  *)tran2bufb)[i2];
+        if (i3 == 255) { // skipdraw1
+            if (i4 != 255) { // skipdraw3
+                uint16_t val;
+                val = ((uint8_t  *)tran2pal_ecx)[i4];
+                val |= (((uint8_t  *)i6)[tran2edi1]<<8);
+
+                if (transrev) 
+                    val = ((val>>8)|(val<<8));
+
+                if (pixelsAllowed-- > 0)
+                    ((uint8_t  *)i6)[tran2edi1] = transluc[val];
+            }
+        } else if (i4 == 255) { // skipdraw2
+            uint16_t val;
+            val = ((uint8_t  *)tran2pal_ebx)[i3];
+            val |= (((uint8_t  *)i6)[tran2edi]<<8);
+
+            if (transrev) 
+                val = ((val>>8)|(val<<8));
+
+            if (pixelsAllowed-- > 0)
+                ((uint8_t  *)i6)[tran2edi] = transluc[val];
+        } else {
+            uint16_t l = ((uint8_t  *)i6)[tran2edi]<<8;
+            uint16_t r = ((uint8_t  *)i6)[tran2edi1]<<8;
+            l |= ((uint8_t  *)tran2pal_ebx)[i3];
+            r |= ((uint8_t  *)tran2pal_ecx)[i4];
+            if (transrev) {
+                l = ((l>>8)|(l<<8));
+                r = ((r>>8)|(r<<8));
+            }
+            if (pixelsAllowed-- > 0)
+            {
+                ((uint8_t  *)i6)[tran2edi] = transluc[l];
+                ((uint8_t  *)i6)[tran2edi1] =transluc[r];
+                pixelsAllowed--;
+            }
+        }
+        i6 += bytesperline;
+    } while (i6 > i6 - bytesperline);
+    asm1 = i5;
+    asm2 = ebp;
+} 
+
+
 //386
 var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {

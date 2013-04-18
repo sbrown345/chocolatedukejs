@@ -2969,6 +2969,140 @@ function spritewallfront (s, w) {
     return (dmulscale32(wal.x-x1,s.y-y1,-(s.x-x1),wal.y-y1) >= 0);
 }
 
+
+function transmaskvline(x) {
+    var vplc, vinc, p, i, palookupoffs, bufplc;
+    var y1v, y2v;
+
+    if ((x < 0) || (x >= xdimen)) return;
+
+    y1v = Math.max(uwall[x],startumost[x+windowx1]-windowy1);
+    y2v = Math.min(dwall[x],startdmost[x+windowx1]-windowy1);
+    y2v--;
+    if (y2v < y1v) return;
+
+    palookupoffs = new PointerHelper(palookup[globalpal], (getpalookup(mulscale16(swall[x], globvis), globalshade) << 8));
+
+    vinc = swall[x]*globalyscale;
+    vplc = globalzd + vinc*(y1v-globalhoriz+1);
+
+    i = lwall[x]+globalxpanning;
+    
+    if (i >= tiles[globalpicnum].dim.width)
+        i %= tiles[globalpicnum].dim.width;
+
+    bufplc = tiles[globalpicnum].data;// +i*tiles[globalpicnum].dim.height;
+
+    p = ylookup[y1v]+x+frameoffset;
+
+    tvlineasm1(vinc,palookupoffs,y2v-y1v,vplc,bufplc,p);
+
+    transarea += y2v-y1v;
+}
+
+function transmaskvline2 (x)
+{
+    var i, y1, y2, x2;
+    var y1ve = new Int16Array(2), y2ve= new Int16Array(2);
+
+    if ((x < 0) || (x >= xdimen)) return;
+    if (x == xdimen-1) {
+        transmaskvline(x);
+        return;
+    }
+
+    x2 = x+1;
+
+    y1ve[0] = Math.max(uwall[x],startumost[x+windowx1]-windowy1);
+    y2ve[0] = Math.min(dwall[x],startdmost[x+windowx1]-windowy1)-1;
+    if (y2ve[0] < y1ve[0]) {
+        transmaskvline(x2);
+        return;
+    }
+    y1ve[1] = Math.max(uwall[x2],startumost[x2+windowx1]-windowy1);
+    y2ve[1] = Math.min(dwall[x2],startdmost[x2+windowx1]-windowy1)-1;
+    if (y2ve[1] < y1ve[1]) {
+        transmaskvline(x);
+        return;
+    }
+
+    palookupoffse[0] = new PointerHelper(palookup[globalpal], (getpalookup(mulscale16(swall[x],globvis),globalshade)<<8));
+    palookupoffse[1] = new PointerHelper(palookup[globalpal], (getpalookup(mulscale16(swall[x2],globvis),globalshade)<<8));
+
+    setuptvlineasm2(globalshiftval,palookupoffse[0],palookupoffse[1]);
+
+    vince[0] = swall[x]*globalyscale;
+    vince[1] = swall[x2]*globalyscale;
+    vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
+    vplce[1] = globalzd + vince[1]*(y1ve[1]-globalhoriz+1);
+
+    i = lwall[x] + globalxpanning;
+    if (i >= tiles[globalpicnum].dim.width)
+        i %= tiles[globalpicnum].dim.width;
+    bufplce[0] = tiles[globalpicnum].data+i*tiles[globalpicnum].dim.height;
+
+    i = lwall[x2] + globalxpanning;
+    if (i >= tiles[globalpicnum].dim.width)
+        i %= tiles[globalpicnum].dim.width;
+    bufplce[1] = tiles[globalpicnum].data+i*tiles[globalpicnum].dim.height;
+
+    
+    y1 = max(y1ve[0],y1ve[1]);
+    y2 = min(y2ve[0],y2ve[1]);
+
+    i = x+frameoffset;
+
+    if (y1ve[0] != y1ve[1])
+    {
+        if (y1ve[0] < y1)
+            vplce[0] = tvlineasm1(vince[0],palookupoffse[0],y1-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+i);
+        else
+            vplce[1] = tvlineasm1(vince[1],palookupoffse[1],y1-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+i+1);
+    }
+
+    if (y2 > y1)
+    {
+        asm1 = vince[1];
+        asm2 = ylookup[y2]+i+1;
+        tvlineasm2(vplce[1],vince[0],bufplce[0],bufplce[1],vplce[0],ylookup[y1]+i);
+        transarea += ((y2-y1)<<1);
+    }
+    else
+    {
+        asm1 = vplce[0];
+        asm2 = vplce[1];
+    }
+
+    if (y2ve[0] > y2ve[1])
+        tvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y2-1,asm1,bufplce[0],ylookup[y2+1]+i);
+    else if (y2ve[0] < y2ve[1])
+        tvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y2-1,asm2,bufplce[1],ylookup[y2+1]+i+1);
+
+    faketimerhandler();
+}
+
+
+//3191
+function transmaskwallscan(x1, x2) {
+    var x;
+
+    setgotpic(globalpicnum);
+    
+    //Tile dimensions are invalid
+    if ((tiles[globalpicnum].dim.width <= 0) ||
+        (tiles[globalpicnum].dim.height <= 0))
+        return;
+
+    TILE_MakeAvailable(globalpicnum);
+
+    x = x1;
+    while ((startumost[x+windowx1] > startdmost[x+windowx1]) && (x <= x2)) x++;
+    if ((x <= x2) && (x&1)) transmaskvline(x), x++;
+    while (x < x2) transmaskvline2(x), x += 2;
+    while (x <= x2) transmaskvline(x), x++;
+    faketimerhandler();
+}
+
 //3179
 Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectnum) {
     var x = 0;
