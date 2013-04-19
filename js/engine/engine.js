@@ -126,8 +126,8 @@ var dmost = new Int16Array(MAXXDIM + 1);
 //int16_t bakumost[MAXXDIM+1], bakdmost[MAXXDIM+1];
 var uplc = new Int16Array(MAXXDIM + 1), dplc = new Int16Array(MAXXDIM + 1);
 var uwall = new Int16Array(MAXXDIM + 1), dwall = new Int16Array(MAXXDIM + 1);
-var swplc = new Int16Array(MAXXDIM + 1), lplc = new Int16Array(MAXXDIM + 1);
-var swall = new Int16Array(MAXXDIM + 1), lwall = new Int16Array(MAXXDIM + 4);
+var swplc = new Int32Array(MAXXDIM + 1), lplc = new Int32Array(MAXXDIM + 1);
+var swall = new Int32Array(MAXXDIM + 1), lwall = new Int32Array(MAXXDIM + 4);
 var xdimen = -1, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
 var wx1, wy1, wx2, wy2, ydimen;
 var viewoffset;
@@ -1571,7 +1571,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
                     swplc[j] = mulscale14(sintable[(radarang2[j]+512)&2047],n);
             }
             else
-                clearbuf(swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
+                clearbuf(swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],0,pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
         }
         else if (x >= 0)
         {
@@ -2911,7 +2911,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         console.log("drawrooms numbunches: %i", numbunches)
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.
-        clearbuf(tempbuf,((numbunches+3)>>2),0);
+        clearbuf(tempbuf,0,((numbunches+3)>>2),0);
 
         /* Almost works, but not quite :( */
         closest = 0;
@@ -3035,29 +3035,30 @@ function transmaskvline2 (x)
     vince[1] = swall[x2]*globalyscale;
     vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
     vplce[1] = globalzd + vince[1]*(y1ve[1]-globalhoriz+1);
+    printf("swall[x]: %i, swall[x2]: %i, vince[0]: %i, vince[1]: %i, vplce[0]: %i, vplce[1]: %i\n", swall[x], wall[x2], vince[0], vince[1], vplce[0], vplce[1]);
 
     i = lwall[x] + globalxpanning;
     if (i >= tiles[globalpicnum].dim.width)
         i %= tiles[globalpicnum].dim.width;
-    bufplce[0] = tiles[globalpicnum].data+i*tiles[globalpicnum].dim.height;
+    bufplce[0] = /*tiles[globalpicnum].data+*/i*tiles[globalpicnum].dim.height;
 
     i = lwall[x2] + globalxpanning;
     if (i >= tiles[globalpicnum].dim.width)
         i %= tiles[globalpicnum].dim.width;
-    bufplce[1] = tiles[globalpicnum].data+i*tiles[globalpicnum].dim.height;
+    bufplce[1] = /*tiles[globalpicnum].data+*/i*tiles[globalpicnum].dim.height;
 
     
-    y1 = max(y1ve[0],y1ve[1]);
-    y2 = min(y2ve[0],y2ve[1]);
+    y1 = Math.max(y1ve[0],y1ve[1]);
+    y2 = Math.min(y2ve[0],y2ve[1]);
 
-    i = x+frameoffset;
+    i = x;//x+frameoffset;
 
     if (y1ve[0] != y1ve[1])
     {
         if (y1ve[0] < y1)
-            vplce[0] = tvlineasm1(vince[0],palookupoffse[0],y1-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+i);
+            vplce[0] = tvlineasm1(vince[0],palookupoffse[0],y1-y1ve[0]-1,vplce[0],tiles[globalpicnum].data,bufplce[0],ylookup[y1ve[0]]+i);
         else
-            vplce[1] = tvlineasm1(vince[1],palookupoffse[1],y1-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+i+1);
+            vplce[1] = tvlineasm1(vince[1],palookupoffse[1],y1-y1ve[1]-1,vplce[1],tiles[globalpicnum].data,bufplce[1],ylookup[y1ve[1]]+i+1);
     }
 
     if (y2 > y1)
@@ -4523,7 +4524,7 @@ function drawsprite (snum) {
 
         printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
         qinterpolatedown16(lwall, lx, rx - lx + 1, linum, linuminc);
-        clearbuf(swall[lx],rx-lx+1,mulscale19(yp,xdimscale));
+        clearbuf(swall, lx, rx - lx + 1, mulscale19(yp, xdimscale));
 
         if ((cstat&2) == 0)
             maskwallscan(lx,rx,uwall,dwall,swall,lwall);
@@ -4697,7 +4698,7 @@ function drawsprite (snum) {
 
             dalx2 = pvWalls[j].screenSpaceCoo[0][VEC_COL];
             darx2 = pvWalls[j].screenSpaceCoo[1][VEC_COL];
-            if (max(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.min(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
+            if (Math.max(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.min(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
             {
                 if (min(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.max(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
                 {

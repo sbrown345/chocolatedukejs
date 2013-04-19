@@ -1011,9 +1011,9 @@ preMap.clearFifo = function () {
         inputfifo[i] = structArray(Input, MAXPLAYERS);
     }
     
-    clearbuf(movefifoend,MAXPLAYERS,0);
-    clearbuf(syncvalhead,MAXPLAYERS,0);
-    clearbuf(myminlag,MAXPLAYERS,0);
+    clearbuf(movefifoend, 0, MAXPLAYERS, 0);
+    clearbuf(syncvalhead, 0, MAXPLAYERS, 0);
+    clearbuf(myminlag, 0, MAXPLAYERS, 0);
 };
 
 //1434

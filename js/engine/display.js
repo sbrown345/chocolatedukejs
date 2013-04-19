@@ -158,8 +158,8 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     qsetmode = surface.height;
     activepage = visualpage = 0;
 
-    console.assert(ScreenWidth == screenWidth, "todo, match up ScreenWidth and screenWidth");
-    console.assert(ScreenHeight == screenHeight, "todo, match up ScreenHeight and screenHeight");
+    //console.assert(ScreenWidth == screenWidth, "todo, match up ScreenWidth and screenWidth");
+    //console.assert(ScreenHeight == screenHeight, "todo, match up ScreenHeight and screenHeight");
     frameoffset = frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
 
     j = ydim * 4 * 4;

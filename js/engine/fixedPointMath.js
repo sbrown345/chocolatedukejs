@@ -120,13 +120,10 @@ function klabs(i1) {
     return i1;
 }
 
-function clearbuf(d, c, a) {
-    if (arguments.length != 3) throw "arg error";
-    //// todo: check this
-    //int32_t *p = (int32_t*)d;
-    var p = d instanceof Int32Array ? d : new Int32Array(d.buffer), pIdx = 0;
-    //while ((c--) > 0) *(p++) = a;
-    while ((c--) > 0) p[pIdx++] = a; //*(p++) = a;
+function clearbuf(d, dOffset, c, a) {
+    console.assert(arguments.length == 4, "arg error");
+    var p = d instanceof Int32Array ? d : new Int32Array(d.buffer), pIdx = dOffset;
+    while ((c--) > 0) p[pIdx++] = a;
 }
 
 function clearbufbyte(buffer, offset, c, a) {

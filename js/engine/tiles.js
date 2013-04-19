@@ -149,7 +149,7 @@ function loadPics(filename, gamedir) {
 
     console.log("Art files loaded");
 
-    clearbuf(gotpic, (MAXTILES + 31) >> 5, 0); // todo: check
+    clearbuf(gotpic, 0, (MAXTILES + 31) >> 5, 0); // todo: check
 
     cachesize = Math.max(artsize, 1048576);
     // skipped some while loop that change cachesize
