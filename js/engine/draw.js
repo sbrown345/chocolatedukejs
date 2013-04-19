@@ -209,6 +209,43 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
     return vplce;
 }
 
+//279
+function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
+{
+    var shiftValue = (globalshiftval & 0x1f);
+    var temp;
+    var colorIndex;
+    var framePlaceArray = frameplace.array;
+    numPixels++;
+    debugger;
+    while (numPixels)
+    {
+        temp = i4;
+        temp >>>= shiftValue;
+        temp = source[temp];
+
+        //255 is the index for transparent color index. Skip drawing this pixel. 
+        if (temp != 255)
+        {
+            colorIndex = texture[temp];
+            colorIndex |= ((framePlaceArray[dest]) << 8);
+            
+            if (transrev) 
+                colorIndex = ((colorIndex>>8)|(colorIndex<<8));
+            
+            if (pixelsAllowed-- > 0)
+                framePlaceArray[dest] = transluc[colorIndex];
+        }
+        
+        i4 += i1;
+        
+        //We are drawing a column ?!
+        dest += bytesperline;
+        numPixels--;
+    }
+    return i4;
+} /* tvlineasm1 */
+
 var  tran2shr;
 var tran2pal_ebx;
 var tran2pal_ecx;

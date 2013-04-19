@@ -3035,7 +3035,7 @@ function transmaskvline2 (x)
     vince[1] = swall[x2]*globalyscale;
     vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
     vplce[1] = globalzd + vince[1]*(y1ve[1]-globalhoriz+1);
-    printf("swall[x]: %i, swall[x2]: %i, vince[0]: %i, vince[1]: %i, vplce[0]: %i, vplce[1]: %i\n", swall[x], wall[x2], vince[0], vince[1], vplce[0], vplce[1]);
+    printf("swall[x]: %i, swall[x2]: %i, vince[0]: %i, vince[1]: %i, vplce[0]: %i, vplce[1]: %i\n", swall[x], swall[x2], vince[0], vince[1], vplce[0], vplce[1]);
 
     i = lwall[x] + globalxpanning;
     if (i >= tiles[globalpicnum].dim.width)
