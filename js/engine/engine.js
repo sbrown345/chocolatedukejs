@@ -1488,8 +1488,6 @@ function maskwallscan(x1, x2,
         mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], new PointerHelper(tiles[globalpicnum].data),bufplce[0], p.position + ylookup[y1ve[0]], p);
     }
     faketimerhandler();
-    console.log2flush()
-    throw "check log"
 }
 
 //1580

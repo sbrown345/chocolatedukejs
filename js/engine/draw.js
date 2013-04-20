@@ -440,28 +440,19 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
     var dest = -ylookup[column];
     var frameBufferArray = frameBuffer.array;
     do {
-    //printf("dest -bytesperline : %i, dest: %i\n", (dest - bytesperline)>>>0, dest)
-    //for (; ((dest - bytesperline)>>>0) < (dest>>>0); dest += bytesperline) {
-        //printf("dest -bytesperline : %i, dest: %i\n", dest - bytesperline, dest)
+        //for (; (((dest >>> 0) - bytesperline)>>>0) < (dest>>>0); dest += bytesperline) {
         for (i = 0; i < 4; i++) {
             temp = ((vplce[i] >>> 0) >>> machmv) >>> 0;
-            //if ( bufplcArray[bufplce[i] + temp]==undefined) debugger;
-            printf("temp1: %u\n", temp);
             temp = bufplcArray[bufplce[i] + temp]; // get texture
-            //if (isNaN(temp)) debugger;
-            printf("temp2: %u\n", temp);
             if (temp !== 255) {
                 if (pixelsAllowed-- > 0) {
                     frameBufferArray[dest + index + i] = palookupoffse[i].getByte(temp);
-                    printf("mvlineasm4 px: %i\n", frameBufferArray[dest + index + i]);
                 }
             }
             vplce[i] += vince[i];
         }
             dest += bytesperline;
-            printf("dest - bytesperline: %u, :dest %u\n",(((dest >>> 0) - bytesperline)>>>0),(dest>>>0));
         } while ((((dest >>> 0) - bytesperline)>>>0) < (dest>>>0));
-    printf("FINISH dest - bytesperline: %u, :dest %u\n",(((dest >>> 0) - bytesperline)>>>0),(dest>>>0));
     //}
 }
 
