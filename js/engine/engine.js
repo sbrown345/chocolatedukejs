@@ -602,6 +602,7 @@ function getpalookup(davis, dashade) {
 //665
 function hline(xr, yp) {
     var xl, r, s;
+    printf("hline\n");
 
     xl = lastx[yp];
 
@@ -1250,9 +1251,9 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         }
 
         u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
-        d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
+        d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3])); 
 
-        printf("d4: %i\n", d4);
+        printf("wallscan x: %i, d4: %i, u4: %i\n", x,d4, u4);
         if ((bad != 0) || (u4 >= d4))
         {
             if (!(bad&1))
@@ -1327,14 +1328,12 @@ function maskwallscan(x1, x2,
                          uwal, dwal,
                          swal, lwal)
 {
-    //todo!!
-
     var i, x, startx, xnice, ynice;
     var fpalookup;
     var y1ve = new Int32Array(4), y2ve = new Int32Array(4), u4, d4, dax, z, tileWidth, tileHeight;
     var  p;
     var  bad;
-    debugger;
+    printf("maskwallscan %i, %i\n", x1, x2);
     tileWidth = tiles[globalpicnum].dim.width;
     tileHeight = tiles[globalpicnum].dim.height;
     setgotpic(globalpicnum);
@@ -1349,7 +1348,7 @@ function maskwallscan(x1, x2,
     TILE_MakeAvailable(globalpicnum);
 
     startx = x1;
-
+    
     xnice = (pow2long[picsiz[globalpicnum]&15] == tileWidth);
     if (xnice)
         tileWidth = (tileWidth-1);
@@ -1365,11 +1364,13 @@ function maskwallscan(x1, x2,
     x = startx;
     while ((startumost[x+windowx1] > startdmost[x+windowx1]) && (x <= x2)) x++;
 
-    p = new PointerHelper(frameoffset, x);
+    p = new PointerHelper(frameoffset.array, x);
 
-    for(; (x<=x2)&&p; x++,p.position++)
+    printf("(x<=x2): %i\n", (x <= x2) ? 1 : 0);
+    for (; (x <= x2) && (p.position &3); x++, p.position++)
     {
-        y1ve[0] = Math.max(uwal[x],startumost[x+windowx1]-windowy1);
+        printf("mvlineasm1 x==%i && x2 == %i, *p: %u\n",x,x2, p.getByte());
+        y1ve[0] = Math.max(uwal[x], startumost[x + windowx1] - windowy1);
         y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);
         if (y2ve[0] <= y1ve[0]) continue;
 
@@ -1390,8 +1391,8 @@ function maskwallscan(x1, x2,
 
         mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]],p);
     }
-    for(; x<=x2-3; x+=4,p+=4)
-    {
+    for(; x<=x2-3; x+=4,p.position+=4) {
+        printf("mvlineasm1 x==%i \n", x);
         bad = 0;
         for(z=3,dax=x+3; z>=0; z--,dax--)
         {
@@ -1420,45 +1421,47 @@ function maskwallscan(x1, x2,
         }
         if (bad == 15) continue;
 
-        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
-        palookupoffse[3] = fpalookup[(getpalookup(mulscale16(swal[x+3],globvis),globalshade)<<8)];
+        palookupoffse[0] = new PointerHelper(fpalookup, (getpalookup(mulscale16(swal[x],globvis),globalshade)<<8));
+        palookupoffse[3] = new PointerHelper(fpalookup, (getpalookup(mulscale16(swal[x+3],globvis),globalshade)<<8));
 
-        if ((palookupoffse[0] == palookupoffse[3]) && ((bad&0x9) == 0))
+        if ((palookupoffse[0].array == palookupoffse[3].array && palookupoffse[0].position == palookupoffse[3].position) && ((bad & 0x9) == 0))
         {
             palookupoffse[1] = palookupoffse[0];
             palookupoffse[2] = palookupoffse[0];
         }
         else
         {
-            palookupoffse[1] = fpalookup[(getpalookup(mulscale16(swal[x+1],globvis),globalshade)<<8)];
-            palookupoffse[2] = fpalookup[(getpalookup(mulscale16(swal[x+2],globvis),globalshade)<<8)];
+            palookupoffse[1] = new PointerHelper(fpalookup,(getpalookup(mulscale16(swal[x+1],globvis),globalshade)<<8));
+            palookupoffse[2] = new PointerHelper(fpalookup,(getpalookup(mulscale16(swal[x+2],globvis),globalshade)<<8));
         }
 
         u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
         d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
 
+
+        printf("bad: %i x: %i: d4: %i, u4: %i\n", bad,x,d4, u4);
         if ((bad > 0) || (u4 >= d4))
         {
-            if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],bufplce[0],ylookup[y1ve[0]]+0,p);
-            if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],bufplce[1],ylookup[y1ve[1]]+1,p);
-            if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],bufplce[2],ylookup[y1ve[2]]+2,p);
-            if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],bufplce[3],ylookup[y1ve[3]]+3,p);
+            if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]]+0,p);
+            if (!(bad&2)) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-y1ve[1],vplce[1],new PointerHelper(tiles[globalpicnum].data),bufplce[1],ylookup[y1ve[1]]+1,p);
+            if (!(bad&4)) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-y1ve[2],vplce[2],new PointerHelper(tiles[globalpicnum].data),bufplce[2],ylookup[y1ve[2]]+2,p);
+            if (!(bad&8)) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-y1ve[3],vplce[3],new PointerHelper(tiles[globalpicnum].data),bufplce[3],ylookup[y1ve[3]]+3,p);
             continue;
         }
 
-        if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],bufplce[0],ylookup[y1ve[0]]+0,p);
-        if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],bufplce[1],ylookup[y1ve[1]]+1,p);
-        if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],bufplce[2],ylookup[y1ve[2]]+2,p);
-        if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],bufplce[3],ylookup[y1ve[3]]+3,p);
+        if (u4 > y1ve[0]) vplce[0] = mvlineasm1(vince[0],palookupoffse[0],u4-y1ve[0]-1,vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]]+0,p);
+        if (u4 > y1ve[1]) vplce[1] = mvlineasm1(vince[1],palookupoffse[1],u4-y1ve[1]-1,vplce[1],new PointerHelper(tiles[globalpicnum].data),bufplce[1],ylookup[y1ve[1]]+1,p);
+        if (u4 > y1ve[2]) vplce[2] = mvlineasm1(vince[2],palookupoffse[2],u4-y1ve[2]-1,vplce[2],new PointerHelper(tiles[globalpicnum].data),bufplce[2],ylookup[y1ve[2]]+2,p);
+        if (u4 > y1ve[3]) vplce[3] = mvlineasm1(vince[3],palookupoffse[3],u4-y1ve[3]-1,vplce[3],new PointerHelper(tiles[globalpicnum].data),bufplce[3],ylookup[y1ve[3]]+3,p);
 
         if (d4 >= u4) 
             mvlineasm4(d4 - u4 + 1, tiles[globalpicnum].data, ylookup[u4] + p.position, p);
 
         i = p+ylookup[d4+1];
-        if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],bufplce[0],i+0);
-        if (y2ve[1] > d4) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],bufplce[1],i+1);
-        if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],bufplce[2],i+2);
-        if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],bufplce[3],i+3);
+        if (y2ve[0] > d4) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-d4-1,vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],i+0,p);
+        if (y2ve[1] > d4) mvlineasm1(vince[1],palookupoffse[1],y2ve[1]-d4-1,vplce[1],new PointerHelper(tiles[globalpicnum].data),bufplce[1],i+1,p);
+        if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],new PointerHelper(tiles[globalpicnum].data),bufplce[2],i+2,p);
+        if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],new PointerHelper(tiles[globalpicnum].data),bufplce[3],i+3,p);
     }
     for(; x<=x2; x++,p++)
     {
@@ -1466,7 +1469,7 @@ function maskwallscan(x1, x2,
         y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);
         if (y2ve[0] <= y1ve[0]) continue;
 
-        palookupoffse[0] = fpalookup[(getpalookup(mulscale16(swal[x],globvis),globalshade)<<8)];
+        palookupoffse[0] = new PointerHelper(fpalookup, (getpalookup(mulscale16(swal[x], globvis), globalshade) << 8));
 
         bufplce[0] = lwal[x] + globalxpanning;
         if (bufplce[0] >= tileWidth) {
@@ -1481,7 +1484,7 @@ function maskwallscan(x1, x2,
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data,bufplce[0], p.position + ylookup[y1ve[0]], p);
+        mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], new PointerHelper(tiles[globalpicnum].data),bufplce[0], p.position + ylookup[y1ve[0]], p);
     }
     faketimerhandler();
 }
@@ -1496,6 +1499,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
     sectnum = pvWalls[bunchfirst[bunch]].sectorId;
     sec = sector[sectnum];
 
+    printf("parascan\n");
     globalhorizbak = globalhoriz;
     if (parallaxyscale != 65536)
         globalhoriz = mulscale16(globalhoriz-(ydimen>>1),parallaxyscale) + (ydimen>>1);
@@ -3601,6 +3605,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     var tileWidht, tileHeight;
 
+    printf("doRotateSprite sx == %i && sy == %i && picnum == %i\n", sx, sy, picnum);
+
     tileWidht = tiles[picnum].dim.width;
     tileHeight = tiles[picnum].dim.height;
 
@@ -3624,7 +3630,13 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         if ((dastat & 8) == 0) {
             x = xdimenscale;   /* = scale(xdimen,yxaspect,320); */
             if (stereomode) x = scale(windowx2 - windowx1 + 1, yxaspect, 320);
+            printf("(dastat & 8) == 0\n");
+            printf("cx1: %i\n", cx1);
+            printf("cx2: %i\n", cx2);
+            printf("sx: %i\n", sx);
+            printf("xdimen: %i\n", xdimen);
             sx = ((cx1 + cx2 + 2) << 15) + scale(sx - (320 << 15), xdimen, 320);
+            
             sy = ((cy1 + cy2 + 2) << 15) + mulscale16(sy - (200 << 15), x);
         }
         else {
@@ -3633,6 +3645,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
              *  hard-coded bonus, scale to full screen instead
              */
             x = scale(xdim, yxaspect, 320);
+            printf("sx: %i\n", sx);
+            printf("xdim: %i\n", xdim);
             sx = (xdim << 15) + 32768 + scale(sx - (320 << 15), xdim, 320);
             sy = (ydim << 15) + 32768 + mulscale16(sy - (200 << 15), x);
         }
@@ -3678,6 +3692,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     //Taking care of the X coordinates.
     pvWalls[0].cameraSpaceCoo[0][VEC_X] = sx - (xv2 * xoff - yv2 * yoff);
+    printf("sx: %i\n", sx);
     pvWalls[1].cameraSpaceCoo[0][VEC_X] = pvWalls[0].cameraSpaceCoo[0][VEC_X] + xv2 * tileWidht;
     pvWalls[3].cameraSpaceCoo[0][VEC_X] = pvWalls[0].cameraSpaceCoo[0][VEC_X] - yv2 * tileHeight;
     pvWalls[2].cameraSpaceCoo[0][VEC_X] = pvWalls[1].cameraSpaceCoo[0][VEC_X] +
@@ -3710,6 +3725,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     lx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
     rx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
+    printf("lx: %i\n", lx);
 
     nextv = 0;
     for (v = npoints - 1; v >= 0; v--) {
@@ -3759,6 +3775,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     x1 = (lx >> 16);
     x2 = (rx >> 16);
+    printf("x1: %i\n", x1);
 
     oy = 0;
     x = (x1 << 16) - 1 - gx1;
@@ -3822,6 +3839,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     vplce[xx] = by;
                     y1ve[xx] = y1;
                     y2ve[xx] = y2 - 1;
+                    printf("xx == %i && vplce[xx] == %i &&   y1ve[xx] == %i &&  y2ve[xx] == %i\n", xx, vplce[xx], y1ve[xx], y2ve[xx]);
                     bad &= ~pow2char[xx];
                 }
 
@@ -3856,6 +3874,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[3])
                         vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p);
 
+                    printf("doRotateSprite x:%i, d4: %i, u4: %i\n", x, d4, u4);
                     if (d4 >= u4) {
                         vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
                     }
@@ -3871,6 +3890,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3, p);
                 }
                 else {
+                    printf("doRotateSprite bad == %i && x == %i && d4 == %i && u4 == %i\n", bad, x, d4, u4);
                     if ((bad != 0) || (u4 >= d4)) {
                         if (!(bad & 1)) mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], bufplc, bufplce[0], ylookup[y1ve[0]] + 0, p);
                         if (!(bad & 2)) mvlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], bufplc, bufplce[1], ylookup[y1ve[1]] + 1, p);

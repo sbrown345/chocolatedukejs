@@ -47,7 +47,7 @@ function sethlinesizes(i1, _bits, textureAddress) {
 //var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
-
+    printf("hlineasm4\n");
     var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
 
@@ -112,6 +112,7 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
         throw new Error("todo: the line that passed to this method (rhlineasm4) needs fixing");
     }
 
+    printf("rhlineasm4\n");
     i4 = i4 >>> 0;
     i5 = i5 >>> 0;
 
@@ -159,6 +160,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
         throw new Error("prevlineasm1 should have 8 arguments");
     }
 
+    printf("prevlineasm1\n");
     if (i3 == 0) {
         if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
             return 0;
@@ -182,6 +184,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
 function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffset, destOffset, dest) {
     console.assert(arguments.length == 8);
 
+    printf("vlineasm1\n");
     if (!dest || dest.length === undefined) {
         console.log(new Error().stack);
         throw new Error("dest should have a length e.g. be an array");
@@ -212,6 +215,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 //279     (todo: more of the func should be setup like this one?)
 function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
 {
+    printf("tvlineasm1\n");
     var shiftValue = (globalshiftval & 0x1f);
     var temp;
     var colorIndex;
@@ -255,66 +259,68 @@ function setuptvlineasm2(i1, i2, i3) {
 } /* */
 
 function tvlineasm2(i1, i2, i3, i4, texture, i5, i6 /*dest frameoffset*/) {
-	var ebp = i1;
-    var tran2inca = i2;
-    var tran2incb = asm1;
-    var tran2bufa = i3;
-    var tran2bufb = i4;
-    var tran2edi = asm2;
-    var tran2edi1 = asm2 + 1;
-    debugger 
-    i6 -= asm2; i6 >>>= 0;
+    printf("tvlineasm2\n");
+    // todo!!!!!!!
+	//var ebp = i1;
+    //var tran2inca = i2;
+    //var tran2incb = asm1;
+    //var tran2bufa = i3;
+    //var tran2bufb = i4;
+    //var tran2edi = asm2;
+    //var tran2edi1 = asm2 + 1;
+    //debugger 
+    //i6 -= asm2; i6 >>>= 0;
 
-    //do {
+    ////do {
 		
-        i1 = i5 >>> tran2shr;
-        i2 = ebp >>> tran2shr;
-        i5 += tran2inca; i5 >>>= 0;
-        ebp += tran2incb; ebp >>>= 0;
-    //    i3 = ((uint8_t  *)tran2bufa)[i1];
-    //    i4 = ((uint8_t  *)tran2bufb)[i2];
-    //    if (i3 == 255) { // skipdraw1
-    //        if (i4 != 255) { // skipdraw3
-    //            var val;
-    //            val = ((uint8_t  *)tran2pal_ecx)[i4];
-    //            val |= (((uint8_t  *)i6)[tran2edi1]<<8);
+    //    i1 = i5 >>> tran2shr;
+    //    i2 = ebp >>> tran2shr;
+    //    i5 += tran2inca; i5 >>>= 0;
+    //    ebp += tran2incb; ebp >>>= 0;
+    ////    i3 = ((uint8_t  *)tran2bufa)[i1];
+    ////    i4 = ((uint8_t  *)tran2bufb)[i2];
+    ////    if (i3 == 255) { // skipdraw1
+    ////        if (i4 != 255) { // skipdraw3
+    ////            var val;
+    ////            val = ((uint8_t  *)tran2pal_ecx)[i4];
+    ////            val |= (((uint8_t  *)i6)[tran2edi1]<<8);
 
-    //            if (transrev) 
-    //                val = ((val>>8)|(val<<8));
+    ////            if (transrev) 
+    ////                val = ((val>>8)|(val<<8));
 
-    //            if (pixelsAllowed-- > 0)
-    //                ((uint8_t  *)i6)[tran2edi1] = transluc[val];
-    //        }
-    //    } else if (i4 == 255) { // skipdraw2
-    //        var val;
-    //        val = ((uint8_t  *)tran2pal_ebx)[i3];
-    //        val |= (((uint8_t  *)i6)[tran2edi]<<8);
+    ////            if (pixelsAllowed-- > 0)
+    ////                ((uint8_t  *)i6)[tran2edi1] = transluc[val];
+    ////        }
+    ////    } else if (i4 == 255) { // skipdraw2
+    ////        var val;
+    ////        val = ((uint8_t  *)tran2pal_ebx)[i3];
+    ////        val |= (((uint8_t  *)i6)[tran2edi]<<8);
 
-    //        if (transrev) 
-    //            val = ((val>>8)|(val<<8));
+    ////        if (transrev) 
+    ////            val = ((val>>8)|(val<<8));
 
-    //        if (pixelsAllowed-- > 0)
-    //            ((uint8_t  *)i6)[tran2edi] = transluc[val];
-    //    } else {
-    //        var l = ((uint8_t  *)i6)[tran2edi]<<8;
-    //        var r = ((uint8_t  *)i6)[tran2edi1]<<8;
-    //        l |= ((uint8_t  *)tran2pal_ebx)[i3];
-    //        r |= ((uint8_t  *)tran2pal_ecx)[i4];
-    //        if (transrev) {
-    //            l = ((l>>8)|(l<<8));
-    //            r = ((r>>8)|(r<<8));
-    //        }
-    //        if (pixelsAllowed-- > 0)
-    //        {
-    //            ((uint8_t  *)i6)[tran2edi] = transluc[l];
-    //            ((uint8_t  *)i6)[tran2edi1] =transluc[r];
-    //            pixelsAllowed--;
-    //        }
-    //    }
-    //    i6 += bytesperline;
-    //} while (i6 > i6 - bytesperline);
-    //asm1 = i5;
-    //asm2 = ebp;
+    ////        if (pixelsAllowed-- > 0)
+    ////            ((uint8_t  *)i6)[tran2edi] = transluc[val];
+    ////    } else {
+    ////        var l = ((uint8_t  *)i6)[tran2edi]<<8;
+    ////        var r = ((uint8_t  *)i6)[tran2edi1]<<8;
+    ////        l |= ((uint8_t  *)tran2pal_ebx)[i3];
+    ////        r |= ((uint8_t  *)tran2pal_ecx)[i4];
+    ////        if (transrev) {
+    ////            l = ((l>>8)|(l<<8));
+    ////            r = ((r>>8)|(r<<8));
+    ////        }
+    ////        if (pixelsAllowed-- > 0)
+    ////        {
+    ////            ((uint8_t  *)i6)[tran2edi] = transluc[l];
+    ////            ((uint8_t  *)i6)[tran2edi1] =transluc[r];
+    ////            pixelsAllowed--;
+    ////        }
+    ////    }
+    ////    i6 += bytesperline;
+    ////} while (i6 > i6 - bytesperline);
+    ////asm1 = i5;
+    ////asm2 = ebp;
 } 
 
 
@@ -323,7 +329,7 @@ var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {
     console.assert(arguments.length == 8);
     console.assert(dest instanceof PointerHelper);
-
+    printf("mvlineasm1\n");
     var temp;
     var textureArray = texture.array;
     var destArray = dest.array;
@@ -354,6 +360,7 @@ function setupvlineasm(i1) {
 
 //FCS This is used to fill the inside of a wall (so it draws VERTICAL column, always).
 function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
+    printf("vlineasm4\n");
     if (!RENDER_DRAW_WALL_INSIDE)
         return;
 
@@ -392,6 +399,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
         throw new Error("todo: vlineasm4_2 should have 2 arguments");
     }
 
+    printf("vlineasm4\n");
     var i = 0;
     var temp;
 
@@ -424,6 +432,7 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
         throw new Error("todo: mvlineasm4 should have 4 arguments");
     }
 
+    printf("mvlineasm4\n");
     var i;
     var temp;
     var index = (framebufferOffset + ylookup[column]);
@@ -450,6 +459,7 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
  */
 //665
 function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, dest) {
+    printf("DrawSpriteVerticalLine\n");
     // todo
     var colorIndex;
     texture = texture.array;
@@ -565,6 +575,7 @@ function low32(a) { return (a & 0xffffffff); }
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 //var slopevlinCount = 0;
 function slopevlin(i1, i2, i3, i4, i5, i6) {
+    printf("slopevlin\n");
     var doCount = 0;
     var whileCount = 0;
     var c = new bitwisef2i();

@@ -1082,6 +1082,7 @@ preMap.enterLevel = function (g) {
             var poszRef = new Ref(ps[0].posz);
             var angRef = new Ref(ps[0].ang);
             var cursectnumRef = new Ref(ps[0].cursectnum);
+            console.log("filename=%s", fulllevelfilename);
             var loadBoardResult = Engine.loadBoard(fulllevelfilename, posxRef, posyRef, poszRef, angRef, cursectnumRef);
             ps[0].posx = posxRef.$;
             ps[0].posy = posyRef.$;
@@ -1089,7 +1090,6 @@ preMap.enterLevel = function (g) {
             ps[0].ang = angRef.$;
             ps[0].cursectnum = cursectnumRef.$;
 
-            console.log("filename=%s", fulllevelfilename);
             if (loadBoardResult === -1) {
                 throw new Error("Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found! Not using the right grp file?");
             }
@@ -1132,7 +1132,7 @@ preMap.enterLevel = function (g) {
     //    //if (VOLUMEONE) // commented out in original
     //    //    if(ud.level_number == 0 && ud.recstat != 2) FTA(40,&ps[myconnectindex]);
 
-    fta_quotes[103] = "Chocolate JS Duke3D v" + ud.rev[myconnectindex][2] + "." + ud.rev[myconnectindex][3];
+    fta_quotes[103] = "Chocolate Duke3D v" + ud.rev[myconnectindex][2] + "." + ud.rev[myconnectindex][3];
     FTA(103, ps[myconnectindex], 1);
 
     if (ud.auto_aim == 1 && ud.recstat != 2) {
