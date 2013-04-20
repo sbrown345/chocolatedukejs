@@ -209,7 +209,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
     return vplce;
 }
 
-//279
+//279     (todo: more of the func should be setup like this one?)
 function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
 {
     var shiftValue = (globalshiftval & 0x1f);
@@ -217,7 +217,6 @@ function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
     var colorIndex;
     var framePlaceArray = frameplace.array;
     numPixels++;
-    debugger;
     while (numPixels)
     {
         temp = i4;
