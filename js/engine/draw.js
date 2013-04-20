@@ -348,6 +348,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
         }
 
         vplce += vince;
+        vplce = vplce | 0;
         printf("vplce: %i\n", vplce);
         destPosition += bytesperline;
     }
