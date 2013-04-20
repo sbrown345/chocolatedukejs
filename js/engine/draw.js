@@ -335,16 +335,20 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
     var destArray = dest.array;
 
     for (; i3 >= 0; i3--) {
-        temp = ((vplce >>> 0) >> machmv) >>> 0;
+        temp = vplce >>> machmv;
+        printf("temp1: %u\n", temp);
         temp = textureArray[texturePosition + temp];
-
+        printf("temp2: %u\n", temp);
+        
         if (temp != 255) {
             if (pixelsAllowed-- > 0) {
                 destArray[destPosition + dest.position] = palookupoffse.getByte(temp);
+                printf("mvlineasm1 px: %i\n", destArray[destPosition + dest.position]);
             }
         }
 
         vplce += vince;
+        printf("vplce: %i\n", vplce);
         destPosition += bytesperline;
     }
 

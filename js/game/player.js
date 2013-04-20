@@ -460,6 +460,7 @@ function shoot(i,atwith) {
 
                 if(hitspr >= 0)
                 {
+                    console.log2flush()
                     checkhitsprite(hitspr,k);
                     if( sprite[hitspr].picnum == APLAYER && (ud.coop != 1 || ud.ffire == 1) )
                     {
