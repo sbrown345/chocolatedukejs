@@ -327,7 +327,7 @@ function scansector(sectnum) {
         scanfirst = numscans;
 
 
-        for (z = startwall, walIdx = z, wal = wall[walIdx]; z < endwall; z++, wal = wall[++walIdx]) {
+        for (z = startwall, wal = wall[walIdx = z]; z < endwall; z++, wal = wall[++walIdx]) {
             nextsectnum = wal.nextsector;
 
             wal2 = wall[wal.point2];
@@ -5387,8 +5387,7 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
     {
         dasectnum = clipsectorlist[dacnt];
         sec = sector[dasectnum];
-        walIdx = sec.wallptr;
-        for (cnt = sec.wallnum, wal = wall[walIdx]; cnt > 0; cnt--, wal = wall[++walIdx])
+        for (cnt = sec.wallnum, wal = wall[walIdx = sec.wallptr]; cnt > 0; cnt--, wal = wall[++walIdx])
         {
             wal2 = wall[wal.point2];
             x31 = wal.x-x1;
@@ -5513,6 +5512,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
     tempshortnum = 1;
     do
     {
+        printf("tempshortcnt: %i,tempshortnum: %i\n", tempshortcnt, tempshortnum);
         dasector = clipsectorlist[tempshortcnt];
         sec = sector[dasector];
 
@@ -5614,7 +5614,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
 
         startwall = sec.wallptr;
         endwall = startwall + sec.wallnum;
-        for(z=startwall,wal=wall[startwall]; z<endwall; z++, wal = wall[++walIdx])
+        for (z = startwall, wal = wall[walIdx=startwall], walIdx; z < endwall; z++, wal = wall[++walIdx])
         {
             wal2 = wall[wal.point2];
             x1 = wal.x;
@@ -5623,8 +5623,10 @@ function hitscan( xs,  ys,  zs,  sectnum,
             y2 = wal2.y;
 
             if ((x1-xs)*(y2-ys) < (x2-xs)*(y1-ys)) continue;
-            if (rintersect(xs,ys,zs,vx,vy,vz,x1,y1,x2,y2,intx,inty,intz) == 0) continue;
-
+            printf("test23 %i < %i \n", (x1 - xs) * (y2 - ys), (x2 - xs) * (y1 - ys));
+            printf("z==%i && x1==%i && y1==%i && x2==%i && y2==%i\n", z, x1, y1, x2, y2);
+            if (rintersect(xs, ys, zs, vx, vy, vz, x1, y1, x2, y2, intx, inty, intz) == 0) continue;
+            printf("passed rintersect\n");
             if (klabs(intx.$-xs)+klabs(inty.$-ys) >= klabs((hitx.$)-xs)+klabs((hity.$)-ys)) continue;
 
             nextsector = wal.nextsector;
@@ -5650,21 +5652,22 @@ function hitscan( xs,  ys,  zs,  sectnum,
                 continue;
             }
 
-            for(zz=tempshortnum-1; zz>=0; zz--)
-                if (clipsectorlist[zz] == nextsector) break;
+            for(zz=tempshortnum-1; zz>=0; printf("zz: %i\n",zz),zz--)
+                if (clipsectorlist[zz] == nextsector)
+                    break;
             if (zz < 0) clipsectorlist[tempshortnum++] = nextsector;
         }
 
-        for(z=headspritesect[dasector]; z>=0; z=nextspritesect[z])
-        {
+        for(z=headspritesect[dasector]; z>=0; z=nextspritesect[z]) {
             spr = sprite[z];
             cstat = spr.cstat;
-            if ((cstat&dasprclipmask) == 0) continue;
+            printf("z: %i, cstat & 48: %i\n", z, cstat & 48);
+            if ((cstat & dasprclipmask) == 0) continue;
 
             x1 = spr.x;
             y1 = spr.y;
             z1 = spr.z;
-            switch(cstat&48)
+            switch (cstat & 48)
             {
                 case 0:
                     topt = vx*(x1-xs) + vy*(y1-ys);
