@@ -1464,7 +1464,7 @@ function maskwallscan(x1, x2,
         if (y2ve[2] > d4) mvlineasm1(vince[2],palookupoffse[2],y2ve[2]-d4-1,vplce[2],new PointerHelper(tiles[globalpicnum].data),bufplce[2],i+2,p);
         if (y2ve[3] > d4) mvlineasm1(vince[3],palookupoffse[3],y2ve[3]-d4-1,vplce[3],new PointerHelper(tiles[globalpicnum].data),bufplce[3],i+3,p);
     }
-    for(; x<=x2; x++,p++)
+    for(; x<=x2; x++,p.position++)
     {
         y1ve[0] = Math.max(uwal[x],startumost[x+windowx1]-windowy1);
         y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);

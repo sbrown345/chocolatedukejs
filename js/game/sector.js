@@ -359,6 +359,450 @@ function checkplayerhurt(p, j)
     }
 }
 
+// 1948
+function checkhitsprite( i, sn) {
+    var j, k, p;
+    var s;
+
+    i &= (MAXSPRITES-1);
+
+    switch(sprite[i].picnum)
+    {
+        case OCEANSPRITE1:
+        case OCEANSPRITE2:
+        case OCEANSPRITE3:
+        case OCEANSPRITE4:
+        case OCEANSPRITE5:
+            spawn(i,SMALLSMOKE);
+            deletesprite(i);
+            break;
+        case QUEBALL:
+        case STRIPEBALL:
+            if(sprite[sn].picnum == QUEBALL || sprite[sn].picnum == STRIPEBALL)
+            {
+                sprite[sn].xvel = (sprite[i].xvel>>1)+(sprite[i].xvel>>2);
+                sprite[sn].ang -= (sprite[i].ang<<1)+1024;
+                sprite[i].ang = getangle(sprite[i].x-sprite[sn].x,sprite[i].y-sprite[sn].y)-512;
+                if(Sound[POOLBALLHIT].num < 2)
+                    spritesound(POOLBALLHIT,i);
+            }
+            else
+            {
+                if( krand()&3 )
+                {
+                    sprite[i].xvel = 164;
+                    sprite[i].ang = sprite[sn].ang;
+                }
+                else
+                {
+                    lotsofglass(i,-1,3);
+                    deletesprite(i);
+                }
+            }
+            break;
+        case TREE1:
+        case TREE2:
+        case TIRE:
+        case CONE:
+        case BOX:
+            switch(sprite[sn].picnum)
+            {
+                case RADIUSEXPLOSION:
+                case RPG:
+                case FIRELASER:
+                case HYDRENT:
+                case HEAVYHBOMB:
+                    if(hittype[i].temp_data[0] == 0)
+                    {
+                        sprite[i].cstat &= ~257;
+                        hittype[i].temp_data[0] = 1;
+                        spawn(i,BURNING);
+                    }
+                    break;
+            }
+            break;
+        case CACTUS:
+            //        case CACTUSBROKE:
+            switch(sprite[sn].picnum)
+            {
+                case RADIUSEXPLOSION:
+                case RPG:
+                case FIRELASER:
+                case HYDRENT:
+                case HEAVYHBOMB:
+                    for(k=0;k<64;k++)
+                    {
+                        j = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+                        sprite[j].pal = 8;
+                    }
+
+                    if(sprite[i].picnum == CACTUS)
+                        sprite[i].picnum = CACTUSBROKE;
+                    sprite[i].cstat &= ~257;
+                    //       else deletesprite(i);
+                    break;
+            }
+            break;
+
+        case HANGLIGHT:
+        case GENERICPOLE2:
+            for(k=0;k<6;k++)
+                EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(8<<8),SCRAP1+(krand()&15),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+            spritesound(GLASS_HEAVYBREAK,i);
+            deletesprite(i);
+            break;
+
+
+        case FANSPRITE:
+            sprite[i].picnum = FANSPRITEBROKE;
+            sprite[i].cstat &= (65535-257);
+            if( sector[sprite[i].sectnum].floorpicnum == FANSHADOW )
+                sector[sprite[i].sectnum].floorpicnum = FANSHADOWBROKE;
+
+            spritesound(GLASS_HEAVYBREAK,i);
+            s = sprite[i];
+            for(j=0;j<16;j++) RANDOMSCRAP;
+
+            break;
+        case WATERFOUNTAIN:
+        case WATERFOUNTAIN+1:
+        case WATERFOUNTAIN+2:
+        case WATERFOUNTAIN+3:
+            sprite[i].picnum = WATERFOUNTAINBROKE;
+            spawn(i,TOILETWATER);
+            break;
+        case SATELITE:
+        case FUELPOD:
+        case SOLARPANNEL:
+        case ANTENNA:
+            if(sprite[sn].extra != script[actorscrptr[SHOTSPARK1]] )
+            {
+                for(j=0;j<15;j++)
+                    EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sector[sprite[i].sectnum].floorz-(12<<8)-(j<<9),SCRAP1+(krand()&15),-8,64,64,
+                        krand()&2047,(krand()&127)+64,-(krand()&511)-256,i,5);
+                spawn(i,EXPLOSION2);
+                deletesprite(i);
+            }
+            break;
+        case BOTTLE1:
+        case BOTTLE2:
+        case BOTTLE3:
+        case BOTTLE4:
+        case BOTTLE5:
+        case BOTTLE6:
+        case BOTTLE8:
+        case BOTTLE10:
+        case BOTTLE11:
+        case BOTTLE12:
+        case BOTTLE13:
+        case BOTTLE14:
+        case BOTTLE15:
+        case BOTTLE16:
+        case BOTTLE17:
+        case BOTTLE18:
+        case BOTTLE19:
+        case WATERFOUNTAINBROKE:
+        case DOMELITE:
+        case SUSHIPLATE1:
+        case SUSHIPLATE2:
+        case SUSHIPLATE3:
+        case SUSHIPLATE4:
+        case SUSHIPLATE5:
+        case WAITTOBESEATED:
+        case VASE:
+        case STATUEFLASH:
+        case STATUE:
+            if(sprite[i].picnum == BOTTLE10)
+                lotsofmoney(sprite[i],4+(krand()&3));
+            else if(sprite[i].picnum == STATUE || sprite[i].picnum == STATUEFLASH)
+            {
+                lotsofcolourglass(i,-1,40);
+                spritesound(GLASS_HEAVYBREAK,i);
+            }
+            else if(sprite[i].picnum == VASE)
+                lotsofglass(i,-1,40);
+
+            spritesound(GLASS_BREAKING,i);
+            sprite[i].ang = krand()&2047;
+            lotsofglass(i,-1,8);
+            deletesprite(i);
+            break;
+        case FETUS:
+            sprite[i].picnum = FETUSBROKE;
+            spritesound(GLASS_BREAKING,i);
+            lotsofglass(i,-1,10);
+            break;
+        case FETUSBROKE:
+            for(j=0;j<48;j++)
+            {
+                shoot(i,BLOODSPLAT1);
+                sprite[i].ang += 333;
+            }
+            spritesound(GLASS_HEAVYBREAK,i);
+            spritesound(SQUISHED,i);
+        case BOTTLE7:
+            spritesound(GLASS_BREAKING,i);
+            lotsofglass(i,-1,10);
+            deletesprite(i);
+            break;
+        case HYDROPLANT:
+            sprite[i].picnum = BROKEHYDROPLANT;
+            spritesound(GLASS_BREAKING,i);
+            lotsofglass(i,-1,10);
+            break;
+
+        case FORCESPHERE:
+            sprite[i].xrepeat = 0;
+            hittype[sprite[i].owner].temp_data[0] = 32;
+            hittype[sprite[i].owner].temp_data[1] = !hittype[sprite[i].owner].temp_data[1];
+            hittype[sprite[i].owner].temp_data[2] ++;
+            spawn(i,EXPLOSION2);
+            break;
+
+        case BROKEHYDROPLANT:
+            if(sprite[i].cstat&1)
+            {
+                spritesound(GLASS_BREAKING,i);
+                sprite[i].z += 16<<8;
+                sprite[i].cstat = 0;
+                lotsofglass(i,-1,5);
+            }
+            break;
+
+        case TOILET:
+            sprite[i].picnum = TOILETBROKE;
+            sprite[i].cstat |= (krand()&1)<<2;
+            sprite[i].cstat &= ~257;
+            spawn(i,TOILETWATER);
+            spritesound(GLASS_BREAKING,i);
+            break;
+
+        case STALL:
+            sprite[i].picnum = STALLBROKE;
+            sprite[i].cstat |= (krand()&1)<<2;
+            sprite[i].cstat &= ~257;
+            spawn(i,TOILETWATER);
+            spritesound(GLASS_HEAVYBREAK,i);
+            break;
+
+        case HYDRENT:
+            sprite[i].picnum = BROKEFIREHYDRENT;
+            spawn(i,TOILETWATER);
+
+            //            for(k=0;k<5;k++)
+            //          {
+            //            j = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+            //          sprite[j].pal = 2;
+            //    }
+            spritesound(GLASS_HEAVYBREAK,i);
+            break;
+
+        case GRATE1:
+            sprite[i].picnum = BGRATE1;
+            sprite[i].cstat &= (65535-256-1);
+            spritesound(VENT_BUST,i);
+            break;
+
+        case CIRCLEPANNEL:
+            sprite[i].picnum = CIRCLEPANNELBROKE;
+            sprite[i].cstat &= (65535-256-1);
+            spritesound(VENT_BUST,i);
+            break;
+        case PANNEL1:
+        case PANNEL2:
+            sprite[i].picnum = BPANNEL1;
+            sprite[i].cstat &= (65535-256-1);
+            spritesound(VENT_BUST,i);
+            break;
+        case PANNEL3:
+            sprite[i].picnum = BPANNEL3;
+            sprite[i].cstat &= (65535-256-1);
+            spritesound(VENT_BUST,i);
+            break;
+        case PIPE1:
+        case PIPE2:
+        case PIPE3:
+        case PIPE4:
+        case PIPE5:
+        case PIPE6:
+            switch(sprite[i].picnum)
+            {
+                case PIPE1:sprite[i].picnum=PIPE1B;break;
+                case PIPE2:sprite[i].picnum=PIPE2B;break;
+                case PIPE3:sprite[i].picnum=PIPE3B;break;
+                case PIPE4:sprite[i].picnum=PIPE4B;break;
+                case PIPE5:sprite[i].picnum=PIPE5B;break;
+                case PIPE6:sprite[i].picnum=PIPE6B;break;
+            }
+
+            j = spawn(i,STEAM);
+            sprite[j].z = sector[sprite[i].sectnum].floorz-(32<<8);
+            break;
+
+        case MONK:
+        case LUKE:
+        case INDY:
+        case JURYGUY:
+            spritesound(sprite[i].lotag,i);
+            spawn(i,sprite[i].hitag);
+        case SPACEMARINE:
+            sprite[i].extra -= sprite[sn].extra;
+            if(sprite[i].extra > 0) break;
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT1);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT2);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT3);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT4);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT1);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT2);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT3);
+            sprite[i].ang = krand()&2047;
+            shoot(i,BLOODSPLAT4);
+            guts(sprite[i],JIBS1,1,myconnectindex);
+            guts(sprite[i],JIBS2,2,myconnectindex);
+            guts(sprite[i],JIBS3,3,myconnectindex);
+            guts(sprite[i],JIBS4,4,myconnectindex);
+            guts(sprite[i],JIBS5,1,myconnectindex);
+            guts(sprite[i],JIBS3,6,myconnectindex);
+            sound(SQUISHED);
+            deletesprite(i);
+            break;
+        case CHAIR1:
+        case CHAIR2:
+            sprite[i].picnum = BROKENCHAIR;
+            sprite[i].cstat = 0;
+            break;
+        case CHAIR3:
+        case MOVIECAMERA:
+        case SCALE:
+        case VACUUM:
+        case CAMERALIGHT:
+        case IVUNIT:
+        case POT1:
+        case POT2:
+        case POT3:
+        case TRIPODCAMERA:
+            spritesound(GLASS_HEAVYBREAK,i);
+            s = sprite[i];
+            for(j=0;j<16;j++) RANDOMSCRAP;
+            deletesprite(i);
+            break;
+        case PLAYERONWATER:
+            i = sprite[i].owner;
+        default:
+            if( (sprite[i].cstat&16) && sprite[i].hitag == 0 && sprite[i].lotag == 0 && sprite[i].statnum == 0)
+                break;
+
+            if( ( sprite[sn].picnum == FREEZEBLAST || sprite[sn].owner != i ) && sprite[i].statnum != 4)
+            {
+                if( badguy(sprite[i]) == 1)
+                {
+                    if(sprite[sn].picnum == RPG) sprite[sn].extra <<= 1;
+
+                    if( (sprite[i].picnum != DRONE) && (sprite[i].picnum != ROTATEGUN) && (sprite[i].picnum != COMMANDER) && (sprite[i].picnum < GREENSLIME || sprite[i].picnum > GREENSLIME+7) )
+                        if(sprite[sn].picnum != FREEZEBLAST )
+                            if( actortype[sprite[i].picnum] == 0 )
+                            {
+                                j = spawn(sn,JIBS6);
+                                if(sprite[sn].pal == 6)
+                                    sprite[j].pal = 6;
+                                sprite[j].z += (4<<8);
+                                sprite[j].xvel = 16;
+                                sprite[j].xrepeat = sprite[j].yrepeat = 24;
+                                sprite[j].ang += 32-(krand()&63);
+                            }
+
+                    j = sprite[sn].owner;
+
+                    if( j >= 0 && sprite[j].picnum == APLAYER && sprite[i].picnum != ROTATEGUN && sprite[i].picnum != DRONE )
+                        if( ps[sprite[j].yvel].curr_weapon == SHOTGUN_WEAPON )
+                        {
+                            shoot(i,BLOODSPLAT3);
+                            shoot(i,BLOODSPLAT1);
+                            shoot(i,BLOODSPLAT2);
+                            shoot(i,BLOODSPLAT4);
+                        }
+
+                    if( sprite[i].picnum != TANK && sprite[i].picnum != BOSS1 && sprite[i].picnum != BOSS4 && sprite[i].picnum != BOSS2 && sprite[i].picnum != BOSS3 && sprite[i].picnum != RECON && sprite[i].picnum != ROTATEGUN )
+                    {
+                        if( (sprite[i].cstat&48) == 0 )
+                            sprite[i].ang = (sprite[sn].ang+1024)&2047;
+                        sprite[i].xvel = -(sprite[sn].extra<<2);
+                        j = sprite[i].sectnum;
+                        var xRef = new Ref(sprite[i].x);
+                        var yRef = new Ref(sprite[i].y);
+                        var zRef = new Ref(sprite[i].z);
+                        var jRef = new Ref(j);
+                        pushmove(xRef,yRef,zRef,jRef,128,(4<<8),(4<<8),CLIPMASK0);
+                        sprite[i].x = xRef.$;
+                        sprite[i].y = yRef.$;
+                        sprite[i].z = zRef.$;
+                        j = jRef.$;
+                        
+                        if(j != sprite[i].sectnum && j >= 0 && j < MAXSECTORS)
+                            changespritesect(i,j);
+                    }
+
+                    if(sprite[i].statnum == 2)
+                    {
+                        changespritestat(i,1);
+                        hittype[i].timetosleep = SLEEPTIME;
+                    }
+                    if( ( sprite[i].xrepeat < 24 || sprite[i].picnum == SHARK) && sprite[sn].picnum == SHRINKSPARK) return;
+                }
+
+                if( sprite[i].statnum != 2 )
+                {
+                    if( sprite[sn].picnum == FREEZEBLAST && ( (sprite[i].picnum == APLAYER && sprite[i].pal == 1 ) || ( freezerhurtowner == 0 && sprite[sn].owner == i ) ) )
+                        return;
+
+                    hittype[i].picnum = sprite[sn].picnum;
+                    hittype[i].extra += sprite[sn].extra;
+                    hittype[i].ang = sprite[sn].ang;
+                    hittype[i].owner = sprite[sn].owner;
+                }
+
+                if(sprite[i].statnum == 10)
+                {
+                    p = sprite[i].yvel;
+                    if(ps[p].newowner >= 0)
+                    {
+                        ps[p].newowner = -1;
+                        ps[p].posx = ps[p].oposx;
+                        ps[p].posy = ps[p].oposy;
+                        ps[p].posz = ps[p].oposz;
+                        ps[p].ang = ps[p].oang;
+
+                        updatesector(ps[p].posx,ps[p].posy,ps[p].cursectnum);
+                        Player.setPal(ps[p]);
+
+                        j = headspritestat[1];
+                        while(j >= 0)
+                        {
+                            if(sprite[j].picnum==CAMERA1) sprite[j].yvel = 0;
+                            j = nextspritestat[j];
+                        }
+                    }
+
+                    if( sprite[i].xrepeat < 24 && sprite[sn].picnum == SHRINKSPARK)
+                        return;
+
+                    if( sprite[hittype[i].owner].picnum != APLAYER)
+                        if(ud.player_skill >= 3)
+                            sprite[sn].extra += (sprite[sn].extra>>1);
+                }
+
+            }
+            break;
+    }
+}
+
 
 //2383
 Sector.allignWarpElevators = function () {

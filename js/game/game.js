@@ -2211,7 +2211,6 @@ function spawn(j, pn) {
         case SHRINKEREXPLOSION:
         case COOLEXPLOSION1:
 
-            throw new Error("todo");
             if (j >= 0) {
                 sp.ang = sprite[j].ang;
                 sp.shade = -64;
@@ -4015,10 +4014,18 @@ function drawmasks() {
             {
                 if (spritesy[l] <= spritesy[l+gap])
                     break;
-                console.log2flush();
-                throw "swaplong((int32_t *)tspriteptr[l],(int32_t *)tspriteptr[l+gap]);"
-                swaplong(spritesx[l],spritesx[l+gap]);
-                swaplong(spritesy[l],spritesy[l+gap]);
+                
+                tempSwap = tspriteptr[l];
+                tspriteptr[l] = tspriteptr[l + gap];
+                tspriteptr[l + gap] = tempSwap;
+                
+                tempSwapLong = spritesx[l];
+                spritesx[l] = spritesx[l + gap];
+                spritesx[l + gap] = tempSwapLong;
+                
+                tempSwapLong = spritesy[l];
+                spritesy[l] = spritesy[l + gap]
+                spritesy[l + gap] = tempSwapLong;
             }
 
     if (spritesortcnt > 0)

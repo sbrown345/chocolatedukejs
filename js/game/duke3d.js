@@ -27,6 +27,9 @@ window.__defineGetter__("VOLUMEONE", function () {
     return getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
 });
 
+var MAXSLEEPDIST = 16384;
+var SLEEPTIME = 24 * 64;
+
 //152
 var NUMPAGES = 1;
 
