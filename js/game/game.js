@@ -93,9 +93,10 @@ function gametext(x, y, t, s, dabits) {
 
         rotateSprite(x << 16, y << 16, 65536, 0, ac, s, 0, dabits, 0, 0, xdim - 1, ydim - 1);
 
-        if (t.charCodeAt(tIdx) >= '0' && t.charCodeAt(tIdx) <= '9')
+        if (t.charCodeAt(tIdx) >= '0'.charCodeAt(0) && t.charCodeAt(tIdx) <= '9'.charCodeAt(0))
             x += 8;
-        else x += tiles[ac].dim.width;
+        else
+            x += tiles[ac].dim.width;
 
         tIdx++;
     }
@@ -1446,7 +1447,7 @@ function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_
 
     hittype[i].temp_data[0] = hittype[i].temp_data[2] = hittype[i].temp_data[3] = hittype[i].temp_data[5] = 0;
     if (actorscrptr[s_pn]) {
-        s.extra = script[actorscrptr[s_pn]];
+        s.extra =   script[actorscrptr[s_pn]];
         hittype[i].temp_data[4] = script[actorscrptr[s_pn] + 1];
         hittype[i].temp_data[1] = script[actorscrptr[s_pn] + 2];
         s.hitag = script[actorscrptr[s_pn] + 3];
@@ -3645,14 +3646,13 @@ function animatesprites( x, y, a, smoothratio) {
                         s.yoffset = toInt8(l/(s.yrepeat<<2));
                     else s.yoffset=0;
                 }
-                console.log2flush()
-                throw "todo"
-                //if(ps[p].newowner > -1)
-                //{
-                //    t4 = *(actorscrptr[APLAYER]+1);
-                //    t3 = 0;
-                //    t1 = *(actorscrptr[APLAYER]+2);
-                //}
+              
+                if(ps[p].newowner > -1)
+                {
+                    t4 = script[actorscrptr[APLAYER]+1];
+                    t3 = 0;
+                    t1 = script[actorscrptr[APLAYER]+2];
+                }
 
                 if(ud.camerasprite == -1 && ps[p].newowner == -1)
                     if(s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0 )
@@ -4015,6 +4015,7 @@ function drawmasks() {
             {
                 if (spritesy[l] <= spritesy[l+gap])
                     break;
+                console.log2flush();
                 throw "swaplong((int32_t *)tspriteptr[l],(int32_t *)tspriteptr[l+gap]);"
                 swaplong(spritesx[l],spritesx[l+gap]);
                 swaplong(spritesy[l],spritesy[l+gap]);
