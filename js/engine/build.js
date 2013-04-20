@@ -117,7 +117,26 @@ function Wall() {
 function Sprite() {
     this.x = 0;
     this.y = 0;
-    this.z = 0;
+    //this.z = 0;
+
+
+    var _z;
+    this.__defineGetter__("z", function () {
+        return _z;
+    });
+
+    this.__defineSetter__("z", function (val) {
+        if ((val | 0) != val) debugger;
+        _z = val;
+    });
+
+
+
+
+
+
+
+
 
     //this.cstat = 0; //???
     // TODO: PERF MUST BE AWFUL!!

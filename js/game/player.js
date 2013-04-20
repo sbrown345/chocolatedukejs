@@ -48,7 +48,40 @@ function incur_damage(p) {
     }
 }
 
+//107
 
+function tracers( x1, y1, z1, x2, y2, z2, n) {
+     var i, xv, yv, zv;
+    var sect = -1;
+
+    i = n+1;
+    xv = ((x2-x1)/i)|0;
+    yv = ((y2-y1)/i)|0;
+    zv = ((z2-z1)/i)|0;
+
+    if( ( klabs(x1-x2)+klabs(y1-y2) ) < 3084 )
+        return;
+
+    var sectRef = new Ref(sect);
+    for(i=n;i>0;i--)
+    {
+        x1 += xv;
+        y1 += yv;
+        z1 += zv;
+        sectRef.$ = sect;
+        updatesector(x1,y1,sectRef);
+        sect = sectRef.$;
+        if(sect >= 0)
+        {
+            if(sector[sect].lotag == 2)
+                EGS(sect,x1,y1,z1,WATERBUBBLE,-32,4+(TRAND&3),4+(TRAND&3),TRAND&2047,0,0,ps[0].i,5);
+            else
+                EGS(sect,x1,y1,z1,SMALLSMOKE,-32,14,14,0,0,0,ps[0].i,5);
+        }
+    }
+}
+
+//203
 function aim(s, aang, auto_aim) {
     var  gotshrinker,gotfreezer;
     var i, j, a, k, cans;
@@ -460,7 +493,6 @@ function shoot(i,atwith) {
 
                 if(hitspr >= 0)
                 {
-                    console.log2flush()
                     checkhitsprite(hitspr,k);
                     if( sprite[hitspr].picnum == APLAYER && (ud.coop != 1 || ud.ffire == 1) )
                     {

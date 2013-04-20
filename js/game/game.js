@@ -1655,12 +1655,10 @@ function spawn(j, pn) {
             }
             break;
         case FOF:
-            throw new Error("todo");
-            //sp.xrepeat = sp.yrepeat = 0;
-            //changespritestat(i,5);
-            //break;
+            sp.xrepeat = sp.yrepeat = 0;
+            changespritestat(i,5);
+            break;
         case WATERSPLASH2:
-            throw new Error("todo");
             if (j >= 0) {
                 setsprite(i, sprite[j].x, sprite[j].y, sprite[j].z);
                 sp.xrepeat = sp.yrepeat = 8 + (krand() & 7);
@@ -1725,39 +1723,38 @@ function spawn(j, pn) {
             break;
         case TRANSPORTERSTAR:
         case TRANSPORTERBEAM:
-            throw new Error("todo");
-            //if(j == -1) break;
-            //if(sp.picnum == TRANSPORTERBEAM)
-            //{
-            //    sp.xrepeat = 31;
-            //    sp.yrepeat = 1;
-            //    sp.z = sector[sprite[j].sectnum].floorz-(40<<8);
-            //}
-            //else
-            //{
-            //    if(sprite[j].statnum == 4)
-            //    {
-            //        sp.xrepeat = 8;
-            //        sp.yrepeat = 8;
-            //    }
-            //    else
-            //    {
-            //        sp.xrepeat = 48;
-            //        sp.yrepeat = 64;
-            //        if(sprite[j].statnum == 10 || badguy(sprite[j]) )
-            //            sp.z -= (32<<8);
-            //    }
-            //}
+            if(j == -1) break;
+            if(sp.picnum == TRANSPORTERBEAM)
+            {
+                sp.xrepeat = 31;
+                sp.yrepeat = 1;
+                sp.z = sector[sprite[j].sectnum].floorz-(40<<8);
+            }
+            else
+            {
+                if(sprite[j].statnum == 4)
+                {
+                    sp.xrepeat = 8;
+                    sp.yrepeat = 8;
+                }
+                else
+                {
+                    sp.xrepeat = 48;
+                    sp.yrepeat = 64;
+                    if(sprite[j].statnum == 10 || badguy(sprite[j]) )
+                        sp.z -= (32<<8);
+                }
+            }
 
-            //sp.shade = -127;
-            //sp.cstat = 128|2;
-            //sp.ang = sprite[j].ang;
+            sp.shade = -127;
+            sp.cstat = 128|2;
+            sp.ang = sprite[j].ang;
 
-            //sp.xvel = 128;
-            //changespritestat(i,5);
-            //ssp(i,CLIPMASK0);
-            //setsprite(i,sp.x,sp.y,sp.z);
-            //break;
+            sp.xvel = 128;
+            changespritestat(i,5);
+            ssp(i,CLIPMASK0);
+            setsprite(i,sp.x,sp.y,sp.z);
+            break;
 
         case FRAMEEFFECT1:
         case FRAMEEFFECT1_13CON:
@@ -1773,7 +1770,6 @@ function spawn(j, pn) {
             break;
 
         case LASERLINE:
-            throw new Error("todo");
             sp.yrepeat = 6;
             sp.xrepeat = 32;
 
@@ -1791,7 +1787,6 @@ function spawn(j, pn) {
             break;
 
         case FORCESPHERE:
-            throw new Error("todo");
             if (j == -1) {
                 sp.cstat = 32768;
                 changespritestat(i, 2);
@@ -1803,7 +1798,6 @@ function spawn(j, pn) {
             break;
 
         case BLOOD:
-            throw new Error("todo");
             sp.xrepeat = sp.yrepeat = 16;
             sp.z -= (26 << 8);
             if (j >= 0 && sprite[j].pal == 6)
@@ -1860,7 +1854,6 @@ function spawn(j, pn) {
             //}
             //sp.cstat |= 32;
         case FECES:
-            throw new Error("todo");
             if (j >= 0)
                 sp.xrepeat = sp.yrepeat = 1;
             changespritestat(i, 5);
@@ -1881,7 +1874,6 @@ function spawn(j, pn) {
             break;
 
         case TRIPBOMB:
-            throw new Error("todo");
             if (sp.lotag > ud.player_skill) {
                 sp.xrepeat = sp.yrepeat = 0;
                 changespritestat(i, 5);
@@ -1901,7 +1893,6 @@ function spawn(j, pn) {
             hittype[i].temp_data[5] = sp.ang;
 
         case SPACEMARINE:
-            throw new Error("todo");
             if (sp.picnum == SPACEMARINE) {
                 sp.extra = 20;
                 sp.cstat |= 257;
@@ -2067,7 +2058,6 @@ function spawn(j, pn) {
         case NAKED1:
         case STATUE:
         case TOUGHGAL:
-            throw new Error("todo");
             sp.yvel = sp.hitag;
             sp.hitag = -1;
             if (sp.picnum == PODFEM1) sp.extra <<= 1;
@@ -2089,7 +2079,6 @@ function spawn(j, pn) {
             break;
 
         case DUKELYINGDEAD:
-            throw new Error("todo");
             if (j >= 0 && sprite[j].picnum == APLAYER) {
                 sp.xrepeat = sprite[j].xrepeat;
                 sp.yrepeat = sprite[j].yrepeat;
@@ -2098,7 +2087,6 @@ function spawn(j, pn) {
             }
         case DUKECAR:
         case HELECOPT:
-            throw new Error("todo");
             //                if(sp.picnum == HELECOPT || sp.picnum == DUKECAR) sp.xvel = 1024;
             sp.cstat = 0;
             sp.extra = 1;
@@ -2106,8 +2094,6 @@ function spawn(j, pn) {
             sp.zvel = 360;
         case RESPAWNMARKERRED:
         case BLIMP:
-
-            throw new Error("todo");
             if (sp.picnum == RESPAWNMARKERRED) {
                 sp.xrepeat = sp.yrepeat = 24;
                 if (j >= 0) sp.z = hittype[j].floorz; // -(1<<4);
@@ -2117,28 +2103,23 @@ function spawn(j, pn) {
                 sp.clipdist = 128;
             }
         case MIKE:
-            throw new Error("todo");
             if (sp.picnum == MIKE)
                 sp.yvel = sp.hitag;
         case WEATHERWARN:
-            throw new Error("todo");
             changespritestat(i, 1);
             break;
 
         case SPOTLITE:
-            throw new Error("todo");
             hittype[i].temp_data[0] = sp.x;
             hittype[i].temp_data[1] = sp.y;
             break;
         case BULLETHOLE:
-            throw new Error("todo");
             sp.xrepeat = sp.yrepeat = 3;
             sp.cstat = 16 + (krand() & 12);
             insertspriteq(i);
         case MONEY:
         case MAIL:
         case PAPER:
-            throw new Error("todo");
             if (sp.picnum == MONEY || sp.picnum == MAIL || sp.picnum == PAPER) {
                 hittype[i].temp_data[0] = krand() & 2047;
                 sp.cstat = krand() & 12;
@@ -2283,7 +2264,6 @@ function spawn(j, pn) {
 
         case CRANE:
 
-            throw new Error("todo");
             sp.cstat |= 64 | 257;
 
             sp.picnum += 2;
@@ -2325,7 +2305,6 @@ function spawn(j, pn) {
             break;
 
         case WATERDRIP:
-            throw new Error("todo");
             if ((j >= 0 && sprite[j].statnum == 10) || sprite[j].statnum == 1) {
                 sp.shade = 32;
                 if (sprite[j].pal != 1) {
@@ -2344,13 +2323,11 @@ function spawn(j, pn) {
             }
         case TRASH:
 
-            throw new Error("todo");
             if (sp.picnum != WATERDRIP)
                 sp.ang = krand() & 2047;
 
         case WATERDRIPSPLASH:
 
-            throw new Error("todo");
             sp.xrepeat = 24;
             sp.yrepeat = 24;
 
@@ -2852,22 +2829,21 @@ function spawn(j, pn) {
                     break;
 
                 case 17:
-                    throw new Error("todo");
-                    //        hittype[i].temp_data[2] = sector[sect].floorz; //Stopping loc
+                    hittype[i].temp_data[2] = sector[sect].floorz; //Stopping loc
 
-                    //        j = nextsectorneighborz(sect,sector[sect].floorz,-1,-1);
-                    //        hittype[i].temp_data[3] = sector[j].ceilingz;
+                    j = nextsectorneighborz(sect,sector[sect].floorz,-1,-1);
+                    hittype[i].temp_data[3] = sector[j].ceilingz;
 
-                    //        j = nextsectorneighborz(sect,sector[sect].ceilingz,1,1);
-                    //        hittype[i].temp_data[4] = sector[j].floorz;
+                    j = nextsectorneighborz(sect,sector[sect].ceilingz,1,1);
+                    hittype[i].temp_data[4] = sector[j].floorz;
 
-                    //        if(numplayers < 2)
-                    //        {
-                    //            setinterpolation(&sector[sect].floorz);
-                    //            setinterpolation(&sector[sect].ceilingz);
-                    //        }
+                    if(numplayers < 2)
+                    {
+                        setinterpolation(sector[sect].floorz);
+                        setinterpolation(sector[sect].ceilingz);
+                    }
 
-                    //        break;
+                    break;
 
                 case 24:
                     sp.yvel <<= 1;
@@ -3009,9 +2985,8 @@ function spawn(j, pn) {
                     break;
 
                 case 11://Pivitor rotater
-                    throw new Error("todo");
-                    //        if(sp.ang>1024) hittype[i].temp_data[3] = 2;
-                    //        else hittype[i].temp_data[3] = -2;
+                    if(sp.ang>1024) hittype[i].temp_data[3] = 2;
+                    else hittype[i].temp_data[3] = -2;
                 case 0:
                 case 2://Earthquakemakers
                 case 5://Boss Creature
@@ -3748,7 +3723,6 @@ function animatesprites( x, y, a, smoothratio) {
                 // Lame fix. ok for w32. Doesn't work for other plateform.
                 // How to make a differene between a timer and an address??
             {
-                throw "todo"
                 //l = *(int32_t *)(t4+8);
 
                 switch( l )

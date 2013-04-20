@@ -2,6 +2,36 @@
 
 var Sector = {};
 
+//124
+function isadoorwall(dapic) {
+    switch (dapic) {
+    case DOORTILE1:
+    case DOORTILE2:
+    case DOORTILE3:
+    case DOORTILE4:
+    case DOORTILE5:
+    case DOORTILE6:
+    case DOORTILE7:
+    case DOORTILE8:
+    case DOORTILE9:
+    case DOORTILE10:
+    case DOORTILE11:
+    case DOORTILE12:
+    case DOORTILE14:
+    case DOORTILE15:
+    case DOORTILE16:
+    case DOORTILE17:
+    case DOORTILE18:
+    case DOORTILE19:
+    case DOORTILE20:
+    case DOORTILE21:
+    case DOORTILE22:
+    case DOORTILE23:
+        return 1;
+    }
+    return 0;
+}
+
 //156
 function isanunderoperator(lotag) {
     switch (lotag & 0xff) {
@@ -293,6 +323,258 @@ function animatewalls() {
             }
     }
 }
+
+//1568
+
+function checkhitwall(spr,dawallnum,x, y, z, atwith)
+{
+    var  j, i, sn = -1, darkestwall;
+    var wal;
+   
+
+    wal = wall[dawallnum];
+
+    if(wal.overpicnum == MIRROR)
+    {
+        switch(atwith)
+        {
+            case HEAVYHBOMB:
+            case RADIUSEXPLOSION:
+            case RPG:
+            case HYDRENT:
+            case SEENINE:
+            case OOZFILTER:
+            case EXPLODINGBARREL:
+                lotsofglass(spr,dawallnum,70);
+                wal.cstat &= ~16;
+                wal.overpicnum = MIRRORBROKE;
+                spritesound(GLASS_HEAVYBREAK,spr);
+                return;
+        }
+    }
+
+    if( ( (wal.cstat&16) || wal.overpicnum == BIGFORCE ) && wal.nextsector >= 0 )
+        if( sector[wal.nextsector].floorz > z )
+            if( sector[wal.nextsector].floorz-sector[wal.nextsector].ceilingz )
+                switch(wal.overpicnum)
+                {
+                    case W_FORCEFIELD:
+                    case W_FORCEFIELD+1:
+                    case W_FORCEFIELD+2:
+                        wal.extra = 1; // tell the forces to animate
+                    case BIGFORCE:
+                        var snRef = new Ref(sn);
+                        updatesector(x,y,snRef);
+                        sn = snRef.$;
+                        if( sn < 0 ) return;
+
+                        if(atwith == -1)
+                            i = EGS(sn,x,y,z,FORCERIPPLE,-127,8,8,0,0,0,spr,5);
+                        else
+                        {
+                            if(atwith == CHAINGUN)
+                                i = EGS(sn,x,y,z,FORCERIPPLE,-127,16+sprite[spr].xrepeat,16+sprite[spr].yrepeat,0,0,0,spr,5);
+                            else i = EGS(sn,x,y,z,FORCERIPPLE,-127,32,32,0,0,0,spr,5);
+                        }
+
+                        sprite[i].cstat |= 18+128;
+                        sprite[i].ang = getangle(wal.x-wall[wal.point2].x,
+                            wal.y-wall[wal.point2].y)-512;
+
+                        spritesound(SOMETHINGHITFORCE,i);
+
+                        return;
+
+                    case FANSPRITE:
+                        wal.overpicnum = FANSPRITEBROKE;
+                        wal.cstat &= 65535-65;
+                        if(wal.nextwall >= 0)
+                        {
+                            wall[wal.nextwall].overpicnum = FANSPRITEBROKE;
+                            wall[wal.nextwall].cstat &= 65535-65;
+                        }
+                        spritesound(VENT_BUST,spr);
+                        spritesound(GLASS_BREAKING,spr);
+                        return;
+
+                    case GLASS:
+                        var snRef = new Ref(sn);
+                        updatesector(x,y,snRef); 
+                        sn = snRef.$;
+                        if( sn < 0 ) return;
+                        wal.overpicnum=GLASS2;
+                        lotsofglass(spr,dawallnum,10);
+                        wal.cstat = 0;
+
+                        if(wal.nextwall >= 0)
+                            wall[wal.nextwall].cstat = 0;
+
+                        i = EGS(sn,x,y,z,SECTOREFFECTOR,0,0,0,ps[0].ang,0,0,spr,3);
+                        sprite[i].lotag = 128; hittype[i].temp_data[1] = 5; hittype[i].temp_data[2] = dawallnum;
+                        spritesound(GLASS_BREAKING,i);
+                        return;
+                    case STAINGLASS1:
+                        var snRef = new Ref(sn);
+                        updatesector(x,y,snRef);
+                        sn = snRef.$;
+                        if( sn < 0 ) return;
+                        sn = snRef.$;
+                        lotsofcolourglass(spr,dawallnum,80);
+                        wal.cstat = 0;
+                        if(wal.nextwall >= 0)
+                            wall[wal.nextwall].cstat = 0;
+                        spritesound(VENT_BUST,spr);
+                        spritesound(GLASS_BREAKING,spr);
+                        return;
+                }
+
+    switch(wal.picnum)
+    {
+        case COLAMACHINE:
+        case VENDMACHINE:
+            breakwall(wal.picnum+2,spr,dawallnum);
+            spritesound(VENT_BUST,spr);
+            return;
+
+        case OJ:
+        case FEMPIC2:
+        case FEMPIC3:
+
+        case SCREENBREAK6:
+        case SCREENBREAK7:
+        case SCREENBREAK8:
+
+        case SCREENBREAK1:
+        case SCREENBREAK2:
+        case SCREENBREAK3:
+        case SCREENBREAK4:
+        case SCREENBREAK5:
+
+        case SCREENBREAK9:
+        case SCREENBREAK10:
+        case SCREENBREAK11:
+        case SCREENBREAK12:
+        case SCREENBREAK13:
+        case SCREENBREAK14:
+        case SCREENBREAK15:
+        case SCREENBREAK16:
+        case SCREENBREAK17:
+        case SCREENBREAK18:
+        case SCREENBREAK19:
+        case BORNTOBEWILDSCREEN:
+
+            lotsofglass(spr,dawallnum,30);
+            wal.picnum=W_SCREENBREAK+(krand()%3);
+            spritesound(GLASS_HEAVYBREAK,spr);
+            return;
+
+        case W_TECHWALL5:
+        case W_TECHWALL6:
+        case W_TECHWALL7:
+        case W_TECHWALL8:
+        case W_TECHWALL9:
+            breakwall(wal.picnum+1,spr,dawallnum);
+            return;
+        case W_MILKSHELF:
+            breakwall(W_MILKSHELFBROKE,spr,dawallnum);
+            return;
+
+        case W_TECHWALL10:
+            breakwall(W_HITTECHWALL10,spr,dawallnum);
+            return;
+
+        case W_TECHWALL1:
+        case W_TECHWALL11:
+        case W_TECHWALL12:
+        case W_TECHWALL13:
+        case W_TECHWALL14:
+            breakwall(W_HITTECHWALL1,spr,dawallnum);
+            return;
+
+        case W_TECHWALL15:
+            breakwall(W_HITTECHWALL15,spr,dawallnum);
+            return;
+
+        case W_TECHWALL16:
+            breakwall(W_HITTECHWALL16,spr,dawallnum);
+            return;
+
+        case W_TECHWALL2:
+            breakwall(W_HITTECHWALL2,spr,dawallnum);
+            return;
+
+        case W_TECHWALL3:
+            breakwall(W_HITTECHWALL3,spr,dawallnum);
+            return;
+
+        case W_TECHWALL4:
+            breakwall(W_HITTECHWALL4,spr,dawallnum);
+            return;
+
+        case ATM:
+            wal.picnum = ATMBROKE;
+            lotsofmoney(sprite[spr],1+(krand()&7));
+            spritesound(GLASS_HEAVYBREAK,spr);
+            break;
+
+        case WALLLIGHT1:
+        case WALLLIGHT2:
+        case WALLLIGHT3:
+        case WALLLIGHT4:
+        case TECHLIGHT2:
+        case TECHLIGHT4:
+
+            if( rnd(128) )
+                spritesound(GLASS_HEAVYBREAK,spr);
+            else spritesound(GLASS_BREAKING,spr);
+            lotsofglass(spr,dawallnum,30);
+
+            if(wal.picnum == WALLLIGHT1)
+                wal.picnum = WALLLIGHTBUST1;
+
+            if(wal.picnum == WALLLIGHT2)
+                wal.picnum = WALLLIGHTBUST2;
+
+            if(wal.picnum == WALLLIGHT3)
+                wal.picnum = WALLLIGHTBUST3;
+
+            if(wal.picnum == WALLLIGHT4)
+                wal.picnum = WALLLIGHTBUST4;
+
+            if(wal.picnum == TECHLIGHT2)
+                wal.picnum = TECHLIGHTBUST2;
+
+            if(wal.picnum == TECHLIGHT4)
+                wal.picnum = TECHLIGHTBUST4;
+
+            if(!wal.lotag) return;
+
+            sn = wal.nextsector;
+            if(sn < 0) return;
+            darkestwall = 0;
+
+            wal = wall[sector[sn].wallptr];
+            for(i=sector[sn].wallnum;i > 0;i--,wal++)
+                if(wal.shade > darkestwall)
+                    darkestwall=wal.shade;
+
+            j = krand()&1;
+            i= headspritestat[3];
+            while(i >= 0)
+            {
+                if(sprite[i].hitag == wall[dawallnum].lotag && sprite[i].lotag == 3 )
+                {
+                    hittype[i].temp_data[2] = j;
+                    hittype[i].temp_data[3] = darkestwall;
+                    hittype[i].temp_data[4] = 1;
+                }
+                i = nextspritestat[i];
+            }
+            break;
+    }
+}
+
+
 
 //1808
 function checkplayerhurt(p, j)
