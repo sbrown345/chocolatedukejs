@@ -610,7 +610,6 @@ function getpalookup(davis, dashade) {
 //665
 function hline(xr, yp) {
     var xl, r, s;
-    printf("hline\n");
 
     xl = lastx[yp];
 
@@ -4502,6 +4501,7 @@ function drawsprite (snum) {
         spriteDim.height = tiles[tilenum].dim.height;
         
         xsiz = mulscale30(siz, xv * spriteDim.width);
+        if (tilenum == 661 && xsiz == 962 && siz == 101739) debugger;
         printf("tilenum: %i\n", tilenum);
         printf("xsiz: %i\n", xsiz);
         printf("siz: %i\n", siz);
@@ -4584,7 +4584,7 @@ function drawsprite (snum) {
         {
             uwall[x] = Math.max(startumost[x+windowx1]-windowy1,toInt16(startum));
             dwall[x] = Math.min(startdmost[x+windowx1]-windowy1,toInt16(startdm));
-            printf("first x: %i, uwall[x]: %i dwall[x]: %i\n", x, uwall[x], dwall[x]);
+            //printf("first x: %i, uwall[x]: %i dwall[x]: %i\n", x, uwall[x], dwall[x]);
         }
         daclip = 0;
         for(i=smostwallcnt-1; i>=0; i--)
@@ -4633,7 +4633,7 @@ function drawsprite (snum) {
         if (uwall[rx] >= dwall[rx])
         {
             for (x = lx; x < rx; x++) {
-                printf("x: %i, uwall[x]: %i dwall[x]: %i\n", x,uwall[x], dwall[x]);
+                //printf("x: %i, uwall[x]: %i dwall[x]: %i\n", x,uwall[x], dwall[x]);
                 if (uwall[x] < dwall[x])
                     break;
             }
@@ -4652,7 +4652,7 @@ function drawsprite (snum) {
             }
 
         z2 = tspr.z - ((yoff * tspr.yrepeat) << 2);
-        printf("z2: %i\n", z2);
+        //printf("z2: %i\n", z2);
         if (cstat&128)
         {
             z2 += ((spriteDim.height*tspr.yrepeat)<<1);
@@ -4680,7 +4680,7 @@ function drawsprite (snum) {
             globalzd = (((globalposz-z2)*globalyscale)<<8);
         }
 
-        printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
+        //printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
         qinterpolatedown16(lwall, lx, rx - lx + 1, linum, linuminc);
         clearbuf(swall, lx, rx - lx + 1, mulscale19(yp, xdimscale));
 
@@ -6812,6 +6812,7 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
 
 //7795
 function krand() {
+    //return 10
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     console.log("result: %i", randomseed >>> 16);
     return randomseed >>> 16;

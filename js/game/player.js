@@ -73,10 +73,14 @@ function tracers( x1, y1, z1, x2, y2, z2, n) {
         sect = sectRef.$;
         if(sect >= 0)
         {
-            if(sector[sect].lotag == 2)
-                EGS(sect,x1,y1,z1,WATERBUBBLE,-32,4+(TRAND&3),4+(TRAND&3),TRAND&2047,0,0,ps[0].i,5);
-            else
-                EGS(sect,x1,y1,z1,SMALLSMOKE,-32,14,14,0,0,0,ps[0].i,5);
+            if (sector[sect].lotag == 2) {
+                // TRAND is a macro, so need to reverse these so it matches original (i guess?)
+                var rand1 = TRAND;
+                var rand2 = TRAND;
+                var rand3 = TRAND;
+                EGS(sect, x1, y1, z1, WATERBUBBLE, -32, 4 + (rand3 & 3), 4 + (rand2 & 3), rand1 & 2047, 0, 0, ps[0].i, 5);
+            } else
+                EGS(sect, x1, y1, z1, SMALLSMOKE, -32, 14, 14, 0, 0, 0, ps[0].i, 5);
         }
     }
 }
@@ -1269,11 +1273,7 @@ function displayweapon(snum) {
 
     weapon_xoffset =  (160)-90;
     weapon_xoffset -= (((sintable[((p.weapon_sway>>1)+512)&2047]/(1024+512)))|0);
-    printf("p.weapon_sway: %i\n", p.weapon_sway);
-    printf("((p->weapon_sway>>1)+512)&2047: %i\n", ((p.weapon_sway>>1)+512)&2047);
-    printf("weapon_xoffset: %i\n", weapon_xoffset);
     weapon_xoffset -= 58 + p.weapon_ang;
-    printf("weapon_xoffset: %i\n", weapon_xoffset);
     if (sprite[p.i].xrepeat < 32)
         gun_pos -= klabs(sintable[(p.weapon_sway<<2)&2047]>>9);
     else gun_pos -= klabs(sintable[(p.weapon_sway>>1)&2047]>>10);
