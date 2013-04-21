@@ -1553,8 +1553,8 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
     k = 11 - (picsiz[globalpicnum]&15) - pskybits;
     x = -1;
 
-    for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z])
-    {
+    for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]) {
+        printf("z:%i\n", z);
         wallnum = pvWalls[z].worldWallId;
         nextsectnum = wall[wallnum].nextsector;
 

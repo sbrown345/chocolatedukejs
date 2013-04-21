@@ -129,14 +129,7 @@ function Sprite() {
     this.clipdist = 0;
     this.filler = 0;
     
-    //this.xrepeat = 0;
-    var _xrepeat = new Uint8Array(1);
-    this.__defineGetter__("xrepeat", function () { return _xrepeat[0]; });
-    this.__defineSetter__("xrepeat", function(val) {
-        if (val == 6) debugger;
-        _xrepeat[0] = val;
-    });
-
+    this.xrepeat = 0;
     this.yrepeat = 0;
     this.xoffset = 0;
     this.yoffset = 0;

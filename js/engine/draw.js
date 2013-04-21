@@ -1,5 +1,7 @@
 ﻿'use strict';
 
+var flatColor = 1;
+
 var transluc = new Uint8Array(65536);
 
 var transrev = 0;
@@ -47,7 +49,7 @@ function sethlinesizes(i1, _bits, textureAddress) {
 //var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     if (arguments.length != 6) throw "bad args";
-    printf("hlineasm4\n");
+    //printf("hlineasm4\n");
     var shifter = ((256 - machxbits_al) & 0x1f);
     var source;
 
@@ -75,6 +77,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
         // globalpalwritten points to the first palookup pointer
         if (pixelsAllowed-- > 0) {
             destArray[destOffset] = globalpalwritten[shade | source];
+            if (flatColor) destArray[destOffset] = 200;
             //console.log("hlineasm4Count: %i, numPixels: %i, shade: %i, i4: %i, i5: %i", hlineasm4Count, numPixels, shade, i4, i5);
             //console.log("dest: %i", destArray[destOffset]);
         }
@@ -143,6 +146,7 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
 
         //if (pixelsAllowed-- > 0) {
         destArray[rmach6b + numPixels] = (i1 & 0xff);
+        if (flatColor) destArray[rmach6b + numPixels] = 100;
         //}
 
         texturePosition -= ebp;
@@ -169,8 +173,11 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
         i4 = (i4) >>> mach3_al;
         i4 = (i4 & 0xffffff00) | source[i4 + sourceOffset];
 
-        if (pixelsAllowed-- > 0)
+        if (pixelsAllowed-- > 0) {
             dest.array[destOffset] = palette.getByte(i4);
+            if(flatColor) dest.array[destOffset] = 100;
+            printf("ppx:%i\n", dest.array[destOffset]);
+        }
 
 
         return i1;
@@ -201,9 +208,11 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 
         temp = texture[textureOffset + temp];
 
-        if (pixelsAllowed-- > 0)
+        if (pixelsAllowed-- > 0) {
             dest[destOffset] = palookupoffse.getByte(temp);
-
+            if (flatColor ) dest[destOffset] = 23;
+            printf("px:%i\n", dest[destOffset]);
+        }
         vplce += vince;
         destOffset += bytesperline;
         numPixels--;
@@ -235,9 +244,11 @@ function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
             
             if (transrev) 
                 colorIndex = ((colorIndex>>8)|(colorIndex<<8));
-            
-            if (pixelsAllowed-- > 0)
+
+            if (pixelsAllowed-- > 0) {
                 framePlaceArray[dest] = transluc[colorIndex];
+                if (flatColor) framePlaceArray[dest] = 160;
+            }
         }
         
         i4 += i1;
@@ -259,7 +270,7 @@ function setuptvlineasm2(i1, i2, i3) {
 } /* */
 
 function tvlineasm2(i1, i2, i3, i4, texture, i5, i6 /*dest frameoffset*/) {
-    printf("tvlineasm2\n");
+    printf("tvlineasm2 todo\n");
     // todo!!!!!!!
 	//var ebp = i1;
     //var tran2inca = i2;
@@ -341,6 +352,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
         if (temp != 255) {
             if (pixelsAllowed-- > 0) {
                 destArray[destPosition + dest.position] = palookupoffse.getByte(temp);
+                if (flatColor) destArray[destPosition + dest.position] = 180;
             }
         }
 
@@ -379,11 +391,14 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
     var frameBufferArray = frameBuffer.array;
     var bufplcArray = bufplc.array;
     // dest <= numBytesOnScreen  - possibly bad if the sprite isn't for the whole screen size!!
-    for (var numBytesOnScreen = ScreenWidth * ScreenHeight; dest <= numBytesOnScreen; dest += bytesperline) {
+    //for (var numBytesOnScreen = ScreenWidth * ScreenHeight; dest <= numBytesOnScreen; dest += bytesperline) {
+    for (; i < ((dest>>>0) - bytesperline) < (dest>>>0);dest += bytesperline ) {
         for (i = 0; i < 4; i++) {
             temp = (((vplce[i] >>> 0) >> mach3_al) & 0xff) >>> 0;
             temp = bufplcArray[bufplce[i] + temp]; // get texture
             frameBufferArray[dest + index + i] = palookupoffse[i].getByte(temp); // add texture to framebuffer
+            if (flatColor) frameBufferArray[dest + index + i] = 25;
+            //printf("px:%i\n", frameBufferArray[dest + index + i]);
             vplce[i] += vince[i];
         }
     }
@@ -400,7 +415,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
         throw new Error("todo: vlineasm4_2 should have 2 arguments");
     }
 
-    printf("vlineasm4\n");
+    printf("vlineasm4   \n");
     var i = 0;
     var temp;
 
@@ -414,6 +429,8 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
 
             //if (pixelsAllowed-- > 0) {
             destArray[dest.position + index + i] = palookupoffse[i].getByte(temp);
+            if (flatColor) destArray[dest.position + index + i] = 250;
+            //printf("px:%i\n", destArray[dest.position + index + i]);
             //}
 
             //appendCanvasImageToPage((dest.position + index + i) + "=" + palookup[palookupoffse[i]][temp]);
@@ -447,6 +464,7 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
             if (temp !== 255) {
                 if (pixelsAllowed-- > 0) {
                     frameBufferArray[dest + index + i] = palookupoffse[i].getByte(temp);
+                    if (flatColor) frameBufferArray[dest + index + i] = 190;
                 }
             }
             vplce[i] += vince[i];
@@ -497,9 +515,9 @@ function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, de
                 colorIndex = transluc[val];
 
                 if (pixelsAllowed-- > 0) {
-                    if (isNaN(colorIndex)) debugger;
                     //printf("dsv:%i\n", colorIndex);
                     dest.setByte(colorIndex);
+                    if (flatColor) dest.setByte(66);
                 }
             }
 
@@ -580,7 +598,7 @@ function low32(a) { return (a & 0xffffffff); }
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 //var slopevlinCount = 0;
 function slopevlin(i1, i2, i3, i4, i5, i6) {
-    printf("slopevlin\n");
+    //printf("slopevlin\n");
     var doCount = 0;
     var whileCount = 0;
     var c = new bitwisef2i();
@@ -645,6 +663,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
 
             if (pixelsAllowed-- > 0) {
                 frameplace.array[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
+                if (flatColor) frameplace.array[i1] = 44;
                 //console.log("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
                 wrote++;
             }
