@@ -117,43 +117,17 @@ function Wall() {
 function Sprite() {
     this.x = 0;
     this.y = 0;
-    //this.z = 0;
+    this.z = 0;
 
-
-    var _z;
-    this.__defineGetter__("z", function () {
-        return _z;
-    });
-
-    this.__defineSetter__("z", function (val) {
-        if ((val | 0) != val) debugger;
-        _z = val;
-    });
-
-
-
-
-
-
-
-
-
-    //this.cstat = 0; //???
-    // TODO: PERF MUST BE AWFUL!!
     var _cstat = new Int16Array(1);
-    this.__defineGetter__("cstat", function () {
-        return _cstat[0];
-    });
-
-    this.__defineSetter__("cstat", function (val) {
-        _cstat[0] = val;
-    });
+    this.__defineGetter__("cstat", function () {return _cstat[0];});
+    this.__defineSetter__("cstat", function (val) {_cstat[0] = val;});
 
     this.picnum = 0;
     this.shade = 0;
     this.pal = 0;
     this.clipdist = 0;
-    this.filler = 0;
+    this.filler = 0;    
     this.xrepeat = 0;
     this.yrepeat = 0;
     this.xoffset = 0;
@@ -162,13 +136,24 @@ function Sprite() {
     this.statnum = 0;
     this.ang = 0;
     this.owner = 0;
-    this.xvel = 0;
-    this.yvel = 0;
-    this.zvel = 0;
+    
+    var _xvel = new Int16Array(1);
+    this.__defineGetter__("xvel", function () {return _xvel[0];});
+    this.__defineSetter__("xvel", function (val) {_xvel[0] = val;});
+    var _yvel = new Int16Array(1);
+    this.__defineGetter__("yvel", function () { return _yvel[0]; });
+    this.__defineSetter__("yvel", function (val) { _yvel[0] = val; });
+    var _zvel = new Int16Array(1);
+    this.__defineGetter__("zvel", function () { return _zvel[0]; });
+    this.__defineSetter__("zvel", function (val) { _zvel[0] = val; });
+    
+    // todo: a load of these are (short) so they might
     this.lotag = 0;
     this.hitag = 0;
-    this.extra = 0;
-    // todo: a load of these are (short) so they might
+    
+    var _extra = new Int16Array(1);
+    this.__defineGetter__("extra", function () { return _extra[0]; });
+    this.__defineSetter__("extra", function (val) { _extra[0] = val; });
 }
 
 Sprite.prototype.copyTo = function (obj) {

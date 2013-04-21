@@ -1503,16 +1503,16 @@ function displayweapon(snum) {
     //                            i = 0;
     //                            if(sprite[p.i].pal != 1) i = rand()&7;
     //                            myospal(i+weapon_xoffset-4+140-(p.look_ang>>1),i+looking_arc-((p.kickback_pic)>>1)+208-gun_pos,
-    //                                CHAINGUN+5+((p.kickback_pic-4)/5),gs,o,pal);
+    //                                CHAINGUN+5+(((p.kickback_pic-4)/5)|0),gs,o,pal);
     //                            if(sprite[p.i].pal != 1) i = rand()&7;
     //                            myospal(i+weapon_xoffset-4+184-(p.look_ang>>1),i+looking_arc-((p.kickback_pic)>>1)+208-gun_pos,
-    //                                CHAINGUN+5+((p.kickback_pic-4)/5),gs,o,pal);
+    //                                CHAINGUN+5+(((p.kickback_pic-4)/5)|0),gs,o,pal);
     //                        }
     //                        if(p.kickback_pic < 8)
     //                        {
     //                            i = rand()&7;
     //                            myospal(i+weapon_xoffset-4+162-(p.look_ang>>1),i+looking_arc-((p.kickback_pic)>>1)+208-gun_pos,
-    //                                CHAINGUN+5+((p.kickback_pic-2)/5),gs,o,pal);
+    //                                CHAINGUN+5+(((p.kickback_pic-2)/5)|0),gs,o,pal);
     //                            myospal(weapon_xoffset+178-(p.look_ang>>1),looking_arc+233-gun_pos,
     //                                CHAINGUN+1+((p.kickback_pic)>>1),gs,o,pal);
     //                        }
@@ -2364,7 +2364,8 @@ Player.processInput = function(snum) {
 
     s.xvel =
         ksqrt( (p.posx-p.bobposx)*(p.posx-p.bobposx)+(p.posy-p.bobposy)*(p.posy-p.bobposy));
-    if(p.on_ground) p.bobcounter += sprite[p.i].xvel>>1;
+    printf("processinput s.xvel: %i\n", s.xvel);
+    if (p.on_ground) p.bobcounter += sprite[p.i].xvel >> 1;
 
     if( ud.clipping == 0 && ( sector[p.cursectnum].floorpicnum == MIRROR || p.cursectnum < 0 || p.cursectnum >= MAXSECTORS) )
     {

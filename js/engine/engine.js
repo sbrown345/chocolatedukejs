@@ -234,19 +234,21 @@ var totalclocklock;
 
 //278
 function nsqrtasm(param) {
+    param >>>= 0;
+
     //todo: compare perf and output with Math.sqrt(param) | 0;
     var shlookup_a = shLookup;
     var sqrtable_a = sqrTable;
     var cx;
 
     if (param & 0xff000000)
-        cx = shlookup_a[(param >> 24) + 4096];
+        cx = shlookup_a[(param >>> 24) + 4096];
     else
-        cx = shlookup_a[param >> 12];
+        cx = shlookup_a[param >>> 12];
 
-    param = param >> (cx & 0xff);
+    param = param >>> (cx & 0xff);
     param = ((param & 0xffff0000) | sqrtable_a[param]);
-    param = param >> ((cx & 0xff00) >> 8);
+    param = param >>> ((cx & 0xff00) >> 8);
 
     //console.log("nsqrtasm: %i", param);
     return param;
