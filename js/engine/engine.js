@@ -276,7 +276,7 @@ function scansector(sectnum) {
     var nextsectnum;
     ////The stack storing sectors to visit.
     var sectorsToVisit = new Int16Array(256), numSectorsToVisit;
-
+    printf("scansector %i\n", sectnum);
     var skipitaddwall = function () {
         if ((wall[z].point2 < z) && (scanfirst < numscans)) {
             bunchWallsList[numscans - 1] = scanfirst;
@@ -296,10 +296,13 @@ function scansector(sectnum) {
     numSectorsToVisit = 1;
     do {
         sectnum = sectorsToVisit[--numSectorsToVisit];
+        printf("scansector do %i\n", sectnum);
 
         //Add every script in the current sector as potentially visible.
         for (z = headspritesect[sectnum]; z >= 0; z = nextspritesect[z]) {
             spr = sprite[z];
+            printf("scansector do z: %i, picnum: %i\n", z, spr.picnum);
+            printf("tsprite[1].picnum: %i\n", tsprite[1].picnum);
             if ((((spr.cstat & 0x8000) == 0) || (showinvisibility)) &&
                     (spr.xrepeat > 0) && (spr.yrepeat > 0) &&
                     (spritesortcnt < MAXSPRITESONSCREEN)) {
@@ -307,13 +310,16 @@ function scansector(sectnum) {
                 ys = spr.y - globalposy;
                 if ((spr.cstat & 48) || (xs * cosglobalang + ys * singlobalang > 0)) {
                     //copybufbyte(spr, 0, tsprite[spritesortcnt], 44);
-                    for (var key in spr) {  
-                        tsprite[spritesortcnt][key] = spr[key];
+                    if (spritesortcnt == 1 && key == "picnum" && spr[key] == 2329) debugger;
+                    for (var key in spr) {
+                        if(spr.hasOwnProperty(key))
+                            tsprite[spritesortcnt][key] = spr[key];
                     }
                     //tsprite[spritesortcnt].copyTo(spr);
                     tsprite[spritesortcnt++].owner = z;
                 }
             }
+            printf("tsprite[1].picnum: %i\n", tsprite[1].picnum);
         }
 
         //Mark the current sector bit as "visited" in the bitvector
@@ -2779,7 +2785,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     globalposx = daposx;
     globalposy = daposy;
     globalposz = daposz;
-    console.log("dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
+    console.log("drawrooms dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
     globalang = (daang & 2047); //FCS: Mask and keep only 11 bits of angle value.
 
     globalhoriz = mulscale16(dahoriz - 100, xdimenscale) + (ydimen >> 1);
@@ -5326,7 +5332,7 @@ function drawmasks() {
         tspriteptr[i] = tsprite[i];
 
     printf("drawmasks\n");
-    if(spritesortcnt>0)printf("0tspriteptr[1].picnum %i\n", tspriteptr[1].picnum);
+    if (spritesortcnt > 0) printf("0tspriteptr[1].picnum %i, %i\n", tspriteptr[1].picnum, tsprite[1].picnum);
     //Generate screenspace coordinate (X column and Y distance).
     for (i = spritesortcnt - 1; i >= 0; i--) {
         //Translate and rotate the sprite in Camera space coordinate.
@@ -5469,7 +5475,7 @@ function drawmasks() {
             drawmaskwall(--maskwallcnt);
         }
     }
-    if(spritesortcnt>0)	printf("b4 drawsprite tspriteptr[1].picnum %i\n", tspriteptr[1].picnum);
+    if (spritesortcnt > 0) printf("b4 drawsprite tspriteptr[1].picnum %i, %i\n", tspriteptr[1].picnum, tsprite[1].picnum);
     while (spritesortcnt > 0) drawsprite(--spritesortcnt);
     while (maskwallcnt > 0) drawmaskwall(--maskwallcnt);
 }

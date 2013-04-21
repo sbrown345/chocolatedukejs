@@ -1209,7 +1209,7 @@ Game.displayRooms = function (snum, smoothratio) {
     var tang;
 
     p = ps[snum];
-    console.log("snum: %i, p.posx: %i, p.posy: %i, p.posz: %i", snum, p.posx, p.posy, p.posz);
+    console.log("displayrooms snum: %i, p.posx: %i, p.posy: %i, p.posz: %i", snum, p.posx, p.posy, p.posz);
     
     if (pub > 0) {
         if (ud.screen_size > 8) {
@@ -1359,7 +1359,9 @@ Game.displayRooms = function (snum, smoothratio) {
         
         //todo check drawrooms
         drawrooms(cposx, cposy, cposz, cang, choriz, sect);
+        printf("b4 animatesprites tsprite[1].picnum: %i\n", tsprite[1].picnum);
         animatesprites(cposx, cposy, cang, smoothratio);
+        printf("after animatesprites tsprite[1].picnum: %i\n", tsprite[1].picnum);
         drawmasks();
 
         if(screencapt === 1)
@@ -1449,6 +1451,7 @@ function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_
     if (actorscrptr[s_pn]) {
         s.extra =   script[actorscrptr[s_pn]];
         hittype[i].temp_data[4] = script[actorscrptr[s_pn] + 1];
+        if (hittype[i].temp_data[4] == 2648) debugger;
         hittype[i].temp_data[1] = script[actorscrptr[s_pn] + 2];
         s.hitag = script[actorscrptr[s_pn] + 3];
     }
@@ -3707,9 +3710,10 @@ function animatesprites( x, y, a, smoothratio) {
                 break;
         }
 
-        if( actorscrptr[s.picnum] )
-        {
-            if(t4>10000)
+        if( actorscrptr[s.picnum] ) {
+            // REMOVED "FIX_00093" FOR NOW - looks like it might work if script[] or (actorscrptr?) was offset by 10000
+
+           /* if(t4>10000)
                 // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
                 // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
                 // close to blimp bug (search for BLIMP)
@@ -3723,7 +3727,7 @@ function animatesprites( x, y, a, smoothratio) {
                 // Lame fix. ok for w32. Doesn't work for other plateform.
                 // How to make a differene between a timer and an address??
             {
-                //l = *(int32_t *)(t4+8);
+                l = *(int32_t *)(t4+8);
 
                 switch( l )
                 {
@@ -3771,8 +3775,7 @@ function animatesprites( x, y, a, smoothratio) {
                         break;
                 }
 
-                throw "todo"
-                //t.picnum += k + ( *(int32_t *)t4 ) + l * t3;
+                t.picnum += k + ( *(int32_t *)t4 ) + l * t3;
 
                 if(l > 0)
                     while(tiles[t.picnum].dim.width == 0 && t.picnum > 0 )
@@ -3781,7 +3784,7 @@ function animatesprites( x, y, a, smoothratio) {
                 if( hittype[i].dispicnum >= 0)
                     hittype[i].dispicnum = t.picnum;
             }
-            else if(display_mirror == 1)
+            else */if(display_mirror == 1)
                 t.cstat |= 4;
         }
 
