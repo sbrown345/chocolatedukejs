@@ -1287,7 +1287,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
             vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x /*+ frameoffset*/);
         }
 
-        i = x + frameoffset.position + ylookup[d4 + 1];
+        i = x + ylookup[d4 + 1];
         
         if (y2ve[0] > d4)
             prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], i + 0, frameoffset);
