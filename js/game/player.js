@@ -957,7 +957,7 @@ function shoot(i,atwith) {
                 j = findplayer(s,xRef);
                 x = xRef.$;
                 sz -= (4<<8);
-                zvel = ( (ps[j].posz-sz) <<8 ) / (ldist(sprite[ps[j].i], s ) );
+                zvel = (( (ps[j].posz-sz) <<8 ) / (ldist(sprite[ps[j].i], s ) ))|0;
                 zvel += 128-(TRAND&255);
                 sa += 32-(TRAND&63);
             }
@@ -1088,7 +1088,6 @@ function animatefist(gs, snum) {
     fisti = ps[snum].fist_incs;
     if (fisti > 32) fisti = 32;
     if (fisti <= 0) return 0;
-    throw "todo"
     looking_arc = (klabs(ps[snum].look_ang) / 9) | 0;
 
     fistzoom = 65536 - (sintable[(512 + (fisti << 6)) & 2047] << 2);
@@ -1255,7 +1254,8 @@ function displayweapon(snum) {
 
     o = 0;
 
-    looking_arc = (klabs(p.look_ang)/9) | 0 ;
+    printf("displayweapon: %i\n", snum);
+    looking_arc = (klabs(p.look_ang) / 9) | 0;
 
     gs = sprite[p.i].shade;
     if(gs > 24) gs = 24;
@@ -1269,8 +1269,12 @@ function displayweapon(snum) {
 
     weapon_xoffset =  (160)-90;
     weapon_xoffset -= (((sintable[((p.weapon_sway>>1)+512)&2047]/(1024+512)))|0);
+    printf("p.weapon_sway: %i\n", p.weapon_sway);
+    printf("((p->weapon_sway>>1)+512)&2047: %i\n", ((p.weapon_sway>>1)+512)&2047);
+    printf("weapon_xoffset: %i\n", weapon_xoffset);
     weapon_xoffset -= 58 + p.weapon_ang;
-    if( sprite[p.i].xrepeat < 32 )
+    printf("weapon_xoffset: %i\n", weapon_xoffset);
+    if (sprite[p.i].xrepeat < 32)
         gun_pos -= klabs(sintable[(p.weapon_sway<<2)&2047]>>9);
     else gun_pos -= klabs(sintable[(p.weapon_sway>>1)&2047]>>10);
 
@@ -1315,7 +1319,8 @@ function displayweapon(snum) {
              FIST,gs,o);
         weapon_xoffset = cw;
         weapon_xoffset -= sintable[(fistsign)&2047]>>10;
-        myos(weapon_xoffset+40-(p.look_ang>>1),
+        printf("weapon_xoffset xrepeat<40: %i\n", weapon_xoffset);
+        myos(weapon_xoffset + 40 - (p.look_ang >> 1),
              looking_arc+200+(klabs(sintable[(fistsign)&2047]>>8)),
              FIST,gs,o|4);
     }
@@ -2139,6 +2144,7 @@ Player.processInput = function(snum) {
 
     if( s.extra <= 0 )
     {
+        throw "todo"
         debugger;
      //        if(p.dead_flag == 0)
 //        {
@@ -2344,6 +2350,7 @@ Player.processInput = function(snum) {
     }
     */
 
+    printf("b4 processinput weapon_sway: %i, s.xvel: %i,p.on_ground : %i, p.bobcounter:%i  \n", p.weapon_sway, s.xvel, p.on_ground, p.bobcounter);
     if( s.xvel < 32 || p.on_ground == 0 || p.bobcounter == 1024 )
     {
         if( (p.weapon_sway&2047) > (1024+96) )
@@ -2353,6 +2360,7 @@ Player.processInput = function(snum) {
         else p.weapon_sway = 1024;
     }
     else p.weapon_sway = p.bobcounter;
+    printf("processinput weapon_sway: %i\n",p.weapon_sway);
 
     s.xvel =
         ksqrt( (p.posx-p.bobposx)*(p.posx-p.bobposx)+(p.posy-p.bobposy)*(p.posy-p.bobposy));
@@ -2952,8 +2960,7 @@ Player.processInput = function(snum) {
             {
                 p.pycount += 52;
                 p.pycount &= 2047;
-                p.pyoff =
-                    klabs(s.xvel*sintable[p.pycount])/1596;
+                p.pyoff = (klabs(s.xvel * sintable[p.pycount]) / 1596) | 0;
             }
         }
         else if( psectlotag != 2 && psectlotag != 1 )

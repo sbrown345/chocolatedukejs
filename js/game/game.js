@@ -1451,7 +1451,6 @@ function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_
     if (actorscrptr[s_pn]) {
         s.extra =   script[actorscrptr[s_pn]];
         hittype[i].temp_data[4] = script[actorscrptr[s_pn] + 1];
-        if (hittype[i].temp_data[4] == 2648) debugger;
         hittype[i].temp_data[1] = script[actorscrptr[s_pn] + 2];
         s.hitag = script[actorscrptr[s_pn] + 3];
     }
