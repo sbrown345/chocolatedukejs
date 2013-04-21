@@ -165,7 +165,6 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
     }
 
     printf("prevlineasm1\n");
-    printf("i1 == %i && i3 == %i && i4 == %i\n", i1, i3, i4);
     if (i3 == 0) {
         if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
             return 0;
@@ -177,8 +176,6 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
         if (pixelsAllowed-- > 0) {
             dest.array[destOffset] = palette.getByte(i4);
             if(flatColor) dest.array[destOffset] = 100;
-            printf("ofs:%i\n", destOffset);
-            printf("ppx:%i\n", dest.array[destOffset]);
         }
 
 
