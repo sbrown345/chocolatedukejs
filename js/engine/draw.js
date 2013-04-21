@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var transluc = new Uint8Array(65536 / 4);
+var transluc = new Uint8Array(65536);
 
 var transrev = 0;
 
@@ -496,8 +496,11 @@ function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, de
 
                 colorIndex = transluc[val];
 
-                if (pixelsAllowed-- > 0)
+                if (pixelsAllowed-- > 0) {
+                    if (isNaN(colorIndex)) debugger;
+                    //printf("dsv:%i\n", colorIndex);
                     dest.setByte(colorIndex);
+                }
             }
 
             //Move down one pixel on the framebuffer

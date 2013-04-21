@@ -340,7 +340,7 @@ function scansector(sectnum) {
 
             x2 = wal2.x - globalposx;
             y2 = wal2.y - globalposy;
-            console.log("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
+            //console.log("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
 
             // If this is a portal...
             if ((nextsectnum >= 0) && ((wal.cstat & 32) == 0))
@@ -449,7 +449,7 @@ function scansector(sectnum) {
             pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
-            console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+            //console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
 
             bunchWallsList[numscans] = numscans + 1;
             numscans++;
@@ -1216,7 +1216,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
                 bad += pow2char[z];
                 continue;
             }
-            printf("y2ve[z]: %i\n", y2ve[z]);
+            //printf("y2ve[z]: %i\n", y2ve[z]);
 
             i = lwal[x+z] + globalxpanning;
             if (i >= tileWidth) {
@@ -1236,7 +1236,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         if (bad == 15)
             continue;
 
-        printf("bad: %i\n", bad);
+        //printf("bad: %i\n", bad);
         palookupoffse[0] = new PointerHelper(fpalookup, getpalookup(mulscale16(swal[x], globvis), globalshade) << 8);
         palookupoffse[3] = new PointerHelper(fpalookup, getpalookup(mulscale16(swal[x + 3], globvis), globalshade) << 8);
 
@@ -1253,7 +1253,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         u4 = Math.max(Math.max(y1ve[0],y1ve[1]),Math.max(y1ve[2],y1ve[3]));
         d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3])); 
 
-        printf("wallscan x: %i, d4: %i, u4: %i\n", x,d4, u4);
+        //printf("wallscan x: %i, d4: %i, u4: %i\n", x,d4, u4);
         if ((bad != 0) || (u4 >= d4))
         {
             if (!(bad&1))
@@ -1366,10 +1366,10 @@ function maskwallscan(x1, x2,
 
     p = new PointerHelper(frameoffset.array, x);
 
-    printf("(x<=x2): %i\n", (x <= x2) ? 1 : 0);
+    //printf("(x<=x2): %i\n", (x <= x2) ? 1 : 0);
     for (; (x <= x2) && (p.position &3); x++, p.position++)
     {
-        printf("mvlineasm1 x==%i && x2 == %i, *p: %u\n",x,x2, p.getByte());
+        //printf("mvlineasm1 x==%i && x2 == %i, *p: %u\n",x,x2, p.getByte());
         y1ve[0] = Math.max(uwal[x], startumost[x + windowx1] - windowy1);
         y2ve[0] = Math.min(dwal[x],startdmost[x+windowx1]-windowy1);
         if (y2ve[0] <= y1ve[0]) continue;
@@ -1392,7 +1392,7 @@ function maskwallscan(x1, x2,
         mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0]-1,vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]],p);
     }
     for(; x<=x2-3; x+=4,p.position+=4) {
-        printf("mvlineasm1 x==%i \n", x);
+        //printf("mvlineasm1 x==%i \n", x);
         bad = 0;
         for(z=3,dax=x+3; z>=0; z--,dax--)
         {
@@ -1414,7 +1414,7 @@ function maskwallscan(x1, x2,
             else
                 i <<= tileHeight;
             
-            printf(" i == %i\n", i);
+            //printf(" i == %i\n", i);
             bufplce[z] = /*tiles[globalpicnum].data +*/ i;
 
             vince[z] = swal[dax]*globalyscale;
@@ -1440,7 +1440,7 @@ function maskwallscan(x1, x2,
         d4 = Math.min(Math.min(y2ve[0],y2ve[1]),Math.min(y2ve[2],y2ve[3]));
 
 
-        printf("bad: %i x: %i: d4: %i, u4: %i\n", bad,x,d4, u4);
+        //printf("bad: %i x: %i: d4: %i, u4: %i\n", bad,x,d4, u4);
         if ((bad > 0) || (u4 >= d4))
         {
             if (!(bad&1)) mvlineasm1(vince[0],palookupoffse[0],y2ve[0]-y1ve[0],vplce[0],new PointerHelper(tiles[globalpicnum].data),bufplce[0],ylookup[y1ve[0]]+0,p);
@@ -3039,7 +3039,7 @@ function transmaskvline2 (x)
     vince[1] = swall[x2]*globalyscale;
     vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
     vplce[1] = globalzd + vince[1]*(y1ve[1]-globalhoriz+1);
-    printf("swall[x]: %i, swall[x2]: %i, vince[0]: %i, vince[1]: %i, vplce[0]: %i, vplce[1]: %i\n", swall[x], swall[x2], vince[0], vince[1], vplce[0], vplce[1]);
+    //printf("swall[x]: %i, swall[x2]: %i, vince[0]: %i, vince[1]: %i, vplce[0]: %i, vplce[1]: %i\n", swall[x], swall[x2], vince[0], vince[1], vplce[0], vplce[1]);
 
     i = lwall[x] + globalxpanning;
     if (i >= tiles[globalpicnum].dim.width)
@@ -3630,11 +3630,11 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
         if ((dastat & 8) == 0) {
             x = xdimenscale;   /* = scale(xdimen,yxaspect,320); */
             if (stereomode) x = scale(windowx2 - windowx1 + 1, yxaspect, 320);
-            printf("(dastat & 8) == 0\n");
-            printf("cx1: %i\n", cx1);
-            printf("cx2: %i\n", cx2);
-            printf("sx: %i\n", sx);
-            printf("xdimen: %i\n", xdimen);
+            //printf("(dastat & 8) == 0\n");
+            //printf("cx1: %i\n", cx1);
+            //printf("cx2: %i\n", cx2);
+            //printf("sx: %i\n", sx);
+            //printf("xdimen: %i\n", xdimen);
             sx = ((cx1 + cx2 + 2) << 15) + scale(sx - (320 << 15), xdimen, 320);
             
             sy = ((cy1 + cy2 + 2) << 15) + mulscale16(sy - (200 << 15), x);
@@ -3645,8 +3645,8 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
              *  hard-coded bonus, scale to full screen instead
              */
             x = scale(xdim, yxaspect, 320);
-            printf("sx: %i\n", sx);
-            printf("xdim: %i\n", xdim);
+            //printf("sx: %i\n", sx);
+            //printf("xdim: %i\n", xdim);
             sx = (xdim << 15) + 32768 + scale(sx - (320 << 15), xdim, 320);
             sy = (ydim << 15) + 32768 + mulscale16(sy - (200 << 15), x);
         }
@@ -3725,7 +3725,6 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     lx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
     rx = pvWalls[0].cameraSpaceCoo[0][VEC_X];
-    printf("lx: %i\n", lx);
 
     nextv = 0;
     for (v = npoints - 1; v >= 0; v--) {
@@ -3775,7 +3774,6 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
 
     x1 = (lx >> 16);
     x2 = (rx >> 16);
-    printf("x1: %i\n", x1);
 
     oy = 0;
     x = (x1 << 16) - 1 - gx1;
@@ -3839,7 +3837,6 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     vplce[xx] = by;
                     y1ve[xx] = y1;
                     y2ve[xx] = y2 - 1;
-                    printf("xx == %i && vplce[xx] == %i &&   y1ve[xx] == %i &&  y2ve[xx] == %i\n", xx, vplce[xx], y1ve[xx], y2ve[xx]);
                     bad &= ~pow2char[xx];
                 }
 
@@ -3874,7 +3871,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     if (u4 > y1ve[3])
                         vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + 3 + p.position, p);
 
-                    printf("doRotateSprite x:%i, d4: %i, u4: %i\n", x, d4, u4);
+                    //printf("doRotateSprite x:%i, d4: %i, u4: %i\n", x, d4, u4);
                     if (d4 >= u4) {
                         vlineasm4(d4 - u4 + 1, bufplc, ylookup[u4], p);
                     }
@@ -3890,7 +3887,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                         prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3, p);
                 }
                 else {
-                    printf("doRotateSprite bad == %i && x == %i && d4 == %i && u4 == %i\n", bad, x, d4, u4);
+                    //printf("doRotateSprite bad == %i && x == %i && d4 == %i && u4 == %i\n", bad, x, d4, u4);
                     if ((bad != 0) || (u4 >= d4)) {
                         if (!(bad & 1)) mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], bufplc, bufplce[0], ylookup[y1ve[0]] + 0, p);
                         if (!(bad & 2)) mvlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], bufplc, bufplce[1], ylookup[y1ve[1]] + 1, p);
@@ -4571,7 +4568,7 @@ function drawsprite (snum) {
         {
             uwall[x] = Math.max(startumost[x+windowx1]-windowy1,toInt16(startum));
             dwall[x] = Math.min(startdmost[x+windowx1]-windowy1,toInt16(startdm));
-            printf("first x: %i, uwall[x]: %i dwall[x]: %i\n", x, uwall[x], dwall[x]);
+            //printf("first x: %i, uwall[x]: %i dwall[x]: %i\n", x, uwall[x], dwall[x]);
         }
         daclip = 0;
         for(i=smostwallcnt-1; i>=0; i--)
@@ -4620,7 +4617,7 @@ function drawsprite (snum) {
         if (uwall[rx] >= dwall[rx])
         {
             for (x = lx; x < rx; x++) {
-                printf("x: %i, uwall[x]: %i dwall[x]: %i\n", x,uwall[x], dwall[x]);
+                //printf("x: %i, uwall[x]: %i dwall[x]: %i\n", x,uwall[x], dwall[x]);
                 if (uwall[x] < dwall[x])
                     break;
             }
@@ -4639,7 +4636,7 @@ function drawsprite (snum) {
             }
 
         z2 = tspr.z - ((yoff * tspr.yrepeat) << 2);
-        printf("z2: %i\n", z2);
+        //printf("z2: %i\n", z2);
         if (cstat&128)
         {
             z2 += ((spriteDim.height*tspr.yrepeat)<<1);
@@ -4667,7 +4664,7 @@ function drawsprite (snum) {
             globalzd = (((globalposz-z2)*globalyscale)<<8);
         }
 
-        printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
+        //printf("rx: %i, lx: %i, linum: %i, linuminc: %i\n", rx, lx, linum, linuminc);
         qinterpolatedown16(lwall, lx, rx - lx + 1, linum, linuminc);
         clearbuf(swall, lx, rx - lx + 1, mulscale19(yp, xdimscale));
 
@@ -5637,7 +5634,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
     tempshortnum = 1;
     do
     {
-        printf("tempshortcnt: %i,tempshortnum: %i\n", tempshortcnt, tempshortnum);
+        //printf("tempshortcnt: %i,tempshortnum: %i\n", tempshortcnt, tempshortnum);
         dasector = clipsectorlist[tempshortcnt];
         sec = sector[dasector];
 
@@ -5748,8 +5745,8 @@ function hitscan( xs,  ys,  zs,  sectnum,
             y2 = wal2.y;
 
             if ((x1-xs)*(y2-ys) < (x2-xs)*(y1-ys)) continue;
-            printf("test23 %i < %i \n", (x1 - xs) * (y2 - ys), (x2 - xs) * (y1 - ys));
-            printf("z==%i && x1==%i && y1==%i && x2==%i && y2==%i\n", z, x1, y1, x2, y2);
+            //printf("test23 %i < %i \n", (x1 - xs) * (y2 - ys), (x2 - xs) * (y1 - ys));
+            //printf("z==%i && x1==%i && y1==%i && x2==%i && y2==%i\n", z, x1, y1, x2, y2);
             if (rintersect(xs, ys, zs, vx, vy, vz, x1, y1, x2, y2, intx, inty, intz) == 0) continue;
             printf("passed rintersect\n");
             if (klabs(intx.$-xs)+klabs(inty.$-ys) >= klabs((hitx.$)-xs)+klabs((hity.$)-ys)) continue;
@@ -5777,7 +5774,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
                 continue;
             }
 
-            for(zz=tempshortnum-1; zz>=0; printf("zz: %i\n",zz),zz--)
+            for(zz=tempshortnum-1; zz>=0; zz--)
                 if (clipsectorlist[zz] == nextsector)
                     break;
             if (zz < 0) clipsectorlist[tempshortnum++] = nextsector;
@@ -5786,7 +5783,7 @@ function hitscan( xs,  ys,  zs,  sectnum,
         for(z=headspritesect[dasector]; z>=0; z=nextspritesect[z]) {
             spr = sprite[z];
             cstat = spr.cstat;
-            printf("z: %i, cstat & 48: %i\n", z, cstat & 48);
+            //printf("z: %i, cstat & 48: %i\n", z, cstat & 48);
             if ((cstat & dasprclipmask) == 0) continue;
 
             x1 = spr.x;

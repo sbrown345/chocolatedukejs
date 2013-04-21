@@ -175,7 +175,7 @@ function loadefs(filename, readfromGrp) {
     }
 
     actorscrptr = new Array(MAXTILES);
-    actortype = new Array(MAXTILES);
+    actortype = new Uint8Array(MAXTILES);
 
     labelcnt = 0;
     scriptPtr = scriptIdx + 1;
