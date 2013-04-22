@@ -37,7 +37,7 @@ function setgotpic(tileNume) {
 function loadTile(tileNume) {
     var i, tileFileSize;
 
-    if (tileNume >= MAXTILES) {
+    if ((tileNume >>> 0) >= MAXTILES) {
         return;
     }
 

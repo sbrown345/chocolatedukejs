@@ -647,7 +647,7 @@ function ceilscan ( x1,  x2,  sectnum)
     
     globalpicnum = sec.ceilingpicnum;
     
-    if (/*(uint32_t)*/globalpicnum >= MAXTILES)
+    if ((globalpicnum >>> 0) >= MAXTILES)
         globalpicnum = 0;
     
     setgotpic(globalpicnum);
@@ -881,8 +881,8 @@ function florscan(x1, x2, sectnum) {
     
     //Retrive the floor texture.
     globalpicnum = sec.floorpicnum;
-    if (globalpicnum >= MAXTILES)
-    globalpicnum = 0;
+    if ((globalpicnum >>> 0) >= MAXTILES)
+        globalpicnum = 0;
     
     //Lock the floor texture
     setgotpic(globalpicnum);
@@ -1537,7 +1537,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
         botptr = dmost;
     }
 
-    if (globalpicnum >= MAXTILES) globalpicnum = 0;
+    if ((globalpicnum >>> 0) >= MAXTILES) globalpicnum = 0;
     
     if (tiles[globalpicnum].animFlags&192) 
         globalpicnum += animateoffs(globalpicnum);
@@ -2364,7 +2364,7 @@ Engine.draWalls = function (bunch) {
                         wal = wall[wallnum];
                         globalorientation = wal.cstat;
                         globalpicnum = wal.picnum;
-                        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+                        if ((globalpicnum >>>  0) >= MAXTILES) globalpicnum = 0;
                         globalxpanning = wal.xpanning;
                         globalypanning = wal.ypanning;
 
@@ -2380,7 +2380,7 @@ Engine.draWalls = function (bunch) {
                         globalorientation = wal.cstat;
                         globalpicnum = wal.picnum;
 
-                        if (globalpicnum >= MAXTILES) 
+                        if ((globalpicnum >>> 0) >= MAXTILES)
                             globalpicnum = 0;
 
                         globalxpanning = wal.xpanning;
@@ -2487,7 +2487,7 @@ Engine.draWalls = function (bunch) {
             else
                 globalpicnum = wal.overpicnum;
 
-            if (globalpicnum >= MAXTILES)
+            if ((globalpicnum >>> 0) >= MAXTILES)
                 globalpicnum = 0;
 
             globalxpanning = wal.xpanning;
@@ -4353,7 +4353,7 @@ function drawmaskwall(damaskwallcnt) {
 
     globalorientation = wal.cstat;
     globalpicnum = wal.overpicnum;
-    if (globalpicnum >= MAXTILES)
+    if ((globalpicnum >>> 0) >= MAXTILES)
     globalpicnum = 0;
     globalxpanning = wal.xpanning;
     globalypanning = wal.ypanning;
@@ -4663,7 +4663,7 @@ function drawsprite (snum) {
 
         globalorientation = 0;
         globalpicnum = tilenum;
-        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+        if ((globalpicnum >>> 0) >= MAXTILES) globalpicnum = 0;
         globalxpanning = 0;
         globalypanning = 0;
         globvis = globalvisibility;
@@ -4820,7 +4820,7 @@ function drawsprite (snum) {
 
         globalorientation = 0;
         globalpicnum = tilenum;
-        if (globalpicnum >= MAXTILES) globalpicnum = 0;
+        if ((globalpicnum >>> 0) >= MAXTILES) globalpicnum = 0;
         globalxpanning = 0;
         globalypanning = 0;
         globvis = globalvisibility;
@@ -5279,8 +5279,7 @@ function drawsprite (snum) {
 
         globalorientation = cstat;
         globalpicnum = tilenum;
-        if (globalpicnum >= MAXTILES)
-        globalpicnum = 0;
+        if ((globalpicnum >>> 0) >= MAXTILES) globalpicnum = 0;
 
         TILE_MakeAvailable(globalpicnum);
         
