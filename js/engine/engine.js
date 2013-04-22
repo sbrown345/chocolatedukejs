@@ -360,8 +360,9 @@ function scansector(sectnum) {
                     // Using cross product, determine if the portal is facing us or not.
                     // If it is: Add it to the stack and bump the stack counter.
                     // This line is equivalent to tempint < 0x40000
-                    if ((/*(uint32_t)*/tempint + 262144) < 524288) // ??? What is this test ?? How acute the angle is ?
+                    if (/*(uint32_t)*/((tempint + 262144)>>>0) < 524288) // ??? What is this test ?? How acute the angle is ?
                     {
+                        printf("%u < 524288\n",(/*(uint32_t)*/tempint + 262144) );
                         //(x2-x1)*(x2-x1)+(y2-y1)*(y2-y1) is the squared length of the wall
                         // ??? What is this test ?? How acute the angle is ?
                         if (mulscale5(tempint, tempint) <= (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
