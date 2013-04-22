@@ -308,7 +308,7 @@ function movefta() {
     while(i >= 0)
     {
         nexti = nextspritestat[i];
-
+        printf("movefta i:%i,nexti:%i\n",i,nexti)
         s = sprite[i];
         var xRef = new Ref(x);
         p = findplayer(s, xRef);
@@ -341,13 +341,15 @@ function movefta() {
                             i = nexti;
                             continue;
                         }
-                        j = cansee(sx,sy,s.z-(krand()%(52<<8)),s.sectnum,px,py,ps[p].oposz-(krand()%(32<<8)),ps[p].cursectnum);
+                        var krand2 = krand();
+                        var krand1 = krand(); // fixes C eval differences - it's the opposite way around!
+                        j = cansee(sx, sy, s.z - (krand1 % (52 << 8)), s.sectnum, px, py, ps[p].oposz - (krand2 % (32 << 8)), ps[p].cursectnum);
                     }
                     else
                         j = cansee(s.x,s.y,s.z-((krand()&31)<<8),s.sectnum,ps[p].oposx,ps[p].oposy,ps[p].oposz-((krand()&31)<<8),ps[p].cursectnum);
 
                     //             j = 1;
-
+                    printf("j:%i\n", j);
                     if(j) switch(s.picnum)
                     {
                         case RUBBERCAN:

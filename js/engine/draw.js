@@ -210,7 +210,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
         if (pixelsAllowed-- > 0) {
             dest[destOffset] = palookupoffse.getByte(temp);
             if (flatColor ) dest[destOffset] = 23;
-            printf("px:%i\n", dest[destOffset]);
+            //printf("px:%i\n", dest[destOffset]);
         }
         vplce += vince;
         destOffset += bytesperline;

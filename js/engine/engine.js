@@ -5571,6 +5571,7 @@ Engine.insertSpriteStat = function (statnum) {
     }
 
     blanktouse = headspritestat[MAXSTATUS];
+    printf("insertspritestat blanktouse: %i, nextspritestat[blanktouse]: %i\n", blanktouse, nextspritestat[blanktouse]);
 
     headspritestat[MAXSTATUS] = nextspritestat[blanktouse];
     if (headspritestat[MAXSTATUS] >= 0)
@@ -5623,6 +5624,7 @@ Engine.deleteSpriteStat = function (deleteme) {
     if (sprite[deleteme].statnum == MAXSTATUS)
         return (-1);
 
+    printf("deletespritestat deleteme: %i\n", deleteme);
     if (headspritestat[sprite[deleteme].statnum] == deleteme)
         headspritestat[sprite[deleteme].statnum] = nextspritestat[deleteme];
 
@@ -5655,6 +5657,7 @@ function changespritesect(spritenum, newsectnum) {
 
 //6106
 function changespritestat(spritenum, newstatnum) {
+    printf("changespritestat newstatnum: %i\n", newstatnum);
     if ((newstatnum < 0) || (newstatnum > MAXSTATUS)) return (-1);
     if (sprite[spritenum].statnum == newstatnum) return (0);
     if (sprite[spritenum].statnum == MAXSTATUS) return (-1);
@@ -5697,13 +5700,14 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
                 continue;
             
             t = y21*x31-x21*y31;
-            if (t >= bot)
+            if ((t >>> 0) >= (bot >>> 0))
                 continue;
             t = y31*x34-x31*y34;
-            if (t >= bot)
+            if ((t >>> 0) >= (bot >>> 0))
                 continue;
 
             nexts = wal.nextsector;
+            if (nexts < 0) printf("nexts:%i\n", nexts);
             if ((nexts < 0) || (wal.cstat&32)) return(0);
 
             t = divscale24(t,bot);
@@ -6812,12 +6816,14 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
 
 //7795
 function krand() {
-    //return 10
+    return 10
+    // c method arguments eval in the opposite direction to js
+    //todo: search for all methods that have multiple TRAND or krand etc and swap values around so they eval in the same order as the C version (regex: krand.+krand)
+
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     console.log("result: %i", randomseed >>> 16);
     return randomseed >>> 16;
 }
-
 
 //7810
 function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, cliptype) {
