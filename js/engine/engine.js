@@ -1492,7 +1492,7 @@ function maskwallscan(x1, x2,
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], new PointerHelper(tiles[globalpicnum].data),bufplce[0], p.position + ylookup[y1ve[0]], p);
+        mvlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], new PointerHelper(tiles[globalpicnum].data),bufplce[0], ylookup[y1ve[0]], p);
     }
     faketimerhandler();
 }
@@ -4502,11 +4502,11 @@ function drawsprite (snum) {
         
         xsiz = mulscale30(siz, xv * spriteDim.width);
         if (tilenum == 661 && xsiz == 962 && siz == 101739) debugger;
-        printf("tilenum: %i\n", tilenum);
-        printf("xsiz: %i\n", xsiz);
-        printf("siz: %i\n", siz);
-        printf("xv: %i\n", xv);
-        printf("spriteDim.width: %i\n", spriteDim.width);
+        //printf("tilenum: %i\n", tilenum);
+        //printf("xsiz: %i\n", xsiz);
+        //printf("siz: %i\n", siz);
+        //printf("xv: %i\n", xv);
+        //printf("spriteDim.width: %i\n", spriteDim.width);
         ysiz = mulscale14(siz,tspr.yrepeat * spriteDim.height);
 
         if (((tiles[tilenum].dim.width>>11) >= xsiz) || (spriteDim.height >= (ysiz>>1)))
@@ -4532,8 +4532,8 @@ function drawsprite (snum) {
 
         x2 = x1+xsiz-1;
         y2 = y1 + ysiz - 1;
-        printf("x1: %i\n", x1);
-        printf("xsiz: %i\n", xsiz);
+        //printf("x1: %i\n", x1);
+        //printf("xsiz: %i\n", xsiz);
         if ((y1|255) >= (y2|255)) return;
 
         lx = (x1>>8)+1;
@@ -4542,7 +4542,7 @@ function drawsprite (snum) {
         if (rx >= xdimen) rx = xdimen-1;
         if (lx > rx) return;
 
-        printf("rx: %i\n", rx);
+        //printf("rx: %i\n", rx);
         yinc = divscale32(spriteDim.height, ysiz);
 
         if ((sec.ceilingstat&3) == 0)
@@ -4930,7 +4930,7 @@ function drawsprite (snum) {
                             if (dalx2 <= darx2)
                             {
                                 if ((dalx2 == pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_COL]) && (darx2 == pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_COL])) return;
-                                clearbufbyte(dwall[dalx2],(darx2-dalx2+1)*sizeof(dwall[0]),0);
+                                clearbufbyte(dwall, dalx2,(darx2 - dalx2 + 1) * 2, 0);
                             }
                             break;
                         case 1:
