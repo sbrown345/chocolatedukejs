@@ -4237,7 +4237,7 @@ function clipinsideboxline(x, y, x1, y1, x2, y2, walldist) {
  */
 
 function inside(x, y, sectnum) {
-    var wal;
+    var wal, walIdx;
     var i, x1, y1, x2, y2;
     var wallCrossed;
 
@@ -4247,10 +4247,9 @@ function inside(x, y, sectnum) {
     }
 
     wallCrossed = 0;
-    var wallPos = sector[sectnum].wallptr;
+    wal = wall[walIdx = sector[sectnum].wallptr];
     i = sector[sectnum].wallnum;
     do {
-        wal = wall[wallPos];
         y1 = wal.y - y;
         y2 = wall[wal.point2].y - y;
 
@@ -4277,7 +4276,8 @@ function inside(x, y, sectnum) {
             wallCrossed = wallCrossed >>> 0;
         }
 
-        wallPos++;
+        walIdx++;
+        wal = wall[walIdx];
         i--;
 
     } while (i);
@@ -5485,7 +5485,7 @@ function drawmasks() {
 //5930
 function setsprite(spritenum, newx, newy, newz) {
     var tempsectnum;
-
+    printf("spritenum == %i && newx == %i && newy == %i && newz == %i\n", spritenum, newx, newy, newz);
     sprite[spritenum].x = newx;
     sprite[spritenum].y = newy;
     sprite[spritenum].z = newz;
@@ -5646,7 +5646,7 @@ Engine.deleteSpriteStat = function (deleteme) {
 
 // 6084
 function changespritesect(spritenum, newsectnum) {
-    console.log("changespritesect newsectnum: %i", newsectnum);
+    printf("changespritesect spritenum:%i newsectnum: %i\n", spritenum, newsectnum);
     if ((newsectnum < 0) || (newsectnum > MAXSECTORS)) return (-1);
     if (sprite[spritenum].sectnum == newsectnum) return(0);
     if (sprite[spritenum].sectnum == MAXSECTORS) return(-1);
@@ -5679,7 +5679,10 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
 
     x21 = x2-x1;
     y21 = y2-y1;
-    z21 = z2-z1;
+    z21 = z2 - z1;
+
+    printf("cansee x1 == %i && y1 == %i && z1 == %i && sect1 == %i\n", x1, y1, z1, sect1);
+    printf("x2 == %i && y2 == %i && z2 == %i && sect2 == %i\n", x2, y2, z2, sect2);
 
     clipsectorlist[0] = sect1;
     danum = 1;
@@ -5689,6 +5692,7 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
         sec = sector[dasectnum];
         for (cnt = sec.wallnum, wal = wall[walIdx = sec.wallptr]; cnt > 0; cnt--, wal = wall[++walIdx])
         {
+            //printf("wallnum:%i\n",sec.wallnum);
             wal2 = wall[wal.point2];
             x31 = wal.x-x1;
             x34 = wal.x-wal2.x;
@@ -5707,8 +5711,10 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
                 continue;
 
             nexts = wal.nextsector;
-            if (nexts < 0) printf("nexts:%i\n", nexts);
-            if ((nexts < 0) || (wal.cstat&32)) return(0);
+            printf("nexts:%i\n", nexts);
+            //if (nexts < 0)
+            //	printf("nexts (<0):%i\n",nexts);
+            if ((nexts < 0) || (wal.cstat & 32)) return (0);
 
             t = divscale24(t,bot);
             x = x1 + mulscale24(x21,t);
@@ -6762,7 +6768,7 @@ function pushmove( x,  y,  z,  sectnum, walldist,  ceildist,  flordist, cliptype
  */
 function updatesector(x, y, lastKnownSector) {
     console.assert(lastKnownSector instanceof Ref, "lastKnownSector must be Ref");
-    var wal;
+    var wal, walIdx;
     var i, j;
 
     //First check the last sector where (old_x,old_y) was before being updated to (x,y)
@@ -6772,7 +6778,7 @@ function updatesector(x, y, lastKnownSector) {
     }
     // Seems (x,y) moved into an other sector....hopefully one connected via a portal. Let's flood in each portal.
     if ((lastKnownSector.$ >= 0) && (lastKnownSector.$ < numsectors)) {
-        wal = wall[sector[lastKnownSector.$].wallptr];
+        wal = wall[walIdx = sector[lastKnownSector.$].wallptr];
         j = sector[lastKnownSector.$].wallnum;
         do {
             i = wal.nextsector;
@@ -6781,7 +6787,7 @@ function updatesector(x, y, lastKnownSector) {
                     lastKnownSector.$ = i;
                     return;
                 }
-            wal++;
+            wal = wall[++walIdx];
             j--;
         } while (j != 0);
     }

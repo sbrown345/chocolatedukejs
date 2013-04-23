@@ -115,7 +115,7 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
         throw new Error("todo: the line that passed to this method (rhlineasm4) needs fixing");
     }
 
-    printf("rhlineasm4\n");
+    //printf("rhlineasm4\n");
     i4 = i4 >>> 0;
     i5 = i5 >>> 0;
 
@@ -164,7 +164,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
         throw new Error("prevlineasm1 should have 8 arguments");
     }
 
-    printf("prevlineasm1\n");
+    //printf("prevlineasm1\n");
     if (i3 == 0) {
         if (!RENDER_DRAW_TOP_AND_BOTTOM_COLUMN)
             return 0;
@@ -190,7 +190,7 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
 function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffset, destOffset, dest) {
     console.assert(arguments.length == 8);
 
-    printf("vlineasm1\n");
+    //printf("vlineasm1\n");
     if (!dest || dest.length === undefined) {
         console.log(new Error().stack);
         throw new Error("dest should have a length e.g. be an array");
@@ -223,7 +223,7 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 //279     (todo: more of the func should be setup like this one?)
 function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
 {
-    printf("tvlineasm1\n");
+    //printf("tvlineasm1\n");
     var shiftValue = (globalshiftval & 0x1f);
     var temp;
     var colorIndex;
@@ -340,7 +340,7 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
     console.assert(arguments.length == 8);
     console.assert(dest instanceof PointerHelper);
     var temp;
-    printf("mvlineasm1\n");
+    //printf("mvlineasm1\n");
     var textureArray = texture.array;
     var destArray = dest.array;
 
@@ -372,7 +372,7 @@ function setupvlineasm(i1) {
 
 //FCS This is used to fill the inside of a wall (so it draws VERTICAL column, always).
 function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
-    printf("vlineasm4\n");
+    //printf("vlineasm4\n");
     if (!RENDER_DRAW_WALL_INSIDE)
         return;
 
@@ -414,7 +414,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
         throw new Error("todo: vlineasm4_2 should have 2 arguments");
     }
 
-    printf("vlineasm4   \n");
+    //printf("vlineasm4   \n");
     var i = 0;
     var temp;
 
@@ -449,7 +449,7 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
         throw new Error("todo: mvlineasm4 should have 4 arguments");
     }
 
-    printf("mvlineasm4\n");
+    //printf("mvlineasm4\n");
     var i;
     var temp;
     var index = (framebufferOffset + ylookup[column]);
@@ -478,7 +478,7 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
  */
 //665
 function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, dest) {
-    printf("DrawSpriteVerticalLine\n");
+    //printf("DrawSpriteVerticalLine\n");
     // todo
     var colorIndex;
     texture = texture.array;

@@ -20,6 +20,7 @@ function sound() {
 
 //494
 function spritesound(num, i) {
+    return -1;
     // todo!
 }
 

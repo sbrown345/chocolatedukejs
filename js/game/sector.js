@@ -129,7 +129,8 @@ function findplayer(s,d) {
 function doanimations() {
     var i, j, a, p, v, dasect;
 
-    for(i=animatecnt-1;i>=0;i--)
+    printf("doanimations\n");
+    for (i = animatecnt - 1; i >= 0; i--)
     {
         throw "todo"
         //a = *animateptr[i];
@@ -554,6 +555,7 @@ function checkhitwall(spr,dawallnum,x, y, z, atwith)
             darkestwall = 0;
 
             wal = wall[sector[sn].wallptr];
+            throw "todo wal cannot be ++- its an  object!!"
             for(i=sector[sn].wallnum;i > 0;i--,wal++)
                 if(wal.shade > darkestwall)
                     darkestwall=wal.shade;

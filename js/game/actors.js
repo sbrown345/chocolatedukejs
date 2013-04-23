@@ -308,7 +308,7 @@ function movefta() {
     while(i >= 0)
     {
         nexti = nextspritestat[i];
-        printf("movefta i:%i,nexti:%i\n",i,nexti)
+        //printf("movefta i:%i,nexti:%i\n",i,nexti)
         s = sprite[i];
         var xRef = new Ref(x);
         p = findplayer(s, xRef);
@@ -500,7 +500,8 @@ function movecyclers() {
         if(c[5])
         {
             wal = wall[sector[s].wallptr];
-            for(x = sector[s].wallnum;x>0;x--,wal++)
+            throw "todo wal cannot be ++- its an  object!!"
+            for (x = sector[s].wallnum; x > 0; x--, wal++)
                 if( wal.hitag != 1 )
                 {
                     wal.shade = j;
@@ -707,6 +708,7 @@ function movefx() {
     var x, ht;
     var s;
 
+    printf("movefx\n");
     i = headspritestat[11];
     BOLT:
     while(i >= 0)
@@ -918,7 +920,7 @@ function movestandables()
         t = hittype[i].temp_data;
         s = sprite[i];
         sect = s.sectnum;
-        console.log("movestandables, i: %i, sect: %i",i, sect);
+        //console.log("movestandables, i: %i, sect: %i",i, sect);
         
         if (sect < 0) { deletesprite(i); { i = nexti; continue BOLT; } }
 
@@ -5073,7 +5075,8 @@ function moveeffectors()   //STATNUM 3
 
                 wal = wall[sc.wallptr];
 
-                for(x=sc.wallnum;x > 0;x--,wal++)
+                throw "todo wal cannot be ++- its an  object!!"
+                for (x = sc.wallnum; x > 0; x--, wal++)
                 {
                     if( wal.hitag != 1 )
                     {
@@ -5113,7 +5116,8 @@ function moveeffectors()   //STATNUM 3
 
                 wal = wall[sc.wallptr];
 
-                for(x=sc.wallnum;x > 0; x--,wal++)
+                throw "todo wal cannot be ++- its an  object!!"
+                for (x = sc.wallnum; x > 0; x--, wal++)
                 {
                     if(j) wal.pal = (s.owner&0xff);
                     else wal.pal = s.pal;
@@ -5395,7 +5399,8 @@ function moveeffectors()   //STATNUM 3
                     sc.ceilingpal = 0;
 
                     wal = wall[sc.wallptr];
-                    for(j = sc.wallnum;j > 0; j--, wal++)
+                    throw "todo wal cannot be ++- its an  object!!"
+                    for (j = sc.wallnum; j > 0; j--, wal++)
                         if(wal.hitag != 1)
                         {
                             wal.shade = t[1];
@@ -5432,7 +5437,8 @@ function moveeffectors()   //STATNUM 3
                         sc.ceilingshade -= 2;
 
                         wal = wall[sc.wallptr];
-                        for(j=sc.wallnum;j>0;j--,wal++)
+                        throw "todo wal cannot be ++- its an  object!!"
+                        for (j = sc.wallnum; j > 0; j--, wal++)
                             if(wal.hitag != 1)
                             {
                                 wal.pal = s.pal;
@@ -5496,7 +5502,8 @@ function moveeffectors()   //STATNUM 3
                         if(s.ang == 512)
                         {
                             wal = wall[sc.wallptr];
-                            for(j=sc.wallnum;j>0;j--,wal++)
+                            throw "todo wal cannot be ++- its an  object!!"
+                            for (j = sc.wallnum; j > 0; j--, wal++)
                                 wal.shade = s.shade;
 
                             sc.floorshade = s.shade;
