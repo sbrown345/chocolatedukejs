@@ -2012,41 +2012,39 @@ function spawn(j, pn) {
         case FOOTPRINTS2:
         case FOOTPRINTS3:
         case FOOTPRINTS4:
-            throw new Error("todo");
-            //if(j >= 0)
-            //{
-            //    short s1;
-            //    s1 = sp.sectnum;
+            if(j >= 0)
+            {
+                var s1 = new Ref(sp.sectnum);
 
-            //    updatesector(sp.x+84,sp.y+84,&s1);
-            //    if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //    {
-            //        updatesector(sp.x-84,sp.y-84,&s1);
-            //        if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //        {
-            //            updatesector(sp.x+84,sp.y-84,&s1);
-            //            if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //            {
-            //                updatesector(sp.x-84,sp.y+84,&s1);
-            //                if(s1 >= 0 && sector[s1].floorz != sector[sp.sectnum].floorz)
-            //                { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
-            //            }
-            //            else { sp.xrepeat = sp.yrepeat = 0;break;}
-            //        }
-            //        else { sp.xrepeat = sp.yrepeat = 0;break;}
-            //    }
-            //    else { sp.xrepeat = sp.yrepeat = 0;break;}
+                updatesector(sp.x+84,sp.y+84,s1);
+                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                {
+                    updatesector(sp.x-84,sp.y-84,s1);
+                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                    {
+                        updatesector(sp.x+84,sp.y-84,s1);
+                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                        {
+                            updatesector(sp.x-84,sp.y+84,s1);
+                            if (s1.$ >= 0 && sector[s1.$].floorz != sector[sp.sectnum].floorz)
+                            { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                        }
+                        else { sp.xrepeat = sp.yrepeat = 0;break;}
+                    }
+                    else { sp.xrepeat = sp.yrepeat = 0;break;}
+                }
+                else { sp.xrepeat = sp.yrepeat = 0;break;}
 
-            //    sp.cstat = 32+((ps[sprite[j].yvel].footprintcount&1)<<2);
-            //    sp.ang = sprite[j].ang;
-            //}
+                sp.cstat = 32+((ps[sprite[j].yvel].footprintcount&1)<<2);
+                sp.ang = sprite[j].ang;
+            }
 
-            //sp.z = sector[sect].floorz;
-            //if(sector[sect].lotag != 1 && sector[sect].lotag != 2)
-            //    sp.xrepeat = sp.yrepeat = 32;
+            sp.z = sector[sect].floorz;
+            if(sector[sect].lotag != 1 && sector[sect].lotag != 2)
+                sp.xrepeat = sp.yrepeat = 32;
 
-            //insertspriteq(i);
-            //changespritestat(i,5);
+            insertspriteq(i);
+            changespritestat(i,5);
             break;
 
         case FEM1:

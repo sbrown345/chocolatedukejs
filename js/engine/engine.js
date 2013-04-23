@@ -5130,7 +5130,7 @@ function drawsprite (snum) {
             }
             if ((zsgn^zzsgn) < 0)
             {
-                t = divscale30(zsgn,zsgn-zzsgn);
+                t = divscale30(zsgn,zsgn-zzsgn); 
                 rxi2[npoints2] = rxi[z] + mulscale30(t,rxi[zz]-rxi[z]);
                 ryi2[npoints2] = ryi[z] + mulscale30(t,ryi[zz]-ryi[z]);
                 rzi2[npoints2] = rzi[z] + mulscale30(t,rzi[zz]-rzi[z]);
@@ -5193,9 +5193,10 @@ function drawsprite (snum) {
             dax2 = ((xsi[zz]+65535)>>16);
             if (dax2 > dax1)
             {
+                throw "todo"
                 yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
                 y = ysi[z] + mulscale16((dax1<<16)-xsi[z],yinc);
-                throw "qinterpolatedown16short((int32_t *)(&uwall[dax1]),dax2-dax1,y,yinc);"
+                qinterpolatedown16short(uwall, dax1, dax2 - dax1, y, yinc);
             }
         }
 
@@ -5209,9 +5210,10 @@ function drawsprite (snum) {
             dax2 = ((xsi[z]+65535)>>16);
             if (dax2 > dax1)
             {
-                yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
+                throw "todo"
+                yinc = divscale16(ysi[zz] - ysi[z], xsi[zz] - xsi[z]);
                 y = ysi[zz] + mulscale16((dax1<<16)-xsi[zz],yinc);
-                throw "qinterpolatedown16short((int32_t *)(&dwall[dax1]),dax2-dax1,y,yinc)";
+                qinterpolatedown16short(dwall, dax1, dax2 - dax1, y, yinc);
             }
         }
 
