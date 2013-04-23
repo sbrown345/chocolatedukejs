@@ -2692,7 +2692,7 @@ Player.processInput = function(snum) {
                 }
                 else
                 {
-                    p.poszv -= (sintable[(2048-128+p.jumping_counter)&2047])/12;
+                    p.poszv -= (((sintable[(2048 - 128 + p.jumping_counter) & 2047]) / 12)|0);
                     p.jumping_counter += 180;
                     p.on_ground = 0;
                 }

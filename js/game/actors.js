@@ -1976,7 +1976,7 @@ function moveweapons()
                         x = EGS(s.sectnum,
                             s.x+((k*sintable[(s.ang+512)&2047])>>9),
                             s.y+((k*sintable[s.ang&2047])>>9),
-                            s.z+((k*ksgn(s.zvel))*klabs(s.zvel/24)),FIRELASER,-40+(k<<2),
+                            s.z+((k*ksgn(s.zvel))*klabs((s.zvel/24)|0)),FIRELASER,-40+(k<<2),
                             s.xrepeat,s.yrepeat,0,0,0,s.owner,5);
 
                         sprite[x].cstat = 128;
@@ -3841,7 +3841,7 @@ function moveexplosions()  // STATNUM 5
             case NEON5:
             case NEON6:
 
-                if( (global_random/(s.lotag+1)&31) > 4) s.shade = -127;
+                if( ((global_random/(s.lotag+1)|0)&31) > 4) s.shade = -127;
                 else s.shade = 127;
                 {i = nexti; continue;}
 
@@ -5073,7 +5073,6 @@ function moveeffectors()   //STATNUM 3
                 sc.floorshade = t[0];
 
                 wal = wall[walIdx = sc.wallptr];
-
                 for (x = sc.wallnum; x > 0; x--, wal = wall[++walIdx])
                 {
                     if( wal.hitag != 1 )
@@ -5090,7 +5089,7 @@ function moveeffectors()   //STATNUM 3
 
             case 4:
 
-                if((global_random/(sh+1)&31) < 4 )
+                if(((global_random/(sh+1)|0)&31) < 4 )
                 {
                     t[1] = s.shade + (global_random&15);//Got really bright
                     t[0] = s.shade + (global_random&15);
@@ -5113,7 +5112,6 @@ function moveeffectors()   //STATNUM 3
                 sc.ceilingshade = t[1];
 
                 wal = wall[walIdx = sc.wallptr];
-
                 for (x = sc.wallnum; x > 0; x--, wal = wall[++walIdx])
                 {
                     if(j) wal.pal = (s.owner&0xff);

@@ -1559,7 +1559,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
         nextsectnum = wall[wallnum].nextsector;
         printf("z:%i, nextsectnum:%i\n", z, nextsectnum);
 
-        if (dastat == 0) j = sector[nextsectnum].ceilingstat;
+        if (dastat == 0) j = (sector[nextsectnum] || new SectorType()).ceilingstat; // nextsectnum can be negative (probably -1) which seems to return an empty type
         else j = sector[nextsectnum].floorstat;
 
         if ((nextsectnum < 0) || (wall[wallnum].cstat&32) || ((j&1) == 0))
