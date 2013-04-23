@@ -480,7 +480,7 @@ function ifhitbyweapon(sn)
 //1096
 function movecyclers() {
     var q, j, x, t, s, c;
-    var wal;
+    var wal, walIdx;
     var  cshade;
 
     for(q=numcyclers-1;q>=0;q--)
@@ -499,9 +499,8 @@ function movecyclers() {
         c[1] += sector[s].extra;
         if(c[5])
         {
-            wal = wall[sector[s].wallptr];
-            throw "todo wal cannot be ++- its an  object!!"
-            for (x = sector[s].wallnum; x > 0; x--, wal++)
+            wal = wall[walIdx = sector[s].wallptr];
+            for (x = sector[s].wallnum; x > 0; x--, wal = wall[++walIdx])
                 if( wal.hitag != 1 )
                 {
                     wal.shade = j;
@@ -4359,7 +4358,7 @@ function moveeffectors()   //STATNUM 3
     var i, k, nexti, nextk, p, sh, nextj;
     var s;
     var sc;
-    var wal;
+    var wal, walIdx;
 
     fricxv = fricyv = 0;
 
@@ -5073,10 +5072,9 @@ function moveeffectors()   //STATNUM 3
                 sc.ceilingshade = t[0];
                 sc.floorshade = t[0];
 
-                wal = wall[sc.wallptr];
+                wal = wall[walIdx = sc.wallptr];
 
-                throw "todo wal cannot be ++- its an  object!!"
-                for (x = sc.wallnum; x > 0; x--, wal++)
+                for (x = sc.wallnum; x > 0; x--, wal = wall[++walIdx])
                 {
                     if( wal.hitag != 1 )
                     {
@@ -5114,10 +5112,9 @@ function moveeffectors()   //STATNUM 3
                 sc.floorshade = t[1];
                 sc.ceilingshade = t[1];
 
-                wal = wall[sc.wallptr];
+                wal = wall[walIdx = sc.wallptr];
 
-                throw "todo wal cannot be ++- its an  object!!"
-                for (x = sc.wallnum; x > 0; x--, wal++)
+                for (x = sc.wallnum; x > 0; x--, wal = wall[++walIdx])
                 {
                     if(j) wal.pal = (s.owner&0xff);
                     else wal.pal = s.pal;
@@ -5264,9 +5261,9 @@ function moveeffectors()   //STATNUM 3
                             sn = sprite[j].sectnum;
                             m = sprite[j].shade;
 
-                            wal = wall[sector[sn].wallptr];
+                            wal = wall[walIdx = sector[sn].wallptr];
 
-                            for(l=sector[sn].wallnum;l>0;l--,wal++)
+                            for(l=sector[sn].wallnum;l>0;l--,wal = wall[++walIdx])
                             {
                                 if( wal.hitag != 1 )
                                 {
@@ -5398,9 +5395,8 @@ function moveeffectors()   //STATNUM 3
                     sc.floorpal = 0;
                     sc.ceilingpal = 0;
 
-                    wal = wall[sc.wallptr];
-                    throw "todo wal cannot be ++- its an  object!!"
-                    for (j = sc.wallnum; j > 0; j--, wal++)
+                    wal = wall[walIdx = sc.wallptr];
+                    for (j = sc.wallnum; j > 0; j--, wal = wall[++walIdx])
                         if(wal.hitag != 1)
                         {
                             wal.shade = t[1];
@@ -5436,9 +5432,8 @@ function moveeffectors()   //STATNUM 3
                         sc.floorshade -= 2;
                         sc.ceilingshade -= 2;
 
-                        wal = wall[sc.wallptr];
-                        throw "todo wal cannot be ++- its an  object!!"
-                        for (j = sc.wallnum; j > 0; j--, wal++)
+                        wal = wall[walIdx = sc.wallptr];
+                        for (j = sc.wallnum; j > 0; j--, wal = wall[++walIdx])
                             if(wal.hitag != 1)
                             {
                                 wal.pal = s.pal;
@@ -5501,9 +5496,8 @@ function moveeffectors()   //STATNUM 3
 
                         if(s.ang == 512)
                         {
-                            wal = wall[sc.wallptr];
-                            throw "todo wal cannot be ++- its an  object!!"
-                            for (j = sc.wallnum; j > 0; j--, wal++)
+                            wal = wall[walIdx = sc.wallptr];
+                            for (j = sc.wallnum; j > 0; j--, wal = wall[++walIdx])
                                 wal.shade = s.shade;
 
                             sc.floorshade = s.shade;

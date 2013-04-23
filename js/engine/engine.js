@@ -1555,9 +1555,9 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
     x = -1;
 
     for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]) {
-        printf("z:%i\n", z);
         wallnum = pvWalls[z].worldWallId;
         nextsectnum = wall[wallnum].nextsector;
+        printf("z:%i, nextsectnum:%i\n", z, nextsectnum);
 
         if (dastat == 0) j = sector[nextsectnum].ceilingstat;
         else j = sector[nextsectnum].floorstat;
