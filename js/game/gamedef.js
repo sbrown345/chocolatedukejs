@@ -208,6 +208,25 @@ function loadefs(filename, readfromGrp) {
     }
 }
 
+//169
+function getincangle(a,na) {
+    a &= 2047;
+    na &= 2047;
+
+    if(klabs(a-na) < 1024)
+        return (na-a);
+    else
+    {
+        if(na > 1024) na -= 2048;
+        if(a > 1024) a -= 2048;
+
+        na -= 2048;
+        a -= 2048;
+        return (na-a);
+    }
+}
+
+//187
 function ispecial(c) {
     c = typeof c === "number" ? c : c.charCodeAt(0);
     if (c == 0x0a) {
@@ -226,6 +245,60 @@ function isaltok(c) {
     var ch = typeof c === "number" ? String.fromCharCode(c) : c;
     return (isalnum(c) || ch == '{' || ch == '}' || ch == '/' || ch == '*' || ch == '-' || ch == '_' || ch == '.');
 }
+
+function getglobalz(i) {
+    var hz,lz,zr;
+
+    var s = sprite[i];
+
+    if( s.statnum == 10 || s.statnum == 6 || s.statnum == 2 || s.statnum == 1 || s.statnum == 4)
+    {
+        if(s.statnum == 4)
+            zr = 4;
+        else zr = 127;
+        var czRef = new Ref(hittype[i].ceilingz);
+        var hzRef = new Ref(hz);
+        var fzRef = new Ref(hittype[i].floorz);
+        var lzRef = new Ref(lz);
+        getzrange(s.x,s.y,s.z-(FOURSLEIGHT),s.sectnum,czRef,hzRef,fzRef,lzRef,zr,CLIPMASK0);
+        hittype[i].ceilingz = czRef.$;
+        hz = hzRef.$;
+        hittype[i].floorz = fzRef.$;
+        lz = lzRef.$;
+
+        if( (lz&49152) == 49152 && (sprite[lz&(MAXSPRITES-1)].cstat&48) == 0 )
+        {
+            lz &= (MAXSPRITES-1);
+            if( badguy(sprite[lz]) && sprite[lz].pal != 1)
+            {
+                if( s.statnum != 4 )
+                {
+                    hittype[i].dispicnum = -4; // No shadows on actors
+                    s.xvel = -256;
+                    ssp(i,CLIPMASK0);
+                }
+            }
+            else if(sprite[lz].picnum == APLAYER && badguy(s) )
+            {
+                hittype[i].dispicnum = -4; // No shadows on actors
+                s.xvel = -256;
+                ssp(i,CLIPMASK0);
+            }
+            else if(s.statnum == 4 && sprite[lz].picnum == APLAYER)
+                if(s.owner == lz)
+            {
+                hittype[i].ceilingz = sector[s.sectnum].ceilingz;
+                hittype[i].floorz   = sector[s.sectnum].floorz;
+            }
+        }
+    }
+    else
+    {
+        hittype[i].ceilingz = sector[s.sectnum].ceilingz;
+        hittype[i].floorz   = sector[s.sectnum].floorz;
+    }
+}
+
 
 function makeitfall(i) {
     var s = sprite[i];
@@ -1453,18 +1526,303 @@ function furthestangle(i, angs) {
 }
 
 
+function alterang(a) {
+    var aang, angdif, goalang,j;
+    var ticselapsed, moveptr;
+
+    moveptr = g_t[1];
+
+    ticselapsed = (g_t[0])&31;
+
+    aang = g_sp.ang;
+
+    g_sp.xvel += ((script[moveptr]-g_sp.xvel)/5)|0;
+    if(g_sp.zvel < 648) g_sp.zvel += ((((script[moveptr+1])<<4)-g_sp.zvel)/5)|0;
+
+    if(a&seekplayer)
+    {
+        j = ps[g_p].holoduke_on;
+
+        if(j >= 0 && cansee(sprite[j].x,sprite[j].y,sprite[j].z,sprite[j].sectnum,g_sp.x,g_sp.y,g_sp.z,g_sp.sectnum) )
+            g_sp.owner = j;
+        else g_sp.owner = ps[g_p].i;
+
+        if(sprite[g_sp.owner].picnum == APLAYER)
+            goalang = getangle(hittype[g_i].lastvx-g_sp.x,hittype[g_i].lastvy-g_sp.y);
+        else
+            goalang = getangle(sprite[g_sp.owner].x-g_sp.x,sprite[g_sp.owner].y-g_sp.y);
+
+        if(g_sp.xvel && g_sp.picnum != DRONE)
+        {
+            angdif = getincangle(aang,goalang);
+
+            if(ticselapsed < 2)
+            {
+                if( klabs(angdif) < 256)
+                {
+                    j = 128-(TRAND&256);
+                    g_sp.ang += j;
+                    if( hits(g_i) < 844 )
+                        g_sp.ang -= j;
+                }
+            }
+            else if(ticselapsed > 18 && ticselapsed < 26) // choose
+            {
+                if(klabs(angdif>>2) < 128) g_sp.ang = goalang;
+                else g_sp.ang += angdif>>2;
+            }
+        }
+        else g_sp.ang = goalang;
+    }
+
+    if(ticselapsed < 1)
+    {
+        j = 2;
+        if(a&furthestdir)
+        {
+            goalang = furthestangle(g_i,j);
+            g_sp.ang = goalang;
+            g_sp.owner = ps[g_p].i;
+        }
+
+        if(a&fleeenemy)
+        {
+            goalang = furthestangle(g_i,j);
+            g_sp.ang = goalang; // += angdif; //  = getincangle(aang,goalang)>>1;
+        }
+    }
+}
+
+//1858
+function move() {
+    var l, moveptr;
+    var a, goalang, angdif;
+    var daxvel;
+
+    a = g_sp.hitag;
+
+    if(a == -1) a = 0;
+
+    g_t[0]++;
+
+    if(a&face_player)
+    {
+        if(ps[g_p].newowner >= 0)
+            goalang = getangle(ps[g_p].oposx-g_sp.x,ps[g_p].oposy-g_sp.y);
+        else goalang = getangle(ps[g_p].posx-g_sp.x,ps[g_p].posy-g_sp.y);
+        angdif = getincangle(g_sp.ang,goalang)>>2;
+        if(angdif > -8 && angdif < 0) angdif = 0;
+        g_sp.ang += angdif;
+    }
+
+    if(a&spin)
+        g_sp.ang += sintable[ ((g_t[0]<<3)&2047) ]>>6;
+
+    if(a&face_player_slow)
+    {
+        if(ps[g_p].newowner >= 0)
+            goalang = getangle(ps[g_p].oposx-g_sp.x,ps[g_p].oposy-g_sp.y);
+        else goalang = getangle(ps[g_p].posx-g_sp.x,ps[g_p].posy-g_sp.y);
+        angdif = ksgn(getincangle(g_sp.ang,goalang))<<5;
+        if(angdif > -32 && angdif < 0)
+        {
+            angdif = 0;
+            g_sp.ang = goalang;
+        }
+        g_sp.ang += angdif;
+    }
+
+
+    if((a&jumptoplayer) == jumptoplayer)
+    {
+        if(g_t[0] < 16)
+            g_sp.zvel -= (sintable[(512+(g_t[0]<<4))&2047]>>5);
+    }
+
+    if(a&face_player_smart)
+    {
+        var newx,newy;
+
+        newx = ps[g_p].posx+((ps[g_p].posxv/768)|0);
+        newy = ps[g_p].posy+((ps[g_p].posyv/768)|0);
+        goalang = getangle(newx-g_sp.x,newy-g_sp.y);
+        angdif = getincangle(g_sp.ang,goalang)>>2;
+        if(angdif > -8 && angdif < 0) angdif = 0;
+        g_sp.ang += angdif;
+    }
+
+    if( g_t[1] == 0 || a == 0 )
+    {
+        if( ( badguy(g_sp) && g_sp.extra <= 0 ) || (hittype[g_i].bposx != g_sp.x) || (hittype[g_i].bposy != g_sp.y) )
+        {
+            hittype[g_i].bposx = g_sp.x;
+            hittype[g_i].bposy = g_sp.y;
+            setsprite(g_i,g_sp.x,g_sp.y,g_sp.z);
+        }
+        return;
+    }
+
+    moveptr = g_t[1];
+
+    if(a&geth) g_sp.xvel += (script[moveptr]-g_sp.xvel)>>1;
+    if(a&getv) g_sp.zvel += (((script[moveptr+1])<<4)-g_sp.zvel)>>1;
+
+    if(a&dodgebullet)
+        dodge(g_sp);
+
+    if(g_sp.picnum != APLAYER)
+        alterang(a);
+
+    if(g_sp.xvel > -6 && g_sp.xvel < 6 ) g_sp.xvel = 0;
+
+    a = badguy(g_sp);
+
+    if(g_sp.xvel || g_sp.zvel)
+    {
+        if(a && g_sp.picnum != ROTATEGUN)
+        {
+            if( (g_sp.picnum == DRONE || g_sp.picnum == COMMANDER) && g_sp.extra > 0)
+            {
+                if(g_sp.picnum == COMMANDER)
+                {
+                    hittype[g_i].floorz = l = getflorzofslope(g_sp.sectnum,g_sp.x,g_sp.y);
+                    if( g_sp.z > (l-(8<<8)) )
+                    {
+                        if( g_sp.z > (l-(8<<8)) ) g_sp.z = l-(8<<8);
+                        g_sp.zvel = 0;
+                    }
+
+                    hittype[g_i].ceilingz = l = getceilzofslope(g_sp.sectnum,g_sp.x,g_sp.y);
+                    if( (g_sp.z-l) < (80<<8) )
+                    {
+                        g_sp.z = l+(80<<8);
+                        g_sp.zvel = 0;
+                    }
+                }
+                else
+                {
+                    if( g_sp.zvel > 0 )
+                    {
+                        hittype[g_i].floorz = l = getflorzofslope(g_sp.sectnum,g_sp.x,g_sp.y);
+                        if( g_sp.z > (l-(30<<8)) )
+                            g_sp.z = l-(30<<8);
+                    }
+                    else
+                    {
+                        hittype[g_i].ceilingz = l = getceilzofslope(g_sp.sectnum,g_sp.x,g_sp.y);
+                        if( (g_sp.z-l) < (50<<8) )
+                        {
+                            g_sp.z = l+(50<<8);
+                            g_sp.zvel = 0;
+                        }
+                    }
+                }
+            }
+            else if(g_sp.picnum != ORGANTIC)
+            {
+                if(g_sp.zvel > 0 && hittype[g_i].floorz < g_sp.z)
+                    g_sp.z = hittype[g_i].floorz;
+                if( g_sp.zvel < 0)
+                {
+                    l = getceilzofslope(g_sp.sectnum,g_sp.x,g_sp.y);
+                    if( (g_sp.z-l) < (66<<8) )
+                    {
+                        g_sp.z = l+(66<<8);
+                        g_sp.zvel >>= 1;
+                    }
+                }
+            }
+        }
+        else if(g_sp.picnum == APLAYER)
+            if( (g_sp.z-hittype[g_i].ceilingz) < (32<<8) )
+                g_sp.z = hittype[g_i].ceilingz+(32<<8);
+
+        daxvel = g_sp.xvel;
+        angdif = g_sp.ang;
+
+        if( a && g_sp.picnum != ROTATEGUN )
+        {
+            if( g_x < 960 && g_sp.xrepeat > 16 )
+            {
+
+                daxvel = -(1024-g_x);
+                angdif = getangle(ps[g_p].posx-g_sp.x,ps[g_p].posy-g_sp.y);
+
+                if(g_x < 512)
+                {
+                    ps[g_p].posxv = 0;
+                    ps[g_p].posyv = 0;
+                }
+                else
+                {
+                    ps[g_p].posxv = mulscale(ps[g_p].posxv,dukefriction-0x2000,16);
+                    ps[g_p].posyv = mulscale(ps[g_p].posyv,dukefriction-0x2000,16);
+                }
+            }
+            else if(g_sp.picnum != DRONE && g_sp.picnum != SHARK && g_sp.picnum != COMMANDER)
+            {
+                if( hittype[g_i].bposz != g_sp.z || ( ud.multimode < 2 && ud.player_skill < 2 ) )
+                {
+                    if( (g_t[0]&1) || ps[g_p].actorsqu == g_i ) return;
+                    else daxvel <<= 1;
+                }
+                else
+                {
+                    if( (g_t[0]&3) || ps[g_p].actorsqu == g_i ) return;
+                    else daxvel <<= 2;
+                }
+            }
+        }
+
+        hittype[g_i].movflag = movesprite(g_i,
+            (daxvel*(sintable[(angdif+512)&2047]))>>14,
+            (daxvel*(sintable[angdif&2047]))>>14,g_sp.zvel,CLIPMASK0);
+    }
+
+    if( a )
+    {
+        if (sector[g_sp.sectnum].ceilingstat&1)
+            g_sp.shade += (sector[g_sp.sectnum].ceilingshade-g_sp.shade)>>1;
+        else g_sp.shade += (sector[g_sp.sectnum].floorshade-g_sp.shade)>>1;
+
+        if( sector[g_sp.sectnum].floorpicnum == MIRROR )
+            deletesprite(g_i);
+    }
+}
+
+
+//2057
+function parseifelse(condition)
+{
+    if( condition )
+    {
+        insptr+=2;
+        parse();
+    }
+    else {
+        insptr = script[insptr+1];//(int32_t *) *(insptr+1);
+        printf("*insptr: %i\n", script[insptr]);
+        if(script[insptr] == 10)
+        {
+            insptr+=2;
+            parse();
+        }
+    }
+}
+
+//2077
 function parse() {
     var j, l, s;
 
     if(killit_flag) return 1;
 
 //    if(*it == 1668249134L) gameexit("\nERR");
-
-    switch(insptr)
+    printf("parse %i\n", script[insptr]);
+    switch(script[insptr])
     {
         case 3:
-            insptrIdx++;
-            parseifelse( rnd(insptr[insptrIdx]));
+            insptr++;
+            parseifelse( rnd(script[insptr]));
             break;
         case 45:
 
@@ -1532,7 +1890,7 @@ function parse() {
             break;
         case 5:
         {
-            spritetype *s;
+            var s;
 
             if(ps[g_p].holoduke_on >= 0)
             {
@@ -1589,19 +1947,19 @@ function parse() {
             }
             break;
         case 24:
-            insptrIdx++;
-            throw "todo"
-            //////g_t[5] = insptr[insptrIdx];
-            //////g_t[4] = *(int32_t *)(g_t[5]);       // Action
-            //////g_t[1] = *(int32_t *)(g_t[5]+4);       // move
-            //////g_sp.hitag = *(int32_t *)(g_t[5]+8);    // Ai
-            //////g_t[0] = g_t[2] = g_t[3] = 0;
-            //////if(g_sp.hitag&random_angle)
-            //////    g_sp.ang = TRAND&2047;
-            //////insptrIdx++;
+            debugger;
+            insptr++;
+            g_t[5] = script[insptr];
+            g_t[4] = script[g_t[5]]; //*(int32_t *)(g_t[5]);       // Action
+            g_t[1] = script[g_t[5]+1];// *(int32_t *)(g_t[5]+4);       // move
+            g_sp.hitag =  script[g_t[5]+2];//*(int32_t *)(g_t[5]+8);    // Ai
+            g_t[0] = g_t[2] = g_t[3] = 0;
+            if(g_sp.hitag&random_angle)
+                g_sp.ang = TRAND&2047;
+            insptr++;
             break;
         case 7:
-            insptrIdx++;
+            insptr++;
             g_t[2] = 0;
             g_t[3] = 0;
 			// FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
@@ -1612,42 +1970,41 @@ function parse() {
 			// as a action address instead of giving a real action address.
 			// We simply counter this specific con code bug by resetting 
 			// the action address to 0 when we get an address "2048":
-			g_t[4] = ((insptr[insptrIdx])==2048)?0:(insptr[insptrIdx]);
-            insptrIdx++;
+			g_t[4] = ((script[insptr])==2048)?0:(script[insptr]);
+            insptr++;
             break;
 
         case 8:
-            insptrIdx++;
-            parseifelse(g_x < insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_x < script[insptr]);
             if(g_x > MAXSLEEPDIST && hittype[g_i].timetosleep == 0)
                 hittype[g_i].timetosleep = SLEEPTIME;
             break;
         case 9:
-            insptrIdx++;
-            parseifelse(g_x > insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_x > script[insptr]);
             if(g_x > MAXSLEEPDIST && hittype[g_i].timetosleep == 0)
                 hittype[g_i].timetosleep = SLEEPTIME;
             break;
         case 10:
-            throw "todo"
-            //////insptr = (int32_t *) *(insptr+1);
-            //////break;
+            insptr = script[insptr+1];
+            break;
         case 100:
-            insptrIdx++;
-            g_sp.extra += insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.extra += script[insptr];
+            insptr++;
             break;
         case 11:
-            insptrIdx++;
-            g_sp.extra = insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.extra = script[insptr];
+            insptr++;
             break;
         case 94:
-            insptrIdx++;
+            insptr++;
 
             if(ud.coop >= 1 && ud.multimode > 1)
             {
-                if(insptr[insptrIdx] == 0)
+                if(script[insptr] == 0)
                 {
                     for(j=0;j < ps[g_p].weapreccnt;j++)
                         if( ps[g_p].weaprecs[j] == g_sp.picnum )
@@ -1664,26 +2021,26 @@ function parse() {
             else parseifelse(0);
             break;
         case 95:
-            insptrIdx++;
+            insptr++;
             if(g_sp.picnum == APLAYER)
                 g_sp.pal = ps[g_sp.yvel].palookup;
             else g_sp.pal = hittype[g_i].tempang;
             hittype[g_i].tempang = 0;
             break;
         case 104:
-            insptrIdx++;
+            insptr++;
             checkweapons(ps[g_sp.yvel]);
             break;
         case 106:
-            insptrIdx++;
+            insptr++;
             break;
         case 97:
-            insptrIdx++;
+            insptr++;
             if(Sound[g_sp.yvel].num == 0)
                 spritesound(g_sp.yvel,g_i);
             break;
         case 96:
-            insptrIdx++;
+            insptr++;
 
             if( ud.multimode > 1 && g_sp.picnum == APLAYER )
             {
@@ -1694,144 +2051,145 @@ function parse() {
                 ps[g_p].quick_kick = 14;
             break;
         case 28:
-            insptrIdx++;
+            insptr++;
 
-            j = ((insptr[insptrIdx])-g_sp.xrepeat)<<1;
+            j = ((script[insptr])-g_sp.xrepeat)<<1;
             g_sp.xrepeat += ksgn(j);
 
-            insptrIdx++;
+            insptr++;
 
             if( ( g_sp.picnum == APLAYER && g_sp.yrepeat < 36 ) ||
-               insptr[insptrIdx] < g_sp.yrepeat ||
+               script[insptr] < g_sp.yrepeat ||
                ((g_sp.yrepeat*(tiles[g_sp.picnum].dim.height+8))<<2) < (hittype[g_i].floorz - hittype[g_i].ceilingz) )
             {
-                j = ((insptr[insptrIdx])-g_sp.yrepeat)<<1;
+                j = ((script[insptr])-g_sp.yrepeat)<<1;
                 if( klabs(j) ) g_sp.yrepeat += ksgn(j);
             }
 
-            insptrIdx++;
+            insptr++;
 
             break;
         case 99:
-            insptrIdx++;
-            g_sp.xrepeat = toUint8( insptr[insptrIdx]);
-            insptrIdx++;
-            g_sp.yrepeat = toUint8( insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            g_sp.xrepeat = toUint8( script[insptr]);
+            insptr++;
+            g_sp.yrepeat = toUint8( script[insptr]);
+            insptr++;
             break;
         case 13:
-            insptrIdx++;
-            shoot(g_i,insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            shoot(g_i,script[insptr]);
+            insptr++;
             break;
         case 87:
-            insptrIdx++;
-            if( Sound[insptr[insptrIdx]].num == 0 )
-                spritesound( insptr[insptrIdx],g_i);
-            insptrIdx++;
+            insptr++;
+            if( Sound[script[insptr]].num == 0 )
+                spritesound( script[insptr],g_i);
+            insptr++;
             break;
         case 89:
-            insptrIdx++;
-            if( Sound[insptr[insptrIdx]].num > 0 )
-                stopsound(insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            if( Sound[script[insptr]].num > 0 )
+                stopsound(script[insptr]);
+            insptr++;
             break;
         case 92:
-            insptrIdx++;
+            insptr++;
             if(g_p == screenpeek || ud.coop==1)
-                spritesound( insptr[insptrIdx],ps[screenpeek].i);
-            insptrIdx++;
+                spritesound( script[insptr],ps[screenpeek].i);
+            insptr++;
             break;
         case 15:
-            insptrIdx++;
-            spritesound( insptr[insptrIdx],g_i);
-            insptrIdx++;
+            insptr++;
+            spritesound( script[insptr],g_i);
+            insptr++;
             break;
         case 84:
-            insptrIdx++;
+            insptr++;
             ps[g_p].tipincs = 26;
             break;
         case 16:
-            throw "todo"
-            ////            insptrIdx++;
-////            g_sp.xoffset = 0;
-////            g_sp.yoffset = 0;
-//////            if(!gotz)
-////            {
-////                var c;
+            insptr++;
+            g_sp.xoffset = 0;
+            g_sp.yoffset = 0;
+//            if(!gotz)
+            {
+                var c;
 
-////                if( floorspace(g_sp.sectnum) )
-////                    c = 0;
-////                else
-////                {
-////                    if( ceilingspace(g_sp.sectnum) || sector[g_sp.sectnum].lotag == 2)
-////                        c = gc/6;
-////                    else c = gc;
-////                }
+                if( floorspace(g_sp.sectnum) )
+                    c = 0;
+                else
+                {
+                    if( ceilingspace(g_sp.sectnum) || sector[g_sp.sectnum].lotag == 2)
+                        c = gc/6;
+                    else c = gc;
+                }
 
-////                if( hittype[g_i].cgg <= 0 || (sector[g_sp.sectnum].floorstat&2) )
-////                {
-////                    getglobalz(g_i);
-////                    hittype[g_i].cgg = 6;
-////                }
-////                else hittype[g_i].cgg --;
+                if( hittype[g_i].cgg <= 0 || (sector[g_sp.sectnum].floorstat&2) )
+                {
+                    getglobalz(g_i);
+                    hittype[g_i].cgg = 6;
+                }
+                else hittype[g_i].cgg --;
 
-////                if( g_sp.z < (hittype[g_i].floorz-FOURSLEIGHT) )
-////                {
-////                    g_sp.zvel += c;
-////                    g_sp.z+=g_sp.zvel;
+                if( g_sp.z < (hittype[g_i].floorz-FOURSLEIGHT) )
+                {
+                    g_sp.zvel += c;
+                    g_sp.z+=g_sp.zvel;
 
-////                    if(g_sp.zvel > 6144) g_sp.zvel = 6144;
-////                }
-////                else
-////                {
-////                    g_sp.z = hittype[g_i].floorz - FOURSLEIGHT;
+                    if(g_sp.zvel > 6144) g_sp.zvel = 6144;
+                }
+                else
+                {
+                    g_sp.z = hittype[g_i].floorz - FOURSLEIGHT;
 
-////                    if( badguy(g_sp) || ( g_sp.picnum == APLAYER && g_sp.owner >= 0) )
-////                    {
+                    if( badguy(g_sp) || ( g_sp.picnum == APLAYER && g_sp.owner >= 0) )
+                    {
 
-////                        if( g_sp.zvel > 3084 && g_sp.extra <= 1)
-////                        {
-////                            if(g_sp.pal != 1 && g_sp.picnum != DRONE)
-////                            {
-////                                if(g_sp.picnum == APLAYER && g_sp.extra > 0)
-////                                    goto SKIPJIBS;
-////                                guts(g_sp,JIBS6,15,g_p);
-////                                spritesound(SQUISHED,g_i);
-////                                spawn(g_i,BLOODPOOL);
-////                            }
+                        if( g_sp.zvel > 3084 && g_sp.extra <= 1)
+                        {
+                            for (var i = 0; i < 1; i++) {
+                                if(g_sp.pal != 1 && g_sp.picnum != DRONE)
+                                {
+                                    if(g_sp.picnum == APLAYER && g_sp.extra > 0)
+                                        break;//goto SKIPJIBS;
+                                    guts(g_sp,JIBS6,15,g_p);
+                                    spritesound(SQUISHED,g_i);
+                                    spawn(g_i,BLOODPOOL);
+                                }
+                            }
 
-////                            SKIPJIBS:
+                            //SKIPJIBS:
 
-////                            hittype[g_i].picnum = SHOTSPARK1;
-////                            hittype[g_i].extra = 1;
-////                            g_sp.zvel = 0;
-////                        }
-////                        else if(g_sp.zvel > 2048 && sector[g_sp.sectnum].lotag != 1)
-////                        {
+                            hittype[g_i].picnum = SHOTSPARK1;
+                            hittype[g_i].extra = 1;
+                            g_sp.zvel = 0;
+                        }
+                        else if(g_sp.zvel > 2048 && sector[g_sp.sectnum].lotag != 1)
+                        {
+                            throw "todo"
+                            //j = g_sp.sectnum;
+                            //pushmove(&g_sp.x,&g_sp.y,&g_sp.z,(short*)&j,128L,(4<<8),(4L<<8),CLIPMASK0);
+                            //if(j != g_sp.sectnum && j >= 0 && j < MAXSECTORS)
+                            //    changespritesect(g_i,j);
 
-////                            j = g_sp.sectnum;
-////                            pushmove(&g_sp.x,&g_sp.y,&g_sp.z,(short*)&j,128L,(4L<<8),(4L<<8),CLIPMASK0);
-////                            if(j != g_sp.sectnum && j >= 0 && j < MAXSECTORS)
-////                                changespritesect(g_i,j);
-
-////                            spritesound(THUD,g_i);
-////                        }
-////                    }
-////                    if(sector[g_sp.sectnum].lotag == 1)
-////                        switch (g_sp.picnum)
-////                        {
-////                            case OCTABRAIN:
-////                            case COMMANDER:
-////                            case DRONE:
-////                                break;
-////                            default:
-////                                g_sp.z += (24<<8);
-////                                break;
-////                        }
-////                    else g_sp.zvel = 0;
-////                }
-////            }
+                            //spritesound(THUD,g_i);
+                        }
+                    }
+                    if(sector[g_sp.sectnum].lotag == 1)
+                        switch (g_sp.picnum)
+                        {
+                            case OCTABRAIN:
+                            case COMMANDER:
+                            case DRONE:
+                                break;
+                            default:
+                                g_sp.z += (24<<8);
+                                break;
+                        }
+                    else g_sp.zvel = 0;
+                }
+            }
 
             break;
         case 4:
@@ -1839,86 +2197,86 @@ function parse() {
         case 18:
             return 1;
         case 30:
-            insptrIdx++;
+            insptr++;
             return 1;
         case 2:
             throw "todo"
-            //insptrIdx++;
-            //if( ps[g_p].ammo_amount[insptr[insptrIdx]] >= max_ammo_amount[insptr[insptrIdx]] )
+            //insptr++;
+            //if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
             //{
             //    killit_flag = 2;
             //    break;
             //}
-            //addammo( insptr[insptrIdx], ps[g_p], *(insptr+1) );
+            //addammo( script[insptr], ps[g_p], *(insptr+1) );
             //if(ps[g_p].curr_weapon == KNEE_WEAPON)
-            //    if( ps[g_p].gotweapon[insptr[insptrIdx]] )
-            //        addweapon( ps[g_p], insptr[insptrIdx] );
+            //    if( ps[g_p].gotweapon[script[insptr]] )
+            //        addweapon( ps[g_p], script[insptr] );
             //insptr += 2;
             //break;
         case 86:
-            insptrIdx++;
-            lotsofmoney(g_sp,insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            lotsofmoney(g_sp,script[insptr]);
+            insptr++;
             break;
         case 102:
-            insptrIdx++;
-            lotsofmail(g_sp,insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            lotsofmail(g_sp,script[insptr]);
+            insptr++;
             break;
         case 105:
-            insptrIdx++;
-            hittype[g_i].timetosleep = insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            hittype[g_i].timetosleep = script[insptr];
+            insptr++;
             break;
         case 103:
-            insptrIdx++;
-            lotsofpaper(g_sp,insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            lotsofpaper(g_sp,script[insptr]);
+            insptr++;
             break;
         case 88:
-            insptrIdx++;
-            ps[g_p].actors_killed += insptr[insptrIdx];
+            insptr++;
+            ps[g_p].actors_killed += script[insptr];
             hittype[g_i].actorstayput = -1;
-            insptrIdx++;
+            insptr++;
             break;
         case 93:
-            insptrIdx++;
-            spriteglass(g_i,insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            spriteglass(g_i,script[insptr]);
+            insptr++;
             break;
         case 22:
-            insptrIdx++;
+            insptr++;
             killit_flag = 1;
             break;
         case 23:
             throw "todo"
-            ////insptrIdx++;
-            ////if( ps[g_p].gotweapon[insptr[insptrIdx]] == 0 ) addweapon( ps[g_p], insptr[insptrIdx] );
-            ////else if( ps[g_p].ammo_amount[insptr[insptrIdx]] >= max_ammo_amount[insptr[insptrIdx]] )
+            ////insptr++;
+            ////if( ps[g_p].gotweapon[script[insptr]] == 0 ) addweapon( ps[g_p], script[insptr] );
+            ////else if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
             ////{
             ////     killit_flag = 2;
             ////     break;
             ////}
-            ////addammo( insptr[insptrIdx], ps[g_p], *(insptr+1) );
+            ////addammo( script[insptr], ps[g_p], *(insptr+1) );
             ////if(ps[g_p].curr_weapon == KNEE_WEAPON)
-            ////    if( ps[g_p].gotweapon[insptr[insptrIdx]] )
-            ////        addweapon( ps[g_p], insptr[insptrIdx] );
+            ////    if( ps[g_p].gotweapon[script[insptr]] )
+            ////        addweapon( ps[g_p], script[insptr] );
             ////insptr+=2;
             ////break;
         case 68:
-            insptrIdx++;
-            printf("%d\n",insptr[insptrIdx]);
-            insptrIdx++;
+            insptr++;
+            printf("%d\n",script[insptr]);
+            insptr++;
             break;
         case 69:
-            insptrIdx++;
-            ps[g_p].timebeforeexit = insptr[insptrIdx];
+            insptr++;
+            ps[g_p].timebeforeexit = script[insptr];
             ps[g_p].customexitsound = -1;
             ud.eog = 1;
-            insptrIdx++;
+            insptr++;
             break;
         case 25:
-            insptrIdx++;
+            insptr++;
 
             if(ps[g_p].newowner >= 0)
             {
@@ -1943,23 +2301,23 @@ function parse() {
 
             if(g_sp.picnum != ATOMICHEALTH)
             {
-                if( j > max_player_health && insptr[insptrIdx] > 0 )
+                if( j > max_player_health && script[insptr] > 0 )
                 {
-                    insptrIdx++;
+                    insptr++;
                     break;
                 }
                 else
                 {
                     if(j > 0)
-                        j += insptr[insptrIdx];
-                    if ( j > max_player_health && insptr[insptrIdx] > 0 )
+                        j += script[insptr];
+                    if ( j > max_player_health && script[insptr] > 0 )
                         j = max_player_health;
                 }
             }
             else
             {
                 if( j > 0 )
-                    j += insptr[insptrIdx];
+                    j += script[insptr];
                 if ( j > (max_player_health<<1) )
                     j = (max_player_health<<1);
             }
@@ -1968,9 +2326,9 @@ function parse() {
 
             if(ud.god == 0)
             {
-                if(insptr[insptrIdx] > 0)
+                if(script[insptr] > 0)
                 {
-                    if( ( j - insptr[insptrIdx] ) < (max_player_health>>2) &&
+                    if( ( j - script[insptr] ) < (max_player_health>>2) &&
                         j >= (max_player_health>>2) )
                             spritesound(DUKE_GOTHEALTHATLOW,ps[g_p].i);
 
@@ -1980,70 +2338,69 @@ function parse() {
                 sprite[ps[g_p].i].extra = j;
             }
 
-            insptrIdx++;
+            insptr++;
             break;
         case 17:
             {
-                throw "todo"
-                ////int32_t *tempscrptr;
+                var tempscrptr;
 
-                ////tempscrptr = insptr+2;
+                tempscrptr = insptr+2;
 
-                ////insptr = (int32_t *) *(insptr+1);
-                ////while(1) if(parse()) break;
-                ////insptr = tempscrptr;
+                insptr = script[insptr + 1];    // script[insptr+1];//(int32_t *) *(insptr+1);
+                while(1) if(parse()) break;
+                insptr = tempscrptr;
             }
             break;
         case 29:
-            insptrIdx++;
+            insptr++;
             while(1) if(parse()) break;
             break;
         case 32:
             g_t[0]=0;
-            insptrIdx++;
-            g_t[1] = insptr[insptrIdx];
-            insptrIdx++;
-            g_sp.hitag = insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_t[1] = script[insptr];
+            insptr++;
+            g_sp.hitag = script[insptr];
+            insptr++;
             if(g_sp.hitag&random_angle)
                 g_sp.ang = TRAND&2047;
             break;
         case 31:
-            insptrIdx++;
+            insptr++;
             if(g_sp.sectnum >= 0 && g_sp.sectnum < MAXSECTORS)
-                spawn(g_i,insptr[insptrIdx]);
-            insptrIdx++;
+                spawn(g_i,script[insptr]);
+            insptr++;
             break;
         case 33:
-            insptrIdx++;
-            parseifelse( hittype[g_i].picnum == insptr[insptrIdx]);
+            insptr++;
+            parseifelse( hittype[g_i].picnum == script[insptr]);
             break;
         case 21:
-            insptrIdx++;
-            parseifelse(g_t[5] == insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_t[5] == script[insptr]);
             break;
         case 34:
-            insptrIdx++;
-            parseifelse(g_t[4] == insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_t[4] == script[insptr]);
             break;
         case 35:
-            insptrIdx++;
-            parseifelse(g_t[2] >= insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_t[2] >= script[insptr]);
             break;
         case 36:
-            insptrIdx++;
+            insptr++;
             g_t[2] = 0;
             break;
         case 37:
             {
                 var dnum;
 
-                insptrIdx++;
-                dnum = insptr[insptrIdx];
-                insptrIdx++;
+                insptr++;
+                dnum = script[insptr];
+                insptr++;
 
                 if(g_sp.sectnum >= 0 && g_sp.sectnum < MAXSECTORS)
-                    for(j=(insptr[insptrIdx])-1;j>=0;j--)
+                    for(j=(script[insptr])-1;j>=0;j--)
                 {
                     if(g_sp.picnum == BLIMP && dnum == SCRAP1)
                         s = 0;
@@ -2059,35 +2416,35 @@ function parse() {
                     else sprite[l].yvel = -1;
                     sprite[l].pal = g_sp.pal;
                 }
-                insptrIdx++;
+                insptr++;
             }
             break;
         case 52:
-            insptrIdx++;
-            g_t[0] =  insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_t[0] =  script[insptr];
+            insptr++;
             break;
         case 101:
-            insptrIdx++;
-            g_sp.cstat |= insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.cstat |= script[insptr];
+            insptr++;
             break;
         case 110:
-            insptrIdx++;
-            g_sp.clipdist =  insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.clipdist =  script[insptr];
+            insptr++;
             break;
         case 40:
-            insptrIdx++;
-            g_sp.cstat =  insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.cstat =  script[insptr];
+            insptr++;
             break;
         case 41:
-            insptrIdx++;
-            parseifelse(g_t[1] == insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_t[1] == script[insptr]);
             break;
         case 42:
-            insptrIdx++;
+            insptr++;
 
             if(ud.multimode < 2)
             {
@@ -2164,15 +2521,15 @@ function parse() {
             parseifelse( sector[g_sp.sectnum].lotag == 2);
             break;
         case 46:
-            insptrIdx++;
-            parseifelse(g_t[0] >= insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_t[0] >= script[insptr]);
             break;
         case 53:
-            insptrIdx++;
-            parseifelse(g_sp.picnum == insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_sp.picnum == script[insptr]);
             break;
         case 47:
-            insptrIdx++;
+            insptr++;
             g_t[0] = 0;
             break;
         case 48:
@@ -2181,24 +2538,24 @@ function parse() {
             //switch(*(insptr-1))
             //{
             //    case 0:
-            //        ps[g_p].steroids_amount = insptr[insptrIdx];
+            //        ps[g_p].steroids_amount = script[insptr];
             //        ps[g_p].inven_icon = 2;
             //        break;
             //    case 1:
-            //        ps[g_p].shield_amount +=          insptr[insptrIdx];// 100;
+            //        ps[g_p].shield_amount +=          script[insptr];// 100;
             //        if(ps[g_p].shield_amount > max_player_health)
             //            ps[g_p].shield_amount = max_player_health;
             //        break;
             //    case 2:
-            //        ps[g_p].scuba_amount =             insptr[insptrIdx];// 1600;
+            //        ps[g_p].scuba_amount =             script[insptr];// 1600;
             //        ps[g_p].inven_icon = 6;
             //        break;
             //    case 3:
-            //        ps[g_p].holoduke_amount =          insptr[insptrIdx];// 1600;
+            //        ps[g_p].holoduke_amount =          script[insptr];// 1600;
             //        ps[g_p].inven_icon = 3;
             //        break;
             //    case 4:
-            //        ps[g_p].jetpack_amount =           insptr[insptrIdx];// 1600;
+            //        ps[g_p].jetpack_amount =           script[insptr];// 1600;
             //        ps[g_p].inven_icon = 4;
             //        break;
             //    case 6:
@@ -2210,19 +2567,19 @@ function parse() {
             //        }
             //        break;
             //    case 7:
-            //        ps[g_p].heat_amount = insptr[insptrIdx];
+            //        ps[g_p].heat_amount = script[insptr];
             //        ps[g_p].inven_icon = 5;
             //        break;
             //    case 9:
             //        ps[g_p].inven_icon = 1;
-            //        ps[g_p].firstaid_amount = insptr[insptrIdx];
+            //        ps[g_p].firstaid_amount = script[insptr];
             //        break;
             //    case 10:
             //        ps[g_p].inven_icon = 7;
-            //        ps[g_p].boot_amount = insptr[insptrIdx];
+            //        ps[g_p].boot_amount = script[insptr];
             //        break;
             //}
-            //insptrIdx++;
+            //insptr++;
             //break;
         case 50:
             throw "todo"
@@ -2231,9 +2588,9 @@ function parse() {
             //break;
         case 51:
             {
-                insptrIdx++;
+                insptr++;
 
-                l = insptr[insptrIdx];
+                l = script[insptr];
                 j = 0;
 
                 s = g_sp.xvel;
@@ -2289,29 +2646,29 @@ function parse() {
             }
             break;
         case 56:
-            insptrIdx++;
-            parseifelse(g_sp.extra <= insptr[insptrIdx]);
+            insptr++;
+            parseifelse(g_sp.extra <= script[insptr]);
             break;
         case 58:
             throw "todo"
             //insptr += 2;
-            //guts(g_sp,*(insptr-1),insptr[insptrIdx],g_p);
-            //insptrIdx++;
+            //guts(g_sp,*(insptr-1),script[insptr],g_p);
+            //insptr++;
             break;
         case 59:
-            insptrIdx++;
-//            if(g_sp.owner >= 0 && sprite[g_sp.owner].picnum == insptr[insptrIdx])
+            insptr++;
+//            if(g_sp.owner >= 0 && sprite[g_sp.owner].picnum == script[insptr])
   //              parseifelse(1);
 //            else
-            parseifelse( hittype[g_i].picnum == insptr[insptrIdx]);
+            parseifelse( hittype[g_i].picnum == script[insptr]);
             break;
         case 61:
-            insptrIdx++;
+            insptr++;
             forceplayerangle(ps[g_p]);
             return 0;
         case 62:
-            insptrIdx++;
-            parseifelse( (( hittype[g_i].floorz - hittype[g_i].ceilingz ) >> 8 ) < insptr[insptrIdx]);
+            insptr++;
+            parseifelse( (( hittype[g_i].floorz - hittype[g_i].ceilingz ) >> 8 ) < script[insptr]);
             break;
         case 63:
             parseifelse( sync[g_p].bits&(1<<29));
@@ -2324,7 +2681,7 @@ function parse() {
             break;
         case 66:
             throw "todo"
-            //insptrIdx++;
+            //insptr++;
             //if( sector[g_sp.sectnum].lotag == 0 )
             //{
             //    neartag(g_sp.x,g_sp.y,g_sp.z-(32<<8),g_sp.sectnum,g_sp.ang,&neartagsector,&neartagwall,&neartagsprite,&neartaghitdist,768L,1);
@@ -2350,17 +2707,17 @@ function parse() {
             break;
 
         case 74:
-            insptrIdx++;
+            insptr++;
             if(g_sp.picnum != APLAYER)
                 hittype[g_i].tempang = g_sp.pal;
-            g_sp.pal = insptr[insptrIdx];
-            insptrIdx++;
+            g_sp.pal = script[insptr];
+            insptr++;
             break;
 
         case 77:
-            insptrIdx++;
-            g_sp.picnum = insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            g_sp.picnum = script[insptr];
+            insptr++;
             break;
 
         case 70:
@@ -2375,54 +2732,54 @@ function parse() {
                 parseifelse( ud.respawn_items );
             break;
         case 72:
-            insptrIdx++;
+            insptr++;
 //            getglobalz(g_i);
-            parseifelse( (hittype[g_i].floorz - g_sp.z) <= ((insptr[insptrIdx])<<8));
+            parseifelse( (hittype[g_i].floorz - g_sp.z) <= ((script[insptr])<<8));
             break;
         case 73:
-            insptrIdx++;
+            insptr++;
 //            getglobalz(g_i);
-            parseifelse( ( g_sp.z - hittype[g_i].ceilingz ) <= ((insptr[insptrIdx])<<8));
+            parseifelse( ( g_sp.z - hittype[g_i].ceilingz ) <= ((script[insptr])<<8));
             break;
         case 14:
 
-            insptrIdx++;
-            ps[g_p].pals_time = insptr[insptrIdx];
-            insptrIdx++;
+            insptr++;
+            ps[g_p].pals_time = script[insptr];
+            insptr++;
             for(j=0;j<3;j++)
             {
-                ps[g_p].pals[j] = insptr[insptrIdx];
-                insptrIdx++;
+                ps[g_p].pals[j] = script[insptr];
+                insptr++;
             }
             break;
 
 /*        case 74:
-            insptrIdx++;
+            insptr++;
             getglobalz(g_i);
-            parseifelse( (( hittype[g_i].floorz - hittype[g_i].ceilingz ) >> 8 ) >= insptr[insptrIdx]);
+            parseifelse( (( hittype[g_i].floorz - hittype[g_i].ceilingz ) >> 8 ) >= script[insptr]);
             break;
 */
         case 78:
-            insptrIdx++;
-            parseifelse( sprite[ps[g_p].i].extra < insptr[insptrIdx]);
+            insptr++;
+            parseifelse( sprite[ps[g_p].i].extra < script[insptr]);
             break;
 
         case 75:
             {
                 throw "todo"
-                //insptrIdx++;
+                //insptr++;
                 //j = 0;
-                //switch(*(insptrIdx++))
+                //switch(*(insptr++))
                 //{
-                //    case 0:if( ps[g_p].steroids_amount != insptr[insptrIdx])
+                //    case 0:if( ps[g_p].steroids_amount != script[insptr])
                 //           j = 1;
                 //        break;
                 //    case 1:if(ps[g_p].shield_amount != max_player_health )
                 //            j = 1;
                 //        break;
-                //    case 2:if(ps[g_p].scuba_amount != insptr[insptrIdx]) j = 1;break;
-                //    case 3:if(ps[g_p].holoduke_amount != insptr[insptrIdx]) j = 1;break;
-                //    case 4:if(ps[g_p].jetpack_amount != insptr[insptrIdx]) j = 1;break;
+                //    case 2:if(ps[g_p].scuba_amount != script[insptr]) j = 1;break;
+                //    case 3:if(ps[g_p].holoduke_amount != script[insptr]) j = 1;break;
+                //    case 4:if(ps[g_p].jetpack_amount != script[insptr]) j = 1;break;
                 //    case 6:
                 //        switch(g_sp.pal)
                 //        {
@@ -2431,11 +2788,11 @@ function parse() {
                 //            case 23: if(ps[g_p].got_access&4) j = 1;break;
                 //        }
                 //        break;
-                //    case 7:if(ps[g_p].heat_amount != insptr[insptrIdx]) j = 1;break;
+                //    case 7:if(ps[g_p].heat_amount != script[insptr]) j = 1;break;
                 //    case 9:
-                //        if(ps[g_p].firstaid_amount != insptr[insptrIdx]) j = 1;break;
+                //        if(ps[g_p].firstaid_amount != script[insptr]) j = 1;break;
                 //    case 10:
-                //        if(ps[g_p].boot_amount != insptr[insptrIdx]) j = 1;break;
+                //        if(ps[g_p].boot_amount != script[insptr]) j = 1;break;
                 //}
 
                 //parseifelse(j);
@@ -2443,7 +2800,7 @@ function parse() {
             }
         case 38:
             throw "todo"
-        //    insptrIdx++;
+        //    insptr++;
         //    if( ps[g_p].knee_incs == 0 && sprite[ps[g_p].i].xrepeat >= 40 )
         //        if( cansee(g_sp.x,g_sp.y,g_sp.z-(4<<8),g_sp.sectnum,ps[g_p].posx,ps[g_p].posy,ps[g_p].posz+(16<<8),sprite[ps[g_p].i].sectnum) )
         //    {
@@ -2481,9 +2838,9 @@ function parse() {
 
             break;
         case 80:
-            insptrIdx++;
-            FTA(insptr[insptrIdx],ps[g_p],0);
-            insptrIdx++;
+            insptr++;
+            FTA(script[insptr],ps[g_p],0);
+            insptr++;
             break;
         case 81:
             parseifelse( floorspace(g_sp.sectnum));
@@ -2492,7 +2849,7 @@ function parse() {
             parseifelse( (hittype[g_i].movflag&49152) > 16384 );
             break;
         case 83:
-            insptrIdx++;
+            insptr++;
             switch(g_sp.picnum)
             {
                 case FEM1:
@@ -2516,14 +2873,14 @@ function parse() {
             }
             break;
         case 85:
-            insptrIdx++;
-            parseifelse( g_sp.pal == insptr[insptrIdx]);
+            insptr++;
+            parseifelse( g_sp.pal == script[insptr]);
             break;
 
         case 111:
-            insptrIdx++;
+            insptr++;
             j = klabs(getincangle(ps[g_p].ang,g_sp.ang));
-            parseifelse( j <= insptr[insptrIdx]);
+            parseifelse( j <= script[insptr]);
             break;
 
         case 109:

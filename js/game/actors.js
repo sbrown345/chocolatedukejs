@@ -72,6 +72,47 @@ function floorspace(sectnum) {
     return 0;
 }
 
+//406
+function ifsquished(i, p)
+{
+    var sc;
+    var  squishme;
+    var floorceildist;
+
+    if(sprite[i].picnum == APLAYER && ud.clipping)
+        return 0;
+
+    sc = sector[sprite[i].sectnum];
+    floorceildist = sc.floorz - sc.ceilingz;
+
+    if(sc.lotag != 23)
+    {
+        if(sprite[i].pal == 1)
+            squishme = floorceildist < (32<<8) && (sc.lotag&32768) == 0;
+        else
+            squishme = floorceildist < (12<<8); // && (sc.lotag&32768) == 0;
+    }
+    else squishme = 0;
+
+    if( squishme )
+    {
+        FTA(10,ps[p],0);
+
+        if(badguy(sprite[i])) sprite[i].xvel = 0;
+
+        if(sprite[i].pal == 1)
+        {
+            hittype[i].picnum = SHOTSPARK1;
+            hittype[i].extra = 1;
+            return 0;
+        }
+
+        return 1;
+    }
+    return 0;
+}
+
+
 //500
 function checkavailweapon( p ) {
     var i,snum;
@@ -393,7 +434,7 @@ function movefta() {
     }
 }
 
-
+//1018
 function ifhitbyweapon(sn)
 {
     var j, p;

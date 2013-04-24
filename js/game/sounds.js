@@ -6,6 +6,12 @@ function playMusic(filename) {
     // todo!
 }
 
+//293
+function xyzsound(num,i,x,y,z) {
+    //todo
+    return -1;
+}
+
 //435
 function sound() {
     // todo! - just need to swap voc header for wav header

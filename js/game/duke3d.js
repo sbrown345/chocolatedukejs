@@ -66,7 +66,20 @@ var MAXCYCLERS = 256;
 var MAXSCRIPTSIZE = 20460;
 var MAXANIMATES = 64;
 
-window.__defineGetter__("TRAND", krand);
+var face_player = 1;
+var geth = 2;
+var getv = 4;
+var random_angle = 8;
+var face_player_slow = 16;
+var spin = 32;
+var face_player_smart = 64;
+var fleeenemy =128;
+var jumptoplayer = 257;
+var seekplayer = 512;
+var furthestdir = 1024;
+var dodgebullet = 4096;
+
+var TRAND = krand;
 
 //279
 var MAX_WEAPONS = 12;
