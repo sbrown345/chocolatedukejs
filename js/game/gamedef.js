@@ -1525,6 +1525,59 @@ function furthestangle(i, angs) {
     return (furthest_angle & 2047);
 }
 
+//1754
+function furthestcanseepoint(i, ts, dax, day) {
+    console.assert(dax instanceof Ref);
+    console.assert(day instanceof Ref);
+
+    var j, hitsect, hitwall, hitspr, angincs;
+    var hx, hy, hz, d, da;//, d, cd, ca,tempx,tempy,cx,cy;
+    var s = sprite[i];
+
+    if ((g_t[0] & 63)) return -1;
+
+    if (ud.multimode < 2 && ud.player_skill < 3)
+        angincs = (2048 / 2)|0;
+    else angincs = (2048 / (1 + (TRAND & 1)))|0;
+
+    var hitsectRef = new Ref();
+    var hitwallRef = new Ref();
+    var hitsprRef = new Ref();
+    var hxRef = new Ref();
+    var hyRef = new Ref();
+    var hzRef = new Ref();
+    for (j = ts.ang; j < (2048 + ts.ang) ; j += (angincs - (TRAND & 511))) {
+        hitsectRef.$ = hitsect;
+        hitwallRef.$ = hitwall;
+        hitsprRef.$ = hitspr;
+        hxRef.$ = hx;
+        hyRef.$ = hy;
+        hzRef.$ = hz;
+        hitscan(ts.x, ts.y, ts.z - (16 << 8), ts.sectnum,
+            sintable[(j + 512) & 2047],
+            sintable[j & 2047], 16384 - (TRAND & 32767),
+            hitsectRef, hitwallRef, hitsprRef, hxRef, hyRef, hzRef, CLIPMASK1);
+
+        hitsect = hitsectRef.$;
+        hitwall = hitwallRef.$;
+        hitspr = hitsprRef.$;
+        hx = hxRef.$;
+        hy = hyRef.$;
+        hz = hzRef.$;
+
+        d = klabs(hx - ts.x) + klabs(hy - ts.y);
+        da = klabs(hx - s.x) + klabs(hy - s.y);
+
+        if (d < da)
+            if (cansee(hx, hy, hz, hitsect, s.x, s.y, s.z - (16 << 8), s.sectnum)) {
+                dax.$ = hx;
+                day.$ = hy;
+                return hitsect;
+            }
+    }
+    return -1;
+}
+
 
 function alterang(a) {
     var aang, angdif, goalang,j;
@@ -1911,9 +1964,12 @@ function parse() {
                     ( klabs(hittype[g_i].lastvx-s.x)+klabs(hittype[g_i].lastvy-s.y) ) )
                         j = 0;
 
-                if( j == 0 )
-                {
-                    j = furthestcanseepoint(g_i,s,hittype[g_i].lastvx,hittype[g_i].lastvy);
+                if( j == 0 ) {
+                    var lastvxRef = new Ref(hittype[g_i].lastvx);
+                    var lastvyRef = new Ref(hittype[g_i].lastvy);
+                    j = furthestcanseepoint(g_i, s, lastvxRef, lastvyRef);
+                    hittype[g_i].lastvx = lastvxRef.$;
+                    hittype[g_i].lastvy = lastvyRef.$;
 
                     if(j == -1) j = 0;
                     else j = 1;

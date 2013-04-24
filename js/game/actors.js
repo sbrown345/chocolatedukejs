@@ -3,7 +3,7 @@
 var actor_tog = 0;
 
 function updateinterpolations() {
-    // todo
+    //// todo
     //for (var i = numinterpolations - 1; i >= 0; i--) {
     //    oldipos[i] = curipos[i];
     //}
@@ -11,22 +11,23 @@ function updateinterpolations() {
 
 //40
 function setinterpolation(posptr) {
-    var i;
+    // seems to ref things like a wall[12].x
 
+    //console.assert(posptr instanceof Ref);
+
+    //var i;
     ////todo: (btw, demo plays with this commented out)
 
     //if (numinterpolations >= MAXINTERPOLATIONS) return;
     //for (i = numinterpolations - 1; i >= 0; i--)
     //    if (curipos[i] == posptr) return;
     //curipos[numinterpolations] = posptr; //todo: address of...?
-    //oldipos[numinterpolations] = /* * */posptr; //VALUE OF..?
+    //oldipos[numinterpolations] = posptr.$; //VALUE OF..?
     //numinterpolations++;
 }
 
 //66
 function dointerpolations(smoothratio) {
-    //Stick at beginning of drawscreen
-    // todo
     //var i, j, odelta, ndelta;
 
     //ndelta = 0;
@@ -194,9 +195,15 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
         oldy = sprite[spritenum].y;
 
         if (sprite[spritenum].xrepeat > 60) {
-            throw "todo ref obj"
-            var refObj = new R;
-            //retval = clipmove(sprite[spritenum].x,sprite[spritenum].y,&daz,&dasectnum,((xchange*TICSPERFRAME)<<11),((ychange*TICSPERFRAME)<<11),1024L,(4<<8),(4<<8),cliptype);
+            var xRef = new Ref(sprite[spritenum].x);
+            var yRef = new Ref(sprite[spritenum].y);
+            var dazRef = new Ref(daz);
+            var dasectnumRef = new Ref(dasectnum);
+            retval = clipmove(xRef, yRef, dazRef, dasectnumRef, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), 1024, (4 << 8), (4 << 8), cliptype);
+            sprite[spritenum].x = xRef.$;
+            sprite[spritenum].y = yRef.$;
+            daz = dazRef.$;
+            dasectnum = dasectnumRef.$;
         } else {
             if (sprite[spritenum].picnum == LIZMAN)
                 cd = 292;
@@ -205,11 +212,17 @@ function movesprite(spritenum, xchange, ychange, zchange, cliptype) {
             else
                 cd = 192;
 
-            throw "todo ref obj"
-            //retval = clipmove(sprite[spritenum].x,sprite[spritenum].y,&daz,&dasectnum,((xchange*TICSPERFRAME)<<11),((ychange*TICSPERFRAME)<<11),cd,(4<<8),(4<<8),cliptype);
+            var xRef = new Ref(sprite[spritenum].x);
+            var yRef = new Ref(sprite[spritenum].y);
+            var dazRef = new Ref(daz);
+            var dasectnumRef = new Ref(dasectnum);
+            retval = clipmove(xRef, yRef, dazRef, dasectnumRef, ((xchange * TICSPERFRAME) << 11), ((ychange * TICSPERFRAME) << 11), cd, (4 << 8), (4 << 8), cliptype);
+            sprite[spritenum].x = xRef.$;
+            sprite[spritenum].y = yRef.$;
+            daz = dazRef.$;
+            dasectnum = dasectnumRef.$;
         }
 
-        throw "todo "
         if (dasectnum < 0 || (dasectnum >= 0 &&
             ((hittype[spritenum].actorstayput >= 0 && hittype[spritenum].actorstayput != dasectnum) ||
                 ((sprite[spritenum].picnum == BOSS2) && sprite[spritenum].pal == 0 && sector[dasectnum].lotag != 3) ||
@@ -1918,7 +1931,7 @@ function moveweapons()
                     q = EGS(s.sectnum,
                         s.x+((k*sintable[(s.ang+512)&2047])>>9),
                         s.y+((k*sintable[s.ang&2047])>>9),
-                        s.z+((k*ksgn(s.zvel))*klabs(s.zvel/12)),TONGUE,-40+(k<<1),
+                        s.z+((k*ksgn(s.zvel))*klabs((s.zvel/12)|0)),TONGUE,-40+(k<<1),
                         8,8,0,0,0,i,5);
                     sprite[q].cstat = 128;
                     sprite[q].pal = 8;
@@ -1926,7 +1939,7 @@ function moveweapons()
                 q = EGS(s.sectnum,
                     s.x+((k*sintable[(s.ang+512)&2047])>>9),
                     s.y+((k*sintable[s.ang&2047])>>9),
-                    s.z+((k*ksgn(s.zvel))*klabs(s.zvel/12)),INNERJAW,-40,
+                    s.z+((k*ksgn(s.zvel))*klabs((s.zvel/12)|0)),INNERJAW,-40,
                     32,32,0,0,0,i,5);
                 sprite[q].cstat = 128;
                 if( hittype[i].temp_data[1] > 512 && hittype[i].temp_data[1] < (1024) )
@@ -4259,7 +4272,8 @@ function moveexplosions()  // STATNUM 5
                 var xRef = new Ref(x);
                 p = findplayer(s,xRef);
                 x = xRef.$;
-                execute(i,p,x);
+                printf("TRANSPORTERBEAM x:%i\n", x);
+                execute(i, p, x);
                 {i = nexti; continue;}
 
             case SHELL:
@@ -6244,7 +6258,7 @@ function moveeffectors()   //STATNUM 3
                                 ud.camerasprite = i;
                                 t[0] = 999;
                                 s.ang += getincangle(s.ang,getangle(ps[p].posx-s.x,ps[p].posy-s.y))>>3;
-                                sprite[i].yvel = 100+((s.z-ps[p].posz)/257);
+                                sprite[i].yvel = 100+(((s.z-ps[p].posz)/257)|0);
 
                             }
                         else if(t[0] == 999)

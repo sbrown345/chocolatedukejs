@@ -105,6 +105,9 @@ function findplayer(s,d) {
     if(ud.multimode < 2)
     {
         d.$ = klabs(ps[myconnectindex].oposx-s.x) + klabs(ps[myconnectindex].oposy-s.y) + ((klabs(ps[myconnectindex].oposz-s.z+(28<<8)))>>4);
+        printf("findplayer s.x == %i && s.y == %i && s.z == %i\n", s.x, s.y, s.z);
+        printf("findplayer oposx == %i && oposy == %i && oposz == %i\n", ps[myconnectindex].oposx, ps[myconnectindex].oposy, ps[myconnectindex].oposz);
+        printf("findplayer x:%i\n", d.$);
         return myconnectindex;
     }
 
@@ -114,7 +117,7 @@ function findplayer(s,d) {
     for(j=connecthead;j>=0;j=connectpoint2[j])
     {
         x = klabs(ps[j].oposx-s.x) + klabs(ps[j].oposy-s.y) + ((klabs(ps[j].oposz-s.z+(28<<8)))>>4);
-        if( x < closest && sprite[ps[j].i].extra > 0 )
+        if (x < closest && sprite[ps[j].i].extra > 0)
         {
             closest_player = j;
             closest = x;

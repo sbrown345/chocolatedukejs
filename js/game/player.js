@@ -85,36 +85,43 @@ function tracers( x1, y1, z1, x2, y2, z2, n) {
     }
 }
 
+//137
+function hits(i) {
+    var sx = new Ref(),sy = new Ref(),sz = new Ref();
+    var sect = new Ref(),hw = new Ref(),hs = new Ref();
+    var zoff;
+
+    if(sprite[i].picnum == APLAYER) zoff = (40<<8);
+    else zoff = 0;
+
+    hitscan(sprite[i].x,sprite[i].y,sprite[i].z-zoff,sprite[i].sectnum,
+        sintable[(sprite[i].ang+512)&2047],
+        sintable[sprite[i].ang&2047],
+        0,sect,hw,hs,sx,sy,sz,CLIPMASK1);
+    
+    return (FindDistance2D(sx.$ - sprite[i].x, sy.$ - sprite[i].y));
+}
+
 function hitasprite( i, hitsp) {
     console.assert(hitsp instanceof Ref);
-    var sx,sy,sz,zoff;
-    var sect,hw;
+    var sx = new Ref(), sy = new Ref(), sz = new Ref(), zoff;
+    var sect = new Ref(), hw = new Ref();
 
     if(badguy(sprite[i]) )
         zoff = (42<<8);
     else if(sprite[i].picnum == APLAYER) zoff = (39<<8);
     else zoff = 0;
 
-    var sectRef = new Ref(sect);
-    var hwRef = new Ref(hw);
-    var sxRef = new Ref(sx);
-    var syRef = new Ref(sy);
-    var szRef = new Ref(sz);
+
     hitscan(sprite[i].x,sprite[i].y,sprite[i].z-zoff,sprite[i].sectnum,
         sintable[(sprite[i].ang+512)&2047],
         sintable[sprite[i].ang&2047],
-        0,sectRef,hwRef,hitsp,sxRef,syRef,szRef,CLIPMASK1);
+        0,sect,hw,hitsp,sx,sy,sz,CLIPMASK1);
 
-    sect = sectRef.$;
-    hw = hwRef.$;
-    sx = sxRef.$;
-    sy = syRef.$;
-    sz = szRef.$;
-
-    if(hw >= 0 && (wall[hw].cstat&16) && badguy(sprite[i]) )
+    if (hw.$ >= 0 && (wall[hw.$].cstat & 16) && badguy(sprite[i]))
         return((1<<30));
 
-    return ( FindDistance2D(sx-sprite[i].x,sy-sprite[i].y) );
+    return (FindDistance2D(sx.$ - sprite[i].x, sy.$ - sprite[i].y));
 }
 
 //203
@@ -1769,6 +1776,7 @@ function displayweapon(snum) {
 
 }
 
+//2131
 function  doincrements(p)
 {
     var snum;
