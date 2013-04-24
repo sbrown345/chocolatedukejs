@@ -162,7 +162,7 @@ function qinterpolatedown16(buffer, bufferOffset, num, val, add) {
     // ...maybe the same person who provided this too?
     for (var i = 0; i < num; i++) {
         buffer[bufferOffset + i] = (val >> 16);
-        console.log("buffer[%i] = %i",  i, buffer[bufferOffset+i]);
+        //console.log("buffer[%i] = %i",  i, buffer[bufferOffset+i]);
         val += add;
     }
 }
@@ -174,7 +174,7 @@ function qinterpolatedown16short(buffer, bufferOffset, num, val, add) {
     // ...maybe the same person who provided this too?
     for (var i = 0; i < num; i++) {
         buffer[bufferOffset + i] = (val >> 16);
-        //console.log("buffer[%i] = %i", i, buffer[i]);
+        //printf("buffer[%i] = %i\n", i, buffer[bufferOffset+i]);
         val += add;
     }
 }

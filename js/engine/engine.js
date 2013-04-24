@@ -5191,9 +5191,8 @@ function drawsprite (snum) {
 
             dax1 = ((xsi[z]+65535)>>16);
             dax2 = ((xsi[zz]+65535)>>16);
-            if (dax2 > dax1)
-            {
-                throw "todo"
+            if (dax2 > dax1) {
+                debugger;
                 yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
                 y = ysi[z] + mulscale16((dax1<<16)-xsi[z],yinc);
                 qinterpolatedown16short(uwall, dax1, dax2 - dax1, y, yinc);
@@ -5210,7 +5209,7 @@ function drawsprite (snum) {
             dax2 = ((xsi[z]+65535)>>16);
             if (dax2 > dax1)
             {
-                throw "todo"
+                debugger;
                 yinc = divscale16(ysi[zz] - ysi[z], xsi[zz] - xsi[z]);
                 y = ysi[zz] + mulscale16((dax1<<16)-xsi[zz],yinc);
                 qinterpolatedown16short(dwall, dax1, dax2 - dax1, y, yinc);
@@ -5253,7 +5252,7 @@ function drawsprite (snum) {
                     if (dalx2 <= darx2)
                     {
                         if ((dalx2 == lx) && (darx2 == rx)) return;
-                        clearbufbyte(dwall[dalx2],(darx2-dalx2+1)*sizeof(dwall[0]),0);
+                        clearbufbyte(dwall, dalx2,(darx2-dalx2+1)*2,0);
                     }
                     break;
                 case 1:
