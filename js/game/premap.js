@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var preMap = {}; // todo rename PreMap
+var PreMap = {}; // todo rename PreMap
 
 var which_palookup = 9;
 
@@ -63,7 +63,7 @@ function docacheit() {
 }
 
 //357
-preMap.vscrn = function () {
+PreMap.vscrn = function () {
     var ss, x1, x2, y1, y2;
 
     if (ud.screen_size < 0) {
@@ -83,7 +83,7 @@ preMap.vscrn = function () {
 
     y1 = ss;
     y2 = 200;
-    y1 += preMap.countFragBars();
+    y1 += PreMap.countFragBars();
 
     if (ud.screen_size >= 8)
         y2 -= (ss + 34);
@@ -98,7 +98,7 @@ preMap.vscrn = function () {
 };
 
 //386
-preMap.countFragBars = function () {
+PreMap.countFragBars = function () {
     var i, j, y = 0;
     if (ud.screen_size > 0 && ud.coop != 1 && ud.multimode > 1) {
         j = 0;
@@ -115,7 +115,7 @@ preMap.countFragBars = function () {
 };
 
 //425
-preMap.resetPlayerStats = function (snum) {
+PreMap.resetPlayerStats = function (snum) {
     var p = ps[snum];
 
     ud.show_help = 0;
@@ -217,7 +217,7 @@ preMap.resetPlayerStats = function (snum) {
 };
 
 //532
-preMap.resetWeapons = function (snum) {
+PreMap.resetWeapons = function (snum) {
     var weapon;
     var p;
 
@@ -244,7 +244,7 @@ preMap.resetWeapons = function (snum) {
     p.holster_weapon = 0;
 };
 //558
-preMap.resetIinventory = function (snum) {
+PreMap.resetIinventory = function (snum) {
     var p;
 
     p = ps[snum];
@@ -266,7 +266,7 @@ preMap.resetIinventory = function (snum) {
 };
 
 //578
-preMap.resetPreStat = function (snum, g) {
+PreMap.resetPreStat = function (snum, g) {
     var p;
     var i;
 
@@ -314,8 +314,8 @@ preMap.resetPreStat = function (snum, g) {
     startofdynamicinterpolations = 0;
 
     if (((g & MODE_EOL) != MODE_EOL && numplayers < 2) || (ud.coop != 1 && numplayers > 1)) {
-        preMap.resetWeapons(snum);
-        preMap.resetIinventory(snum);
+        PreMap.resetWeapons(snum);
+        PreMap.resetIinventory(snum);
     }
     else if (p.curr_weapon == HANDREMOTE_WEAPON) {
         p.ammo_amount[HANDBOMB_WEAPON]++;
@@ -327,7 +327,7 @@ preMap.resetPreStat = function (snum, g) {
 };
 
 //670
-preMap.preLevel = function (g) {
+PreMap.preLevel = function (g) {
     var i, nexti, j, startwall, endwall, lotaglist;
     var lotags = new Int16Array(65);
 
@@ -335,7 +335,7 @@ preMap.preLevel = function (g) {
     show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
     show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
 
-    preMap.resetPreStat(0, g);
+    PreMap.resetPreStat(0, g);
     numclouds = 0;
 
     for (i = 0; i < numsectors; i++) {
@@ -356,7 +356,7 @@ preMap.preLevel = function (g) {
                         if (!tiles[sector[i].ceilingpicnum + j].data)
                             tloadtile(sector[i].ceilingpicnum + j);
             }
-            preMap.setupBackdrop(sector[i].ceilingpicnum);
+            PreMap.setupBackdrop(sector[i].ceilingpicnum);
 
             if (sector[i].ceilingpicnum == CLOUDYSKIES && numclouds < 127)
                 clouds[numclouds++] = i;
@@ -624,7 +624,7 @@ preMap.preLevel = function (g) {
 };
 
 //640
-preMap.setupBackdrop = function (sky) {
+PreMap.setupBackdrop = function (sky) {
     var i;
 
     for (i = 0; i < MAXPSKYTILES; i++) {
@@ -656,7 +656,7 @@ preMap.setupBackdrop = function (sky) {
 };
 
 //990
-preMap.newGame = function (vn, ln, sk) {
+PreMap.newGame = function (vn, ln, sk) {
     var p = ps[0];
     var i;
 
@@ -666,7 +666,7 @@ preMap.newGame = function (vn, ln, sk) {
 
     globalskillsound = -1;
 
-    preMap.waitForEverybody();
+    PreMap.waitForEverybody();
     ready2send = 0;
 
     if (ud.m_recstat != 2 && ud.last_level >= 0 && ud.multimode > 1 && ud.coop != 1) {
@@ -715,7 +715,7 @@ preMap.newGame = function (vn, ln, sk) {
 };
 
 //1071
-preMap.resetpSpriteVars = function (g) {
+PreMap.resetpSpriteVars = function (g) {
     var i, j, nexti, circ;
     var firstx, firsty;
     var s;
@@ -777,7 +777,7 @@ preMap.resetpSpriteVars = function (g) {
         //    }
     }
 
-    preMap.resetPlayerStats(0); // reset a player 
+    PreMap.resetPlayerStats(0); // reset a player 
 
     for (i = 1; i < MAXPLAYERS; i++) // reset all the others
         ps[i] = new PlayerType();
@@ -913,7 +913,7 @@ preMap.resetpSpriteVars = function (g) {
     }
 };
 
-preMap.clearFrags = function() {
+PreMap.clearFrags = function() {
     var i;
 
     for (i = 0; i < MAXPLAYERS; i++)
@@ -927,7 +927,7 @@ preMap.clearFrags = function() {
     }
 };
 
-preMap.resetTimeVars = function() {
+PreMap.resetTimeVars = function() {
     vel = svel = angvel = horiz = 0;
 
     totalclock = 0;
@@ -968,7 +968,7 @@ function genSpriteRemaps() {
 }
 
 //1322
-preMap.waitForEverybody = function () {
+PreMap.waitForEverybody = function () {
     if (numplayers < 2) {
         return;
     }
@@ -977,7 +977,7 @@ preMap.waitForEverybody = function () {
 };
 
 //1366
-preMap.doFrontScreens = function () {
+PreMap.doFrontScreens = function () {
     var i, j;
     if (ud.recstat !== 2) {
         throw new Error("todo");
@@ -992,7 +992,7 @@ preMap.doFrontScreens = function () {
 };
 
 //1410
-preMap.clearFifo = function () {
+PreMap.clearFifo = function () {
     syncvaltail = 0;
     syncvaltottail = 0;
     syncstat = 0;
@@ -1017,7 +1017,7 @@ preMap.clearFifo = function () {
 };
 
 //1434
-preMap.resetMys = function () {
+PreMap.resetMys = function () {
     myx = omyx = ps[myconnectindex].posx;
     myy = omyy = ps[myconnectindex].posy;
     myz = omyz = ps[myconnectindex].posz;
@@ -1034,7 +1034,7 @@ preMap.resetMys = function () {
 };
 
 //1451
-preMap.enterLevel = function (g) {
+PreMap.enterLevel = function (g) {
     var i;
     var l;
     var levname;
@@ -1064,8 +1064,8 @@ preMap.enterLevel = function (g) {
 
     i = ud.screen_size;
     ud.screen_size = 0;
-    preMap.doFrontScreens(); // todo: maybe a pause to let it render the loading screen
-    preMap.vscrn();
+    PreMap.doFrontScreens(); // todo: maybe a pause to let it render the loading screen
+    PreMap.vscrn();
     ud.screen_size = i;
 
     if (!VOLUMEONE) {
@@ -1098,10 +1098,10 @@ preMap.enterLevel = function (g) {
         throw new Error("todo: test with shareware grp?");
     }
 
-    preMap.preLevel(g);
+    PreMap.preLevel(g);
 
     Sector.allignWarpElevators();
-    preMap.resetpSpriteVars(g);
+    PreMap.resetpSpriteVars(g);
 
 
     if (ud.recstat != 2)
@@ -1151,8 +1151,8 @@ preMap.enterLevel = function (g) {
             case HURTRAIL:
             case FLOORSLIME:
             case FLOORPLASMA:
-                preMap.resetWeapons(i);
-                preMap.resetIinventory(i);
+                PreMap.resetWeapons(i);
+                PreMap.resetIinventory(i);
                 ps[i].gotweapon[PISTOL_WEAPON] = 0;
                 ps[i].ammo_amount[PISTOL_WEAPON] = 0;
                 ps[i].curr_weapon = KNEE_WEAPON;
@@ -1162,7 +1162,7 @@ preMap.enterLevel = function (g) {
 
     //PREMAP.C - replace near the my's at the end of the file
 
-    preMap.resetMys();
+    PreMap.resetMys();
 
     ps[myconnectindex].palette = palette;
     palto(0, 0, 0, 0);
@@ -1175,7 +1175,7 @@ preMap.enterLevel = function (g) {
 
     ud.last_level = ud.level_number + 1;
 
-    preMap.clearFifo();
+    PreMap.clearFifo();
 
     for (i = numinterpolations - 1; i >= 0; i--) {
         bakipos[i] = curipos[i];
@@ -1184,10 +1184,10 @@ preMap.enterLevel = function (g) {
     restorepalette = 1;
 
     Network.flushPackets();
-    preMap.waitForEverybody();
+    PreMap.waitForEverybody();
 
     palto(0, 0, 0, 0);
-    preMap.vscrn();
+    PreMap.vscrn();
     clearView(0);
     Game.drawBackground();
 
@@ -1196,9 +1196,9 @@ preMap.enterLevel = function (g) {
     }
      ps[myconnectindex].over_shoulder_on = 0;
 
-     preMap.clearFrags();
+     PreMap.clearFrags();
 
-     preMap.resetTimeVars();  // Here we go
+     PreMap.resetTimeVars();  // Here we go
 
     if(numplayers > 1) {
         throw new Error("todo");

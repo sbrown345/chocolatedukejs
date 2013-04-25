@@ -1497,6 +1497,38 @@ function passOne(readFromGrp) {
     }
 }
 
+//1692
+function  dodge(s) {
+    var i;
+    var bx,by,mx,my,bxvect,byvect,mxvect,myvect,d;
+
+    mx = s.x;
+    my = s.y;
+    mxvect = sintable[(s.ang+512)&2047]; myvect = sintable[s.ang&2047];
+
+    for(i=headspritestat[4];i>=0;i=nextspritestat[i]) //weapons list
+    {
+        if( sprite[i].owner == i || sprite[i].sectnum != s.sectnum)
+            continue;
+
+        bx = sprite[i].x-mx;
+        by = sprite[i].y-my;
+        bxvect = sintable[(sprite[i].ang+512)&2047]; byvect = sintable[sprite[i].ang&2047];
+
+        if (mxvect*bx + myvect*by >= 0)
+            if (bxvect*bx + byvect*by < 0)
+            {
+                d = bxvect*by - byvect*bx;
+                if (klabs(d) < 65536*64)
+                {
+                    s.ang -= 512+(TRAND&1024);
+                    return 1;
+                }
+            }
+    }
+    return 0;
+}
+
 //1724
 function furthestangle(i, angs) {
     var j, hitsect = new Ref(), hitwall = new Ref(), hitspr = new Ref(), furthest_angle, angincs;
@@ -2256,19 +2288,18 @@ function parse() {
             insptr++;
             return 1;
         case 2:
-            throw "todo"
-            //insptr++;
-            //if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
-            //{
-            //    killit_flag = 2;
-            //    break;
-            //}
-            //addammo( script[insptr], ps[g_p], *(insptr+1) );
-            //if(ps[g_p].curr_weapon == KNEE_WEAPON)
-            //    if( ps[g_p].gotweapon[script[insptr]] )
-            //        addweapon( ps[g_p], script[insptr] );
-            //insptr += 2;
-            //break;
+            insptr++;
+            if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
+            {
+                killit_flag = 2;
+                break;
+            }
+            addammo(script[insptr], ps[g_p], script[insptr+1]);
+            if(ps[g_p].curr_weapon == KNEE_WEAPON)
+                if( ps[g_p].gotweapon[script[insptr]] )
+                    addweapon( ps[g_p], script[insptr] );
+            insptr += 2;
+            break;
         case 86:
             insptr++;
             lotsofmoney(g_sp,script[insptr]);
@@ -2305,20 +2336,19 @@ function parse() {
             killit_flag = 1;
             break;
         case 23:
-            throw "todo"
-            ////insptr++;
-            ////if( ps[g_p].gotweapon[script[insptr]] == 0 ) addweapon( ps[g_p], script[insptr] );
-            ////else if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
-            ////{
-            ////     killit_flag = 2;
-            ////     break;
-            ////}
-            ////addammo( script[insptr], ps[g_p], *(insptr+1) );
-            ////if(ps[g_p].curr_weapon == KNEE_WEAPON)
-            ////    if( ps[g_p].gotweapon[script[insptr]] )
-            ////        addweapon( ps[g_p], script[insptr] );
-            ////insptr+=2;
-            ////break;
+            insptr++;
+            if( ps[g_p].gotweapon[script[insptr]] == 0 ) addweapon( ps[g_p], script[insptr] );
+            else if( ps[g_p].ammo_amount[script[insptr]] >= max_ammo_amount[script[insptr]] )
+            {
+                 killit_flag = 2;
+                 break;
+            }
+            addammo( script[insptr], ps[g_p], script[insptr+1] );
+            if(ps[g_p].curr_weapon == KNEE_WEAPON)
+                if( ps[g_p].gotweapon[script[insptr]] )
+                    addweapon( ps[g_p], script[insptr] );
+            insptr+=2;
+            break;
         case 68:
             insptr++;
             printf("%d\n",script[insptr]);
@@ -2507,7 +2537,7 @@ function parse() {
                 if( lastsavedpos >= 0 && ud.recstat != 2 )
                 {
                     ps[g_p].gm = MODE_MENU;
-                    KB_ClearKeyDown(sc_Space);
+                    KB.clearKeyDown(sc_Space);
                     cmenu(15000);
                 }
                 else ps[g_p].gm = MODE_RESTART;
@@ -2706,10 +2736,9 @@ function parse() {
             parseifelse(g_sp.extra <= script[insptr]);
             break;
         case 58:
-            throw "todo"
-            //insptr += 2;
-            //guts(g_sp,*(insptr-1),script[insptr],g_p);
-            //insptr++;
+            insptr += 2;
+            guts(g_sp,script[insptr-1],script[insptr],g_p);
+            insptr++;
             break;
         case 59:
             insptr++;

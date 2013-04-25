@@ -179,23 +179,23 @@ var env_music_fn = new Array(4);
 var rtsplaying = 0;
 
 
-//short weaponsandammosprites[15] = {
-//    RPGSPRITE,
-//    CHAINGUNSPRITE,
-//    DEVISTATORAMMO,
-//    RPGAMMO,
-//    RPGAMMO,
-//    JETPACK,
-//    SHIELD,
-//    FIRSTAID,
-//    STEROIDS,
-//    RPGAMMO,
-//    RPGAMMO,
-//    RPGSPRITE,
-//    RPGAMMO,
-//    FREEZESPRITE,
-//    FREEZEAMMO
-//    };
+var weaponsandammosprites = [
+    RPGSPRITE,
+    CHAINGUNSPRITE,
+    DEVISTATORAMMO,
+    RPGAMMO,
+    RPGAMMO,
+    JETPACK,
+    SHIELD,
+    FIRSTAID,
+    STEROIDS,
+    RPGAMMO,
+    RPGAMMO,
+    RPGSPRITE,
+    RPGAMMO,
+    FREEZESPRITE,
+    FREEZEAMMO
+];
 
 var impact_damage;
 

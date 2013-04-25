@@ -3578,104 +3578,96 @@ Player.processInput = function(snum) {
 
             case SHRINKER_WEAPON:
             case GROW_WEAPON:
-                throw "todo"
+                if(p.curr_weapon == GROW_WEAPON)
+                {
+                    if((p.kickback_pic) > 3)
+                    {
+                        p.kickback_pic = 0;
+                        if( screenpeek == snum ) pus = 1;
+                        p.ammo_amount[GROW_WEAPON]--;
+                        shoot(pi,GROWSPARK);
 
-//                if(p.curr_weapon == GROW_WEAPON)
-//                {
-//                    if((p.kickback_pic) > 3)
-//                    {
-//                        p.kickback_pic = 0;
-//                        if( screenpeek == snum ) pus = 1;
-//                        p.ammo_amount[GROW_WEAPON]--;
-//                        shoot(pi,GROWSPARK);
+                        p.visibility = 0;
+                        lastvisinc = totalclock+32;
+                        checkavailweapon(p);
+                    }
+                    else (p.kickback_pic)++;
+                }
+                else
+                {
+                    if( (p.kickback_pic) > 10)
+                    {
+                        (p.kickback_pic) = 0;
 
-//                        p.visibility = 0;
-//                        lastvisinc = totalclock+32;
-//                        checkavailweapon(p);
-//                    }
-//                    else (p.kickback_pic)++;
-//                }
-//                else
-//                {
-//                    if( (p.kickback_pic) > 10)
-//                    {
-//                        (p.kickback_pic) = 0;
+                        p.ammo_amount[SHRINKER_WEAPON]--;
+                        shoot(pi,SHRINKER);
 
-//                        p.ammo_amount[SHRINKER_WEAPON]--;
-//                        shoot(pi,SHRINKER);
-
-//                        p.visibility = 0;
-//                        lastvisinc = totalclock+32;
-//                        checkavailweapon(p);
-//                    }
-//                    else (p.kickback_pic)++;
-//                }
-//                break;
+                        p.visibility = 0;
+                        lastvisinc = totalclock+32;
+                        checkavailweapon(p);
+                    }
+                    else (p.kickback_pic)++;
+                }
+                break;
 
             case DEVISTATOR_WEAPON:
-                throw "todo"
-        
-//                if(p.kickback_pic)
-//                {
-//                    (p.kickback_pic)++;
+                if(p.kickback_pic)
+                {
+                    (p.kickback_pic)++;
 
-//                    if( (p.kickback_pic) & 1 )
-//                    {
-//                        p.visibility = 0;
-//                        lastvisinc = totalclock+32;
-//                        shoot(pi,RPG);
-//                        p.ammo_amount[DEVISTATOR_WEAPON]--;
-//                        checkavailweapon(p);
-//                    }
-//                    if((p.kickback_pic) > 5) (p.kickback_pic) = 0;
-//                }
-//                break;
+                    if( (p.kickback_pic) & 1 )
+                    {
+                        p.visibility = 0;
+                        lastvisinc = totalclock+32;
+                        shoot(pi,RPG);
+                        p.ammo_amount[DEVISTATOR_WEAPON]--;
+                        checkavailweapon(p);
+                    }
+                    if((p.kickback_pic) > 5) (p.kickback_pic) = 0;
+                }
+                break;
             case FREEZE_WEAPON:
-                throw "todo"
+                if( (p.kickback_pic) < 4 )
+                {
+                    (p.kickback_pic)++;
+                    if( (p.kickback_pic) == 3 )
+                    {
+                        p.ammo_amount[FREEZE_WEAPON]--;
+                        p.visibility = 0;
+                        lastvisinc = totalclock+32;
+                        shoot(pi,FREEZEBLAST);
+                        checkavailweapon(p);
+                    }
+                    if(s.xrepeat < 32)
+                    { p.kickback_pic = 0; break; }
+                }
+                else
+                {
+                    if( sb_snum&(1<<2))
+                    {
+                        p.kickback_pic = 1;
+                        spritesound(CAT_FIRE,pi);
+                    }
+                    else p.kickback_pic = 0;
+                }
+                break;
 
-//                if( (p.kickback_pic) < 4 )
-//                {
-//                    (p.kickback_pic)++;
-//                    if( (p.kickback_pic) == 3 )
-//                    {
-//                        p.ammo_amount[FREEZE_WEAPON]--;
-//                        p.visibility = 0;
-//                        lastvisinc = totalclock+32;
-//                        shoot(pi,FREEZEBLAST);
-//                        checkavailweapon(p);
-//                    }
-//                    if(s.xrepeat < 32)
-//                    { p.kickback_pic = 0; break; }
-//                }
-//                else
-//                {
-//                    if( sb_snum&(1<<2))
-//                    {
-//                        p.kickback_pic = 1;
-//                        spritesound(CAT_FIRE,pi);
-//                    }
-//                    else p.kickback_pic = 0;
-//                }
-//                break;
-
-      case TRIPBOMB_WEAPON:
-                throw "todo"
-        
-//                if(p.kickback_pic < 4)
-//                {
-//                    p.posz = p.oposz;
-//                    p.poszv = 0;
-//                    if( (p.kickback_pic) == 3 )
-//                        shoot(pi,HANDHOLDINGLASER);
-//                }
-//                if((p.kickback_pic) == 16)
-//                {
-//                    (p.kickback_pic) = 0;
-//                    checkavailweapon(p);
-//                    p.weapon_pos = -9;
-//                }
-//                else (p.kickback_pic)++;
-//                break;
+            case TRIPBOMB_WEAPON:
+                if(p.kickback_pic < 4)
+                {
+                    p.posz = p.oposz;
+                    p.poszv = 0;
+                    if( (p.kickback_pic) == 3 )
+                        shoot(pi,HANDHOLDINGLASER);
+                }
+                if((p.kickback_pic) == 16)
+                {
+                    (p.kickback_pic) = 0;
+                    checkavailweapon(p);
+                    p.weapon_pos = -9;
+                }
+                else (p.kickback_pic)++;
+                break;
             case KNEE_WEAPON:
         
                 (p.kickback_pic)++;
@@ -3693,20 +3685,18 @@ Player.processInput = function(snum) {
                 break;
 
             case RPG_WEAPON:
-                throw "todo"
-        
-//                (p.kickback_pic)++;
-//                if( (p.kickback_pic) == 4 )
-//                {
-//                    p.ammo_amount[RPG_WEAPON]--;
-//                    lastvisinc = totalclock+32;
-//                    p.visibility = 0;
-//                    shoot(pi,RPG);
-//                    checkavailweapon(p);
-//                }
-//                else if( p.kickback_pic == 20 )
-//                    p.kickback_pic = 0;
-//                break;
+                (p.kickback_pic)++;
+                if( (p.kickback_pic) == 4 )
+                {
+                    p.ammo_amount[RPG_WEAPON]--;
+                    lastvisinc = totalclock+32;
+                    p.visibility = 0;
+                    shoot(pi,RPG);
+                    checkavailweapon(p);
+                }
+                else if( p.kickback_pic == 20 )
+                    p.kickback_pic = 0;
+                break;
         }
     }
 }

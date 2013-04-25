@@ -218,6 +218,22 @@ function check_fta_sounds(i) {
     }
 }
 
+//1300
+function inventory(s) {
+    switch(s.picnum)
+    {
+        case FIRSTAID:
+        case STEROIDS:
+        case HEATSENSOR:
+        case BOOTS:
+        case JETPACK:
+        case HOLODUKE:
+        case AIRTANK:
+            return 1;
+    }
+    return 0;
+}
+
 //1316
 
 function badguy(s) {
@@ -561,7 +577,7 @@ function coolgaugetext(snum) {
         if( (current_menu >= 400  && current_menu <= 405) )
             return;
 
-    offy += preMap.countFragBars(); //add fragbars
+    offy += PreMap.countFragBars(); //add fragbars
     var offxRef = new Ref(offx);
     var offyRef = new Ref(offy);
     var stepxRef = new Ref(stepx);
@@ -4055,7 +4071,7 @@ function logo() {
         .endIf()
         .add(function () {
             console.log("(70) todo"); // todo
-            preMap.waitForEverybody();
+            PreMap.waitForEverybody();
 
             clearView(0);
             nextpage();
@@ -4317,7 +4333,7 @@ function main(argc, argv) {
         throw new Error("todo");
     })
         .addElse(function () {
-            preMap.vscrn();
+            PreMap.vscrn();
         })
         .endIf()
         .addWhile(function () {
@@ -4421,7 +4437,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     // FIX_00034: Demos do not turn your run mode off anymore:
     /* ud.showweapons =  */ ud.pause_on /*= ud.auto_run */ = 0; // makes no sense to reset those 2 value!
 
-    preMap.newGame(ud.volume_number, ud.level_number, ud.player_skill);
+    PreMap.newGame(ud.volume_number, ud.level_number, ud.player_skill);
     return 1;
 };
 
@@ -4462,7 +4478,7 @@ Game.playBack = function () {
             Game.whichDemo = 1;
         }
 
-        preMap.enterLevel(MODE_DEMO);
+        PreMap.enterLevel(MODE_DEMO);
     }
 
     if (foundemo === 0 || Game.inMenu || KB.keyWaiting() || numplayers > 1) {

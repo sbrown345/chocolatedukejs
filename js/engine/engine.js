@@ -1560,8 +1560,9 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
         printf("z:%i, nextsectnum:%i\n", z, nextsectnum);
 
         if (dastat == 0) j = (sector[nextsectnum] || new SectorType()).ceilingstat; // nextsectnum can be negative (probably -1) which seems to return an empty type
-        else j = sector[nextsectnum].floorstat;
+        else j = (sector[nextsectnum] || new SectorType()).floorstat;
 
+        printf("j:%i \n", j);
         if ((nextsectnum < 0) || (wall[wallnum].cstat&32) || ((j&1) == 0))
         {
             if (x == -1) x = pvWalls[z].screenSpaceCoo[0][VEC_COL];

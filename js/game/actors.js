@@ -73,6 +73,71 @@ function floorspace(sectnum) {
     return 0;
 }
 
+function addammo(weapon, p, amount) {
+    p.ammo_amount[weapon] += amount;
+
+    if (p.ammo_amount[weapon] > max_ammo_amount[weapon])
+        p.ammo_amount[weapon] = max_ammo_amount[weapon];
+}
+
+function addweapon(p, weapon) {
+    var added_new_weapon = false;
+
+    if (p.gotweapon[weapon] == 0) {
+        p.gotweapon[weapon] = 1;
+        if (weapon == SHRINKER_WEAPON)
+            p.gotweapon[GROW_WEAPON] = 1;
+
+        // FIX_00012: added "weapon autoswitch" toggle allowing to turn the autoswitch off
+        // when picking up new weapons. The weapon sound on pickup will remain on, to not 
+        // affect the opponent's gameplay (so he can still hear you picking up new weapons)
+        if (p.weaponautoswitch)  // Anti antiswitch ordered
+            added_new_weapon = true;
+    }
+
+    if (added_new_weapon == false ||
+        ud.playing_demo_rev == BYTEVERSION_27 ||
+        ud.playing_demo_rev == BYTEVERSION_28 ||
+        ud.playing_demo_rev == BYTEVERSION_116 ||
+        ud.playing_demo_rev == BYTEVERSION_117)
+        // don't block the weapon change on 1st pick up if playing an old demo
+    {
+        p.random_club_frame = 0;
+
+        if (p.holster_weapon == 0) {
+            p.weapon_pos = -1;
+            p.last_weapon = p.curr_weapon;
+        } else {
+            p.weapon_pos = 10;
+            p.holster_weapon = 0;
+            p.last_weapon = -1;
+        }
+
+        p.kickback_pic = 0;
+        p.curr_weapon = weapon;
+    }
+
+    switch (weapon) {
+    case KNEE_WEAPON:
+    case TRIPBOMB_WEAPON:
+    case HANDREMOTE_WEAPON:
+    case HANDBOMB_WEAPON:
+        break;
+    case SHOTGUN_WEAPON:
+        spritesound(SHOTGUN_COCK, p.i);
+        break;
+    case PISTOL_WEAPON:
+        spritesound(INSERT_CLIP, p.i);
+        break;
+    default:
+        spritesound(SELECT_WEAPON, p.i);
+        break;
+    }
+
+    PreMap.vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
+}
+
+
 //406
 function ifsquished(i, p)
 {

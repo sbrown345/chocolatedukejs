@@ -2,10 +2,32 @@
 
 var probey = 0, lastprobey = 0, last_menu, globalskillsound = -1;
 var sh, onbar, buttonstat = 0, deletespot;
-//var last_zero, last_fifty, last_threehundred = 0;
+var last_zero, last_fifty, last_threehundred = 0;
 //var fileselect = 1, menunamecnt;
 //var  menuname[256][17];
 
+//133
+
+function cmenu(cm) {
+    current_menu = cm;
+
+    if ((cm >= 1000 && cm <= 1010))
+        return;
+
+    if (cm == 0)
+        probey = last_zero;
+    else if (cm == 50)
+        probey = last_fifty;
+    else if (cm >= 300 && cm < 400)
+        probey = last_threehundred;
+    else if (cm == 110)
+        probey = 1;
+    else probey = 0;
+    lastprobey = -1;
+}
+
+
+//915
 function menutext(x, y, s, p, t) {
     var i, ac, centre;
 

@@ -2,12 +2,12 @@
 function playMusic(filename) {
     if (MusicToggle == 0) return;
     //if (MusicDevice == NumSoundCards) return;
-    
+
     // todo!
 }
 
 //293
-function xyzsound(num,i,x,y,z) {
+function xyzsound(num, i, x, y, z) {
     //todo
     return -1;
 }
@@ -15,7 +15,7 @@ function xyzsound(num,i,x,y,z) {
 //435
 function sound() {
     // todo! - just need to swap voc header for wav header
-    
+
     // https://github.com/mpruett/audiofile/blob/master/libaudiofile/VOC.cpp
     // ?? http://seegras.discordia.ch/Programs/voc2wav
     // https://github.com/dse/pacpl#readme
@@ -30,8 +30,11 @@ function spritesound(num, i) {
     // todo!
 }
 
+//503
+function stopsound() { }
+
 //525
-function pan3dsound() {}
+function pan3dsound() { }
 
 //652
 function clearsoundlocks() {
