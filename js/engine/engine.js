@@ -6820,13 +6820,11 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
     y2.$ = dmulscale14(y,dacos,x,dasin) + ypivot;
 }
 
-
-
 //7795
 function krand() {
     return 10
     // c method arguments eval in the opposite direction to js
-    //todo: search for all methods that have multiple TRAND or krand etc and swap values around so they eval in the same order as the C version (regex: krand.+krand)
+    //todo: search for all methods that have multiple TRAND or krand etc and swap values around so they eval in the same order as the C version (regex: krand.+krand      and TRAND.+TRAND)
 
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     console.log("result: %i", randomseed >>> 16);

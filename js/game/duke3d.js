@@ -79,7 +79,7 @@ var seekplayer = 512;
 var furthestdir = 1024;
 var dodgebullet = 4096;
 
-var TRAND = krand;
+window.__defineGetter__("TRAND", krand);
 
 //279
 var MAX_WEAPONS = 12;

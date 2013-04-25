@@ -2035,7 +2035,6 @@ function parse() {
             }
             break;
         case 24:
-            debugger;
             insptr++;
             g_t[5] = script[insptr];
             g_t[4] = script[g_t[5]]; //*(int32_t *)(g_t[5]);       // Action
@@ -2255,13 +2254,21 @@ function parse() {
                         }
                         else if(g_sp.zvel > 2048 && sector[g_sp.sectnum].lotag != 1)
                         {
-                            throw "todo"
-                            //j = g_sp.sectnum;
-                            //pushmove(&g_sp.x,&g_sp.y,&g_sp.z,(short*)&j,128L,(4<<8),(4L<<8),CLIPMASK0);
-                            //if(j != g_sp.sectnum && j >= 0 && j < MAXSECTORS)
-                            //    changespritesect(g_i,j);
+                            j = g_sp.sectnum;
+                            var xRef = new Ref(g_sp.x);
+                            var yRef = new Ref(g_sp.y);
+                            var zRef = new Ref(g_sp.z);
+                            var jRef = new Ref(j);
+                            pushmove(xRef,yRef,zRef,jRef,128,(4<<8),(4<<8),CLIPMASK0);
+                            g_sp.x = xRef.$;
+                            g_sp.y = yRef.$;
+                            g_sp.z = zRef.$;
+                            j = jRef.$;
+                            
+                            if(j != g_sp.sectnum && j >= 0 && j < MAXSECTORS)
+                                changespritesect(g_i,j);
 
-                            //spritesound(THUD,g_i);
+                            spritesound(THUD,g_i);
                         }
                     }
                     if(sector[g_sp.sectnum].lotag == 1)
@@ -2668,10 +2675,9 @@ function parse() {
             //insptr++;
             //break;
         case 50:
-            throw "todo"
-            //hitradius(g_i,*(insptr+1),*(insptr+2),*(insptr+3),*(insptr+4),*(insptr+5));
-            //insptr+=6;
-            //break;
+            hitradius(g_i, script[insptr + 1], script[insptr + 2], script[insptr + 3], script[insptr + 4], script[insptr + 5]);
+            insptr+=6;
+            break;
         case 51:
             {
                 insptr++;

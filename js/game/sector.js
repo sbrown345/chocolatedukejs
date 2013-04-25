@@ -646,6 +646,81 @@ function checkplayerhurt(p, j)
     }
 }
 
+
+//1876
+function checkhitceiling(sn) {
+    var i, j;
+
+    switch(sector[sn].ceilingpicnum)
+    {
+        case WALLLIGHT1:
+        case WALLLIGHT2:
+        case WALLLIGHT3:
+        case WALLLIGHT4:
+        case TECHLIGHT2:
+        case TECHLIGHT4:
+
+                ceilingglass(ps[myconnectindex].i,sn,10);
+                spritesound(GLASS_BREAKING,ps[screenpeek].i);
+
+                if(sector[sn].ceilingpicnum == WALLLIGHT1)
+                    sector[sn].ceilingpicnum = WALLLIGHTBUST1;
+
+                if(sector[sn].ceilingpicnum == WALLLIGHT2)
+                    sector[sn].ceilingpicnum = WALLLIGHTBUST2;
+
+                if(sector[sn].ceilingpicnum == WALLLIGHT3)
+                    sector[sn].ceilingpicnum = WALLLIGHTBUST3;
+
+                if(sector[sn].ceilingpicnum == WALLLIGHT4)
+                    sector[sn].ceilingpicnum = WALLLIGHTBUST4;
+
+                if(sector[sn].ceilingpicnum == TECHLIGHT2)
+                    sector[sn].ceilingpicnum = TECHLIGHTBUST2;
+
+                if(sector[sn].ceilingpicnum == TECHLIGHT4)
+                    sector[sn].ceilingpicnum = TECHLIGHTBUST4;
+
+
+                if(!sector[sn].hitag)
+                {
+                    i = headspritesect[sn];
+                    while(i >= 0)
+                    {
+                        if( sprite[i].picnum == SECTOREFFECTOR && sprite[i].lotag == 12 )
+                        {
+                            j = headspritestat[3];
+                            while(j >= 0)
+                            {
+                                if( sprite[j].hitag == sprite[i].hitag )
+                                    hittype[j].temp_data[3] = 1;
+                                j = nextspritestat[j];
+                            }
+                            break;
+                        }
+                        i = nextspritesect[i];
+                    }
+                }
+
+                i = headspritestat[3];
+                j = krand()&1;
+                while(i >= 0)
+                {
+                    if(sprite[i].hitag == (sector[sn].hitag) && sprite[i].lotag == 3 )
+                    {
+                        hittype[i].temp_data[2] = j;
+                        hittype[i].temp_data[4] = 1;
+                    }
+                    i = nextspritestat[i];
+                }
+
+                return 1;
+    }
+
+    return 0;
+}                                     
+
+
 // 1948
 function checkhitsprite( i, sn) {
     var j, k, p;

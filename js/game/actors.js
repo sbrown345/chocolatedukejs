@@ -80,6 +80,7 @@ function addammo(weapon, p, amount) {
         p.ammo_amount[weapon] = max_ammo_amount[weapon];
 }
 
+//123
 function addweapon(p, weapon) {
     var added_new_weapon = false;
 
@@ -176,6 +177,189 @@ function ifsquished(i, p)
         return 1;
     }
     return 0;
+}
+
+//405
+function hitradius( i,  r,  hp1,   hp2,   hp3,   hp4 ) {
+    var s,sj;
+    var wal, walIdx;
+    var d, q, x1, y1;
+    var sectcnt, sectend, dasect, startwall, endwall, nextsect;
+    var j,k,p,x,nextj,sect = new Ref(-1 /* < 0 so skips inside() */);
+    var  statlist = [0,1,6,10,12,2,5];
+    var tempshort = new Int16Array(tempbuf.buffer);// (short *)tempbuf;
+
+    s = sprite[i];
+
+    if(!(s.picnum == RPG && s.xrepeat < 11)) {
+
+        if(s.picnum != SHRINKSPARK)
+        {
+            tempshort[0] = s.sectnum;
+            dasect = s.sectnum;
+            sectcnt = 0; sectend = 1;
+
+            do
+            {
+                dasect = tempshort[sectcnt++];
+                if(((sector[dasect].ceilingz-s.z)>>8) < r)
+                {
+                    d = klabs(wall[sector[dasect].wallptr].x-s.x)+klabs(wall[sector[dasect].wallptr].y-s.y);
+                    if(d < r)
+                        checkhitceiling(dasect);
+                    else
+                    {
+                        d = klabs(wall[wall[wall[sector[dasect].wallptr].point2].point2].x-s.x)+klabs(wall[wall[wall[sector[dasect].wallptr].point2].point2].y-s.y);
+                        if(d < r)
+                            checkhitceiling(dasect);
+                    }
+                }
+
+                startwall = sector[dasect].wallptr;
+                endwall = startwall+sector[dasect].wallnum;
+                for(x=startwall,wal=wall[walIdx=startwall];x<endwall;x++,wal=wall[++walIdx])
+                    if( ( klabs(wal.x-s.x)+klabs(wal.y-s.y) ) < r)
+                    {
+                        nextsect = wal.nextsector;
+                        if (nextsect >= 0)
+                        {
+                            for(dasect=sectend-1;dasect>=0;dasect--)
+                                if (tempshort[dasect] == nextsect) break;
+                            if (dasect < 0) tempshort[sectend++] = nextsect;
+                        }
+                        x1 = (((wal.x+wall[wal.point2].x)>>1)+s.x)>>1;
+                        y1 = (((wal.y+wall[wal.point2].y)>>1)+s.y)>>1;
+                        updatesector(x1,y1,sect);
+                        if( sect.$ >= 0 && cansee(x1,y1,s.z,sect.$,s.x,s.y,s.z,s.sectnum ) )
+                            checkhitwall(i,x,wal.x,wal.y,s.z,s.picnum);
+                    }
+            }
+            while (sectcnt < sectend);
+        }
+    }
+    //SKIPWALLCHECK:
+
+    q = -(16<<8)+(krand()&((32<<8)-1));
+
+    for(x = 0;x<7;x++)
+    {
+        j = headspritestat[statlist[x]];
+        BOLT:
+        while(j >= 0)
+        {
+            nextj = nextspritestat[j];
+            sj = sprite[j];
+
+            if( x == 0 || x >= 5 || AFLAMABLE(sj.picnum) )
+            {
+                if( s.picnum != SHRINKSPARK || (sj.cstat&257) )
+                    if( dist( s, sj ) < r )
+                    {
+                        if( badguy(sj) && !cansee( sj.x, sj.y,sj.z+q, sj.sectnum, s.x, s.y, s.z+q, s.sectnum) )
+                        { j = nextj; continue BOLT; }//goto BOLT;
+                        checkhitsprite( j, i );
+                    }
+            }
+            else if( sj.extra >= 0 && sj != s && ( sj.picnum == TRIPBOMB || badguy(sj) || sj.picnum == QUEBALL || sj.picnum == STRIPEBALL || (sj.cstat&257) || sj.picnum == DUKELYINGDEAD ) )
+            {
+                if( s.picnum == SHRINKSPARK && sj.picnum != SHARK && ( j == s.owner || sj.xrepeat < 24 ) )
+                {
+                    j = nextj;
+                    continue;
+                }
+                if( s.picnum == MORTER && j == s.owner)
+                {
+                    j = nextj;
+                    continue;
+                }
+
+                if(sj.picnum == APLAYER) sj.z -= PHEIGHT;
+                d = dist( s, sj );
+                if(sj.picnum == APLAYER) sj.z += PHEIGHT;
+
+                if ( d < r && cansee( sj.x, sj.y, sj.z-(8<<8), sj.sectnum, s.x, s.y, s.z-(12<<8), s.sectnum) )
+                {
+                    hittype[j].ang = getangle(sj.x-s.x,sj.y-s.y);
+
+                    if ( s.picnum == RPG && sj.extra > 0)
+                        hittype[j].picnum = RPG;
+                    else
+                    {
+                        if( s.picnum == SHRINKSPARK )
+                            hittype[j].picnum = SHRINKSPARK;
+                        else hittype[j].picnum = RADIUSEXPLOSION;
+                    }
+
+                    if(s.picnum != SHRINKSPARK)
+                    {
+                        if ( d < ((r/3)|0) )
+                        {
+                            if(hp4 == hp3) hp4++;
+                            hittype[j].extra = hp3 + (krand()%(hp4-hp3));
+                        }
+                        else if ( d < (2*((r/3)|0)) ) {
+                            printf("odd division\n");
+                            if(hp3 == hp2) hp3++;
+                            hittype[j].extra = hp2 + (krand()%(hp3-hp2));
+                        }
+                        else if ( d < r )
+                        {
+                            if(hp2 == hp1) hp2++;
+                            hittype[j].extra = hp1 + (krand()%(hp2-hp1));
+                        }
+
+                        if( sprite[j].picnum != TANK && sprite[j].picnum != ROTATEGUN && sprite[j].picnum != RECON && sprite[j].picnum != BOSS1 && sprite[j].picnum != BOSS2 && sprite[j].picnum != BOSS3 && sprite[j].picnum != BOSS4 )
+                        {
+                            if(sj.xvel < 0) sj.xvel = 0;
+                            sj.xvel += (s.extra<<2);
+                        }
+
+                        if( sj.picnum == PODFEM1 || sj.picnum == FEM1 ||
+                            sj.picnum == FEM2 || sj.picnum == FEM3 ||
+                            sj.picnum == FEM4 || sj.picnum == FEM5 ||
+                            sj.picnum == FEM6 || sj.picnum == FEM7 ||
+                            sj.picnum == FEM8 || sj.picnum == FEM9 ||
+                            sj.picnum == FEM10 || sj.picnum == STATUE ||
+                            sj.picnum == STATUEFLASH || sj.picnum == SPACEMARINE || sj.picnum == QUEBALL || sj.picnum == STRIPEBALL)
+                                checkhitsprite( j, i );
+                    }
+                    else if(s.extra == 0) hittype[j].extra = 0;
+
+                    if ( sj.picnum != RADIUSEXPLOSION &&
+                        s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS )
+                    {
+                        if(sj.picnum == APLAYER)
+                        {
+                            p = sj.yvel;
+                            if(ps[p].newowner >= 0)
+                            {
+                                ps[p].newowner = -1;
+                                ps[p].posx = ps[p].oposx;
+                                ps[p].posy = ps[p].oposy;
+                                ps[p].posz = ps[p].oposz;
+                                ps[p].ang = ps[p].oang;
+                                var cursectnumRef = new Ref(ps[p].cursectnum);
+                                updatesector(ps[p].posx,ps[p].posy,cursectnumRef);
+                                ps[p].cursectnum = cursectnumRef.$;
+                                Player.setPal(ps[p]);
+
+                                k = headspritestat[1];
+                                while(k >= 0)
+                                {
+                                    if(sprite[k].picnum==CAMERA1)
+                                        sprite[k].yvel = 0;
+                                    k = nextspritestat[k];
+                                }
+                            }
+                        }
+                        hittype[j].owner = s.owner;
+                    }
+                }
+            }
+            //BOLT:
+            j = nextj;
+        }
+    }
 }
 
 
@@ -364,6 +548,45 @@ function insertspriteq(i) {
     } else sprite[i].xrepeat = sprite[i].yrepeat = 0;
 }
 
+
+function guts(s,gtype, n, p) {
+    var gutz,floorz;
+    var i,a,j;
+    var sx,sy;
+    var pal;
+
+    if(badguy(s) && s.xrepeat < 16)
+        sx = sy = 8;
+    else sx = sy = 32;
+
+    gutz = s.z-(8<<8);
+    floorz = getflorzofslope(s.sectnum,s.x,s.y);
+
+    if( gutz > ( floorz-(8<<8) ) )
+        gutz = floorz-(8<<8);
+
+    if(s.picnum == COMMANDER)
+        gutz -= (24<<8);
+
+    if( badguy(s) && s.pal == 6)
+        pal = 6;
+    else pal = 0;
+
+    for(j=0;j<n;j++)
+    {
+        a = krand()&2047;
+        i = EGS(s.sectnum,s.x+(krand()&255)-128,s.y+(krand()&255)-128,gutz-(krand()&8191),gtype,-32,sx,sy,a,48+(krand()&31),-512-(krand()&2047),ps[p].i,5);
+        if(sprite[i].picnum == JIBS2)
+        {
+            sprite[i].xrepeat >>= 2;
+            sprite[i].yrepeat >>= 2;
+        }
+        if(pal == 6)
+            sprite[i].pal = 6;
+    }
+}
+
+
 //836
 function setsectinterpolate(i) {
     var j, k, startwall, endwall;
@@ -403,13 +626,11 @@ function ms( i) {
 
     startwall = sector[s.sectnum].wallptr;
     endwall = startwall+sector[s.sectnum].wallnum;
-    var xRef = new Ref(), yRef = new Ref();
     for(x=startwall;x<endwall;x++) {
         rotatepoint(
             0,0,
             msx[j],msy[j],
             k&2047,tx,ty);
-
 
         dragpoint(x,s.x+tx.$,s.y+ty.$);
 

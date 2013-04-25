@@ -5285,6 +5285,34 @@ Game.doMoveThings = function() {
     return 0;
 };
 
+//10402
+function ceilingglass(i,sectnum,n) {
+	var j, xv, yv, z, x1, y1;
+	var a,s, startwall,endwall;
+
+	startwall = sector[sectnum].wallptr;
+	endwall = startwall+sector[sectnum].wallnum;
+
+	for(s=startwall;s<(endwall-1);s++)
+	{
+		x1 = wall[s].x;
+		y1 = wall[s].y;
+
+		xv = ((wall[s+1].x-x1)/(n+1))|0;
+		yv = ((wall[s+1].y-y1)/(n+1))|0;
+
+		for(j=n;j>0;j--)
+		{
+			x1 += xv;
+			y1 += yv;
+			a = TRAND&2047;
+			z = sector[sectnum].ceilingz+((TRAND&15)<<8);
+			EGS(sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,(TRAND&31),0,i,5);
+		}
+	}
+}
+
+
 //10434
 
 function setupGameButtons() {
