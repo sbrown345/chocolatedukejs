@@ -1642,6 +1642,48 @@ function movestandables()
             {i = nexti; continue BOLT;}
         }
 
+        var DETONATE = function() {
+            earthquaketime = 16;
+
+            j = headspritestat[3];
+            while(j >= 0)
+            {
+                if( s.hitag == sprite[j].hitag )
+                {
+                    if(sprite[j].lotag == 13)
+                    {
+                        if( hittype[j].temp_data[2] == 0 )
+                            hittype[j].temp_data[2] = 1;
+                    }
+                    else if(sprite[j].lotag == 8)
+                        hittype[j].temp_data[4] = 1;
+                    else if(sprite[j].lotag == 18)
+                    {
+                        if(hittype[j].temp_data[0] == 0)
+                            hittype[j].temp_data[0] = 1;
+                    }
+                    else if(sprite[j].lotag == 21)
+                        hittype[j].temp_data[0] = 1;
+                }
+                j = nextspritestat[j];
+            }
+
+            s.z -= (32<<8);
+
+            if( ( t[3] == 1 && s.xrepeat ) || s.lotag == -99 )
+            {
+                x = s.extra;
+                spawn(i,EXPLOSION2);
+                hitradius( i,seenineblastradius,x>>2, x-(x>>1),x-(x>>2), x);
+                spritesound(PIPEBOMB_EXPLODE,i);
+            }
+
+            if(s.xrepeat)
+                for(x=0;x<8;x++) EGS(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
+
+            deletesprite(i);
+            i = nexti;
+        };
 
         if( s.picnum >= CRACK1 && s.picnum <= CRACK4 )
         {
@@ -1661,7 +1703,8 @@ function movestandables()
                         j = nextspritestat[j];
                     }
 
-                    throw "goto DETONATE";
+                    DETONATE();
+                    continue BOLT;
                 }
                 else
                 {
@@ -1704,7 +1747,8 @@ function movestandables()
                 hitradius( i, pipebombblastradius,x>>2, x-(x>>1),x-(x>>2), x);
                 spritesound(PIPEBOMB_EXPLODE,i);
 
-                throw "goto DETONATE;"
+                DETONATE();
+                continue BOLT;
             }
             else
             {
@@ -1752,71 +1796,37 @@ function movestandables()
                 }
                 else
                 {
-                    throw "todo goto stuff"
-                    //if( s.xrepeat > 0 )
-                    //{
-                    //    hittype[i].temp_data[2]++;
-                    //    if(hittype[i].temp_data[2] == 3)
-                    //    {
-                    //        if( s.picnum == OOZFILTER )
-                    //        {
-                    //            hittype[i].temp_data[2] = 0;
-                    //            goto DETONATE;
-                    //        }
-                    //        if( s.picnum != (SEENINEDEAD+1) )
-                    //        {
-                    //            hittype[i].temp_data[2] = 0;
+                    if( s.xrepeat > 0 )
+                    {
+                        hittype[i].temp_data[2]++;
+                        if(hittype[i].temp_data[2] == 3)
+                        {
+                            if( s.picnum == OOZFILTER )
+                            {
+                                hittype[i].temp_data[2] = 0;
+                                DETONATE();
+                                continue BOLT;
+                            }
+                            if( s.picnum != (SEENINEDEAD+1) )
+                            {
+                                hittype[i].temp_data[2] = 0;
 
-                    //            if(s.picnum == SEENINEDEAD) s.picnum++;
-                    //            else if(s.picnum == SEENINE)
-                    //                s.picnum = SEENINEDEAD;
-                    //        }
-                    //        else goto DETONATE;
-                    //    }
-                    //    {i = nexti; continue BOLT;}
-                    //}
+                                if(s.picnum == SEENINEDEAD) s.picnum++;
+                                else if(s.picnum == SEENINE)
+                                    s.picnum = SEENINEDEAD;
+                            }
+                            else {
+                                DETONATE();
+                                continue BOLT;
+                            }
+                            
+                        }
+                        {i = nexti; continue BOLT;}
+                    }
 
                     //DETONATE:
-
-                    //    earthquaketime = 16;
-
-                    //j = headspritestat[3];
-                    //while(j >= 0)
-                    //{
-                    //    if( s.hitag == sprite[j].hitag )
-                    //    {
-                    //        if(sprite[j].lotag == 13)
-                    //        {
-                    //            if( hittype[j].temp_data[2] == 0 )
-                    //                hittype[j].temp_data[2] = 1;
-                    //        }
-                    //        else if(sprite[j].lotag == 8)
-                    //            hittype[j].temp_data[4] = 1;
-                    //        else if(sprite[j].lotag == 18)
-                    //        {
-                    //            if(hittype[j].temp_data[0] == 0)
-                    //                hittype[j].temp_data[0] = 1;
-                    //        }
-                    //        else if(sprite[j].lotag == 21)
-                    //            hittype[j].temp_data[0] = 1;
-                    //    }
-                    //    j = nextspritestat[j];
-                    //}
-
-                    //s.z -= (32<<8);
-
-                    //if( ( t[3] == 1 && s.xrepeat ) || s.lotag == -99 )
-                    //{
-                    //    x = s.extra;
-                    //    spawn(i,EXPLOSION2);
-                    //    hitradius( i,seenineblastradius,x>>2, x-(x>>1),x-(x>>2), x);
-                    //    spritesound(PIPEBOMB_EXPLODE,i);
-                    //}
-
-                    //if(s.xrepeat)
-                    //    for(x=0;x<8;x++) EGS(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
-
-                    //{deletesprite(i);{i = nexti; continue BOLT;}}
+                    DETONATE();
+                    continue BOLT;
                 }
             }
             {i = nexti; continue BOLT;}

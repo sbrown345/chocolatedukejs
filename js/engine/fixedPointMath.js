@@ -113,6 +113,8 @@ function ksgn(i1) {
     else return 0;
 }
 
+function sgn(i1) { return ksgn(i1); }
+
 function klabs(i1) {
     if (i1 < 0) {
         i1 = -i1;
