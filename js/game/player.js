@@ -1956,6 +1956,33 @@ function  doincrements(p)
     return 0;
 }
 
+var weapon_sprites = [KNEE, FIRSTGUNSPRITE, SHOTGUNSPRITE,
+    CHAINGUNSPRITE, RPGSPRITE, HEAVYHBOMB, SHRINKERSPRITE, DEVISTATORSPRITE,
+    TRIPBOMBSPRITE, FREEZESPRITE, HEAVYHBOMB, SHRINKERSPRITE];
+
+//2321
+function checkweapons(p)
+{
+    var cw;
+
+    cw = p.curr_weapon;
+
+    if(cw < 1 || cw >= MAX_WEAPONS) return;
+
+    if(cw)
+    {
+        if(TRAND&1)
+            spawn(p.i,weapon_sprites[cw]);
+        else switch(cw)
+        {
+            case RPG_WEAPON:
+            case HANDBOMB_WEAPON:
+                spawn(p.i,EXPLOSION2);
+                break;
+        }
+    }
+}
+
 //2337
 Player.processInput = function(snum) {
     var j, i, k, doubvel, fz, cz, hz, lz, truefdist, x, y;
@@ -1972,7 +1999,7 @@ Player.processInput = function(snum) {
         refSectnum = new Ref();
 
     p = ps[snum];
-    console.log("start of processInput: p.posyv: %i", p.posyv)
+    console.log("start of processInput: p.posyv: %i", p.posyv);
     pi = p.i;
     s = sprite[pi];
 
@@ -2177,130 +2204,137 @@ Player.processInput = function(snum) {
 
     if( s.extra <= 0 )
     {
-        throw "todo"
-        debugger;
-     //        if(p.dead_flag == 0)
-//        {
-//            if(s.pal != 1)
-//            {
-//                p.pals[0] = 63;
-//                p.pals[1] = 0;
-//                p.pals[2] = 0;
-//                p.pals_time = 63;
-//                p.posz -= (16<<8);
-//                s.z -= (16<<8);
-//            }
+        if(p.dead_flag == 0)
+        {
+            if(s.pal != 1)
+            {
+                p.pals[0] = 63;
+                p.pals[1] = 0;
+                p.pals[2] = 0;
+                p.pals_time = 63;
+                p.posz -= (16<<8);
+                s.z -= (16<<8);
+            }
 
-//            if(ud.recstat == 1 && ud.multimode < 2)
-//                closedemowrite();
+            if(ud.recstat == 1 && ud.multimode < 2)
+                closedemowrite();
 
-//            if(s.pal != 1)
-//                p.dead_flag = (512-((krand()&1)<<10)+(krand()&255)-512)&2047;
+            if(s.pal != 1)
+                p.dead_flag = (512-((krand()&1)<<10)+(krand()&255)-512)&2047;
 
-//            p.jetpack_on = 0;
-//            p.holoduke_on = -1;
+            p.jetpack_on = 0;
+            p.holoduke_on = -1;
 
-//            stopsound(DUKE_JETPACK_IDLE);
-//            if(p.scream_voice > FX_Ok)
-//            {
-//                FX_StopSound(p.scream_voice);
-//                testcallback(DUKE_SCREAM);
-//                p.scream_voice = FX_Ok;
-//            }
+            stopsound(DUKE_JETPACK_IDLE);
+            if(p.scream_voice > FX_Ok)
+            {
+                FX.stopSound(p.scream_voice);
+                testcallback(DUKE_SCREAM);
+                p.scream_voice = FX_Ok;
+            }
 
-//            if( s.pal != 1 && (s.cstat&32768) == 0) s.cstat = 0;
+            if( s.pal != 1 && (s.cstat&32768) == 0) s.cstat = 0;
 
-//            if( ud.multimode > 1 && ( s.pal != 1 || (s.cstat&32768) ) )
-//            {
-//                if(p.frag_ps != snum)
-//                {
-//                    ps[p.frag_ps].frag++;
-//                    frags[p.frag_ps][snum]++;
+            if( ud.multimode > 1 && ( s.pal != 1 || (s.cstat&32768) ) )
+            {
+                if(p.frag_ps != snum)
+                {
+                    ps[p.frag_ps].frag++;
+                    frags[p.frag_ps][snum]++;
 
-//                    if( ud.user_name[p.frag_ps][0] != 0)
-//                    {
-//                        if(snum == screenpeek)
-//                        {
-//                            fta_quotes[115] = "KILLED BY " + ud.user_name[p.frag_ps];
-//                            FTA(115,p,1);
-//                        }
-//                        else if(screenpeek == p.frag_ps)
-//                            // FIX_00076: Added default names for bots + fixed a "killed <name>" bug in Fakeplayers with AI
-//                        {
-//                            fta_quotes[116] = "KILLED " + ud.user_name[snum];
-//                            FTA(116,ps[p.frag_ps],1);
-//                        }
-//                    }
-//                    else
-//                    {
-//                        if(snum == screenpeek)
-//                        {
-//                            fta_quotes[115] = "KILLED BY PLAYER " + (1 + p.frag_ps);
-//                            FTA(115,p,1);
-//                        }
-//                        else if(screenpeek == p.frag_ps)
-//                        {
-//                            fta_quotes[116] = "KILLED PLAYER " + 1 + snum;
-//                            FTA(116, ps[p.frag_ps], 1);
-//                        }
-//                    }
-//                }
-//                else p.fraggedself++;
+                    if( ud.user_name[p.frag_ps][0] != 0)
+                    {
+                        if(snum == screenpeek)
+                        {
+                            fta_quotes[115] = "KILLED BY " + ud.user_name[p.frag_ps];
+                            FTA(115,p,1);
+                        }
+                        else if(screenpeek == p.frag_ps)
+                            // FIX_00076: Added default names for bots + fixed a "killed <name>" bug in Fakeplayers with AI
+                        {
+                            fta_quotes[116] = "KILLED " + ud.user_name[snum];
+                            FTA(116,ps[p.frag_ps],1);
+                        }
+                    }
+                    else
+                    {
+                        if(snum == screenpeek)
+                        {
+                            fta_quotes[115] = "KILLED BY PLAYER " + (1 + p.frag_ps);
+                            FTA(115,p,1);
+                        }
+                        else if(screenpeek == p.frag_ps)
+                        {
+                            fta_quotes[116] = "KILLED PLAYER " + 1 + snum;
+                            FTA(116, ps[p.frag_ps], 1);
+                        }
+                    }
+                }
+                else p.fraggedself++;
 
-//                if(myconnectindex == connecthead)
-//                {
-//                    sendscore("frag " + (p.frag_ps + 1) + " killed " + (snum + 1));
-//                }
+                if(myconnectindex == connecthead)
+                {
+                    sendscore("frag " + (p.frag_ps + 1) + " killed " + (snum + 1));
+                }
 
-//                p.frag_ps = snum;
-//                pus = NUMPAGES;
-//            }
-//        }
+                p.frag_ps = snum;
+                pus = NUMPAGES;
+            }
+        }
 
-//        if( psectlotag == 2 )
-//        {
-//            if(p.on_warping_sector == 0)
-//            {
-//                if( klabs(p.posz-fz) > (PHEIGHT>>1))
-//                    p.posz += 348;
-//            }
-//            else
-//            {
-//                s.z -= 512;
-//                s.zvel = -348;
-//            }
-                //refX.$ = p.posx;
-                //refY.$ = p.posy;
-                //refZ.$ = p.posz;
-                //refSectnum.$ = p.cursectnum;
-//            clipmove(refX, refY, refZ, refSectnum, 0, 0, 164, (4 << 8), (4 << 8), CLIPMASK0);
-//            p.posx = refX.$;
-//            p.posy = refY.$;
-//            p.posz = refZ.$;
-//            p.cursectnum = refSectnum.$;
-//        }
+        if( psectlotag == 2 )
+        {
+            if(p.on_warping_sector == 0)
+            {
+                if( klabs(p.posz-fz) > (PHEIGHT>>1))
+                    p.posz += 348;
+            }
+            else
+            {
+                s.z -= 512;
+                s.zvel = -348;
+            }
+                refX.$ = p.posx;
+                refY.$ = p.posy;
+                refZ.$ = p.posz;
+                refSectnum.$ = p.cursectnum;
+            clipmove(refX, refY, refZ, refSectnum, 0, 0, 164, (4 << 8), (4 << 8), CLIPMASK0);
+            p.posx = refX.$;
+            p.posy = refY.$;
+            p.posz = refZ.$;
+            p.cursectnum = refSectnum.$;
+        }
 
-//        p.oposx = p.posx;
-//        p.oposy = p.posy;
-//        p.oposz = p.posz;
-//        p.oang = p.ang;
-//        p.opyoff = p.pyoff;
+        p.oposx = p.posx;
+        p.oposy = p.posy;
+        p.oposz = p.posz;
+        p.oang = p.ang;
+        p.opyoff = p.pyoff;
 
-//        p.horiz = 100;
-//        p.horizoff = 0;
+        p.horiz = 100;
+        p.horizoff = 0;
 
 
-//        throw " todo: un comment following lines - do refs:";
-//        //updatesector(p.posx,p.posy,&p.cursectnum);
+        var cursectnumRef = new Ref(p.cursectnum);
+        updatesector(p.posx, p.posy, cursectnumRef);
+        p.cursectnum = cursectnumRef.$;
 
-//        //pushmove(&p.posx,&p.posy,&p.posz,&p.cursectnum,128L,(4<<8),(20L<<8),CLIPMASK0);
+        var posxRef = new Ref(p.posx);
+        var posyRef = new Ref(p.posy);
+        var poszRef = new Ref(p.posz);
+        var pcursectnumRef = new Ref(p.cursectnum);
+        pushmove(posxRef,posyRef,poszRef,pcursectnumRef,128,(4<<8),(20<<8),CLIPMASK0);
+        p.posx = posxRef.$;
+        p.posy = posyRef.$;
+        p.posz = poszRef.$;
+        p.cursectnum = pcursectnumRef.$;
+        
+        if( fz > cz+(16<<8) && s.pal != 1)
+            p.rotscrnang = (p.dead_flag + ( (fz+p.posz)>>7))&2047;
 
-//        //if( fz > cz+(16<<8) && s.pal != 1)
-//        //    p.rotscrnang = (p.dead_flag + ( (fz+p.posz)>>7))&2047;
+        p.on_warping_sector = 0;
 
-//        //p.on_warping_sector = 0;
-
-//        return;
+        return;
     }
 
     if(p.transporter_hold > 0)
@@ -2657,7 +2691,7 @@ Player.processInput = function(snum) {
             p.falling_counter = 0;
             if(p.scream_voice > FX_Ok)
             {
-                FX_StopSound(p.scream_voice);
+                FX.stopSound(p.scream_voice);
                 p.scream_voice = FX_Ok;
             }
 
@@ -2809,55 +2843,52 @@ Player.processInput = function(snum) {
             switch(j)
             {
                 case HURTRAIL:
-                    throw "todo"
-                    //                    if( rnd(32) )
-//                    {
-//                        if(p.boot_amount > 0)
-//                            k = 1;
-//                        else
-//                        {
-//                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
-//                                spritesound(DUKE_LONGTERM_PAIN,pi);
-//                            p.pals[0] = 64; p.pals[1] = 64; p.pals[2] = 64;
-//                            p.pals_time = 32;
-//                            s.extra -= 1+(krand()&3);
-//                            if(Sound[SHORT_CIRCUIT].num < 1)
-//                                spritesound(SHORT_CIRCUIT,pi);
-//                        }
-//                    }
-//                    break;
+                    if( rnd(32) )
+                    {
+                        if(p.boot_amount > 0)
+                            k = 1;
+                        else
+                        {
+                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
+                                spritesound(DUKE_LONGTERM_PAIN,pi);
+                            p.pals[0] = 64; p.pals[1] = 64; p.pals[2] = 64;
+                            p.pals_time = 32;
+                            s.extra -= 1+(krand()&3);
+                            if(Sound[SHORT_CIRCUIT].num < 1)
+                                spritesound(SHORT_CIRCUIT,pi);
+                        }
+                    }
+                    break;
                 case FLOORSLIME:
-                    throw "todo"
-                    //                    if( rnd(16) )
-//                    {
-//                        if(p.boot_amount > 0)
-//                            k = 1;
-//                        else
-//                        {
-//                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
-//                                spritesound(DUKE_LONGTERM_PAIN,pi);
-//                            p.pals[0] = 0; p.pals[1] = 8; p.pals[2] = 0;
-//                            p.pals_time = 32;
-//                            s.extra -= 1+(krand()&3);
-//                        }
-//                    }
-//                    break;
+                    if( rnd(16) )
+                    {
+                        if(p.boot_amount > 0)
+                            k = 1;
+                        else
+                        {
+                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
+                                spritesound(DUKE_LONGTERM_PAIN,pi);
+                            p.pals[0] = 0; p.pals[1] = 8; p.pals[2] = 0;
+                            p.pals_time = 32;
+                            s.extra -= 1+(krand()&3);
+                        }
+                    }
+                    break;
                 case FLOORPLASMA:
-                    throw "todo"
-//                    if( rnd(32) )
-//                    {
-//                        if( p.boot_amount > 0 )
-//                            k = 1;
-//                        else
-//                        {
-//                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
-//                                spritesound(DUKE_LONGTERM_PAIN,pi);
-//                            p.pals[0] = 8; p.pals[1] = 0; p.pals[2] = 0;
-//                            p.pals_time = 32;
-//                            s.extra -= 1+(krand()&3);
-//                        }
-//                    }
-//                    break;
+                    if( rnd(32) )
+                    {
+                        if( p.boot_amount > 0 )
+                            k = 1;
+                        else
+                        {
+                            if(Sound[DUKE_LONGTERM_PAIN].num < 1)
+                                spritesound(DUKE_LONGTERM_PAIN,pi);
+                            p.pals[0] = 8; p.pals[1] = 0; p.pals[2] = 0;
+                            p.pals_time = 32;
+                            s.extra -= 1+(krand()&3);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -3360,81 +3391,79 @@ Player.processInput = function(snum) {
         switch( p.curr_weapon )
         {
             case HANDBOMB_WEAPON:
-                throw "todo"
-//                if( (p.kickback_pic) == 6 && (sb_snum&(1<<2)) )
-//                {
-//                    p.rapid_fire_hold = 1;
-//                    break;
-//                }
-//                (p.kickback_pic)++;
-//                if((p.kickback_pic)==12)
-//                {
-//                    p.ammo_amount[HANDBOMB_WEAPON]--;
+                if( (p.kickback_pic) == 6 && (sb_snum&(1<<2)) )
+                {
+                    p.rapid_fire_hold = 1;
+                    break;
+                }
+                (p.kickback_pic)++;
+                if((p.kickback_pic)==12)
+                {
+                    p.ammo_amount[HANDBOMB_WEAPON]--;
 
-//                    if(p.on_ground && (sb_snum&2) )
-//                    {
-//                        k = 15;
-//                        i = ((p.horiz+p.horizoff-100)*20);
-//                    }
-//                    else
-//                    {
-//                        k = 140;
-//                        i = -512-((p.horiz+p.horizoff-100)*20);
-//                    }
+                    if(p.on_ground && (sb_snum&2) )
+                    {
+                        k = 15;
+                        i = ((p.horiz+p.horizoff-100)*20);
+                    }
+                    else
+                    {
+                        k = 140;
+                        i = -512-((p.horiz+p.horizoff-100)*20);
+                    }
 
-//                    j = EGS(p.cursectnum,
-//                        p.posx+(sintable[(p.ang+512)&2047]>>6),
-//                        p.posy+(sintable[p.ang&2047]>>6),
-//                        p.posz,HEAVYHBOMB,-16,9,9,
-//                        p.ang,(k+(p.hbomb_hold_delay<<5)),i,pi,1);
+                    j = EGS(p.cursectnum,
+                        p.posx+(sintable[(p.ang+512)&2047]>>6),
+                        p.posy+(sintable[p.ang&2047]>>6),
+                        p.posz,HEAVYHBOMB,-16,9,9,
+                        p.ang,(k+(p.hbomb_hold_delay<<5)),i,pi,1);
 
-//                    if(k == 15)
-//                    {
-//                        sprite[j].yvel = 3;
-//                        sprite[j].z += (8<<8);
-//                    }
+                    if(k == 15)
+                    {
+                        sprite[j].yvel = 3;
+                        sprite[j].z += (8<<8);
+                    }
 
-//                    k = hits(pi);
-//                    if( k < 512 )
-//                    {
-//                        sprite[j].ang += 1024;
-//                        sprite[j].zvel /= 3;
-//                        sprite[j].xvel /= 3;
-//                    }
+                    k = hits(pi);
+                    if( k < 512 )
+                    {
+                        sprite[j].ang += 1024;
+                        sprite[j].zvel /= 3; sprite[j].zvel = sprite[j].zvel | 0;
+                        sprite[j].xvel /= 3; sprite[j].xvel = sprite[j].xvel | 0;
+                    }
 
-//                    p.hbomb_on = 1;
+                    p.hbomb_on = 1;
 
-//                }
-//                else if( (p.kickback_pic) < 12 && (sb_snum&(1<<2)) )
-//                    p.hbomb_hold_delay++;
-//                else if( (p.kickback_pic) > 19 )
-//                {
-//                    (p.kickback_pic) = 0;
-//                    p.curr_weapon = HANDREMOTE_WEAPON;
-//                    p.last_weapon = -1;
-//                    p.weapon_pos = 10;
-//                }
+                }
+                else if( (p.kickback_pic) < 12 && (sb_snum&(1<<2)) )
+                    p.hbomb_hold_delay++;
+                else if( (p.kickback_pic) > 19 )
+                {
+                    (p.kickback_pic) = 0;
+                    p.curr_weapon = HANDREMOTE_WEAPON;
+                    p.last_weapon = -1;
+                    p.weapon_pos = 10;
+                }
 
-//                break;
+                break;
 
 
             case HANDREMOTE_WEAPON:
-                throw "todo"
-                //                (p.kickback_pic)++;
+                (p.kickback_pic)++;
 
-//                if((p.kickback_pic) == 2)
-//                {
-//                    p.hbomb_on = 0;
-//                }
+                if((p.kickback_pic) == 2)
+                {
+                    p.hbomb_on = 0;
+                }
 
-//                if((p.kickback_pic) == 10)
-//                {
-//                    (p.kickback_pic) = 0;
-//                    if(p.ammo_amount[HANDBOMB_WEAPON] > 0)
-//                        addweapon(p,HANDBOMB_WEAPON);
-//                    else checkavailweapon(p);
-//                }
-//                break;
+                if((p.kickback_pic) == 10)
+                {
+                    (p.kickback_pic) = 0;
+                    if(p.ammo_amount[HANDBOMB_WEAPON] > 0)
+                        addweapon(p,HANDBOMB_WEAPON);
+                    else checkavailweapon(p);
+                }
+                break;
 
             case PISTOL_WEAPON:
             if( (p.kickback_pic)==1)
@@ -3480,94 +3509,92 @@ Player.processInput = function(snum) {
                 break;
 
             case SHOTGUN_WEAPON:
-                throw "todo"
-                //                (p.kickback_pic)++;
+                (p.kickback_pic)++;
 
-//                if(p.kickback_pic == 4)
-//                {
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
-//                    shoot(pi,SHOTGUN);
+                if(p.kickback_pic == 4)
+                {
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
+                    shoot(pi,SHOTGUN);
 
-//                    p.ammo_amount[SHOTGUN_WEAPON]--;
+                    p.ammo_amount[SHOTGUN_WEAPON]--;
 
-//                    spritesound(SHOTGUN_FIRE,pi);
+                    spritesound(SHOTGUN_FIRE,pi);
 
-//                    lastvisinc = totalclock+32;
-//                    p.visibility = 0;
-//                }
+                    lastvisinc = totalclock+32;
+                    p.visibility = 0;
+                }
 
-//                switch(p.kickback_pic)
-//                {
-//                    case 13:
-//                        checkavailweapon(p);
-//                        break;
-//                    case 15:
-//                        spritesound(SHOTGUN_COCK,pi);
-//                        break;
-//                    case 17:
-//                    case 20:
-//                        p.kickback_pic++;
-//                        break;
-//                    case 24:
-//                        j = spawn(pi,SHOTGUNSHELL);
-//                        sprite[j].ang += 1024;
-//                        ssp(j,CLIPMASK0);
-//                        sprite[j].ang += 1024;
-//                        p.kickback_pic++;
-//                        break;
-//                    case 31:
-//                        p.kickback_pic = 0;
-//                        return;
-//                }
-//                break;
+                switch(p.kickback_pic)
+                {
+                    case 13:
+                        checkavailweapon(p);
+                        break;
+                    case 15:
+                        spritesound(SHOTGUN_COCK,pi);
+                        break;
+                    case 17:
+                    case 20:
+                        p.kickback_pic++;
+                        break;
+                    case 24:
+                        j = spawn(pi,SHOTGUNSHELL);
+                        sprite[j].ang += 1024;
+                        ssp(j,CLIPMASK0);
+                        sprite[j].ang += 1024;
+                        p.kickback_pic++;
+                        break;
+                    case 31:
+                        p.kickback_pic = 0;
+                        return;
+                }
+                break;
 
             case CHAINGUN_WEAPON:
-                throw "todo"
 
-//                (p.kickback_pic)++;
+                (p.kickback_pic)++;
 
-//                if( *(kb) <= 12 )
-//                {
-//                    if( ((*(kb))%3) == 0 )
-//                    {
-//                        p.ammo_amount[CHAINGUN_WEAPON]--;
+                if( p.kickback_pic <= 12 )
+                {
+                    if( ((p.kickback_pic)%3) == 0 )
+                    {
+                        p.ammo_amount[CHAINGUN_WEAPON]--;
 
-//                        if( (*(kb)%3) == 0 )
-//                        {
-//                            j = spawn(pi,SHELL);
+                        if ((p.kickback_pic % 3) == 0)
+                        {
+                            j = spawn(pi,SHELL);
 
-//                            sprite[j].ang += 1024;
-//                            sprite[j].ang &= 2047;
-//                            sprite[j].xvel += 32;
-//                            sprite[j].z += (3<<8);
-//                            ssp(j,CLIPMASK0);
-//                        }
+                            sprite[j].ang += 1024;
+                            sprite[j].ang &= 2047;
+                            sprite[j].xvel += 32;
+                            sprite[j].z += (3<<8);
+                            ssp(j,CLIPMASK0);
+                        }
 
-//                        spritesound(CHAINGUN_FIRE,pi);
-//                        shoot(pi,CHAINGUN);
-//                        lastvisinc = totalclock+32;
-//                        p.visibility = 0;
-//                        checkavailweapon(p);
+                        spritesound(CHAINGUN_FIRE,pi);
+                        shoot(pi,CHAINGUN);
+                        lastvisinc = totalclock+32;
+                        p.visibility = 0;
+                        checkavailweapon(p);
 
-//                        if( ( sb_snum&(1<<2) ) == 0 )
-//                        {
-//                            p.kickback_pic = 0;
-//                            break;
-//                        }
-//                    }
-//                }
-//                else if((p.kickback_pic) > 10)
-//                {
-//                    if( sb_snum&(1<<2) ) p.kickback_pic = 1;
-//                    else p.kickback_pic = 0;
-//                }
+                        if( ( sb_snum&(1<<2) ) == 0 )
+                        {
+                            p.kickback_pic = 0;
+                            break;
+                        }
+                    }
+                }
+                else if((p.kickback_pic) > 10)
+                {
+                    if( sb_snum&(1<<2) ) p.kickback_pic = 1;
+                    else p.kickback_pic = 0;
+                }
 
-//                break;
+                break;
 
             case SHRINKER_WEAPON:
             case GROW_WEAPON:

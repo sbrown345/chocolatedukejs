@@ -668,7 +668,7 @@ function coolgaugetext(snum) {
 
     //            minitext(292-30-o,190,"%",6,10+16+permbit);
 
-    //            j = 0x80000000;
+    //            j = 0x80000000 | 0;
     //            switch(p.inven_icon)
     //            {
     //                case 1: i = p.firstaid_amount; break;
@@ -681,7 +681,7 @@ function coolgaugetext(snum) {
     //            }
     //            invennum(284-30-o,200-6,(uint8_t )i,0,10+permbit);
     //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-    //            else if (j != 0x80000000) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+    //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
     //            if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
     //        }
     //    }
@@ -818,10 +818,10 @@ function coolgaugetext(snum) {
     //                case 3: j = p.holoduke_on; break;
     //                case 4: j = p.jetpack_on; break;
     //                case 5: j = p.heat_on; break;
-    //                default: j = 0x80000000;
+    //                default: j = 0x80000000 | 0;
     //            }
     //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-    //            else if (j != 0x80000000) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+    //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
     //        }
     //        if (u&8192)
     //        {
@@ -1409,6 +1409,21 @@ Game.displayRooms = function (snum, smoothratio) {
     }
     else p.visibility = ud.const_visibility;
 };
+
+//3464
+function LocateTheLocator(n,sn)
+{
+	var i;
+
+	i = headspritestat[7];
+	while(i >= 0)
+	{
+		if( (sn == -1 || sn == sprite[i].sectnum) && n == sprite[i].lotag )
+			return i;
+		i = nextspritestat[i];
+	}
+	return -1;
+}
 
 //3472
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
@@ -5312,6 +5327,44 @@ function ceilingglass(i,sectnum,n) {
 	}
 }
 
+//10431
+function lotsofcolourglass( i, wallnum, n)
+{
+	var j, xv, yv, z, x1, y1;
+	var sect = new Ref(-1), a, k;
+
+	if(wallnum < 0)
+	{
+		for(j=n-1; j >= 0 ;j--)
+		{
+			a = TRAND&2047;
+			k = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(TRAND&(63<<8)),GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),1024-(TRAND&2047),i,5);
+			sprite[k].pal = TRAND&15;
+		}
+		return;
+	}
+
+	j = n+1;
+	x1 = wall[wallnum].x;
+	y1 = wall[wallnum].y;
+
+	xv = (wall[wall[wallnum].point2].x-wall[wallnum].x)/j;
+	yv = (wall[wall[wallnum].point2].y-wall[wallnum].y)/j;
+
+	for(j=n;j>0;j--)
+	{
+		x1 += xv;
+		y1 += yv;
+
+		updatesector(x1,y1,sect);
+		z = sector[sect.$].floorz - (TRAND & (klabs(sector[sect.$].ceilingz - sector[sect.$].floorz)));
+		if( z < -(32<<8) || z > (32<<8) )
+			z = sprite[i].z-(32<<8)+(TRAND&((64<<8)-1));
+		a = SA-1024;
+		k = EGS(sprite[i].sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),-(TRAND&2047),i,5);
+		sprite[k].pal = TRAND&7;
+	}
+}
 
 //10434
 

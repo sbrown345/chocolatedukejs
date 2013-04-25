@@ -138,6 +138,78 @@ function addweapon(p, weapon) {
     PreMap.vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
 }
 
+function checkavailinven( p )
+{
+
+    if(p.firstaid_amount > 0)
+        p.inven_icon = 1;
+    else if(p.steroids_amount > 0)
+        p.inven_icon = 2;
+    else if(p.holoduke_amount > 0)
+        p.inven_icon = 3;
+    else if(p.jetpack_amount > 0)
+        p.inven_icon = 4;
+    else if(p.heat_amount > 0)
+        p.inven_icon = 5;
+    else if(p.scuba_amount > 0)
+        p.inven_icon = 6;
+    else if(p.boot_amount > 0)
+        p.inven_icon = 7;
+    else p.inven_icon = 0;
+}
+function checkavailweapon( p )
+{
+    var i,snum;
+    var weap;
+
+    if(p.wantweaponfire >= 0)
+    {
+        weap = p.wantweaponfire;
+        p.wantweaponfire = -1;
+
+        if(weap == p.curr_weapon) return;
+        else if( p.gotweapon[weap] && p.ammo_amount[weap] > 0 )
+        {
+            addweapon(p,weap);
+            return;
+        }
+    }
+
+    weap = p.curr_weapon;
+    if( p.gotweapon[weap] && p.ammo_amount[weap] > 0 )
+        return;
+
+    snum = sprite[p.i].yvel;
+
+    for(i=0;i<10;i++)
+    {
+        weap = ud.wchoice[snum][i];
+        if (VOLUMEONE)
+            if(weap > 6) continue;
+
+        if(weap == 0) weap = 9;
+        else weap--;
+
+        if( weap == 0 || ( p.gotweapon[weap] && p.ammo_amount[weap] > 0 ) )
+            break;
+    }
+
+    if(i == 10) weap = 0;
+
+    // Found the weapon
+
+    p.last_weapon  = p.curr_weapon;
+    p.random_club_frame = 0;
+    p.curr_weapon  = weap;
+    p.kickback_pic = 0;
+    if(p.holster_weapon == 1)
+    {
+        p.holster_weapon = 0;
+        p.weapon_pos = 10;
+    }
+    else p.weapon_pos   = -1;
+}
+
 
 //406
 function ifsquished(i, p)
@@ -362,7 +434,6 @@ function hitradius( i,  r,  hp1,   hp2,   hp3,   hp4 ) {
     }
 }
 
-
 //500
 function checkavailweapon( p ) {
     var i,snum;
@@ -415,7 +486,6 @@ function checkavailweapon( p ) {
     }
     else p.weapon_pos   = -1;
 }
-
 
 // 625
 function movesprite(spritenum, xchange, ychange, zchange, cliptype) {

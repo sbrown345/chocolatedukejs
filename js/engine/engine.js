@@ -4436,6 +4436,67 @@ function drawmaskwall(damaskwallcnt) {
     }
 }
 
+//4895
+function ceilspritehline(x2, y) {
+    var x1, v, bx, by;
+
+    /*
+     * x = x1 + (x2-x1)t + (y1-y2)u  ³  x = 160v
+     * y = y1 + (y2-y1)t + (x2-x1)u  ³  y = (scrx-160)v
+     * z = z1 = z2                   ³  z = posz + (scry-horiz)v
+     */
+
+    x1 = lastx[y];
+    if (x2 < x1) return;
+
+    v = mulscale20(globalzd,horizlookup[y-globalhoriz+horizycent]);
+    bx = mulscale14(globalx2*x1+globalx1,v) + globalxpanning;
+    by = mulscale14(globaly2*x1+globaly1,v) + globalypanning;
+    asm1 = mulscale14(globalx2,v);
+    asm2 = mulscale14(globaly2,v);
+
+    asm3 = new PointerHelper((palookup[globalpal]), (getpalookup(mulscale28(klabs(v), globvis), globalshade) << 8));
+    
+    if ((globalorientation&2) == 0)
+        mhline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1/*,frameoffset*/);
+    else
+    {
+        thline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1/*,frameoffset*/);
+        transarea += (x2-x1);
+    }
+}
+
+//4925
+function ceilspritescan(x1, x2) {
+    var x, y1, y2, twall, bwall;
+
+    y1 = uwall[x1];
+    y2 = y1;
+    for (x = x1; x <= x2; x++) {
+        twall = uwall[x] - 1;
+        bwall = dwall[x];
+        if (twall < bwall - 1) {
+            if (twall >= y2) {
+                while (y1 < y2 - 1) ceilspritehline(x - 1, ++y1);
+                y1 = twall;
+            }
+            else {
+                while (y1 < twall) ceilspritehline(x - 1, ++y1);
+                while (y1 > twall) lastx[y1--] = x;
+            }
+            while (y2 > bwall) ceilspritehline(x - 1, --y2);
+            while (y2 < bwall) lastx[y2++] = x;
+        }
+        else {
+            while (y1 < y2 - 1) ceilspritehline(x - 1, ++y1);
+            if (x == x2) break;
+            y1 = uwall[x + 1];
+            y2 = y1;
+        }
+    }
+    while (y1 < y2 - 1) ceilspritehline(x2, ++y1);
+    faketimerhandler();
+}
 
 //4957
 function drawsprite (snum) {
@@ -4862,7 +4923,7 @@ function drawsprite (snum) {
             {
                 if (Math.min(pvWalls[MAXWALLSB-1].screenSpaceCoo[0][VEC_DIST],pvWalls[MAXWALLSB-1].screenSpaceCoo[1][VEC_DIST]) > Math.max(pvWalls[j].screenSpaceCoo[0][VEC_DIST],pvWalls[j].screenSpaceCoo[1][VEC_DIST]))
                 {
-                    x = 0x80000000;
+                    x = 0x80000000 | 0;
                 }
                 else
                 {
@@ -4889,7 +4950,7 @@ function drawsprite (snum) {
                             if ((xp2-xp1)*(tspr.y-yp1) == (tspr.x-xp1)*(yp2-yp1))
                             {
                                 if (wall[pvWalls[j].worldWallId].nextsector == tspr.sectnum)
-                                    x = 0x80000000;
+                                    x = 0x80000000 | 0;
                                 else
                                     x = 0x7fffffff;
                             }
@@ -5171,7 +5232,7 @@ function drawsprite (snum) {
         lpoint = -1;
         lmax = 0x7fffffff;
         rpoint = -1;
-        rmax = 0x80000000;
+        rmax = 0x80000000 | 0;
         for(z=0; z<npoints; z++)
         {
             xsi[z] = scale(rxi[z],xdimen<<15,rzi[z]) + (xdimen<<15);
@@ -5193,7 +5254,6 @@ function drawsprite (snum) {
             dax1 = ((xsi[z]+65535)>>16);
             dax2 = ((xsi[zz]+65535)>>16);
             if (dax2 > dax1) {
-                debugger;
                 yinc = divscale16(ysi[zz]-ysi[z],xsi[zz]-xsi[z]);
                 y = ysi[z] + mulscale16((dax1<<16)-xsi[z],yinc);
                 qinterpolatedown16short(uwall, dax1, dax2 - dax1, y, yinc);
@@ -5210,7 +5270,6 @@ function drawsprite (snum) {
             dax2 = ((xsi[z]+65535)>>16);
             if (dax2 > dax1)
             {
-                debugger;
                 yinc = divscale16(ysi[zz] - ysi[z], xsi[zz] - xsi[z]);
                 y = ysi[zz] + mulscale16((dax1<<16)-xsi[zz],yinc);
                 qinterpolatedown16short(dwall, dax1, dax2 - dax1, y, yinc);
@@ -6849,7 +6908,7 @@ function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, c
     var clipyou = 0;
 
     if (sectnum < 0) {
-        ceilz.$ = 0x80000000;
+        ceilz.$ = 0x80000000 | 0;
         ceilhit.$ = -1;
         florz.$ = 0x7fffffff;
         florhit.$ = -1;

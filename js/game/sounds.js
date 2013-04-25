@@ -33,6 +33,9 @@ function spritesound(num, i) {
 //503
 function stopsound() { }
 
+//512
+function stopenvsound() { }
+
 //525
 function pan3dsound() { }
 
