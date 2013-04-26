@@ -1268,46 +1268,43 @@ Game.displayRooms = function (snum, smoothratio) {
         }
 
         if (screencapt) {
-            throw "todo"
-            //tiles[MAXTILES-1].lock = 254;
-            //if (tiles[MAXTILES-1].data == NULL)
-            //    allocache(tiles[MAXTILES-1].data,100*160,&tiles[MAXTILES-1].lock);
+            tiles[MAXTILES-1].lock = 254;
+            if (!tiles[MAXTILES-1].data)
+                allocache(tiles[MAXTILES-1].data,100*160,tiles[MAXTILES-1].lock);
 
-            //setviewtotile(MAXTILES-1,100,160);
+            setviewtotile(MAXTILES-1,100,160);
         }
         else if ((ud.screen_tilting && p.rotscrnang) || ud.detail == 0) {
-            throw "todo"
-            //    if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
+                if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
 
-            //    tiles[MAXTILES-2].lock = 255;
-            //    if (tiles[MAXTILES-2].data == NULL)
-            //        allocache(&tiles[MAXTILES-2].data,320*320,&tiles[MAXTILES-2].lock);
-            //    if ((tang&1023) == 0)
-            //        setviewtotile(MAXTILES-2,200>>(1-ud.detail),320>>(1-ud.detail));
-            //else
-            //		setviewtotile(MAXTILES-2,320>>(1-ud.detail),320>>(1-ud.detail));
-            //    if ((tang&1023) == 512)
-            //    {     //Block off unscreen section of 90ø tilted screen
-            //        j = ((320-60)>>(1-ud.detail));
-            //        for(i=(60>>(1-ud.detail))-1;i>=0;i--)
-            //        {
-            //            startumost[i] = 1; startumost[i+j] = 1;
-            //            startdmost[i] = 0; startdmost[i+j] = 0;
-            //        }
-            //    }
+                tiles[MAXTILES-2].lock = 255;
+                if (!tiles[MAXTILES-2].data)
+                    allocache(tiles[MAXTILES-2].data,320*320,tiles[MAXTILES-2].lock);
+                if ((tang&1023) == 0)
+                    setviewtotile(MAXTILES-2,200>>(1-ud.detail),320>>(1-ud.detail));
+            else
+            		setviewtotile(MAXTILES-2,320>>(1-ud.detail),320>>(1-ud.detail));
+                if ((tang&1023) == 512)
+                {     //Block off unscreen section of 90ø tilted screen
+                    j = ((320-60)>>(1-ud.detail));
+                    for(i=(60>>(1-ud.detail))-1;i>=0;i--)
+                    {
+                        startumost[i] = 1; startumost[i+j] = 1;
+                        startdmost[i] = 0; startdmost[i+j] = 0;
+                    }
+                }
 
-            //    i = (tang&511); if (i > 256) i = 512-i;
-            //    i = sinTable[i+512]*8 + sinTable[i]*5;
-            //    setAspect(i>>1,yxaspect);
+                i = (tang&511); if (i > 256) i = 512-i;
+                i = sintable[i+512]*8 + sintable[i]*5;
+                setAspect(i>>1,yxaspect);
         }
         if ((snum == myconnectindex) && (numplayers > 1)) {
-            throw "todo"
-            //cposx = omyx+mulscale16((int32_t)(myx-omyx),smoothratio);
-            //cposy = omyy+mulscale16((int32_t)(myy-omyy),smoothratio);
-            //cposz = omyz+mulscale16((int32_t)(myz-omyz),smoothratio);
-            //cang = omyang+mulscale16((int32_t)(((myang+1024-omyang)&2047)-1024),smoothratio);
-            //choriz = omyhoriz+omyhorizoff+mulscale16((int32_t)(myhoriz+myhorizoff-omyhoriz-omyhorizoff),smoothratio);
-            //sect = mycursectnum;
+            cposx = omyx+mulscale16((myx-omyx),smoothratio);
+            cposy = omyy+mulscale16((myy-omyy),smoothratio);
+            cposz = omyz+mulscale16((myz-omyz),smoothratio);
+            cang = omyang+mulscale16((((myang+1024-omyang)&2047)-1024),smoothratio);
+            choriz = omyhoriz+omyhorizoff+mulscale16((myhoriz+myhorizoff-omyhoriz-omyhorizoff),smoothratio);
+            sect = mycursectnum;
         } else {
             cposx = p.oposx + mulscale16((p.posx - p.oposx), smoothratio);
             cposy = p.oposy + mulscale16((p.posy - p.oposy), smoothratio);

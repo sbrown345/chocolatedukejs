@@ -123,7 +123,7 @@ var umost = new Int16Array(MAXXDIM + 1);
 ////FCS: (down-most pixel +1 on column x that can still be drawn to)
 var dmost = new Int16Array(MAXXDIM + 1);
 
-//int16_t bakumost[MAXXDIM+1], bakdmost[MAXXDIM+1];
+var bakumost = new Int16Array(MAXXDIM + 1), bakdmost = new Int16Array(MAXXDIM + 1);
 var uplc = new Int16Array(MAXXDIM + 1), dplc = new Int16Array(MAXXDIM + 1);
 var uwall = new Int16Array(MAXXDIM + 1), dwall = new Int16Array(MAXXDIM + 1);
 var swplc = new Int32Array(MAXXDIM + 1), lplc = new Int32Array(MAXXDIM + 1);
@@ -7373,6 +7373,15 @@ function clearView(dacol) {
 
     faketimerhandler();
 }
+
+/* MUST USE RESTOREFORDRAWROOMS AFTER DRAWING */
+var setviewcnt = 0;
+var bakvidoption = new Int32Array(4);
+var bakframeplace = new Uint8Array(4);
+var bakxsiz = new Int32Array(4), bakysiz = new Int32Array(4);
+var bakwindowx1 = new Int32Array(4), bakwindowy1 = new Int32Array(4);
+var bakwindowx2 = new Int32Array(4), bakwindowy2 = new Int32Array(4);
+
 function setviewback() {
     console.log("todo setviewback");
     //var i, j, k;

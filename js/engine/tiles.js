@@ -20,6 +20,36 @@ var numTiles;
 
 var gotpic = new Uint8Array((MAXTILES + 7) >> 3);
 
+function setviewtotile(tilenume, tileWidth, tileHeight) {
+    var i, j;
+    printf("todo setviewtotile", tilenume);
+    /* DRAWROOMS TO TILE BACKUP&SET CODE */
+    tiles[tilenume].dim.width = tileWidth;
+    tiles[tilenume].dim.height = tileHeight;
+    bakxsiz[setviewcnt] = tileWidth;
+    bakysiz[setviewcnt] = tileHeight;
+    bakvidoption[setviewcnt] = vidoption;
+    vidoption = 2;
+    bakframeplace[setviewcnt] = frameplace;
+    frameplace = new PointerHelper(tiles[tilenume].data);
+    bakwindowx1[setviewcnt] = windowx1;
+    bakwindowy1[setviewcnt] = windowy1;
+    bakwindowx2[setviewcnt] = windowx2;
+    bakwindowy2[setviewcnt] = windowy2;
+    copybufbyte(startumost, windowx1, bakumost, windowx1, (windowx2 - windowx1 + 1) * 2);
+    copybufbyte(startdmost, windowx1, bakdmost, windowx1, (windowx2 - windowx1 + 1) * 2);
+    setView(0, 0, tileHeight - 1, tileWidth - 1);
+    setAspect(65536, 65536);
+    j = 0;
+    for(i=0; i<=tileWidth; i++) {
+        ylookup[i] = j;
+        j += tileWidth;
+    }
+    setBytesPerLine(tileHeight);
+    setviewcnt++;
+}
+
+
 //94
 
 //1. Lock a picture in the cache system.
