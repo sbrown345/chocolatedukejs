@@ -1615,8 +1615,7 @@ function displayweapon(snum) {
 
                         if((p.kickback_pic))
                         {
-                            var  throw_frames=[]
-    						    = [0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2];
+                            var  throw_frames = [0,0,0,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2];
 
                             if((p.kickback_pic) < 7)
                                 gun_pos -= 10*(p.kickback_pic);        //D

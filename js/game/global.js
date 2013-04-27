@@ -22,6 +22,8 @@ var BYTEVERSION_1_3 = 1; // for 1.3 demos (Not compatible)
 var BYTEVERSION = 119; // xDuke v19.7
 
 var global_random;
+var neartagsector, neartagwall, neartagsprite;
+
 var gc, neartaghitdist, lockclock, max_player_health, max_armour_amount, max_ammo_amount = new Int32Array(MAX_WEAPONS);
 
 // int32_t temp_data[MAXSPRITES][6];

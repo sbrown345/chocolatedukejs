@@ -5727,6 +5727,75 @@ function changespritestat(spritenum, newstatnum) {
     return (0);
 }
 
+//6198
+function nextsectorneighborz(sectnum, thez,
+                        topbottom, direction)
+{
+    var wal, wallIdx;
+    var i, testz, nextz;
+    var sectortouse;
+
+    if (direction == 1) nextz = 0x7fffffff;
+    else nextz = 0x80000000|0;
+
+    sectortouse = -1;
+
+    wal = wall[wallIdx = sector[sectnum].wallptr];
+    i = sector[sectnum].wallnum;
+    do
+    {
+        if (wal.nextsector >= 0)
+        {
+            if (topbottom == 1)
+            {
+                testz = sector[wal.nextsector].floorz;
+                if (direction == 1)
+                {
+                    if ((testz > thez) && (testz < nextz))
+                    {
+                        nextz = testz;
+                        sectortouse = wal.nextsector;
+                    }
+                }
+                else
+                {
+                    if ((testz < thez) && (testz > nextz))
+                    {
+                        nextz = testz;
+                        sectortouse = wal.nextsector;
+                    }
+                }
+            }
+            else
+            {
+                testz = sector[wal.nextsector].ceilingz;
+                if (direction == 1)
+                {
+                    if ((testz > thez) && (testz < nextz))
+                    {
+                        nextz = testz;
+                        sectortouse = wal.nextsector;
+                    }
+                }
+                else
+                {
+                    if ((testz < thez) && (testz > nextz))
+                    {
+                        nextz = testz;
+                        sectortouse = wal.nextsector;
+                    }
+                }
+            }
+        }
+        wallIdx++;
+        wal = wall[wallIdx]
+        i--;
+    } while (i != 0);
+
+    return(sectortouse);
+}
+
+
 //6184
 
 function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
@@ -6675,7 +6744,6 @@ function clipmove(x, y, z, sectnum,
             sectnum.$ = clipsectorlist[j];
             return (retval);
         }
-    debugger;
     sectnum.$ = -1;
     templong1 = 0x7fffffff;
     for (j = numsectors - 1; j >= 0; j--)

@@ -286,6 +286,57 @@ function badguy(s) {
     return 0;
 }
 
+//1317
+
+function badguypic(pn) {
+
+    switch (pn) {
+    case SHARK:
+    case RECON:
+    case DRONE:
+    case LIZTROOPONTOILET:
+    case LIZTROOPJUSTSIT:
+    case LIZTROOPSTAYPUT:
+    case LIZTROOPSHOOT:
+    case LIZTROOPJETPACK:
+    case LIZTROOPDUCKING:
+    case LIZTROOPRUNNING:
+    case LIZTROOP:
+    case OCTABRAIN:
+    case COMMANDER:
+    case COMMANDERSTAYPUT:
+    case PIGCOP:
+    case EGG:
+    case PIGCOPSTAYPUT:
+    case PIGCOPDIVE:
+    case LIZMAN:
+    case LIZMANSPITTING:
+    case LIZMANFEEDING:
+    case LIZMANJUMP:
+    case ORGANTIC:
+    case BOSS1:
+    case BOSS2:
+    case BOSS3:
+    case BOSS4:
+    case GREENSLIME:
+    case GREENSLIME + 1:
+    case GREENSLIME + 2:
+    case GREENSLIME + 3:
+    case GREENSLIME + 4:
+    case GREENSLIME + 5:
+    case GREENSLIME + 6:
+    case GREENSLIME + 7:
+    case RAT:
+    case ROTATEGUN:
+        return 1;
+    }
+
+    if (actortype[pn]) return 1;
+
+    return 0;
+}
+
+
 //1431
 function myospal(x, y, tilenum, shade, orientation, p) {
     var fp;
