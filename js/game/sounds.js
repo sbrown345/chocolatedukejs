@@ -1,4 +1,32 @@
-﻿//258
+﻿//230
+var menunum = 0;
+
+function intomenusounds() {
+    var menusnds =
+    [
+        LASERTRIP_EXPLODE,
+        DUKE_GRUNT,
+        DUKE_LAND_HURT,
+        CHAINGUN_FIRE,
+        SQUISHED,
+        KICK_HIT,
+        PISTOL_RICOCHET,
+        PISTOL_BODYHIT,
+        PISTOL_FIRE,
+        SHOTGUN_FIRE,
+        BOS1_WALK,
+        RPG_EXPLODE,
+        PIPEBOMB_BOUNCE,
+        PIPEBOMB_EXPLODE,
+        NITEVISION_ONOFF,
+        RPG_SHOOT,
+        SELECT_WEAPON
+    ];
+    sound(menusnds[menunum++]);
+    menunum %= 17;
+}
+
+//258
 function playMusic(filename) {
     if (MusicToggle == 0) return;
     //if (MusicDevice == NumSoundCards) return;

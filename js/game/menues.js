@@ -26,6 +26,145 @@ function cmenu(cm) {
     lastprobey = -1;
 }
 
+window.__defineGetter__("LMB", function () { return buttonstat & 1; });
+window.__defineGetter__("RMB", function () { return buttonstat & 2; });
+
+// FIX_00036: Mouse wheel can now be used in menu
+window.__defineGetter__("WHEELUP", function () { return buttonstat & 8; });
+window.__defineGetter__("WHEELDOWN", function () { return buttonstat & 16; });
+
+var minfo = new ControlInfo();
+
+//786
+
+function probe( x, y, i, n)
+{
+	return( probeXduke(x, y, i, n, 65536) );
+}
+
+function probeXduke( x, y, i, n,  spriteSize)
+{
+    var centre;
+	var mouseSens;
+
+	var delay_counter_up = 0, delay_counter_down = 0, delay_up = 50, delay_down = 50;
+	var mi = 0;
+
+	// FIX_00075: Bad Sensitivity aint32_t Y axis when using mouse in menu (Thanks to Turrican)
+	mouseSens = Control.getMouseSensitivity_Y();
+	mouseSens = mouseSens ? mouseSens : 1;
+
+    if( ((ControllerType == controltype.keyboardandmouse)||
+		(ControllerType == controltype.joystickandmouse)) )
+		//&& CONTROL_MousePresent )
+    {
+        minfo.clear();
+
+        Control.getInput( minfo );
+		//mouseY = CONTROL_GetMouseY();
+		//mi = mouseY;
+        mi += (minfo.dz / mouseSens)|0;
+		mi += (minfo.dpitch / mouseSens)|0;
+    }
+
+    else minfo.dz = minfo.dyaw = 0;
+
+    if( x == (320>>1) )
+        centre = 320>>2;
+    else centre = 0;
+
+        if( KB.keyPressed( sc_UpArrow ) || KB.keyPressed( sc_PgUp ) || KB.keyPressed( sc_kpad_8 ) ||
+            (mi < -1024) || WHEELUP)
+        {
+			// FIX_00060: Repeat key function was not working in the menu
+			if(delay_counter_up==0 || (totalclock-delay_counter_up)>delay_up || (mi < -1024) || WHEELUP)
+			{
+				mi = 0;
+				sound(KICK_HIT);
+
+				probey--;
+				if(probey < 0) probey = n-1;
+				minfo.dz = 0;
+				minfo.dpitch = 0;
+				if (delay_counter_up && (totalclock-delay_counter_up)>delay_up)
+					delay_up = 10;
+				delay_counter_up = totalclock;
+			}
+        }
+		else
+		{
+            KB.clearKeyDown( sc_UpArrow );
+            KB.clearKeyDown( sc_kpad_8 );
+            KB.clearKeyDown( sc_PgUp );
+			delay_counter_up = 0;
+			delay_up = 50;
+		}
+
+        if( KB.keyPressed( sc_DownArrow ) || KB.keyPressed( sc_PgDn ) || KB.keyPressed( sc_kpad_2 )
+            || (mi > 1024) || WHEELDOWN )
+        {
+			if(delay_counter_down==0 || (totalclock-delay_counter_down)>delay_down || (mi > 1024) || WHEELDOWN)
+			{
+				mi = 0;
+				sound(KICK_HIT);
+				probey++;
+				minfo.dz = 0;
+				minfo.dpitch = 0;
+				if (delay_counter_down && (totalclock-delay_counter_down)>delay_down)
+					delay_down = 10;
+				delay_counter_down = totalclock;
+			}
+        }
+		else
+		{
+			KB.clearKeyDown( sc_DownArrow );
+			KB.clearKeyDown( sc_kpad_2 );
+			KB.clearKeyDown( sc_PgDn );
+			delay_counter_down = 0;
+			delay_down = 50;
+		}
+
+    if(probey >= n)
+        probey = 0;
+
+    if(centre)
+    {
+//        rotateSprite(((320>>1)+(centre)+54)<<16,(y+(probey*i)-4)<<16,65536L,0,SPINNINGNUKEICON+6-((6+(totalclock>>3))%7),sh,0,10,0,0,xdim-1,ydim-1);
+//        rotateSprite(((320>>1)-(centre)-54)<<16,(y+(probey*i)-4)<<16,65536L,0,SPINNINGNUKEICON+((totalclock>>3)%7),sh,0,10,0,0,xdim-1,ydim-1);
+
+        rotateSprite(((320>>1)+(centre>>1)+70)<<16,(y+(probey*i)-4)<<16,spriteSize,0,SPINNINGNUKEICON+6-((6+(totalclock>>3))%7),sh,0,10,0,0,xdim-1,ydim-1);
+        rotateSprite(((320>>1)-(centre>>1)-70)<<16,(y+(probey*i)-4)<<16,spriteSize,0,SPINNINGNUKEICON+((totalclock>>3)%7),sh,0,10,0,0,xdim-1,ydim-1);
+    }
+    else
+        rotateSprite((x-tiles[BIGFNTCURSOR].dim.width-4)<<16,(y+(probey*i)-4)<<16,spriteSize,0,SPINNINGNUKEICON+(((totalclock>>3))%7),sh,0,10,0,0,xdim-1,ydim-1);
+
+    if( KB.keyPressed(sc_Space) || KB.keyPressed( sc_kpad_Enter ) || KB.keyPressed( sc_Enter ) || (LMB))// && !onbar) )
+    {
+        if(current_menu != 110)
+            sound(PISTOL_BODYHIT);
+        KB.clearKeyDown( sc_Enter );
+        KB.clearKeyDown( sc_Space );
+        KB.clearKeyDown( sc_kpad_Enter );
+        return(probey);
+    }
+    else if( KB.keyPressed( sc_Escape ) || (RMB) )
+    {
+        onbar = 0;
+        KB.clearKeyDown( sc_Escape );
+        sound(EXITMENUSOUND);
+        return(-1);
+    }
+    else
+    {
+        if(onbar == 0) return(-probey-2);
+        if ( KB.keyPressed( sc_LeftArrow ) || KB.keyPressed( sc_kpad_4 ) || ((buttonstat&1) && minfo.dyaw < -128 ) )
+            return(probey);
+        else if ( KB.keyPressed( sc_RightArrow ) || KB.keyPressed( sc_kpad_6 ) || ((buttonstat&1) && minfo.dyaw > 128 ) )
+            return(probey);
+        else return(-probey-2);
+    }
+}
+
 
 //915
 function menutext(x, y, s, p, t) {
@@ -148,6 +287,15 @@ function menutext(x, y, s, p, t) {
     return x;
 }
 
+function SHX(X) { return 0; }
+// ((x==X)*(-sh))
+function PHX(X) { return 0; }
+//// ((x==X)?1:2)
+//#define MWIN(X) rotatesprite( 320<<15,200<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
+//#define MWINXY(X,OX,OY) rotatesprite( ( 320+(OX) )<<15, ( 200+(OY) )<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
+
+
+
 // 1208
 var volnum, levnum, plrskl, numplr;
 var lastsavedpos = -1;
@@ -257,7 +405,7 @@ function menus() {
 //            gametext(160,99+9,"(Y/N)",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Escape) || KB_KeyPressed(sc_N) || RMB)
+//            if( KB.keyPressed(sc_Escape) || KB.keyPressed(sc_N) || RMB)
 //            {
 //                if(sprite[ps[myconnectindex].i].extra <= 0)
 //                {
@@ -265,8 +413,8 @@ function menus() {
 //                    return;
 //                }
 
-//                KB_ClearKeyDown(sc_N);
-//                KB_ClearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_N);
+//                KB.clearKeyDown(sc_Escape);
 
 //                ps[myconnectindex].gm &= ~MODE_MENU;
 //                if(ud.multimode < 2 && ud.recstat != 2)
@@ -276,7 +424,7 @@ function menus() {
 //                }
 //            }
 
-//            if(  KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if(  KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                KB_FlushKeyboardQueue();
 //                FX_StopAllSounds();
@@ -342,15 +490,15 @@ function menus() {
 
 //                    }
 //                    current_menu = 10000;
-//                    KB_ClearKeyDown(sc_Enter);
-//                    KB_ClearKeyDown(sc_kpad_Enter);
+//                    KB.clearKeyDown(sc_Enter);
+//                    KB.clearKeyDown(sc_kpad_Enter);
 //                    KB_FlushKeyboardQueue();
 //                }
 //                else if(x==-1) // pressed esc while typing. We discard the text.
 //                {
 //                    *buf = 0; 
 //                    current_menu = 10000;
-//                    KB_ClearKeyDown(sc_Escape);
+//                    KB.clearKeyDown(sc_Escape);
 //                }
 //            }
 //            else
@@ -436,7 +584,7 @@ function menus() {
 //            gametext(160,99+9,"(Y/N)",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                lastsavedpos = current_menu-1000;
 
@@ -487,10 +635,10 @@ function menus() {
 //                break;
 //            }
 
-//            if( KB_KeyPressed(sc_N) || KB_KeyPressed(sc_Escape) || RMB)
+//            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
 //            {
-//                KB_ClearKeyDown(sc_N);
-//                KB_ClearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_N);
+//                KB.clearKeyDown(sc_Escape);
 //                sound(EXITMENUSOUND);
 //                cmenu(300);
 //                // FIX_00084: Various bugs in the load game (single player) option if ESC is hit or if wrong version 
@@ -507,11 +655,11 @@ function menus() {
 //            gametext(160,99+9+9,"OR BAD # OF PLAYERS OR...",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Escape) || KB_KeyPressed(sc_Enter)
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Escape) || KB.keyPressed(sc_Enter)
 //				|| RMB)            {
-//                KB_ClearKeyDown(sc_Space);
-//                KB_ClearKeyDown(sc_Escape);
-//                KB_ClearKeyDown(sc_Enter);
+//                KB.clearKeyDown(sc_Space);
+//                KB.clearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_Enter);
 //                sound(EXITMENUSOUND);
 //                cmenu(300);
 //            }
@@ -520,15 +668,15 @@ function menus() {
 
 //        case 1500:
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                KB_FlushKeyboardQueue();
 //                cmenu(100);
 //            }
-//            if( KB_KeyPressed(sc_N) || KB_KeyPressed(sc_Escape) || RMB)
+//            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
 //            {
-//                KB_ClearKeyDown(sc_N);
-//                KB_ClearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_N);
+//                KB.clearKeyDown(sc_Escape);
 //                if(ud.multimode < 2 && ud.recstat != 2)
 //                {
 //                    ready2send = 1;
@@ -572,7 +720,7 @@ function menus() {
 //            gametext(160,90+9,"(Y/N)",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                KB_FlushKeyboardQueue();
 //                inputloc = strlen(&ud.savegame[current_menu-2000][0]);
@@ -582,10 +730,10 @@ function menus() {
 //                KB_FlushKeyboardQueue();
 //                break;
 //            }
-//            if( KB_KeyPressed(sc_N) || KB_KeyPressed(sc_Escape) || RMB)
+//            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
 //            {
-//                KB_ClearKeyDown(sc_N);
-//                KB_ClearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_N);
+//                KB.clearKeyDown(sc_Escape);
 //                cmenu(351);
 //                sound(EXITMENUSOUND);
 //            }
@@ -613,44 +761,44 @@ function menus() {
 //                l = 2;
 //            }
 
-//            if(KB_KeyPressed(sc_Escape)) { cmenu(0); break; }
+//            if(KB.keyPressed(sc_Escape)) { cmenu(0); break; }
 
-//            if( KB_KeyPressed( sc_LeftArrow ) ||
-//                KB_KeyPressed( sc_kpad_4 ) ||
-//                KB_KeyPressed( sc_UpArrow ) ||
-//                KB_KeyPressed( sc_PgUp ) ||
-//                KB_KeyPressed( sc_kpad_8 ) )
+//            if( KB.keyPressed( sc_LeftArrow ) ||
+//                KB.keyPressed( sc_kpad_4 ) ||
+//                KB.keyPressed( sc_UpArrow ) ||
+//                KB.keyPressed( sc_PgUp ) ||
+//                KB.keyPressed( sc_kpad_8 ) )
 //            {
-//                KB_ClearKeyDown(sc_LeftArrow);
-//                KB_ClearKeyDown(sc_kpad_4);
-//                KB_ClearKeyDown(sc_UpArrow);
-//                KB_ClearKeyDown(sc_PgUp);
-//                KB_ClearKeyDown(sc_kpad_8);
+//                KB.clearKeyDown(sc_LeftArrow);
+//                KB.clearKeyDown(sc_kpad_4);
+//                KB.clearKeyDown(sc_UpArrow);
+//                KB.clearKeyDown(sc_PgUp);
+//                KB.clearKeyDown(sc_kpad_8);
 
 //                sound(KICK_HIT);
 //                current_menu--;
 //                if(current_menu < 990) current_menu = 990+l;
 //            }
 //            else if(
-//                KB_KeyPressed( sc_PgDn ) ||
-//                KB_KeyPressed( sc_Enter ) ||
-//                KB_KeyPressed( sc_Space ) ||
-//                KB_KeyPressed( sc_kpad_Enter ) ||
-//                KB_KeyPressed( sc_RightArrow ) ||
-//                KB_KeyPressed( sc_DownArrow ) ||
-//                KB_KeyPressed( sc_kpad_2 ) ||
-//                KB_KeyPressed( sc_kpad_9 ) ||
-//                KB_KeyPressed( sc_kpad_6 ) )
+//                KB.keyPressed( sc_PgDn ) ||
+//                KB.keyPressed( sc_Enter ) ||
+//                KB.keyPressed( sc_Space ) ||
+//                KB.keyPressed( sc_kpad_Enter ) ||
+//                KB.keyPressed( sc_RightArrow ) ||
+//                KB.keyPressed( sc_DownArrow ) ||
+//                KB.keyPressed( sc_kpad_2 ) ||
+//                KB.keyPressed( sc_kpad_9 ) ||
+//                KB.keyPressed( sc_kpad_6 ) )
 //            {
-//                KB_ClearKeyDown(sc_PgDn);
-//                KB_ClearKeyDown(sc_Enter);
-//                KB_ClearKeyDown(sc_RightArrow);
-//                KB_ClearKeyDown(sc_kpad_Enter);
-//                KB_ClearKeyDown(sc_kpad_6);
-//                KB_ClearKeyDown(sc_kpad_9);
-//                KB_ClearKeyDown(sc_kpad_2);
-//                KB_ClearKeyDown(sc_DownArrow);
-//                KB_ClearKeyDown(sc_Space);
+//                KB.clearKeyDown(sc_PgDn);
+//                KB.clearKeyDown(sc_Enter);
+//                KB.clearKeyDown(sc_RightArrow);
+//                KB.clearKeyDown(sc_kpad_Enter);
+//                KB.clearKeyDown(sc_kpad_6);
+//                KB.clearKeyDown(sc_kpad_9);
+//                KB.clearKeyDown(sc_kpad_2);
+//                KB.clearKeyDown(sc_DownArrow);
+//                KB.clearKeyDown(sc_Space);
 //                sound(KICK_HIT);
 //                current_menu++;
 //                if(current_menu > 990+l) current_menu = 990;
@@ -917,7 +1065,7 @@ function menus() {
 //                    break;
 //            }
 
-//            if( KB_KeyPressed(sc_Q) )
+//            if( KB.keyPressed(sc_Q) )
 //                cmenu(502);
 
 //            if(movesperpacket == 4 && connecthead != myconnectindex)
@@ -1586,24 +1734,24 @@ function menus() {
 //                x=-(waiting4key-1)-2;
 //            }
 
-//            if (( KB_KeyPressed( sc_RightArrow ) || KB_KeyPressed( sc_LeftArrow ) ||
-//				 KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_kpad_6 )) &&
+//            if (( KB.keyPressed( sc_RightArrow ) || KB.keyPressed( sc_LeftArrow ) ||
+//				 KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_kpad_6 )) &&
 //				!waiting4key) // set left or right column flag
 //            {
 //                lastkeysetup = !lastkeysetup;
-//                KB_ClearKeyDown( sc_RightArrow ); KB_ClearKeyDown( sc_LeftArrow );
-//                KB_ClearKeyDown( sc_kpad_4 ); KB_ClearKeyDown( sc_kpad_6 );
+//                KB.clearKeyDown( sc_RightArrow ); KB.clearKeyDown( sc_LeftArrow );
+//                KB.clearKeyDown( sc_kpad_4 ); KB.clearKeyDown( sc_kpad_6 );
 //                sound(KICK_HIT);
 //            }
 
-//            if (KB_KeyPressed(sc_Delete) && -2>=x && x>=(-NUMGAMEFUNCTIONS-1) && !waiting4key) // clear a key
+//            if (KB.keyPressed(sc_Delete) && -2>=x && x>=(-NUMGAMEFUNCTIONS-1) && !waiting4key) // clear a key
 //            {
 //                if(lastkeysetup)
 //                    CONTROL_MapKey(-x-2, KeyMapping[-x-2].key1, 0);
 //                else
 //                    CONTROL_MapKey(-x-2, 0, KeyMapping[-x-2].key2);
 
-//                KB_ClearKeyDown( sc_Delete ); // Avoid repeating delete
+//                KB.clearKeyDown( sc_Delete ); // Avoid repeating delete
 //                sound(EXITMENUSOUND);
 //            }
 
@@ -1679,27 +1827,27 @@ function menus() {
 //            x = probeXduke(c+146,46+8,8,MAXMOUSEBUTTONS,20000);
 //            lastkeysetup = 0;
 			
-//            if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) || KB_KeyPressed (sc_BackSpace) )
+//            if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) || KB.keyPressed (sc_BackSpace) )
 //            {
 //                lastkeysetup = 1; // reversed;
-//                KB_ClearKeyDown( sc_kpad_4 );
-//                KB_ClearKeyDown( sc_LeftArrow );
-//                KB_ClearKeyDown(sc_BackSpace);
+//                KB.clearKeyDown( sc_kpad_4 );
+//                KB.clearKeyDown( sc_LeftArrow );
+//                KB.clearKeyDown(sc_BackSpace);
 //                sound(KICK_HIT);
 //                x = -x-2;
 //            }
-//            else if ( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//            else if ( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //            {
-//                KB_ClearKeyDown( sc_kpad_6 );
-//                KB_ClearKeyDown( sc_RightArrow );
+//                KB.clearKeyDown( sc_kpad_6 );
+//                KB.clearKeyDown( sc_RightArrow );
 //                sound(KICK_HIT);
 //                x = -x-2;
 //            }
 
-//            if (KB_KeyPressed(sc_Delete) && -2>=x && x>=(-MAXMOUSEBUTTONS-1)) // clear a key
+//            if (KB.keyPressed(sc_Delete) && -2>=x && x>=(-MAXMOUSEBUTTONS-1)) // clear a key
 //            {
 //                MouseMapping[-x-2] = -1;
-//                KB_ClearKeyDown( sc_Delete ); // Avoid repeating delete
+//                KB.clearKeyDown( sc_Delete ); // Avoid repeating delete
 //                sound(EXITMENUSOUND);
 //            }
 
@@ -1776,27 +1924,27 @@ function menus() {
 //            x = probeXduke(c+146,46+8,8,MAXMOUSEAXES*2,20000);
 //            lastkeysetup = 0;
 			
-//            if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) || KB_KeyPressed (sc_BackSpace) )
+//            if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) || KB.keyPressed (sc_BackSpace) )
 //            {
 //                lastkeysetup = 1; // reversed;
-//                KB_ClearKeyDown( sc_kpad_4 );
-//                KB_ClearKeyDown( sc_LeftArrow );
-//                KB_ClearKeyDown(sc_BackSpace);
+//                KB.clearKeyDown( sc_kpad_4 );
+//                KB.clearKeyDown( sc_LeftArrow );
+//                KB.clearKeyDown(sc_BackSpace);
 //                sound(KICK_HIT);
 //                x = -x-2;
 //            }
-//            else if ( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//            else if ( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //            {
-//                KB_ClearKeyDown( sc_kpad_6 );
-//                KB_ClearKeyDown( sc_RightArrow );
+//                KB.clearKeyDown( sc_kpad_6 );
+//                KB.clearKeyDown( sc_RightArrow );
 //                sound(KICK_HIT);
 //                x = -x-2;
 //            }
 
-//            if (KB_KeyPressed(sc_Delete) && -2>=x && x>=(-(MAXMOUSEAXES*2)-1)) // clear a key
+//            if (KB.keyPressed(sc_Delete) && -2>=x && x>=(-(MAXMOUSEAXES*2)-1)) // clear a key
 //            {
 //                MouseDigitalAxeMapping[(-x-2)>>1][(-x-2)&1] = -1;
-//                KB_ClearKeyDown( sc_Delete ); // Avoid repeating delete
+//                KB.clearKeyDown( sc_Delete ); // Avoid repeating delete
 //                sound(EXITMENUSOUND);
 //            }
 
@@ -1876,24 +2024,24 @@ function menus() {
 //                    break;
 
 //                case -2: // cursor idle on the resolution option (0)
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) )
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) )
 //                    {
 //                        current_resolution--;
 //                        if(current_resolution == -1) 
 //                            current_resolution = 0;
 //                        lastkeysetup = 1; // indicates we changed
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
-//                    else if ( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//                    else if ( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //                    {
 //                        current_resolution++; // reversed;
 //                        if(current_resolution == validmodecnt) 
 //                            current_resolution = validmodecnt-1;
 //                        lastkeysetup = 1; // indicates we changed
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
 
@@ -2053,7 +2201,7 @@ function menus() {
 //                            ready2send = 1;
 //                            totalclock = ototalclock;
 //                        }
-//                        KB_ClearKeyDown(sc_Escape);
+//                        KB.clearKeyDown(sc_Escape);
 //                        sound(EXITMENUSOUND);
 //                    }
 //                }
@@ -2165,50 +2313,50 @@ function menus() {
 //            {
 //                c = 320>>1;
 
-//                if( KB_KeyPressed( sc_LeftArrow ) ||
-//                    KB_KeyPressed( sc_kpad_4 ) ||
-//                    KB_KeyPressed( sc_UpArrow ) ||
-//                    KB_KeyPressed( sc_PgUp ) ||
-//                    KB_KeyPressed( sc_kpad_8 ) )
+//                if( KB.keyPressed( sc_LeftArrow ) ||
+//                    KB.keyPressed( sc_kpad_4 ) ||
+//                    KB.keyPressed( sc_UpArrow ) ||
+//                    KB.keyPressed( sc_PgUp ) ||
+//                    KB.keyPressed( sc_kpad_8 ) )
 //                {
-//                    KB_ClearKeyDown(sc_LeftArrow);
-//                    KB_ClearKeyDown(sc_kpad_4);
-//                    KB_ClearKeyDown(sc_UpArrow);
-//                    KB_ClearKeyDown(sc_PgUp);
-//                    KB_ClearKeyDown(sc_kpad_8);
+//                    KB.clearKeyDown(sc_LeftArrow);
+//                    KB.clearKeyDown(sc_kpad_4);
+//                    KB.clearKeyDown(sc_UpArrow);
+//                    KB.clearKeyDown(sc_PgUp);
+//                    KB.clearKeyDown(sc_kpad_8);
 
 //                    sound(KICK_HIT);
 //                    current_menu--;
 //                    if(current_menu < 400) current_menu = 401;
 //                }
 //                else if(
-//                    KB_KeyPressed( sc_PgDn ) ||
-//                    KB_KeyPressed( sc_Enter ) ||
-//                    KB_KeyPressed( sc_kpad_Enter ) ||
-//                    KB_KeyPressed( sc_RightArrow ) ||
-//                    KB_KeyPressed( sc_DownArrow ) ||
-//                    KB_KeyPressed( sc_kpad_2 ) ||
-//                    KB_KeyPressed( sc_kpad_9 ) ||
-//                    KB_KeyPressed( sc_Space ) ||
-//                    KB_KeyPressed( sc_kpad_6 ) )
+//                    KB.keyPressed( sc_PgDn ) ||
+//                    KB.keyPressed( sc_Enter ) ||
+//                    KB.keyPressed( sc_kpad_Enter ) ||
+//                    KB.keyPressed( sc_RightArrow ) ||
+//                    KB.keyPressed( sc_DownArrow ) ||
+//                    KB.keyPressed( sc_kpad_2 ) ||
+//                    KB.keyPressed( sc_kpad_9 ) ||
+//                    KB.keyPressed( sc_Space ) ||
+//                    KB.keyPressed( sc_kpad_6 ) )
 //                {
-//                    KB_ClearKeyDown(sc_PgDn);
-//                    KB_ClearKeyDown(sc_Enter);
-//                    KB_ClearKeyDown(sc_RightArrow);
-//                    KB_ClearKeyDown(sc_kpad_Enter);
-//                    KB_ClearKeyDown(sc_kpad_6);
-//                    KB_ClearKeyDown(sc_kpad_9);
-//                    KB_ClearKeyDown(sc_kpad_2);
-//                    KB_ClearKeyDown(sc_DownArrow);
-//                    KB_ClearKeyDown(sc_Space);
+//                    KB.clearKeyDown(sc_PgDn);
+//                    KB.clearKeyDown(sc_Enter);
+//                    KB.clearKeyDown(sc_RightArrow);
+//                    KB.clearKeyDown(sc_kpad_Enter);
+//                    KB.clearKeyDown(sc_kpad_6);
+//                    KB.clearKeyDown(sc_kpad_9);
+//                    KB.clearKeyDown(sc_kpad_2);
+//                    KB.clearKeyDown(sc_DownArrow);
+//                    KB.clearKeyDown(sc_Space);
 //                    sound(KICK_HIT);
 //                    current_menu++;
 //                    if(current_menu > 401) current_menu = 400;
 //                }
 
-//                if( KB_KeyPressed(sc_Escape) )
+//                if( KB.keyPressed(sc_Escape) )
 //                {
-//                    KB_ClearKeyDown(sc_Escape); // or else ESC will be activated in cmenu(0)
+//                    KB.clearKeyDown(sc_Escape); // or else ESC will be activated in cmenu(0)
 //                    if(ps[myconnectindex].gm&MODE_GAME)
 //                        cmenu(50);
 //                    else cmenu(0);
@@ -2234,48 +2382,48 @@ function menus() {
 //            {
 //                c = 320>>1;
 
-//                if( KB_KeyPressed( sc_LeftArrow ) ||
-//                    KB_KeyPressed( sc_kpad_4 ) ||
-//                    KB_KeyPressed( sc_UpArrow ) ||
-//                    KB_KeyPressed( sc_PgUp ) ||
-//                    KB_KeyPressed( sc_kpad_8 ) )
+//                if( KB.keyPressed( sc_LeftArrow ) ||
+//                    KB.keyPressed( sc_kpad_4 ) ||
+//                    KB.keyPressed( sc_UpArrow ) ||
+//                    KB.keyPressed( sc_PgUp ) ||
+//                    KB.keyPressed( sc_kpad_8 ) )
 //                {
-//                    KB_ClearKeyDown(sc_LeftArrow);
-//                    KB_ClearKeyDown(sc_kpad_4);
-//                    KB_ClearKeyDown(sc_UpArrow);
-//                    KB_ClearKeyDown(sc_PgUp);
-//                    KB_ClearKeyDown(sc_kpad_8);
+//                    KB.clearKeyDown(sc_LeftArrow);
+//                    KB.clearKeyDown(sc_kpad_4);
+//                    KB.clearKeyDown(sc_UpArrow);
+//                    KB.clearKeyDown(sc_PgUp);
+//                    KB.clearKeyDown(sc_kpad_8);
 
 //                    sound(KICK_HIT);
 //                    current_menu--;
 //                    if(current_menu < 400) current_menu = 403;
 //                }
 //                else if(
-//                    KB_KeyPressed( sc_PgDn ) ||
-//                    KB_KeyPressed( sc_Enter ) ||
-//                    KB_KeyPressed( sc_kpad_Enter ) ||
-//                    KB_KeyPressed( sc_RightArrow ) ||
-//                    KB_KeyPressed( sc_DownArrow ) ||
-//                    KB_KeyPressed( sc_kpad_2 ) ||
-//                    KB_KeyPressed( sc_kpad_9 ) ||
-//                    KB_KeyPressed( sc_Space ) ||
-//                    KB_KeyPressed( sc_kpad_6 ) )
+//                    KB.keyPressed( sc_PgDn ) ||
+//                    KB.keyPressed( sc_Enter ) ||
+//                    KB.keyPressed( sc_kpad_Enter ) ||
+//                    KB.keyPressed( sc_RightArrow ) ||
+//                    KB.keyPressed( sc_DownArrow ) ||
+//                    KB.keyPressed( sc_kpad_2 ) ||
+//                    KB.keyPressed( sc_kpad_9 ) ||
+//                    KB.keyPressed( sc_Space ) ||
+//                    KB.keyPressed( sc_kpad_6 ) )
 //                {
-//                    KB_ClearKeyDown(sc_PgDn);
-//                    KB_ClearKeyDown(sc_Enter);
-//                    KB_ClearKeyDown(sc_RightArrow);
-//                    KB_ClearKeyDown(sc_kpad_Enter);
-//                    KB_ClearKeyDown(sc_kpad_6);
-//                    KB_ClearKeyDown(sc_kpad_9);
-//                    KB_ClearKeyDown(sc_kpad_2);
-//                    KB_ClearKeyDown(sc_DownArrow);
-//                    KB_ClearKeyDown(sc_Space);
+//                    KB.clearKeyDown(sc_PgDn);
+//                    KB.clearKeyDown(sc_Enter);
+//                    KB.clearKeyDown(sc_RightArrow);
+//                    KB.clearKeyDown(sc_kpad_Enter);
+//                    KB.clearKeyDown(sc_kpad_6);
+//                    KB.clearKeyDown(sc_kpad_9);
+//                    KB.clearKeyDown(sc_kpad_2);
+//                    KB.clearKeyDown(sc_DownArrow);
+//                    KB.clearKeyDown(sc_Space);
 //                    sound(KICK_HIT);
 //                    current_menu++;
 //                    if(current_menu > 403) current_menu = 400;
 //                }
 
-//                if( KB_KeyPressed(sc_Escape) )
+//                if( KB.keyPressed(sc_Escape) )
 //                {
 //                    if(ps[myconnectindex].gm&MODE_GAME)
 //                        cmenu(50);
@@ -2298,15 +2446,15 @@ function menus() {
 //            gametext(c,99,"(Y/N)",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                gameexitanycase();
 //            }
 
 //            x = probe(186,124,0,0);
-//            if(x == -1 || KB_KeyPressed(sc_N) || RMB)
+//            if(x == -1 || KB.keyPressed(sc_N) || RMB)
 //            {
-//                KB_ClearKeyDown(sc_N);
+//                KB.clearKeyDown(sc_N);
 //                quittimer = 0;
 //                // FIX_00073: menu off messed up. While in game hit Esc . select quit . press esc => stuck in menu
 //                if (current_menu==500)
@@ -2324,7 +2472,7 @@ function menus() {
 //            gametext(c,99,"(Y/N)",0,2+8+16);
 
 //            _handle_events();
-//            if( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) || KB_KeyPressed(sc_Y) || LMB )
+//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
 //                KB_FlushKeyboardQueue();
 //                ps[myconnectindex].gm = MODE_DEMO;
@@ -2338,7 +2486,7 @@ function menus() {
 
 //            x = probe(186,124,0,0);
 
-//            if(x == -1 || KB_KeyPressed(sc_N) || RMB)
+//            if(x == -1 || KB.keyPressed(sc_N) || RMB)
 //            {
 //                cmenu(50);
 //                if(ud.multimode < 2  && ud.recstat != 2)
@@ -2359,9 +2507,9 @@ function menus() {
 //            gametext(160,50,(char*)tempbuf,0,2+8+16);
 //            gametext(160,59,"to select level",0,2+8+16);
 
-//            if( KB_KeyPressed(sc_Escape) )
+//            if( KB.keyPressed(sc_Escape) )
 //            {
-//                KB_ClearKeyDown(sc_Escape);
+//                KB.clearKeyDown(sc_Escape);
 //                sound(EXITMENUSOUND);
 //                cmenu(0);
 //            }
@@ -2389,18 +2537,18 @@ function menus() {
 //            }
 
 //            fileselect = probey;
-//            if( KB_KeyPressed( sc_LeftArrow ) || KB_KeyPressed( sc_kpad_4 ) || ((buttonstat&1) && minfo.dyaw < -256 ) )
+//            if( KB.keyPressed( sc_LeftArrow ) || KB.keyPressed( sc_kpad_4 ) || ((buttonstat&1) && minfo.dyaw < -256 ) )
 //            {
-//                KB_ClearKeyDown( sc_LeftArrow );
-//                KB_ClearKeyDown( sc_kpad_4 );
+//                KB.clearKeyDown( sc_LeftArrow );
+//                KB.clearKeyDown( sc_kpad_4 );
 //                probey -= 15;
 //                if(probey < 0) probey += 15;
 //                else sound(KICK_HIT);
 //            }
-//            if( KB_KeyPressed( sc_RightArrow ) || KB_KeyPressed( sc_kpad_6 ) || ((buttonstat&1) && minfo.dyaw > 256 ) )
+//            if( KB.keyPressed( sc_RightArrow ) || KB.keyPressed( sc_kpad_6 ) || ((buttonstat&1) && minfo.dyaw > 256 ) )
 //            {
-//                KB_ClearKeyDown( sc_RightArrow );
-//                KB_ClearKeyDown( sc_kpad_6 );
+//                KB.clearKeyDown( sc_RightArrow );
+//                KB.clearKeyDown( sc_kpad_6 );
 //                probey += 15;
 //                if(probey >= menunamecnt)
 //                    probey -= 15;
@@ -2461,37 +2609,37 @@ function menus() {
 //            {
 //                // FIX_00068: menu "New Game" in multiplayer mode now allowing left/right arrow for selection
 //                case -7: // idle on case 5
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) ||
-//						 KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ))
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) ||
+//						 KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ))
 //                    {
 //                        if(ud.m_coop == 1)
 //                            ud.m_ffire = !ud.m_ffire;
 
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    } 
 //                    break;
 
 //                case -6: // idle on case 4
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) ||
-//						 KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ))
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) ||
+//						 KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ))
 //                    {
 //                        if(ud.m_coop == 0)
 //                            ud.m_marker = !ud.m_marker;
 
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    } 
 //                    break;
 
 //                case -5: // idle on case 3
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) )
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) )
 //                    {
 //                        if(ud.m_monsters_off == 1 && ud.m_player_skill > 0)
 //                            ud.m_monsters_off = 0;
@@ -2511,11 +2659,11 @@ function menus() {
 //                            }
 //                        }
 
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    } 
-//                    else if( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//                    else if( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //                    {	
 //                        if(ud.m_monsters_off == 1 && ud.m_player_skill > 0)
 //                            ud.m_monsters_off = 0;
@@ -2535,8 +2683,8 @@ function menus() {
 //                            ud.m_player_skill = 0;
 //                        }
 
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
 //                    break;
@@ -2544,7 +2692,7 @@ function menus() {
 //#ifndef ONELEVELDEMO
 
 //                case -4: // idle on case 2
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) )
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) )
 //                    {
 //                        ud.m_level_number--;
 //                        if (!VOLUMEONE)
@@ -2559,11 +2707,11 @@ function menus() {
 //                        }
 //                        if(ud.m_level_number < 0) ud.m_level_number = 10;
 
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
-//                    else if ( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//                    else if ( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //                    {
 //                        ud.m_level_number++;
 //                        if (!VOLUMEONE)
@@ -2578,8 +2726,8 @@ function menus() {
 //                        }
 //                        if(ud.m_level_number > 10) ud.m_level_number = 0;
 
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
 //                    break;
@@ -2588,7 +2736,7 @@ function menus() {
 //                case -3: // Idle on case 1
 //                    if (!VOLUMEONE)
 //                    {
-//                        if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) )
+//                        if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) )
 //                        {
 //                            ud.m_volume_number--;
 //                            if(PLUTOPAK)
@@ -2600,11 +2748,11 @@ function menus() {
 //                                ud.m_level_number = 0;
 //                            if(ud.m_level_number > 10) ud.m_level_number = 0;
 
-//                            KB_ClearKeyDown( sc_kpad_4 );
-//                            KB_ClearKeyDown( sc_LeftArrow );
+//                            KB.clearKeyDown( sc_kpad_4 );
+//                            KB.clearKeyDown( sc_LeftArrow );
 //                            sound(PISTOL_BODYHIT);
 //                        }
-//                        else if( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//                        else if( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //                        {
 //                            ud.m_volume_number++;
 //                            if(PLUTOPAK)
@@ -2616,30 +2764,30 @@ function menus() {
 //                                ud.m_level_number = 0;
 //                            if(ud.m_level_number > 10) ud.m_level_number = 0;
 
-//                            KB_ClearKeyDown( sc_kpad_6 );
-//                            KB_ClearKeyDown( sc_RightArrow );
+//                            KB.clearKeyDown( sc_kpad_6 );
+//                            KB.clearKeyDown( sc_RightArrow );
 //                            sound(PISTOL_BODYHIT);
 //                        }
 //                    }
 //                    break;
 
 //                case -2: // Idle on case 0
-//                    if ( KB_KeyPressed( sc_kpad_4 ) || KB_KeyPressed( sc_LeftArrow ) )
+//                    if ( KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_LeftArrow ) )
 //                    {
 //                        ud.m_coop--;
 //                        if(ud.m_coop == -1) ud.m_coop = 2;
 
-//                        KB_ClearKeyDown( sc_kpad_4 );
-//                        KB_ClearKeyDown( sc_LeftArrow );
+//                        KB.clearKeyDown( sc_kpad_4 );
+//                        KB.clearKeyDown( sc_LeftArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    } 
-//                    else if( KB_KeyPressed( sc_kpad_6 ) || KB_KeyPressed( sc_RightArrow ) )
+//                    else if( KB.keyPressed( sc_kpad_6 ) || KB.keyPressed( sc_RightArrow ) )
 //                    {	
 //                        ud.m_coop++;
 //                        if(ud.m_coop == 3) ud.m_coop = 0;
 
-//                        KB_ClearKeyDown( sc_kpad_6 );
-//                        KB_ClearKeyDown( sc_RightArrow );
+//                        KB.clearKeyDown( sc_kpad_6 );
+//                        KB.clearKeyDown( sc_RightArrow );
 //                        sound(PISTOL_BODYHIT);
 //                    }
 //                    break;

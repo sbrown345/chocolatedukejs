@@ -63,7 +63,8 @@ function docacheit() {
 }
 
 //357
-PreMap.vscrn = function () {
+PreMap.vscrn = vscrn;
+function vscrn() {
     var ss, x1, x2, y1, y2;
 
     if (ud.screen_size < 0) {

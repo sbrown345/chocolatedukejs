@@ -20,6 +20,13 @@ function appendCanvasImageToPage(text) {
 
 var nHostForceDisableAutoaim = 0;
 
+var cameradist = 0, cameraclock = 0;
+var  eightytwofifty = 0;
+var  playerswhenstarted;
+var  qe,cp;
+
+var  nHostForceDisableAutoaim = 0;
+
 // Game play speed
 var g_iTickRate = 120;
 var g_iTicksPerFrame = 26;
@@ -4072,6 +4079,490 @@ function animatesprites( x, y, a, smoothratio) {
     }
 }
 
+//6626
+var nonsharedtimer;
+function nonsharedkeys()
+{
+    var i,ch;
+    var j;
+    var text = "";
+
+
+    //if(ud.recstat == 2)
+    //{
+    //    var noshareinfo;
+    //    CONTROL_GetInput( &noshareinfo );
+    //}
+    
+    //if( KB_KeyPressed( sc_F12 ) )
+    //{
+    //    KB_ClearKeyDown( sc_F12 );
+    //    takescreenshot();
+    //    // FTA(103,ps[myconnectindex]); done better in takescreenshot()
+    //}
+
+    //if( !ALT_IS_PRESSED && ud.overhead_on == 0)
+    //{
+    //    if( ACTION( gamefunc_Enlarge_Screen ) )
+    //    {
+    //        CONTROL_ClearAction( gamefunc_Enlarge_Screen );
+    //        if(ud.screen_size > 0)
+    //            sound(THUD);
+
+    //        // FIX_00027: Added an extra small statusbar (HUD)
+    //        if (ud.screen_size==4)
+    //        {
+    //            ud.extended_screen_size++;
+    //            if(ud.extended_screen_size==2)
+    //            {
+    //                ud.extended_screen_size = 1;
+    //                ud.screen_size -= 4;
+    //            }
+    //        }
+    //        else
+    //            ud.screen_size -= 4;	
+    //        vscrn();
+    //    }
+    //    if( ACTION( gamefunc_Shrink_Screen ) )
+    //    {
+    //        CONTROL_ClearAction( gamefunc_Shrink_Screen );
+    //        if(ud.screen_size < 64) sound(THUD);
+
+    //        // FIX_00027: Added an extra small statusbar (HUD)
+    //        if (ud.screen_size==4)
+    //        {
+    //            ud.extended_screen_size--;
+    //            if(ud.extended_screen_size<0)
+    //            {
+    //                ud.extended_screen_size=0;
+    //                ud.screen_size += 4;
+    //            }
+    //        }
+    //        else
+    //            ud.screen_size += 4;
+    //        vscrn();
+    //    }
+
+    //    if(ud.screen_size < 4)
+    //        ud.extended_screen_size = 1;
+    //    else if(ud.screen_size > 4)
+    //        ud.extended_screen_size = 0;
+
+    //}
+
+    //if( ps[myconnectindex].cheat_phase == 1 || ps[myconnectindex].gm&(MODE_MENU|MODE_TYPE)) return;
+
+    //if( ACTION(gamefunc_See_Coop_View) && ( ud.coop == 1 || ud.recstat == 2) )
+    //{
+    //    CONTROL_ClearAction( gamefunc_See_Coop_View );
+    //    screenpeek = connectpoint2[screenpeek];
+    //    if(screenpeek == -1) screenpeek = connecthead;
+    //    restorepalette = 1;
+    //}
+
+    //if( ud.multimode > 1 && ACTION(gamefunc_Show_Opponents_Weapon) )
+    //{
+    //    CONTROL_ClearAction(gamefunc_Show_Opponents_Weapon);
+    //    ud.showweapons = 1-ud.showweapons;
+    //    FTA(82-ud.showweapons,ps[screenpeek],1);
+    //}
+
+    //if( ACTION(gamefunc_Toggle_Crosshair) )
+    //{
+    //    CONTROL_ClearAction(gamefunc_Toggle_Crosshair);
+    //    ud.crosshair = 1-ud.crosshair;
+    //    FTA(21-ud.crosshair,ps[screenpeek],1);
+    //}
+
+    //if(ud.overhead_on && ACTION(gamefunc_Map_Follow_Mode) )
+    //{
+    //    CONTROL_ClearAction(gamefunc_Map_Follow_Mode);
+    //    ud.scrollmode = 1-ud.scrollmode;
+    //    if(ud.scrollmode)
+    //    {
+    //        ud.folx = ps[screenpeek].oposx;
+    //        ud.foly = ps[screenpeek].oposy;
+    //        ud.fola = ps[screenpeek].oang;
+    //    }
+    //    FTA(83+ud.scrollmode,ps[myconnectindex],1);
+    //}
+
+    //if( SHIFTS_IS_PRESSED || ALT_IS_PRESSED )
+    //{
+    //    i = 0;
+    //    if( KB_KeyPressed( sc_F1) ) { KB_ClearKeyDown(sc_F1);i = 1; }
+    //    if( KB_KeyPressed( sc_F2) ) { KB_ClearKeyDown(sc_F2);i = 2; }
+    //    if( KB_KeyPressed( sc_F3) ) { KB_ClearKeyDown(sc_F3);i = 3; }
+    //    if( KB_KeyPressed( sc_F4) ) { KB_ClearKeyDown(sc_F4);i = 4; }
+    //    if( KB_KeyPressed( sc_F5) ) { KB_ClearKeyDown(sc_F5);i = 5; }
+    //    if( KB_KeyPressed( sc_F6) ) { KB_ClearKeyDown(sc_F6);i = 6; }
+    //    if( KB_KeyPressed( sc_F7) ) { KB_ClearKeyDown(sc_F7);i = 7; }
+    //    if( KB_KeyPressed( sc_F8) ) { KB_ClearKeyDown(sc_F8);i = 8; }
+    //    if( KB_KeyPressed( sc_F9) ) { KB_ClearKeyDown(sc_F9);i = 9; }
+    //    if( KB_KeyPressed( sc_F10) ) {KB_ClearKeyDown(sc_F10);i = 10; }
+
+    //    if(i)
+    //    {
+    //        if(SHIFTS_IS_PRESSED)
+    //        {
+    //            if(i == 5 && ps[myconnectindex].fta > 0 && ps[myconnectindex].ftq == 26)
+    //            {
+    //                music_select++;
+
+    //                // FIX_00065: Music cycling with F5 and SHIFT-F5 messed up
+    //                if(VOLUMEALL) // Then its 1.3d reg
+    //                {
+    //                    if(music_select == 33) music_select = 0;
+    //                }
+    //                else if (VOLUMEONE)
+    //                {
+    //                    if(music_select == 6) music_select = 0;
+    //                }
+    //                else // assume 1.5 or plutopak
+    //                {
+    //                    if(music_select == 44) music_select = 0;
+    //                }
+
+    //                strcpy(text,"PLAYING ");
+    //                strcat(text,&music_fn[0][music_select][0]);
+    //                MUSIC_StopSong(); // FIX_00074: Shift f5 doesn't change hi-res tunes, but only midi tunes.
+    //                playmusic(&music_fn[0][music_select][0]);
+    //                strcpy(&fta_quotes[26][0],text);
+    //                FTA(26,ps[myconnectindex],1);
+    //                return;
+    //            }
+
+    //            adduserquote(ud.ridecule[i-1]);
+
+    //            ch = 0;
+
+    //            tempbuf[ch] = 4;
+    //            tempbuf[ch+1] = 0;
+    //            strcat((char*)tempbuf+1,ud.ridecule[i-1]);
+
+    //            i = 1+strlen(ud.ridecule[i-1]);
+
+    //            if(ud.multimode > 1)
+    //                for(ch=connecthead;ch>=0;ch=connectpoint2[ch])
+    //                    if (ch != myconnectindex)
+    //                        sendpacket(ch,tempbuf,i);
+
+    //            pus = NUMPAGES;
+    //            pub = NUMPAGES;
+
+    //            return;
+
+    //        }
+
+    //        if(ud.lockout == 0)
+    //            if(SoundToggle && ALT_IS_PRESSED && ( RTS_NumSounds() > 0 ) && rtsplaying == 0 && VoiceToggle )
+    //            {
+    //                rtsptr = RTS_GetSound (i-1);
+    //                if(*rtsptr == 'C')
+    //                    FX_PlayVOC3D( rtsptr,0,0,0,255,-i);
+    //                else FX_PlayWAV3D( rtsptr,0,0,0,255,-i);
+
+    //                rtsplaying = 7;
+
+    //                if(ud.multimode > 1)
+    //                {
+    //                    tempbuf[0] = 7;
+    //                    tempbuf[1] = i;
+
+    //                    for(ch=connecthead;ch>=0;ch=connectpoint2[ch])
+    //                        if(ch != myconnectindex)
+    //                            sendpacket(ch,(uint8_t*)tempbuf,2);
+    //                }
+
+    //                pus = NUMPAGES;
+    //                pub = NUMPAGES;
+
+    //                return;
+    //            }
+    //    }
+    //}
+
+    //if(!ALT_IS_PRESSED && !SHIFTS_IS_PRESSED)
+    //{
+
+    //    if( ud.multimode > 1 && ACTION(gamefunc_SendMessage) )
+    //    {
+    //        KB_FlushKeyboardQueue();
+    //        CONTROL_ClearAction( gamefunc_SendMessage );
+    //        ps[myconnectindex].gm |= MODE_TYPE;
+    //        typebuf[0] = 0;
+    //        inputloc = 0;
+    //    }
+
+    //    if( KB_KeyPressed(sc_F1) || ( ud.show_help && ( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) ) ) )
+    //    {
+    //        KB_ClearKeyDown(sc_F1);
+    //        KB_ClearKeyDown(sc_Space);
+    //        KB_ClearKeyDown(sc_kpad_Enter);
+    //        KB_ClearKeyDown(sc_Enter);
+    //        ud.show_help ++;
+
+    //        if( ud.show_help > 2 )
+    //        {
+    //            ud.show_help = 0;
+    //            if(ud.multimode < 2 && ud.recstat != 2) ready2send = 1;
+    //            vscrn();
+    //        }
+    //        else
+    //        {
+    //            setview(0,0,xdim-1,ydim-1);
+    //            if(ud.multimode < 2 && ud.recstat != 2)
+    //            {
+    //                ready2send = 0;
+    //                totalclock = ototalclock;
+    //            }
+    //        }
+    //    }
+
+    //    //        if(ud.multimode < 2)
+    //    {
+    //        if(ud.recstat != 2 && KB_KeyPressed( sc_F2 ) )
+    //        {
+    //            KB_ClearKeyDown( sc_F2 );
+
+    //            if(movesperpacket == 4 && connecthead != myconnectindex)
+    //                return;
+
+    //            FAKE_F2:
+    //                if(sprite[ps[myconnectindex].i].extra <= 0)
+    //                {
+    //                    FTA(118,ps[myconnectindex],1);
+    //                    return;
+    //                }
+    //            cmenu(350);
+    //            screencapt = 1;
+    //            displayrooms(myconnectindex,65536);
+    //            savetemp("duke3d.tmp",tiles[MAXTILES-1].data,160*100);
+    //            screencapt = 0;
+    //            FX_StopAllSounds();
+    //            clearsoundlocks();
+
+    //            //                setview(0,0,xdim-1,ydim-1);
+    //            ps[myconnectindex].gm |= MODE_MENU;
+
+    //            if(ud.multimode < 2)
+    //            {
+    //                ready2send = 0;
+    //                totalclock = ototalclock;
+    //                screenpeek = myconnectindex;
+    //            }
+    //        }
+
+    //        if(KB_KeyPressed( sc_F3 ))
+    //        {
+    //            KB_ClearKeyDown( sc_F3 );
+
+    //            if(movesperpacket == 4 && connecthead != myconnectindex)
+    //                return;
+
+    //            cmenu(300);
+    //            FX_StopAllSounds();
+    //            clearsoundlocks();
+
+    //            //                setview(0,0,xdim-1,ydim-1);
+    //            ps[myconnectindex].gm |= MODE_MENU;
+    //            if(ud.multimode < 2 && ud.recstat != 2)
+    //            {
+    //                ready2send = 0;
+    //                totalclock = ototalclock;
+    //            }
+    //            screenpeek = myconnectindex;
+    //        }
+    //    }
+
+    //    if(KB_KeyPressed( sc_F4 ) && FXDevice != NumSoundCards )
+    //    {
+    //        KB_ClearKeyDown( sc_F4 );
+    //        FX_StopAllSounds();
+    //        clearsoundlocks();
+
+    //        ps[myconnectindex].gm |= MODE_MENU;
+    //        if(ud.multimode < 2 && ud.recstat != 2)
+    //        {
+    //            ready2send = 0;
+    //            totalclock = ototalclock;
+    //        }
+    //        cmenu(700);
+
+    //    }
+
+    //    if( KB_KeyPressed( sc_F6 ) && (ps[myconnectindex].gm&MODE_GAME))
+    //    {
+    //        KB_ClearKeyDown( sc_F6 );
+
+    //        if(movesperpacket == 4 && connecthead != myconnectindex)
+    //            return;
+
+    //        if(lastsavedpos == -1) goto FAKE_F2;
+
+    //        KB_FlushKeyboardQueue();
+
+    //        if(sprite[ps[myconnectindex].i].extra <= 0)
+    //        {
+    //            FTA(118,ps[myconnectindex],1);
+    //            return;
+    //        }
+    //        screencapt = 1;
+    //        displayrooms(myconnectindex,65536);
+    //        savetemp("duke3d.tmp",tiles[MAXTILES-1].data,160*100);
+    //        screencapt = 0;
+    //        if( lastsavedpos >= 0 )
+    //        {
+    //            inputloc = strlen(&ud.savegame[lastsavedpos][0]);
+    //            current_menu = 360+lastsavedpos;
+    //            probey = lastsavedpos;
+    //        }
+    //        FX_StopAllSounds();
+    //        clearsoundlocks();
+
+    //        setview(0,0,xdim-1,ydim-1);
+    //        ps[myconnectindex].gm |= MODE_MENU;
+    //        if(ud.multimode < 2 && ud.recstat != 2)
+    //        {
+    //            ready2send = 0;
+    //            totalclock = ototalclock;
+    //        }
+    //    }
+
+    //    if(KB_KeyPressed( sc_F7 ) )
+    //    {
+    //        KB_ClearKeyDown(sc_F7);
+    //        if( ps[myconnectindex].over_shoulder_on )
+    //            ps[myconnectindex].over_shoulder_on = 0;
+    //        else
+    //        {
+    //            ps[myconnectindex].over_shoulder_on = 1;
+    //            cameradist = 0;
+    //            cameraclock = totalclock;
+    //        }
+    //        FTA(109+ps[myconnectindex].over_shoulder_on,ps[myconnectindex],1);
+    //    }
+
+    //    if( KB_KeyPressed( sc_F5 ) && MusicDevice != NumSoundCards )
+    //    {
+    //        KB_ClearKeyDown( sc_F5 );
+    //        strcpy(text,&music_fn[0][music_select][0]);
+    //        strcat(text,".  USE SHIFT-F5 TO CHANGE.");
+    //        strcpy(fta_quotes[26],text);
+    //        FTA(26,ps[myconnectindex],1);
+
+    //    }
+
+    //    if(KB_KeyPressed( sc_F8 ))
+    //    {
+    //        KB_ClearKeyDown( sc_F8 );
+    //        ud.fta_on = !ud.fta_on;
+    //        FTA(24-ud.fta_on,ps[myconnectindex],1);
+    //    }
+
+    //    if(KB_KeyPressed( sc_F9 ) && (ps[myconnectindex].gm&MODE_GAME) )
+    //    {
+    //        KB_ClearKeyDown( sc_F9 );
+
+    //        if(movesperpacket == 4 && myconnectindex != connecthead)
+    //            return;
+
+    //        if( lastsavedpos >= 0 ) cmenu(15001);
+    //        else cmenu(25000);
+    //        FX_StopAllSounds();
+    //        clearsoundlocks();
+    //        ps[myconnectindex].gm |= MODE_MENU;
+    //        if(ud.multimode < 2 && ud.recstat != 2)
+    //        {
+    //            ready2send = 0;
+    //            totalclock = ototalclock;
+    //        }
+    //    }
+
+    //    if(KB_KeyPressed( sc_F10 ))
+    //    {
+    //        KB_ClearKeyDown( sc_F10 );
+    //        cmenu(500);
+    //        FX_StopAllSounds();
+    //        clearsoundlocks();
+    //        ps[myconnectindex].gm |= MODE_MENU;
+    //        if(ud.multimode < 2 && ud.recstat != 2)
+    //        {
+    //            ready2send = 0;
+    //            totalclock = ototalclock;
+    //        }
+    //    }
+
+
+    //    if( ud.overhead_on != 0)
+    //    {
+
+    //        j = totalclock-nonsharedtimer; nonsharedtimer += j;
+    //        if ( ACTION( gamefunc_Enlarge_Screen ) )
+    //            ps[myconnectindex].zoom += mulscale6(j,max(ps[myconnectindex].zoom,256));
+    //        if ( ACTION( gamefunc_Shrink_Screen ) )
+    //            ps[myconnectindex].zoom -= mulscale6(j,max(ps[myconnectindex].zoom,256));
+
+    //        if( (ps[myconnectindex].zoom > 2048) )
+    //            ps[myconnectindex].zoom = 2048;
+    //        if( (ps[myconnectindex].zoom < 48) )
+    //            ps[myconnectindex].zoom = 48;
+
+    //    }
+    //}
+
+    if( KB.keyPressed(sc_Escape) && ud.overhead_on && ps[myconnectindex].newowner == -1 ) {
+        debugger;
+        KB.clearKeyDown( sc_Escape );
+        ud.last_overhead = ud.overhead_on;
+        ud.overhead_on = 0;
+        ud.scrollmode = 0;
+        vscrn();
+    }
+
+    //if( ACTION(gamefunc_AutoRun) )
+    //{
+    //    CONTROL_ClearAction(gamefunc_AutoRun);
+    //    ud.auto_run = 1-ud.auto_run;
+    //    FTA(85+ud.auto_run,ps[myconnectindex],1);
+    //}
+
+    //if( ACTION(gamefunc_Map) )
+    //{
+    //    CONTROL_ClearAction( gamefunc_Map );
+    //    if( ud.last_overhead != ud.overhead_on && ud.last_overhead)
+    //    {
+    //        ud.overhead_on = ud.last_overhead;
+    //        ud.last_overhead = 0;
+    //    }
+    //    else
+    //    {
+    //        ud.overhead_on++;
+    //        if(ud.overhead_on == 3 ) ud.overhead_on = 0;
+    //        ud.last_overhead = ud.overhead_on;
+    //    }
+    //    restorepalette = 1;
+    //    vscrn();
+    //}
+
+    //if(KB_KeyPressed( sc_F11 ))
+    //{
+    //    KB_ClearKeyDown( sc_F11 );
+    //    // FIX_00030: Brightness step was not the same from the keys vs menu 
+    //    if(SHIFTS_IS_PRESSED) ud.brightness-=8; // Keyboard step must be 8, as the brightness cursor step.
+    //    else ud.brightness+=8;
+
+    //    if (ud.brightness > 56 )
+    //        ud.brightness = 0;
+    //    else if(ud.brightness < 0)
+    //        ud.brightness = 56;
+
+    //    setbrightness(ud.brightness>>2,ps[myconnectindex].palette[0]);
+    //    if(ud.brightness < 40) FTA( 29 + (ud.brightness>>3) ,ps[myconnectindex],1);
+    //    else if(ud.brightness < 80) FTA( 96 + (ud.brightness>>3) - 5,ps[myconnectindex],1);
+    //}
+}
+
 //7486
 function logo() {
     console.log("(9) logo");
@@ -4461,7 +4952,7 @@ function main(argc, argv) {
             FX.stopAllSounds();
             clearsoundlocks();
             //nomorelogohack = 1;
-            //goto MAIN_LOOP_RESTART;
+            //goto MAIN_LOOP_RESTART; // maybe   q.goto("MAIN_LOOP_RESTART") and it removes everything fromt he queue until that label
         })
         .add(function () {
             ud.warp_on = 0;
@@ -4664,18 +5155,19 @@ Game.playBack = function () {
                 }, function() {
                     Game.drawBackground();
                 }).addElse(function() {
-                    if (Console.isActive()) {
+                    if (!Console.isActive()) {
                         nonsharedkeys();
-                    } else {
-                        j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
+                    }
+                    
+                    j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
 
-                        Game.displayRooms(screenpeek, j);
-                        //appendImageDebug = true;
-                        displayrest(j);
-                        //appendImageDebug = false;
+                    Game.displayRooms(screenpeek, j);
+                    //appendImageDebug = true;
+                    displayrest(j);
+                    //appendImageDebug = false;
 
-                        if (ud.multimode > 1 && ps[myconnectindex].gm)
-                            getPackets();
+                    if (ud.multimode > 1 && ps[myconnectindex].gm) {
+                        getPackets();
                     }
                 }).endIf()
                 .addIf(function() {
@@ -4799,7 +5291,7 @@ function fakedomovethings() {
 
     //syn = (input *)&inputfifo[fakemovefifoplc&(MOVEFIFOSIZ-1)][myconnectindex];
 
-    //p = &ps[myconnectindex];
+    //p = ps[myconnectindex];
 
     //backcstat = sprite[p.i].cstat;
     //sprite[p.i].cstat &= ~257;

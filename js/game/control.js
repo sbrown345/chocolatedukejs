@@ -14,10 +14,32 @@ var controltype =
 
 var Control = {};
 
+function ControlInfo() {
+    this.clear();
+}
+
+ControlInfo.prototype.clear = function() {
+    this.dx = 0;
+    this.dy = 0;
+    this.dz = 0;
+    this.dyaw = 0;
+    this.dpitch = 0;
+    this.droll = 0;
+};
+
 function ACTION(i) {
     //todo
     return 0;
 }
+
+//479
+Control.getInput = function(info) {
+    console.log("todo Control.getInput");
+};
+
+Control.getMouseSensitivity_Y = function() {
+    return mouseSensitivity_Y;
+};
 
 //743
 Control.startup = function() {

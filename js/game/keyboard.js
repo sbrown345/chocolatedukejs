@@ -2,13 +2,15 @@
 
 var KB = {};
 
-var  sc_None         	=	0	;
+// hex = original
+
+var  sc_None         	=	0   ;
 var  sc_Bad          	=	0xff	;
 var  sc_Comma        	=	0x33	;
 var  sc_Period       	=	0x34	;
 var  sc_Return       	=	0x1c	;
 var  sc_Enter        	=	sc_Return	;
-var  sc_Escape       	=	0x01	;
+var  sc_Escape       	=	27	;
 var  sc_Space        	=	0x39	;
 var  sc_BackSpace    	=	0x0e	;
 var  sc_Tab          	=	0x0f	;
@@ -126,14 +128,47 @@ var  asc_Space       	=	32	;
 			
 var MAXKEYBOARDSCAN  	=	128	;
 
+/*
+=============================================================================
+
+                               GLOBAL VARIABLES
+
+=============================================================================
+*/
+
+
+KB.keyDown = new Uint8Array(MAXKEYBOARDSCAN);   // Keyboard state array
+//var kb_scancode KB_LastScan;
+
+var keyIsWaiting = false;
+
+//static uint8_t  scancodeToASCII[ MAXKEYBOARDSCAN ];
+//static uint8_t  shiftedScancodeToASCII[ MAXKEYBOARDSCAN ];
+//static uint8_t  extscanToSC[ MAXKEYBOARDSCAN ];
+
+window.addEventListener("keydown", function (e) {
+    KB.keyDown[e.keyCode] = 1;
+});
+
+window.addEventListener("keyup", function(e) {
+    KB.keyDown[e.keyCode] = 0;
+});
 
 // "Macros"
 KB.keyPressed = function (scan) {
-    // todo
+    return KB.keyDown[(scan)] != 0;
 };
 
 KB.clearKeyDown = function (scan) {
-    // todo
+    return KB.keyDown[(scan)] == 0;
+};
+
+// Functions
+KB.clearKeysDown = function () {
+    for (var i = 0; i < KB.keyDown.length; i++) {
+        KB.keyDown.length[i] = 0;
+    }
+    keyIsWaiting = false;
 };
 
 KB.startup = function () {
