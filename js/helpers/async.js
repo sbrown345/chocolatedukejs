@@ -163,7 +163,8 @@ Queue.prototype = {
 
         var that = this;
 
-        shiftArg(); // http://ajaxian.com/archives/settimeout-delay
+        //shiftArg(); // http://ajaxian.com/archives/settimeout-delay
+        setZeroTimeout(shiftArg);
 
         function shiftArg() {
             if (that._methods[0]) {
