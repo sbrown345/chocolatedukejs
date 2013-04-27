@@ -1,5 +1,5 @@
 ﻿var overrideDefaultConsole = true;
-var skipAllLogging = false;
+var skipAllLogging = true;
 
 console.log2 = function () {
     var args = Array.prototype.slice.call(arguments), format;
