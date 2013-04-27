@@ -56,7 +56,7 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     var texture = textureSetup;
     var bits = bitsSetup;
 
-    i4 = i4 >> 0; // uint32
+    i4 = i4 >>> 0; // uint32
     i5 = i5 >>> 0; // uint32
 
     shade = shade & 0xffffff00;
