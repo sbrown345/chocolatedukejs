@@ -4556,7 +4556,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 2;
+Game.whichDemo = 1;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
@@ -4617,10 +4617,7 @@ Game.playBack = function () {
             q.addIf(function() {
                 return foundemo;
             }, function() {
-                q.setPositionAtStart()
-                    .addWhile(function() {
-                        return totalclock >= (lockclock + TICSPERFRAME);
-                    }, function() {
+                q.setPositionAtStart();
                         q.setPositionAtStart();
 
                         if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
@@ -4638,7 +4635,6 @@ Game.playBack = function () {
                             ud.reccnt--;
                         }
                         Game.doMoveThings();
-                    });
             }).endIf()
                 .addIf(function() {
                     return foundemo === 0;

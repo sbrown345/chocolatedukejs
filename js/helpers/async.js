@@ -33,13 +33,21 @@ Queue.prototype = {
 
     // adds callbacks to your queue
     add: function () {
-        var fn = arguments[arguments.length - 1];
+        return this._add(arguments);
+    },
+
+    addFrame: function () {
+        return this._add(arguments, true);
+    },
+    
+    _add: function(allArgs, reqFrame) {
+        var fn = allArgs[allArgs.length - 1];
         var args = [];
-        for (var i = 0; i < arguments.length - 1; i++) {
-            args.push(arguments[i]);
+        for (var i = 0; i < allArgs.length - 1; i++) {
+            args.push(allArgs[i]);
         }
 
-        this._methods.splice(this._insertIndex++, 0, [fn, args]);
+        this._methods.splice(this._insertIndex++, 0, { fn: fn, args: args, requestFrame: reqFrame });
 
         this.outputDebugInfo();
 
@@ -63,7 +71,7 @@ Queue.prototype = {
             }
         };
         
-        return this.add(newFn);
+        return this.addFrame(newFn);
     },
 
     // create branch?
@@ -155,17 +163,21 @@ Queue.prototype = {
 
         var that = this;
 
-        requestAnimationFrame(shiftArg);
+        shiftArg(); // http://ajaxian.com/archives/settimeout-delay
 
         function shiftArg() {
             if (that._methods[0]) {
 
-                var fnAndArg = that._methods.shift();
-                var fn = fnAndArg[0];
-                var newArgs = [resp].concat(fnAndArg[1]);
-                fn.apply(undefined, newArgs);
+                var methodObj = that._methods.shift();
+                var newArgs = [resp].concat(methodObj.args);
+                methodObj.fn.apply(undefined, newArgs);
 
-                requestAnimationFrame(shiftArg);
+                if (methodObj.requestFrame) {
+                    requestAnimationFrame(shiftArg);
+                } else {
+                    shiftArg();
+                    //setZeroTimeout(shiftArg);
+                }
 
             } else if (typeof resp === "function") {
                 resp();
@@ -196,3 +208,42 @@ Queue.prototype = {
         return this;
     }
 };
+
+
+
+
+
+
+
+
+
+
+(function () {
+    var timeouts = [];
+    var messageName = "zero-timeout-message";
+
+    // Like setTimeout, but only takes a function argument.  There's
+    // no time argument (always zero) and no arguments (you have to
+    // use a closure).
+    function setZeroTimeout(fn) {
+        timeouts.push(fn);
+        window.postMessage(messageName, "*");
+    }
+
+    function handleMessage(event) {
+        if (event.source == window && event.data == messageName) {
+            event.stopPropagation();
+            if (timeouts.length > 0) {
+                var fn = timeouts.shift();
+                fn();
+            }
+        }
+    }
+
+    window.addEventListener("message", handleMessage, true);
+
+    // Add the one thing we want added to the window object.
+    window.setZeroTimeout = setZeroTimeout;
+})();
+
+
