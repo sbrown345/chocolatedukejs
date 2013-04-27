@@ -687,16 +687,16 @@ function bitwisef2i() {
     });
 }
 
+setupslopevlin.c = new bitwisef2i();
 function setupslopevlin(i1, i2, i3) {
-    var c = new bitwisef2i();
     slopemach_ebx = i2;
     slopemach_ecx = i3;
     slopemach_edx = (1 << (i1 & 0x1f)) - 1;
     slopemach_edx <<= ((i1 & 0x1f00) >> 8);
     slopemach_ah1 = 32 - ((i1 & 0x1f00) >> 8);
     slopemach_ah2 = (slopemach_ah1 - (i1 & 0x1f)) & 0x1f;
-    c.f = asm2_f[0] = /*(float)*/asm1;
-    asm2 = c.i;
+    setupslopevlin.f = asm2_f[0] = /*(float)*/asm1;
+    asm2 = setupslopevlin.i;
 }
 
 //870
@@ -704,11 +704,11 @@ function low32(a) { return (a & 0xffffffff); }
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 //var slopevlinCount = 0;
+slopevlin.c = new bitwisef2i();
 function slopevlin(i1, i2, i3, i4, i5, i6) {
     //printf("slopevlin\n");
     var doCount = 0;
     var whileCount = 0;
-    var c = new bitwisef2i();
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
     var a = asm3 + asm2_f[0]; // look @ krecipasm for float stuff
@@ -724,8 +724,8 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
-        c.f = a;
-        fpuasm = eax = c.i;
+        slopevlin.c.f = a;
+        fpuasm = eax = slopevlin.c.i;
         edx = ((eax|0) < 0) ? 0xffffffff : 0;
         eax = (eax << 1)>>>0;
         ecx = (eax>>>24);	//  exponent
