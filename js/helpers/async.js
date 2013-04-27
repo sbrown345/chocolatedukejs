@@ -175,8 +175,8 @@ Queue.prototype = {
                 if (methodObj.requestFrame) {
                     requestAnimationFrame(shiftArg);
                 } else {
-                    shiftArg();
-                    //setZeroTimeout(shiftArg);
+                    //shiftArg(); // running this immediately causes head snapshot to be ~60mb (instead of 30)
+                    setZeroTimeout(shiftArg);
                 }
 
             } else if (typeof resp === "function") {
