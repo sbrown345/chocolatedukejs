@@ -1554,6 +1554,56 @@ Game.wallSwitchCheck = function (i) {
     return 0;
 };
 
+//3566
+
+function wallswitchcheck(i) {
+    switch (sprite[i].picnum) {
+    case HANDPRINTSWITCH:
+    case HANDPRINTSWITCH + 1:
+    case ALIENSWITCH:
+    case ALIENSWITCH + 1:
+    case MULTISWITCH:
+    case MULTISWITCH + 1:
+    case MULTISWITCH + 2:
+    case MULTISWITCH + 3:
+    case ACCESSSWITCH:
+    case ACCESSSWITCH2:
+    case PULLSWITCH:
+    case PULLSWITCH + 1:
+    case HANDSWITCH:
+    case HANDSWITCH + 1:
+    case SLOTDOOR:
+    case SLOTDOOR + 1:
+    case LIGHTSWITCH:
+    case LIGHTSWITCH + 1:
+    case SPACELIGHTSWITCH:
+    case SPACELIGHTSWITCH + 1:
+    case SPACEDOORSWITCH:
+    case SPACEDOORSWITCH + 1:
+    case FRANKENSTINESWITCH:
+    case FRANKENSTINESWITCH + 1:
+    case LIGHTSWITCH2:
+    case LIGHTSWITCH2 + 1:
+    case POWERSWITCH1:
+    case POWERSWITCH1 + 1:
+    case LOCKSWITCH1:
+    case LOCKSWITCH1 + 1:
+    case POWERSWITCH2:
+    case POWERSWITCH2 + 1:
+    case DIPSWITCH:
+    case DIPSWITCH + 1:
+    case DIPSWITCH2:
+    case DIPSWITCH2 + 1:
+    case TECHSWITCH:
+    case TECHSWITCH + 1:
+    case DIPSWITCH3:
+    case DIPSWITCH3 + 1:
+        return 1;
+    }
+    return 0;
+}
+
+
 //3608
 var tempwallptr;
 
@@ -1742,7 +1792,6 @@ function spawn(j, pn) {
             changespritestat(i, 5);
             break;
         case TONGUE:
-            throw new Error("todo");
             if (j >= 0)
                 sp.ang = sprite[j].ang;
             sp.z -= 38 << 8;
@@ -1839,53 +1888,51 @@ function spawn(j, pn) {
             break;
         case BLOODPOOL:
         case PUKE:
-            throw new Error("todo");
-            //{
-            //    var s1;
-            //    s1 = sp.sectnum;
+            {
+                var s1 = new Ref(sp.sectnum);
 
-            //    updatesector(sp.x+108,sp.y+108,&s1);
-            //    if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //    {
-            //        updatesector(sp.x-108,sp.y-108,&s1);
-            //        if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //        {
-            //            updatesector(sp.x+108,sp.y-108,&s1);
-            //            if(s1 >= 0 && sector[s1].floorz == sector[sp.sectnum].floorz)
-            //            {
-            //                updatesector(sp.x-108,sp.y+108,&s1);
-            //                if(s1 >= 0 && sector[s1].floorz != sector[sp.sectnum].floorz)
-            //                { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
-            //            }
-            //            else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
-            //        }
-            //        else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
-            //    }
-            //    else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
-            //}
+                updatesector(sp.x+108,sp.y+108,s1);
+                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                {
+                    updatesector(sp.x-108,sp.y-108,s1);
+                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                    {
+                        updatesector(sp.x+108,sp.y-108,s1);
+                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
+                        {
+                            updatesector(sp.x-108,sp.y+108,s1);
+                            if (s1.$ >= 0 && sector[s1.$].floorz != sector[sp.sectnum].floorz)
+                            { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                        }
+                        else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                    }
+                    else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                }
+                else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+            }
 
-            //if( sector[sprite[i].sectnum].lotag == 1 )
-            //{
-            //    changespritestat(i,5);
-            //    break;
-            //}
+            if( sector[sprite[i].sectnum].lotag == 1 )
+            {
+                changespritestat(i,5);
+                break;
+            }
 
-            //if(j >= 0 && sp.picnum != PUKE)
-            //{
-            //    if( sprite[j].pal == 1)
-            //        sp.pal = 1;
-            //    else if( sprite[j].pal != 6 && sprite[j].picnum != NUKEBARREL && sprite[j].picnum != TIRE )
-            //    {
-            //        if(sprite[j].picnum == FECES)
-            //            sp.pal = 7; // Brown
-            //        else sp.pal = 2; // Red
-            //    }
-            //    else sp.pal = 0;  // green
+            if(j >= 0 && sp.picnum != PUKE)
+            {
+                if( sprite[j].pal == 1)
+                    sp.pal = 1;
+                else if( sprite[j].pal != 6 && sprite[j].picnum != NUKEBARREL && sprite[j].picnum != TIRE )
+                {
+                    if(sprite[j].picnum == FECES)
+                        sp.pal = 7; // Brown
+                    else sp.pal = 2; // Red
+                }
+                else sp.pal = 0;  // green
 
-            //    if(sprite[j].picnum == TIRE)
-            //        sp.shade = 127;
-            //}
-            //sp.cstat |= 32;
+                if(sprite[j].picnum == TIRE)
+                    sp.shade = 127;
+            }
+            sp.cstat |= 32;
         case FECES:
             if (j >= 0)
                 sp.xrepeat = sp.yrepeat = 1;
@@ -2336,7 +2383,9 @@ function spawn(j, pn) {
             break;
 
         case WATERDRIP:
-            if ((j >= 0 && sprite[j].statnum == 10) || sprite[j].statnum == 1) {
+            // fix: j can be -1 - so i guess this is correct. 
+            if (j >= 0 && (sprite[j].statnum == 10 || sprite[j].statnum == 1)) {
+            //if ((j >= 0 && sprite[j].statnum == 10) || sprite[j].statnum == 1) {
                 sp.shade = 32;
                 if (sprite[j].pal != 1) {
                     sp.pal = 2;
@@ -2996,7 +3045,7 @@ function spawn(j, pn) {
 
                 case 9:
                     if (sector[sect].lotag &&
-                        labs(sector[sect].ceilingz - sp.z) > 1024)
+                        Math.abs(sector[sect].ceilingz - sp.z) > 1024)
                         sector[sect].lotag |= 32768; //If its open
                 case 8:
                     //First, get the ceiling-floor shade
@@ -4456,7 +4505,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 1;
+Game.whichDemo = 2;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();

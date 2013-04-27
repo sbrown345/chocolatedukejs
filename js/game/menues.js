@@ -856,7 +856,7 @@ function menus() {
 //        case 50: // general menu as cmenu(0) but for multiplayer games
 //            c = (320>>1);
 //            rotateSprite(c<<16,32<<16,65536,0,INGAMEDUKETHREEDEE,0,0,10,0,0,xdim-1,ydim-1);
-//            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sinTable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
+//            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sintable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
 //            x = probe(c,67,16,7);
 //            switch(x)
 //            {
@@ -1044,7 +1044,7 @@ function menus() {
 //                    // uncomment this for usermap
 //                    //menutext(160,60+20+20+20+20,SHX(-6),PHX(-6),"USER MAP");
 		           
-//                    //gametextpal(160,60+20+20+20+20+3,boardfilename,16+(sinTable[(totalclock<<4)&2047]>>11),2);
+//                    //gametextpal(160,60+20+20+20+20+3,boardfilename,16+(sintable[(totalclock<<4)&2047]>>11),2);
 //                    //}
 //                }
 //                else

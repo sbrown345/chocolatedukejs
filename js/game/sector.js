@@ -2,6 +2,55 @@
 
 var Sector = {};
 
+//31
+var  haltsoundhack = 0;
+function callsound(sn,whatsprite)
+{
+    var i;
+
+    if(haltsoundhack)
+    {
+        haltsoundhack = 0;
+        return -1;
+    }
+
+    i = headspritesect[sn];
+    while(i >= 0)
+    {
+        if( sprite[i].picnum == MUSICANDSFX && sprite[i].lotag < 1000 )
+        {
+            if(whatsprite == -1) whatsprite = i;
+
+            if(hittype[i].temp_data[0] == 0)
+            {
+                if( (soundm[sprite[i].lotag]&16) == 0)
+                {
+                    if(sprite[i].lotag)
+                    {
+                        spritesound(sprite[i].lotag,whatsprite);
+                        if(sprite[i].hitag && sprite[i].lotag != sprite[i].hitag && sprite[i].hitag < NUM_SOUNDS)
+                            stopsound(sprite[i].hitag);
+                    }
+
+                    if( (sector[sprite[i].sectnum].lotag&0xff) != 22)
+                        hittype[i].temp_data[0] = 1;
+                }
+            }
+            else if(sprite[i].hitag < NUM_SOUNDS)
+            {
+                if(sprite[i].hitag) spritesound(sprite[i].hitag,whatsprite);
+                if( (soundm[sprite[i].lotag]&1) || ( sprite[i].hitag && sprite[i].hitag != sprite[i].lotag ) )
+                    stopsound(sprite[i].lotag);
+                hittype[i].temp_data[0] = 0;
+            }
+            return sprite[i].lotag;
+        }
+        i = nextspritesect[i];
+    }
+    return -1;
+}
+
+
 //124
 function isadoorwall(dapic) {
     switch (dapic) {
@@ -328,6 +377,551 @@ function animatewalls() {
     }
 }
 
+//553
+
+function operatesectors(sn,ii)
+{
+    var j=0, l, q, startwall, endwall;
+    var i;
+    var sect_error;
+    var sptr;
+
+    sect_error = 0;
+    sptr = sector[sn];
+
+    switch(sptr.lotag&(0xffff-49152))
+    {
+
+        case 30:
+            j = sector[sn].hitag;
+            if( hittype[j].tempang == 0 ||
+                hittype[j].tempang == 256)
+                    callsound(sn,ii);
+            if(sprite[j].extra == 1)
+                sprite[j].extra = 3;
+            else sprite[j].extra = 1;
+            break;
+
+        case 31:
+
+            j = sector[sn].hitag;
+            if(hittype[j].temp_data[4] == 0)
+                hittype[j].temp_data[4] = 1;
+            
+            callsound(sn,ii);
+            break;
+
+        case 26: //The split doors
+            i = getanimationgoal(sptr.ceilingz);
+            if(i == -1) //if the door has stopped
+            {
+                haltsoundhack = 1;
+                sptr.lotag &= 0xff00;
+                sptr.lotag |= 22;
+                operatesectors(sn,ii);
+                sptr.lotag &= 0xff00;
+                sptr.lotag |= 9;
+                operatesectors(sn,ii);
+                sptr.lotag &= 0xff00;
+                sptr.lotag |= 26;
+            }
+            return;
+
+        case 9:
+        {
+            var dax,day,dax2,day2,sp;
+            var wallfind = new Int32Array(2);
+
+            startwall = sptr.wallptr;
+            endwall = startwall+sptr.wallnum-1;
+
+            sp = sptr.extra>>4;
+
+            //first find center point by averaging all points
+            dax = 0, day = 0;
+            for(i=startwall;i<=endwall;i++)
+            {
+                dax += wall[i].x;
+                day += wall[i].y;
+            }
+            dax /= (endwall-startwall+1);
+            day /= (endwall-startwall+1);
+
+            //find any points with either same x or same y coordinate
+            //  as center (dax, day) - should be 2 points found.
+            wallfind[0] = -1;
+            wallfind[1] = -1;
+            for(i=startwall;i<=endwall;i++)
+                if ((wall[i].x == dax) || (wall[i].y == day))
+                {
+                    if (wallfind[0] == -1)
+                        wallfind[0] = i;
+                    else wallfind[1] = i;
+                }
+
+            for(j=0;j<2;j++)
+            {
+                if ((wall[wallfind[j]].x == dax) && (wall[wallfind[j]].y == day))
+                {
+                    //find what direction door should open by averaging the
+                    //  2 neighboring points of wallfind[0] & wallfind[1].
+                    i = wallfind[j]-1; if (i < startwall) i = endwall;
+                    dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
+                    day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
+                    if (dax2 != 0)
+                    {
+                        dax2 = wall[wall[wall[wallfind[j]].point2].point2].x;
+                        dax2 -= wall[wall[wallfind[j]].point2].x;
+                        setanimation(sn,wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,sp);
+                        setanimation(sn,wall[i].x,wall[i].x+dax2,sp);
+                        setanimation(sn,wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,sp);
+                        callsound(sn,ii);
+                    }
+                    else if (day2 != 0)
+                    {
+                        day2 = wall[wall[wall[wallfind[j]].point2].point2].y;
+                        day2 -= wall[wall[wallfind[j]].point2].y;
+                        setanimation(sn,wall[wallfind[j]].y,wall[wallfind[j]].y+day2,sp);
+                        setanimation(sn,wall[i].y,wall[i].y+day2,sp);
+                        setanimation(sn,wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,sp);
+                        callsound(sn,ii);
+                    }
+                }
+                else
+                {
+                    i = wallfind[j]-1; if (i < startwall) i = endwall;
+                    dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
+                    day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
+                    if (dax2 != 0)
+                    {
+                        setanimation(sn,wall[wallfind[j]].x,dax,sp);
+                        setanimation(sn,wall[i].x,dax+dax2,sp);
+                        setanimation(sn,wall[wall[wallfind[j]].point2].x,dax+dax2,sp);
+                        callsound(sn,ii);
+                    }
+                    else if (day2 != 0)
+                    {
+                        setanimation(sn,wall[wallfind[j]].y,day,sp);
+                        setanimation(sn,wall[i].y,day+day2,sp);
+                        setanimation(sn,wall[wall[wallfind[j]].point2].y,day+day2,sp);
+                        callsound(sn,ii);
+                    }
+                }
+            }
+
+        }
+        return;
+
+        case 15://Warping elevators
+
+            if(sprite[ii].picnum != APLAYER) return;
+//            if(ps[sprite[ii].yvel].select_dir == 1) return;
+
+            i = headspritesect[sn];
+            while(i >= 0)
+            {
+                if(sprite[i].picnum==SECTOREFFECTOR && sprite[i].lotag == 17 ) break;
+                i = nextspritesect[i];
+            }
+
+            if(sprite[ii].sectnum == sn)
+            {
+                if( activatewarpelevators(i,-1) )
+                    activatewarpelevators(i,1);
+                else if( activatewarpelevators(i,1) )
+                    activatewarpelevators(i,-1);
+                return;
+            }
+            else
+            {
+                if(sptr.floorz > sprite[i].z)
+                    activatewarpelevators(i,-1);
+                else
+                    activatewarpelevators(i,1);
+            }
+
+            return;
+
+        case 16:
+        case 17:
+
+            i = getanimationgoal(sptr.floorz);
+
+            if(i == -1)
+            {
+                i = nextsectorneighborz(sn,sptr.floorz,1,1);
+                if( i == -1 )
+                {
+                    i = nextsectorneighborz(sn,sptr.floorz,1,-1);
+                    if( i == -1 ) return;
+                    j = sector[i].floorz;
+                    setanimation(sn,sptr.floorz,j,sptr.extra);
+                }
+                else
+                {
+                    j = sector[i].floorz;
+                    setanimation(sn,sptr.floorz,j,sptr.extra);
+                }
+                callsound(sn,ii);
+            }
+
+            return;
+
+        case 18:
+        case 19:
+
+            i = getanimationgoal(sptr.floorz);
+
+            if(i==-1)
+            {
+                i = nextsectorneighborz(sn,sptr.floorz,1,-1);
+                if(i==-1) i = nextsectorneighborz(sn,sptr.floorz,1,1);
+                if(i==-1) return;
+                j = sector[i].floorz;
+                q = sptr.extra;
+                l = sptr.ceilingz-sptr.floorz;
+                setanimation(sn,sptr.floorz,j,q);
+                setanimation(sn,sptr.ceilingz,j+l,q);
+                callsound(sn,ii);
+            }
+            return;
+
+        case 29:
+
+            if(sptr.lotag&0x8000)
+                j = sector[nextsectorneighborz(sn,sptr.ceilingz,1,1)].floorz;
+            else
+                j = sector[nextsectorneighborz(sn,sptr.ceilingz,-1,-1)].ceilingz;
+
+            i = headspritestat[3]; //Effectors
+            while(i >= 0)
+            {
+                if( (sprite[i].lotag == 22) &&
+                    (sprite[i].hitag == sptr.hitag) )
+                {
+                    sector[sprite[i].sectnum].extra = -sector[sprite[i].sectnum].extra;
+
+                    hittype[i].temp_data[0] = sn;
+                    hittype[i].temp_data[1] = 1;
+                }
+                i = nextspritestat[i];
+            }
+
+            sptr.lotag ^= 0x8000;
+
+            setanimation(sn,sptr.ceilingz,j,sptr.extra);
+
+            callsound(sn,ii);
+
+            return;
+
+        case 20:
+
+            REDODOOR:
+            while(true) {
+                if(sptr.lotag&0x8000)
+                {
+                    i = headspritesect[sn];
+                    while(i >= 0)
+                    {
+                        if(sprite[i].statnum == 3 && sprite[i].lotag==9)
+                        {
+                            j = sprite[i].z;
+                            break;
+                        }
+                        i = nextspritesect[i];
+                    }
+                    if(i==-1)
+                        j = sptr.floorz;
+                }
+                else
+                {
+                    j = nextsectorneighborz(sn,sptr.ceilingz,-1,-1);
+
+                    if(j >= 0) j = sector[j].ceilingz;
+                    else
+                    {
+                        sptr.lotag |= 32768;
+                        continue REDODOOR;
+                    }
+                }
+                
+                break;
+            }
+            sptr.lotag ^= 0x8000;
+
+            setanimation(sn,sptr.ceilingz,j,sptr.extra);
+            callsound(sn,ii);
+
+            return;
+
+        case 21:
+            i = getanimationgoal(sptr.floorz);
+            if (i >= 0)
+            {
+                if (animategoal[sn] == sptr.ceilingz)
+                    animategoal[i] = sector[nextsectorneighborz(sn,sptr.ceilingz,1,1)].floorz;
+                else animategoal[i] = sptr.ceilingz;
+                j = animategoal[i];
+            }
+            else
+            {
+                if (sptr.ceilingz == sptr.floorz)
+                    j = sector[nextsectorneighborz(sn,sptr.ceilingz,1,1)].floorz;
+                else j = sptr.ceilingz;
+
+                sptr.lotag ^= 0x8000;
+
+                if(setanimation(sn,sptr.floorz,j,sptr.extra) >= 0)
+                    callsound(sn,ii);
+            }
+            return;
+
+        case 22:
+
+            // REDODOOR22:
+
+            if ( (sptr.lotag&0x8000) )
+            {
+                q = (sptr.ceilingz+sptr.floorz)>>1;
+               // j = setanimation(sn,&sptr.floorz,q,sptr.extra);
+                j = setanimation(sn,sptr.ceilingz,q,sptr.extra);
+            }
+            else
+            {
+                q = sector[nextsectorneighborz(sn,sptr.floorz,1,1)].floorz;
+               // j = setanimation(sn,&sptr.floorz,q,sptr.extra);
+                q = sector[nextsectorneighborz(sn,sptr.ceilingz,-1,-1)].ceilingz;
+                j = setanimation(sn,sptr.ceilingz,q,sptr.extra);
+            }
+
+            sptr.lotag ^= 0x8000;
+
+            callsound(sn,ii);
+
+            return;
+
+        case 23: //Swingdoor
+
+            j = -1;
+            q = 0;
+
+            i = headspritestat[3];
+            while(i >= 0)
+            {
+                if( sprite[i].lotag == 11 && sprite[i].sectnum == sn && !hittype[i].temp_data[4])
+                {
+                    j = i;
+                    break;
+                }
+                i = nextspritestat[i];
+            }
+			
+            //Why would this ever be -1?
+			if(i < 0)
+			{
+				return;
+			}//FIXME: CRASH HERE (the "l = sector[sprite[i].sectnum].lotag&0x8000; " code)
+
+            l = sector[sprite[i].sectnum].lotag&0x8000; 
+
+            if(j >= 0)
+            {
+                i = headspritestat[3];
+                while(i >= 0)
+                {
+                    if( l == (sector[sprite[i].sectnum].lotag&0x8000) && sprite[i].lotag == 11 && sprite[j].hitag == sprite[i].hitag && !hittype[i].temp_data[4] )
+                    {
+                        if(sector[sprite[i].sectnum].lotag&0x8000) sector[sprite[i].sectnum].lotag &= 0x7fff;
+                        else sector[sprite[i].sectnum].lotag |= 0x8000;
+                        hittype[i].temp_data[4] = 1;
+                        hittype[i].temp_data[3] = -hittype[i].temp_data[3];
+                        if(q == 0)
+                        {
+                            callsound(sn,i);
+                            q = 1;
+                        }
+                    }
+                    i = nextspritestat[i];
+                }
+            }
+            return;
+
+        case 25: //Subway type sliding doors
+
+            j = headspritestat[3];
+            while(j >= 0)//Find the sprite
+            {
+                if( (sprite[j].lotag) == 15 && sprite[j].sectnum == sn )
+                    break; //Found the sectoreffector.
+                j = nextspritestat[j];
+            }
+
+            if(j < 0)
+                return;
+
+            i = headspritestat[3];
+            while(i >= 0)
+            {
+                if( sprite[i].hitag==sprite[j].hitag )
+                {
+                    if( sprite[i].lotag == 15 )
+                    {
+                        sector[sprite[i].sectnum].lotag ^= 0x8000; // Toggle the open or close
+                        sprite[i].ang += 1024;
+                        if(hittype[i].temp_data[4]) callsound(sprite[i].sectnum,i);
+                        callsound(sprite[i].sectnum,i);
+                        if(sector[sprite[i].sectnum].lotag&0x8000) hittype[i].temp_data[4] = 1;
+                        else hittype[i].temp_data[4] = 2;
+                    }
+                }
+                i = nextspritestat[i];
+            }
+            return;
+
+        case 27:  //Extended bridge
+
+            j = headspritestat[3];
+            while(j >= 0)
+            {
+                if( (sprite[j].lotag&0xff)==20 && sprite[j].sectnum == sn) //Bridge
+                {
+
+                    sector[sn].lotag ^= 0x8000;
+                    if(sector[sn].lotag&0x8000) //OPENING
+                        hittype[j].temp_data[0] = 1;
+                    else hittype[j].temp_data[0] = 2;
+                    callsound(sn,ii);
+                    break;
+                }
+                j = nextspritestat[j];
+            }
+            return;
+
+
+        case 28:
+            //activate the rest of them
+
+            j = headspritesect[sn];
+            while(j >= 0)
+            {
+                if(sprite[j].statnum==3 && (sprite[j].lotag&0xff)==21)
+                    break; //Found it
+                j = nextspritesect[j];
+            }
+
+            j = sprite[j].hitag;
+
+            l = headspritestat[3];
+            while(l >= 0)
+            {
+                if( (sprite[l].lotag&0xff)==21 && !hittype[l].temp_data[0] &&
+                    (sprite[l].hitag) == j )
+                    hittype[l].temp_data[0] = 1;
+                l = nextspritestat[l];
+            }
+            callsound(sn,ii);
+
+            return;
+    }
+}
+
+//1023
+
+function operateactivators(low,snum)
+{
+    var i, j, k, p;
+    var wal;
+
+    for(i=numcyclers-1;i>=0;i--)
+    {
+        p = cyclers[i][0];
+
+        if(p[4] == low)
+        {
+            p[5] = !p[5];
+
+            sector[p[0]].floorshade = sector[p[0]].ceilingshade = p[3];
+            wal = wall[sector[p[0]].wallptr];
+            for(j=sector[p[0]].wallnum;j > 0;j--,wal++)
+                wal.shade = p[3];
+        }
+    }
+
+    i = headspritestat[8];
+    k = -1;
+    while(i >= 0)
+    {
+        if(sprite[i].lotag == low)
+        {
+            if( sprite[i].picnum == ACTIVATORLOCKED )
+            {
+                if(sector[sprite[i].sectnum].lotag&16384)
+                    sector[sprite[i].sectnum].lotag &= 65535-16384;
+                else
+                    sector[sprite[i].sectnum].lotag |= 16384;
+
+                if(snum >= 0)
+                {
+                    if(sector[sprite[i].sectnum].lotag&16384)
+                        FTA(4,ps[snum],0);
+                    else FTA(8,ps[snum],0);
+                }
+            }
+            else
+            {
+                switch(sprite[i].hitag)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        if(sector[sprite[i].sectnum].floorz != sector[sprite[i].sectnum].ceilingz)
+                        {
+                            i = nextspritestat[i];
+                            continue;
+                        }
+                        break;
+                    case 2:
+                        if(sector[sprite[i].sectnum].floorz == sector[sprite[i].sectnum].ceilingz)
+                        {
+                            i = nextspritestat[i];
+                            continue;
+                        }
+                        break;
+                }
+
+                if( sector[sprite[i].sectnum].lotag < 3 )
+                {
+                    j = headspritesect[sprite[i].sectnum];
+                    while(j >= 0)
+                    {
+                        if( sprite[j].statnum == 3 ) switch(sprite[j].lotag)
+                        {
+                            case 36:
+                            case 31:
+                            case 32:
+                            case 18:
+                                hittype[j].temp_data[0] = 1-hittype[j].temp_data[0];
+                                callsound(sprite[i].sectnum,j);
+                                break;
+                        }
+                        j = nextspritesect[j];
+                    }
+                }
+
+                if( k == -1 && (sector[sprite[i].sectnum].lotag&0xff) == 22 )
+                    k = callsound(sprite[i].sectnum,i);
+
+                operatesectors(sprite[i].sectnum,i);
+            }
+        }
+        i = nextspritestat[i];
+     }
+
+    operaterespawns(low);
+}
+
+//1165
 function checkhitswitch(snum,w,switchtype)
 {
     var  switchpal;
@@ -701,6 +1295,29 @@ function checkhitswitch(snum,w,switchtype)
                return 1;
     }
     return 0;
+}
+
+//1540
+function activatebysector(sect,j)
+{
+    var i,didit;
+
+    didit = 0;
+
+    i = headspritesect[sect];
+    while(i >= 0)
+    {
+        if(sprite[i].picnum == ACTIVATOR)
+        {
+            operateactivators(sprite[i].lotag,-1);
+            didit = 1;
+//            return;
+        }
+        i = nextspritesect[i];
+    }
+
+    if(didit == 0)
+        operatesectors(sect,j);
 }
 
 

@@ -7052,74 +7052,73 @@ function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, c
                         }
                         break;
                     case 32:
-                        throw new Error("todo");
-                        //daz = spr.z;
-                        //daz2 = daz;
+                        daz = spr.z;
+                        daz2 = daz;
 
-                        //if ((cstat&64) != 0)
-                        //    if ((z > daz) == ((cstat&8)==0)) continue;
+                        if ((cstat&64) != 0)
+                            if ((z > daz) == ((cstat&8)==0)) continue;
 
-                        //tilenum = spr.picnum;
-                        //xoff =/* (int32_t)*/(int8_t /*use toInt8*/ )((tiles[tilenum].animFlags>>8)&255))+((int32_t)spr.xoffset);
-                        //yoff =/* (int32_t)*/((int8_t /*use toInt8*/ )((tiles[tilenum].animFlags>>16)&255))+((int32_t)spr.yoffset);
-                        //if ((cstat&4) > 0) xoff = -xoff;
-                        //if ((cstat&8) > 0) yoff = -yoff;
+                        tilenum = spr.picnum;
+                        xoff = toInt8((tiles[tilenum].animFlags >> 8) & 255) + (spr.xoffset);
+                        yoff = toInt8((tiles[tilenum].animFlags >> 16) & 255) + (spr.yoffset);
+                        if ((cstat&4) > 0) xoff = -xoff;
+                        if ((cstat&8) > 0) yoff = -yoff;
 
-                        //ang = spr.ang;
-                        //cosang = sinTable[(ang+512)&2047];
-                        //sinang = sinTable[ang];
-                        //xspan = tiles[tilenum].dim.width;
-                        //xrepeat = spr.xrepeat;
-                        //yspan = tiles[tilenum].dim.height;
-                        //yrepeat = spr.yrepeat;
+                        ang = spr.ang;
+                        cosang = sintable[(ang+512)&2047];
+                        sinang = sintable[ang];
+                        xspan = tiles[tilenum].dim.width;
+                        xrepeat = spr.xrepeat;
+                        yspan = tiles[tilenum].dim.height;
+                        yrepeat = spr.yrepeat;
 
-                        //dax = ((xspan>>1)+xoff)*xrepeat;
-                        //day = ((yspan>>1)+yoff)*yrepeat;
-                        //x1 += dmulscale16(sinang,dax,cosang,day)-x;
-                        //y1 += dmulscale16(sinang,day,-cosang,dax)-y;
-                        //l = xspan*xrepeat;
-                        //x2 = x1 - mulscale16(sinang,l);
-                        //y2 = y1 + mulscale16(cosang,l);
-                        //l = yspan*yrepeat;
-                        //k = -mulscale16(cosang,l);
-                        //x3 = x2+k;
-                        //x4 = x1+k;
-                        //k = -mulscale16(sinang,l);
-                        //y3 = y2+k;
-                        //y4 = y1+k;
+                        dax = ((xspan>>1)+xoff)*xrepeat;
+                        day = ((yspan>>1)+yoff)*yrepeat;
+                        x1 += dmulscale16(sinang,dax,cosang,day)-x;
+                        y1 += dmulscale16(sinang,day,-cosang,dax)-y;
+                        l = xspan*xrepeat;
+                        x2 = x1 - mulscale16(sinang,l);
+                        y2 = y1 + mulscale16(cosang,l);
+                        l = yspan*yrepeat;
+                        k = -mulscale16(cosang,l);
+                        x3 = x2+k;
+                        x4 = x1+k;
+                        k = -mulscale16(sinang,l);
+                        y3 = y2+k;
+                        y4 = y1+k;
 
-                        //dax = mulscale14(sinTable[(spr.ang-256+512)&2047],walldist+4);
-                        //day = mulscale14(sinTable[(spr.ang-256)&2047],walldist+4);
-                        //x1 += dax;
-                        //x2 -= day;
-                        //x3 -= dax;
-                        //x4 += day;
-                        //y1 += day;
-                        //y2 += dax;
-                        //y3 -= day;
-                        //y4 -= dax;
+                        dax = mulscale14(sintable[(spr.ang-256+512)&2047],walldist+4);
+                        day = mulscale14(sintable[(spr.ang-256)&2047],walldist+4);
+                        x1 += dax;
+                        x2 -= day;
+                        x3 -= dax;
+                        x4 += day;
+                        y1 += day;
+                        y2 += dax;
+                        y3 -= day;
+                        y4 -= dax;
 
-                        //if ((y1^y2) < 0)
-                        //{
-                        //    if ((x1^x2) < 0) clipyou ^= (x1*y2<x2*y1)^(y1<y2);
-                        //    else if (x1 >= 0) clipyou ^= 1;
-                        //}
-                        //if ((y2^y3) < 0)
-                        //{
-                        //    if ((x2^x3) < 0) clipyou ^= (x2*y3<x3*y2)^(y2<y3);
-                        //    else if (x2 >= 0) clipyou ^= 1;
-                        //}
-                        //if ((y3^y4) < 0)
-                        //{
-                        //    if ((x3^x4) < 0) clipyou ^= (x3*y4<x4*y3)^(y3<y4);
-                        //    else if (x3 >= 0) clipyou ^= 1;
-                        //}
-                        //if ((y4^y1) < 0)
-                        //{
-                        //    if ((x4^x1) < 0) clipyou ^= (x4*y1<x1*y4)^(y4<y1);
-                        //    else if (x4 >= 0) clipyou ^= 1;
-                        //}
-                        //break;
+                        if ((y1^y2) < 0)
+                        {
+                            if ((x1^x2) < 0) clipyou ^= (x1*y2<x2*y1)^(y1<y2);
+                            else if (x1 >= 0) clipyou ^= 1;
+                        }
+                        if ((y2^y3) < 0)
+                        {
+                            if ((x2^x3) < 0) clipyou ^= (x2*y3<x3*y2)^(y2<y3);
+                            else if (x2 >= 0) clipyou ^= 1;
+                        }
+                        if ((y3^y4) < 0)
+                        {
+                            if ((x3^x4) < 0) clipyou ^= (x3*y4<x4*y3)^(y3<y4);
+                            else if (x3 >= 0) clipyou ^= 1;
+                        }
+                        if ((y4^y1) < 0)
+                        {
+                            if ((x4^x1) < 0) clipyou ^= (x4*y1<x1*y4)^(y4<y1);
+                            else if (x4 >= 0) clipyou ^= 1;
+                        }
+                        break;
                 }
 
                 if (clipyou != 0) {

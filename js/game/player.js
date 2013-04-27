@@ -2053,7 +2053,9 @@ Player.processInput = function(snum) {
         x = p.posx+(sintable[(p.ang+512)&2047]>>5);
         y = p.posy+(sintable[p.ang&2047]>>5);
         tempsect = psect;
-        updatesector(x,y,tempsect);
+        var tempsectRef = new Ref(tempsect);
+        updatesector(x, y, tempsectRef);
+        tempsect = tempsectRef.$;
         if (tempsect >= 0)
         {
             k = getflorzofslope(psect,x,y);
