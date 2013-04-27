@@ -181,7 +181,6 @@ function menutext(x, y, s, p, t) {
             letterCh = t.charCodeAt(i);
             if (letter === ' ') {
                 centre += 5;
-                i++;
                 continue;
             }
             ac = 0;
@@ -237,7 +236,6 @@ function menutext(x, y, s, p, t) {
         letterCh = t.charCodeAt(i);
         if (letter === ' ') {
             x += 5;
-            i++;
             continue;
         }
         ac = 0;
