@@ -124,6 +124,20 @@ function hitasprite( i, hitsp) {
     return (FindDistance2D(sx.$ - sprite[i].x, sy.$ - sprite[i].y));
 }
 
+
+function hitawall(p, hitw) {
+    console.assert(hitw instanceof Ref);
+    var sx = new Ref(), sy = new Ref(), sz = new Ref();
+    var sect = new Ref(), hs = new Ref();
+
+    hitscan(p.posx, p.posy, p.posz, p.cursectnum,
+        sintable[(p.ang + 512) & 2047],
+        sintable[p.ang & 2047],
+        0, sect, hitw, hs, sx, sy, sz, CLIPMASK0);
+
+    return (FindDistance2D(sx.$ - p.posx, sy.$ - p.posy));
+}
+
 //203
 function aim(s, aang, auto_aim) {
     var  gotshrinker,gotfreezer;

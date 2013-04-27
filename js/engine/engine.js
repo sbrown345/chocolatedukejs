@@ -5871,8 +5871,43 @@ function cansee( x1,  y1,  z1,  sect1, x2,  y2,  z2,  sect2) {
     return(0);
 }
 
+//6341
+function lintersect(x1, y1, z1, x2, y2, z2,
+    x3, y3, x4, y4, intx, inty, intz) { /* p1 to p2 is a line segment */
+    console.assert(intx instanceof Ref);
+    console.assert(inty instanceof Ref);
+    console.assert(intz instanceof Ref);
+    var x21, y21, x34, y34, x31, y31, bot, topt, topu, t;
 
-//6291
+    x21 = x2 - x1;
+    x34 = x3 - x4;
+    y21 = y2 - y1;
+    y34 = y3 - y4;
+    bot = x21 * y34 - y21 * x34;
+    if (bot >= 0) {
+        if (bot == 0) return (0);
+        x31 = x3 - x1;
+        y31 = y3 - y1;
+        topt = x31 * y34 - y31 * x34;
+        if ((topt < 0) || (topt >= bot)) return (0);
+        topu = x21 * y31 - y21 * x31;
+        if ((topu < 0) || (topu >= bot)) return (0);
+    } else {
+        x31 = x3 - x1;
+        y31 = y3 - y1;
+        topt = x31 * y34 - y31 * x34;
+        if ((topt > 0) || (topt <= bot)) return (0);
+        topu = x21 * y31 - y21 * x31;
+        if ((topu > 0) || (topu <= bot)) return (0);
+    }
+    t = divscale24(topt, bot);
+    intx.$ = x1 + mulscale24(x21, t);
+    inty.$ = y1 + mulscale24(y21, t);
+    intz.$ = z1 + mulscale24(z2 - z1, t);
+    return (1);
+}
+
+
 function rintersect(x1, y1, z1, vx, vy, vz, x3, y3, x4, y4,
     intx, inty, intz) {
     console.assert(intx instanceof Ref, "intx must be reffedvalue");
@@ -5914,12 +5949,12 @@ function hitscan( xs,  ys,  zs,  sectnum,
             hitsect, hitwall, hitsprite,
             hitx, hity, hitz,   cliptype)
 {
-    console.assert(hitsect instanceof Ref)
-    console.assert(hitwall instanceof Ref)
-    console.assert(hitsprite instanceof Ref)
-    console.assert(hitx instanceof Ref)
-    console.assert(hity instanceof Ref)
-    console.assert(hitz instanceof Ref)
+    console.assert(hitsect instanceof Ref);
+    console.assert(hitwall instanceof Ref);
+    console.assert(hitsprite instanceof Ref);
+    console.assert(hitx instanceof Ref);
+    console.assert(hity instanceof Ref);
+    console.assert(hitz instanceof Ref);
 
     var sec;
     var wal, walIdx = 0, wal2;
@@ -6268,7 +6303,156 @@ function hitscan( xs,  ys,  zs,  sectnum,
     return(0);
 }
 
+//6770
 
+function neartag(xs, ys, zs, sectnum, ange,
+           neartagsector, neartagwall, neartagsprite,
+            neartaghitdist, neartagrange,  tagsearch) {
+    console.assert(neartagsector instanceof Ref);
+    console.assert(neartagwall instanceof Ref);
+    console.assert(neartagsprite instanceof Ref);
+    console.assert(neartaghitdist instanceof Ref);
+
+    var wal, walIdx, wal2;
+    var spr;
+    var i, z, zz, xe, ye, ze, x1, y1, z1, x2, y2, intx, inty, intz;
+    var topt, topu, bot, dist, offx, offy, vx, vy, vz;
+    var tempshortcnt, tempshortnum, dasector, startwall, endwall;
+    var nextsector, good;
+
+    neartagsector.$ = -1;
+    neartagwall.$ = -1;
+    neartagsprite.$ = -1;
+    neartaghitdist.$ = 0;
+
+    if (sectnum < 0) return(0);
+    if ((tagsearch < 1) || (tagsearch > 3)) return(0);
+
+    vx = mulscale14(sintable[(ange+2560)&2047],neartagrange);
+    xe = xs+vx;
+    vy = mulscale14(sintable[(ange+2048)&2047],neartagrange);
+    ye = ys+vy;
+    vz = 0;
+    ze = 0;
+
+    clipsectorlist[0] = sectnum;
+    tempshortcnt = 0;
+    tempshortnum = 1;
+
+    do
+    {
+        dasector = clipsectorlist[tempshortcnt];
+
+        startwall = sector[dasector].wallptr;
+        endwall = startwall + sector[dasector].wallnum - 1;
+        for(z=startwall,wal=wall[walIdx = startwall]; z<=endwall; z++,wal=wall[++walIdx])
+        {
+            wal2 = wall[wal.point2];
+            x1 = wal.x;
+            y1 = wal.y;
+            x2 = wal2.x;
+            y2 = wal2.y;
+
+            nextsector = wal.nextsector;
+
+            good = 0;
+            if (nextsector >= 0)
+            {
+                if ((tagsearch&1) && sector[nextsector].lotag) good |= 1;
+                if ((tagsearch&2) && sector[nextsector].hitag) good |= 1;
+            }
+            if ((tagsearch&1) && wal.lotag) good |= 2;
+            if ((tagsearch&2) && wal.hitag) good |= 2;
+
+            if ((good == 0) && (nextsector < 0)) continue;
+            if ((x1-xs)*(y2-ys) < (x2-xs)*(y1-ys)) continue;
+
+            var intxRef = new Ref(intx);
+            var intyRef = new Ref(inty);
+            var intzRef = new Ref(intz);
+            var lintersectResult = lintersect(xs, ys, zs, xe, ye, ze, x1, y1, x2, y2, intxRef, intyRef, intzRef) == 1;
+            intx = intxRef.$;
+            inty = intyRef.$;
+            intz = intzRef.$;
+            if (lintersectResult)
+            {
+                if (good != 0)
+                {
+                    if (good&1) neartagsector.$ = nextsector;
+                    if (good&2) neartagwall.$ = z;
+                    neartaghitdist.$ = dmulscale14(intx-xs,sintable[(ange+2560)&2047],inty-ys,sintable[(ange+2048)&2047]);
+                    xe = intx;
+                    ye = inty;
+                    ze = intz;
+                }
+                if (nextsector >= 0)
+                {
+                    for(zz=tempshortnum-1; zz>=0; zz--)
+                        if (clipsectorlist[zz] == nextsector) break;
+                    if (zz < 0) clipsectorlist[tempshortnum++] = nextsector;
+                }
+            }
+        }
+
+        for(z=headspritesect[dasector]; z>=0; z=nextspritesect[z])
+        {
+            spr = sprite[z];
+
+            good = 0;
+            if ((tagsearch&1) && spr.lotag) good |= 1;
+            if ((tagsearch&2) && spr.hitag) good |= 1;
+            if (good != 0)
+            {
+                x1 = spr.x;
+                y1 = spr.y;
+                z1 = spr.z;
+
+                topt = vx*(x1-xs) + vy*(y1-ys);
+                if (topt > 0)
+                {
+                    bot = vx*vx + vy*vy;
+                    if (bot != 0)
+                    {
+                        intz = zs+scale(vz,topt,bot);
+                        i = tiles[spr.picnum].dim.height*spr.yrepeat;
+                        if (spr.cstat&128) 
+                            z1 += (i<<1);
+                        if (tiles[spr.picnum].animFlags&0x00ff0000) 
+                            z1 -= ((toInt8((tiles[spr.picnum].animFlags>>16)&255))*spr.yrepeat<<2);
+                        if ((intz <= z1) && (intz >= z1-(i<<2)))
+                        {
+                            topu = vx*(y1-ys) - vy*(x1-xs);
+
+                            offx = scale(vx,topu,bot);
+                            offy = scale(vy,topu,bot);
+                            dist = offx*offx + offy*offy;
+                            i = (tiles[spr.picnum].dim.width*spr.xrepeat);
+                            i *= i;
+                            if (dist <= (i>>7))
+                            {
+                                intx = xs + scale(vx,topt,bot);
+                                inty = ys + scale(vy,topt,bot);
+                                if (klabs(intx-xs)+klabs(inty-ys) < klabs(xe-xs)+klabs(ye-ys))
+                                {
+                                    neartagsprite.$ = z;
+                                    neartaghitdist.$ = dmulscale14(intx-xs,sintable[(ange+2560)&2047],inty-ys,sintable[(ange+2048)&2047]);
+                                    xe = intx;
+                                    ye = inty;
+                                    ze = intz;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        tempshortcnt++;
+    } while (tempshortcnt < tempshortnum);
+    return(0);
+}
+
+//6907
 function dragpoint(pointhighlight, dax, day)
 {
     var cnt, tempshort;
