@@ -31,7 +31,8 @@ function setviewtotile(tilenume, tileWidth, tileHeight) {
     bakvidoption[setviewcnt] = vidoption;
     vidoption = 2;
     bakframeplace[setviewcnt] = frameplace;
-    frameplace = new PointerHelper(tiles[tilenume].data || new Uint8Array() /*todo: check this is alright?*/);
+    console.warning("following line setting frameplace screws screen up after demo");
+    //frameplace = new PointerHelper(tiles[tilenume].data || new Uint8Array() /*todo: check this is alright?*/);
     bakwindowx1[setviewcnt] = windowx1;
     bakwindowy1[setviewcnt] = windowy1;
     bakwindowx2[setviewcnt] = windowx2;

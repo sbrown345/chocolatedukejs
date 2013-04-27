@@ -4618,21 +4618,20 @@ Game.playBack = function () {
                         if (foundemo)
                             kclose(recfilep);
                         ud.playing_demo_rev = 0;
+                        isPlayingBack = false;//return 0;
                         throw "todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??";
-                        return 0;
                     }
                 });
         })
         .add(function () {
-            throw new Error("todo");
-            //kclose(recfilep);
-            //ud.playing_demo_rev = 0;
-            //if(ps[myconnectindex].gm&MODE_MENU)
-            //{
-            //    goto RECHECK;
-            //}
+            kclose(recfilep);
+            ud.playing_demo_rev = 0;
+            if(ps[myconnectindex].gm&MODE_MENU)
+            {
+                throw "goto RECHECK;" //can do GOTO with async stuff?
+            }
 
-            //return 1;
+            isPlayingBack = true;
         });
 
     // put no code here
