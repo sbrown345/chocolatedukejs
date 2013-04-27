@@ -184,7 +184,7 @@ Sprite.prototype.copyTo = function (obj) {
 };
 
 var sector = structArray(SectorType, MAXSECTORS);
-var wall = structArray(Wall, MAXSPRITES);
+var wall = structArray(Wall, MAXWALLS);
 var sprite = structArray(Sprite, MAXSPRITES);
 
 var mapCRC = 0;
