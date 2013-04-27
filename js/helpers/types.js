@@ -5,6 +5,8 @@ function structArray($class, count) {
     for (var i = 0; i < count; i++) {
         array[i] = new $class();
     }
+    
+    array[-1] = new $class(); // various places check for a -1 which doesn't crash C
     return array;
 }
 
