@@ -583,7 +583,7 @@ function mhlineskipmodify(  i2, numPixels, i5, dest)
 		    if (pixelsAllowed-- > 0) {
                 //todo: check
 		        printf("px:%i\n", mmach_asm3[colorIndex]);
-		        frameplace[dest] = mmach_asm3[colorIndex];
+		        frameplace.array[dest] = mmach_asm3[colorIndex];
 		    }
 		}
 	    i2 += mmach_asm1;
@@ -760,7 +760,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             i1 += slopemach_ecx;
             edx = ((edx & 0xffffff00) | slopemach_ebx[ebx + edx]); 
             //printf("0doCount: %i, whileCount: %i, edx %u\n", doCount, whileCount, edx);
-            ebx = i3.getInt32(); 
+            ebx = i3.getInt32(); //todo: check tis uint32 in original, or was there a reason for this?
             //printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
             i3.position-=4;
             //printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
