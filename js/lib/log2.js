@@ -1,4 +1,7 @@
-﻿console.log2 = function() {
+﻿var overrideDefaultConsole = true;
+var skipAllLogging = false;
+
+console.log2 = function () {
     var args = Array.prototype.slice.call(arguments), format;
     format = args.shift();
     var formatter = new Formatter(format);
@@ -17,7 +20,6 @@ printf = function() {
     console.log2.output.push(string);
 };
 
-var overrideDefaultConsole = true;
 if (overrideDefaultConsole) {
     console.log = console.log2;
 }
@@ -28,6 +30,11 @@ console.log2.concat = function (arr) {
     for (s = "", i = 0; i < len; s += arr[i], i++);
     return s;
 };
+
+if (skipAllLogging) {
+    console.log = printf = function() {
+    };
+}
 
 console.log2.output = [];
 
