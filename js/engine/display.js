@@ -347,7 +347,7 @@ function updateCanvas() {
         }
 
         var buf = new ArrayBuffer(imageData.data.length); // creating new ones like this is faster than having them premade
-        var buf8 = new Uint8ClampedArray(buf);
+        var buf8 = new Uint8ClampedArray(buf); // won't work in safari 5.1
         var data = new Uint32Array(buf);
 
         var newImageData = frameplace.array;

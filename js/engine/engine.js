@@ -1585,7 +1585,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
                     swplc[j] = mulscale14(sintable[(radarang2[j]+512)&2047],n);
             }
             else
-                clearbuf(swplc[pvWalls[z].screenSpaceCoo[0][VEC_COL]],0,pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
+                clearbuf(swplc, pvWalls[z].screenSpaceCoo[0][VEC_COL],pvWalls[z].screenSpaceCoo[1][VEC_COL]-pvWalls[z].screenSpaceCoo[0][VEC_COL]+1,mulscale16(xdimscale,viewingrange));
         }
         else if (x >= 0)
         {
