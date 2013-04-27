@@ -358,6 +358,12 @@ function myospal(x, y, tilenum, shade, orientation, p) {
     rotateSprite(x << 16, y << 16, 65536, a, tilenum, shade, p, 2 | orientation, windowx1, windowy1, windowx2, windowy2);
 }
 
+function orderweaponnum(ind,x,y, num1,  num2,  ha) {
+    ha = toUint8(ha);
+    rotateSprite((x - 7) << 16, y << 16, 65536, 0, THREEBYFIVE + ind + 1, ha - 10, 7, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+	rotateSprite((x-3)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
+	minitextshade(x+1,y-4,"ORDER",26,6,2+8+16+128);
+}
 
 //1473
 

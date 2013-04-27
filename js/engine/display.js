@@ -1,7 +1,5 @@
 ﻿'use strict';
 
-var scancodes = new Array(323);
-
 var Display = {};
 
 
@@ -17,6 +15,16 @@ var permanentupdate = 0, vgacompatible;
 var surface = document.getElementById("gameCanvas");
 var surfaceContext = document.getElementById("gameCanvas").getContext("2d");
 
+
+var sdl_flags = 0x20000000;
+var mouse_relative_x = 0;
+var mouse_relative_y = 0;
+var mouse_buttons = 0;
+var lastkey = 0;
+/* so we can make use of setcolor16()... - DDOI */
+var  drawpixel_color=0;
+
+var scancodes = new Uint32Array(334);
 
 var last_render_ticks = 0;
 var total_render_time = 1;
@@ -206,6 +214,87 @@ function go_to_new_vid_mode(screenMode) {
     init_new_res_vars(screenMode);
 }
 
+//454
+function sdl_key_filter(event, keyReleased) {
+//    var extended;
+
+//    if ( (event.key.keysym.sym == SDLK_m) &&
+//         (event.key.state == SDL_PRESSED) &&
+//         (event.key.keysym.mod & KMOD_CTRL) )
+//    {
+//		// FIX_00005: Mouse pointer can be toggled on/off (see mouse menu or use CTRL-M)
+//		// This is usefull to move the duke window when playing in window mode.
+  
+//        if (SDL_WM_GrabInput(SDL_GRAB_QUERY)==SDL_GRAB_ON) 
+//		{
+//            SDL_WM_GrabInput(SDL_GRAB_OFF);
+//			SDL_ShowCursor(1);
+//		}
+//		else
+//		{
+//            SDL_WM_GrabInput(SDL_GRAB_ON);
+//			SDL_ShowCursor(0);
+//		}
+
+//        return(0);
+//    } /* if */
+
+//    else if ( ( (event.key.keysym.sym == SDLK_RETURN) ||
+//                (event.key.keysym.sym == SDLK_KP_ENTER) ) &&
+//              (event.key.state == SDL_PRESSED) &&
+//              (event.key.keysym.mod & KMOD_ALT) )
+//    {	fullscreen_toggle_and_change_driver();
+
+//		// hack to discard the ALT key...
+//		lastkey=scancodes[SDLK_RALT]>>8; // extended
+//		keyhandler();
+//		lastkey=(scancodes[SDLK_RALT]&0xff)+0x80; // Simulating Key up
+//		keyhandler();
+//		lastkey=(scancodes[SDLK_LALT]&0xff)+0x80; // Simulating Key up (not extended)
+//		keyhandler();
+//		SDL_SetModState(KMOD_NONE); // SDL doesnt see we are releasing the ALT-ENTER keys
+        
+//		return(0);					
+//    }								
+
+//    if (!handle_keypad_enter_hack(event))
+        lastkey = scancodes[event.keyCode];
+
+////	printf("key.keysym.sym=%d\n", event.key.keysym.sym);
+
+//    if (lastkey == 0x0000)   /* No DOS equivalent defined. */
+//        return(0);
+
+//    extended = ((lastkey & 0xFF00) >> 8);
+//    if (extended != 0)
+//    {
+//        lastkey = extended;
+//        keyhandler();
+//        lastkey = (scancodes[event.key.keysym.sym] & 0xFF);
+//    } /* if */
+
+    if (keyReleased)
+        lastkey += 128;  /* +128 signifies that the key is released in DOS. */
+
+    keyhandler();
+    return(0);
+} 
+
+/* sdl_key_filter */
+//560
+function handle_events() {
+    var event;
+	//while(SDL_PollEvent(&event))
+    //root_sdl_event_filter(&event);
+} 
+
+
+function _readlastkeyhit() {
+    return(lastkey);
+} /* _readlastkeyhit */
+
+
+//940
 Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
     surface.width = screenWidth;
     surface.height = screenHeight;

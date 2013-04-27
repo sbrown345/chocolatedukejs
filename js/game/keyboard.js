@@ -2,15 +2,13 @@
 
 var KB = {};
 
-// hex = original
-
 var  sc_None         	=	0   ;
 var  sc_Bad          	=	0xff	;
 var  sc_Comma        	=	0x33	;
 var  sc_Period       	=	0x34	;
 var  sc_Return       	=	0x1c	;
 var  sc_Enter        	=	sc_Return	;
-var  sc_Escape       	=	27	;
+var  sc_Escape       	=	0x01	;
 var  sc_Space        	=	0x39	;
 var  sc_BackSpace    	=	0x0e	;
 var  sc_Tab          	=	0x0f	;
@@ -136,7 +134,6 @@ var MAXKEYBOARDSCAN  	=	128	;
 =============================================================================
 */
 
-
 KB.keyDown = new Uint8Array(MAXKEYBOARDSCAN);   // Keyboard state array
 //var kb_scancode KB_LastScan;
 
@@ -147,11 +144,11 @@ var keyIsWaiting = false;
 //static uint8_t  extscanToSC[ MAXKEYBOARDSCAN ];
 
 window.addEventListener("keydown", function (e) {
-    KB.keyDown[e.keyCode] = 1;
+    sdl_key_filter(e, false);
 });
 
 window.addEventListener("keyup", function(e) {
-    KB.keyDown[e.keyCode] = 0;
+    sdl_key_filter(e, true);
 });
 
 // "Macros"
@@ -164,6 +161,56 @@ KB.clearKeyDown = function (scan) {
 };
 
 // Functions
+
+function keyhandler() {
+    var gotextended = false;
+    
+    var rawkey = _readlastkeyhit();
+    var lastkey = rawkey & 0x7f;
+    
+    // 128 bit means key was released.
+    var pressed = !(rawkey & 0x80);
+    
+    if (rawkey == 0xe0 && !gotextended)
+    {
+    	gotextended = true;
+        return;
+    }
+
+    if (rawkey == 0xe1)
+    {
+    	/* SBF - build doesn't actually generate this for Pause/Break */
+    	//STUBBED("Another extended key!");
+    	return;
+    }
+        
+    if (gotextended)
+    {
+    	gotextended = false;
+    	
+    	/* remap extended key to Duke3D equivalent */
+    	lastkey = extscanToSC[lastkey];
+    }
+    
+    if (lastkey >= MAXKEYBOARDSCAN)
+    {
+        //STUBBED("Scancode out of range!");
+        return;
+    }
+
+    if (pressed)
+    {
+         KB.lastScan = lastkey;
+    }
+
+    KB.keyDown[lastkey] = pressed;
+
+    keyIsWaiting = ((keyIsWaiting) || (KB.keyDown[lastkey]));
+    
+   Control.updateKeyboardState(lastkey, pressed);
+}
+
+
 KB.clearKeysDown = function () {
     for (var i = 0; i < KB.keyDown.length; i++) {
         KB.keyDown.length[i] = 0;
@@ -179,7 +226,7 @@ KB.keyWaiting = function () {
     //return keyIsWaiting;
     return 0; // TODO (this is just for test)
 };
+
 KB.flushKeyboardQueue = function () {
     // todo
 };
-
