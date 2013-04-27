@@ -3,7 +3,8 @@
 var Player = {};
 
 //34
-Player.setPal = function(p) {
+Player.setPal = setpal;
+function setpal(p) {
     if (p.heat_on)
         p.palette = slimepal;
     else

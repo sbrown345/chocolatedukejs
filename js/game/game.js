@@ -1188,7 +1188,7 @@ function displayrest(smoothratio) {
 }
 
 //3001
-Game.drawBackground = function () {
+Game.drawBackground = function drawbackground() {
     var dapicnum;
     var x, y, x1, y1, x2, y2;
 
@@ -4556,7 +4556,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 1;
+Game.whichDemo = 3;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
@@ -4568,6 +4568,8 @@ Game.playBack = function () {
         return false;
     }
 
+    //RECHECK:
+        
     Game.inMenu = ps[myconnectindex].gm & MODE_MENU;
 
     pub = NUMPAGES;
@@ -4580,9 +4582,30 @@ Game.playBack = function () {
         foundemo = Game.openDemoRead(Game.whichDemo);
     }
 
-
     if (foundemo === 0) {
-        throw new Error("todo");
+        if (Game.whichDemo > 1)
+        {
+            Game.whichDemo = 1;
+            q.setPositionAtStart().add(Game.playBack);
+            return; //goto RECHECK;
+        }
+        for(t=0;t<63;t+=7) palto(0,0,0,t);
+        drawbackground();
+
+        Console.handleInput();
+        if( !Console.isActive())
+        {
+            menus();
+        }
+        Console.render();
+        ps[myconnectindex].palette = palette;
+        nextpage();
+        for(t=63;t>0;t-=7) 
+        {
+            palto(0,0,0,t);
+        }
+
+        ud.reccnt = 0;
     } else {
         ud.recstat = 2;
         Game.whichDemo++;
