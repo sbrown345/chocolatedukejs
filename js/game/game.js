@@ -3739,9 +3739,8 @@ function animatesprites( x, y, a, smoothratio) {
         }
 
         if( actorscrptr[s.picnum] ) {
-            // REMOVED "FIX_00093" FOR NOW - looks like it might work if script[] or (actorscrptr?) was offset by 10000
-
-           /* if(t4>10000)
+            printf("todo FIX_00093 in game.c\n");
+           if(t4>10000)
                 // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
                 // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
                 // close to blimp bug (search for BLIMP)
@@ -3755,7 +3754,7 @@ function animatesprites( x, y, a, smoothratio) {
                 // Lame fix. ok for w32. Doesn't work for other plateform.
                 // How to make a differene between a timer and an address??
             {
-                l = *(int32_t *)(t4+8);
+               l = script[t4+8];// *(int32_t *)(t4+8);
 
                 switch( l )
                 {
@@ -3803,7 +3802,8 @@ function animatesprites( x, y, a, smoothratio) {
                         break;
                 }
 
-                t.picnum += k + ( *(int32_t *)t4 ) + l * t3;
+               t.picnum += k + script[t4] + l + t3; //( *(int32_t *)t4 ) + l * t3;
+               printf("FIX_00093 picnum %i\n", t.picnum);
 
                 if(l > 0)
                     while(tiles[t.picnum].dim.width == 0 && t.picnum > 0 )
@@ -3812,7 +3812,7 @@ function animatesprites( x, y, a, smoothratio) {
                 if( hittype[i].dispicnum >= 0)
                     hittype[i].dispicnum = t.picnum;
             }
-            else */if(display_mirror == 1)
+            else if(display_mirror == 1)
                 t.cstat |= 4;
         }
 

@@ -2049,7 +2049,8 @@ function parse() {
             insptr++;
             g_t[2] = 0;
             g_t[3] = 0;
-			// FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
+            printf("todo FIX_00093 in gamedef.c\n");
+            // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
 			// This is the blimp bug.
 			// *.con code 1.3 and 1.4 are buggy when you try to blow up the 
 			// blimp in multiplayer. duke3d_w32 /q2 /m /v3 /l9

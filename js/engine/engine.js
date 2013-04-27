@@ -6881,9 +6881,11 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
 
 //7795
 function krand() {
-    return 10
+    //return 10 - breaks animation
     // c method arguments eval in the opposite direction to js
-    //todo: search for all methods that have multiple TRAND or krand etc and swap values around so they eval in the same order as the C version (regex: krand.+krand      and TRAND.+TRAND)
+    //
+    // todo: search for all methods that have multiple TRAND or krand etc - reverse argument order
+    // and swap values around so they eval in the same order as the C version (regex: krand.+krand      and TRAND.+TRAND)
 
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     console.log("result: %i", randomseed >>> 16);
