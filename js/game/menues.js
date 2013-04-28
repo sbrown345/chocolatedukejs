@@ -424,7 +424,7 @@ function menus() {
 
 //            if(  KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
-//                KB_FlushKeyboardQueue();
+//                KB.flushKeyboardQueue();
 //                FX_StopAllSounds();
 
 //                if(ud.multimode > 1)
@@ -490,7 +490,7 @@ function menus() {
 //                    current_menu = 10000;
 //                    KB.clearKeyDown(sc_Enter);
 //                    KB.clearKeyDown(sc_kpad_Enter);
-//                    KB_FlushKeyboardQueue();
+//                    KB.flushKeyboardQueue();
 //                }
 //                else if(x==-1) // pressed esc while typing. We discard the text.
 //                {
@@ -520,7 +520,7 @@ function menus() {
 //                            buf[0] = 0;
 //                            current_menu = 10001;
 //                            inputloc = 0;
-//                            KB_FlushKeyboardQueue();
+//                            KB.flushKeyboardQueue();
 //                        }
 //                    }
 //                    else
@@ -546,7 +546,7 @@ function menus() {
 //                    current_menu = 10001; // ask for password change
 //                    inputloc = 0;
 //                    *buf = 0;
-//                    KB_FlushKeyboardQueue();
+//                    KB.flushKeyboardQueue();
 //                }
 //            }
 
@@ -586,7 +586,7 @@ function menus() {
 //            {
 //                lastsavedpos = current_menu-1000;
 
-//                KB_FlushKeyboardQueue();
+//                KB.flushKeyboardQueue();
 //                //if(ud.multimode < 2 && ud.recstat != 2)
 //                //{
 //                //    ready2send = 1;
@@ -664,31 +664,31 @@ function menus() {
 
 //            break;
 
-//        case 1500:
-//            _handle_events();
-//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
-//            {
-//                KB_FlushKeyboardQueue();
-//                cmenu(100);
-//            }
-//            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
-//            {
-//                KB.clearKeyDown(sc_N);
-//                KB.clearKeyDown(sc_Escape);
-//                if(ud.multimode < 2 && ud.recstat != 2)
-//                {
-//                    ready2send = 1;
-//                    totalclock = ototalclock;
-//                }
-//                ps[myconnectindex].gm &= ~MODE_MENU;
-//                sound(EXITMENUSOUND);
-//                break;
-//            }
-//            probe(186,124,0,0);
-//            gametext(160,90,"ABORT this game?",0,2+8+16);
-//            gametext(160,90+9,"(Y/N)",0,2+8+16);
+        case 1500:
+            _handle_events();
+            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
+            {
+                KB.flushKeyboardQueue();
+                cmenu(100);
+            }
+            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
+            {
+                KB.clearKeyDown(sc_N);
+                KB.clearKeyDown(sc_Escape);
+                if(ud.multimode < 2 && ud.recstat != 2)
+                {
+                    ready2send = 1;
+                    totalclock = ototalclock;
+                }
+                ps[myconnectindex].gm &= ~MODE_MENU;
+                sound(EXITMENUSOUND);
+                break;
+            }
+            probe(186,124,0,0);
+            gametext(160,90,"ABORT this game?",0,2+8+16);
+            gametext(160,90+9,"(Y/N)",0,2+8+16);
 
-//            break;
+            break;
 
 //        case 2000:
 //        case 2001:
@@ -720,12 +720,12 @@ function menus() {
 //            _handle_events();
 //            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
-//                KB_FlushKeyboardQueue();
+//                KB.flushKeyboardQueue();
 //                inputloc = strlen(&ud.savegame[current_menu-2000][0]);
 
 //                cmenu(current_menu-2000+360);
 
-//                KB_FlushKeyboardQueue();
+//                KB.flushKeyboardQueue();
 //                break;
 //            }
 //            if( KB.keyPressed(sc_N) || KB.keyPressed(sc_Escape) || RMB)
@@ -954,7 +954,7 @@ function menus() {
                                 break;
                             cmenu(300);
                             break;
-                        case 3: KB_FlushKeyboardQueue();cmenu(400);break;  // help
+                        case 3: KB.flushKeyboardQueue();cmenu(400);break;  // help
                         case 4: cmenu(990);break;  // credit
                         case 5: cmenu(501);break;  // quit
 
@@ -999,98 +999,98 @@ function menus() {
             break;
             // CTW END - MODIFICATION
 
-//        case 50: // general menu as cmenu(0) but for multiplayer games
-//            c = (320>>1);
-//            rotateSprite(c<<16,32<<16,65536,0,INGAMEDUKETHREEDEE,0,0,10,0,0,xdim-1,ydim-1);
-//            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sintable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
-//            x = probe(c,67,16,7);
-//            switch(x)
-//            {
-//                case 0:
-//                    if(movesperpacket == 4 && myconnectindex != connecthead)
-//                        break;
-//                    if(ud.multimode < 2 || ud.recstat == 2)
-//                        cmenu(1500);
-//                    else
-//                    {
-//                        cmenu(600);
-//                        last_fifty = 0;
-//                    }
-//                    break;
-//                case 1:
-//                    if(movesperpacket == 4 && connecthead != myconnectindex)
-//                        break;
-//                    if(ud.recstat != 2)
-//                    {
-//                        last_fifty = 1;
-//                        cmenu(350);
-//                        setview(0,0,xdim-1,ydim-1);
-//                    }
-//                    break;
-//                case 2:
-//                    if(movesperpacket == 4 && connecthead != myconnectindex)
-//                        break;
-//                    last_fifty = 2;
-//                    cmenu(300);
-//                    break;
-//                case 3:
-//                    last_fifty = 3;
-//                    cmenu(200);
-//                    break;
-//                case 4:
-//                    last_fifty = 4;
-//                    KB_FlushKeyboardQueue();
-//                    cmenu(400);
-//                    break;
-//                case 5:
-//                    if(numplayers < 2)
-//                    {
-//                        last_fifty = 5;
-//                        cmenu(503);
-//                    }
-//                    break;
-//                case 6:
-//                    last_fifty = 6;
-//                    cmenu(502);
-//                    break;
-//                case -1:
-//                    ps[myconnectindex].gm &= ~MODE_MENU;
-//                    if(ud.multimode < 2 && ud.recstat != 2)
-//                    {
-//                        ready2send = 1;
-//                        totalclock = ototalclock;
-//                    }
-//                    break;
-//            }
+        case 50: // general menu as cmenu(0) but for multiplayer games
+            c = (320>>1);
+            rotateSprite(c<<16,32<<16,65536,0,INGAMEDUKETHREEDEE,0,0,10,0,0,xdim-1,ydim-1);
+            rotateSprite((c+100)<<16,36<<16,65536,0,PLUTOPAKSPRITE+2,(sintable[(totalclock<<4)&2047]>>11),0,2+8,0,0,xdim-1,ydim-1);
+            x = probe(c,67,16,7);
+            switch(x)
+            {
+                case 0:
+                    if(movesperpacket == 4 && myconnectindex != connecthead)
+                        break;
+                    if(ud.multimode < 2 || ud.recstat == 2)
+                        cmenu(1500);
+                    else
+                    {
+                        cmenu(600);
+                        last_fifty = 0;
+                    }
+                    break;
+                case 1:
+                    if(movesperpacket == 4 && connecthead != myconnectindex)
+                        break;
+                    if(ud.recstat != 2)
+                    {
+                        last_fifty = 1;
+                        cmenu(350);
+                        setview(0,0,xdim-1,ydim-1);
+                    }
+                    break;
+                case 2:
+                    if(movesperpacket == 4 && connecthead != myconnectindex)
+                        break;
+                    last_fifty = 2;
+                    cmenu(300);
+                    break;
+                case 3:
+                    last_fifty = 3;
+                    cmenu(200);
+                    break;
+                case 4:
+                    last_fifty = 4;
+                    KB.flushKeyboardQueue();
+                    cmenu(400);
+                    break;
+                case 5:
+                    if(numplayers < 2)
+                    {
+                        last_fifty = 5;
+                        cmenu(503);
+                    }
+                    break;
+                case 6:
+                    last_fifty = 6;
+                    cmenu(502);
+                    break;
+                case -1:
+                    ps[myconnectindex].gm &= ~MODE_MENU;
+                    if(ud.multimode < 2 && ud.recstat != 2)
+                    {
+                        ready2send = 1;
+                        totalclock = ototalclock;
+                    }
+                    break;
+            }
 
-//            if( KB.keyPressed(sc_Q) )
-//                cmenu(502);
+            if( KB.keyPressed(sc_Q) )
+                cmenu(502);
 
-//            if(movesperpacket == 4 && connecthead != myconnectindex)
-//            {
-//                menutext(c,67+16*0 ,SHX(-2),1,"NEW GAME");
-//                menutext(c,67+16*1 ,SHX(-3),1,"SAVE GAME");
-//                menutext(c,67+16*2 ,SHX(-4),1,"LOAD GAME");
-//            }
-//            else
-//            {
-//                menutext(c,67+16*0 ,SHX(-2),PHX(-2),"NEW GAME");
-//                menutext(c,67+16*1 ,SHX(-3),PHX(-3),"SAVE GAME");
-//                menutext(c,67+16*2 ,SHX(-4),PHX(-4),"LOAD GAME");
-//            }
+            if(movesperpacket == 4 && connecthead != myconnectindex)
+            {
+                menutext(c,67+16*0 ,SHX(-2),1,"NEW GAME");
+                menutext(c,67+16*1 ,SHX(-3),1,"SAVE GAME");
+                menutext(c,67+16*2 ,SHX(-4),1,"LOAD GAME");
+            }
+            else
+            {
+                menutext(c,67+16*0 ,SHX(-2),PHX(-2),"NEW GAME");
+                menutext(c,67+16*1 ,SHX(-3),PHX(-3),"SAVE GAME");
+                menutext(c,67+16*2 ,SHX(-4),PHX(-4),"LOAD GAME");
+            }
 
-//            menutext(c,67+16*3 ,SHX(-5),PHX(-5),"OPTIONS");
-//            if(VOLUMEONE)
-//                menutext(c,67+16*4 ,SHX(-6),PHX(-6),"HOW TO ORDER");
-//            else
-//                menutext(c,67+16*4 ,SHX(-6),PHX(-6)," HELP");
+            menutext(c,67+16*3 ,SHX(-5),PHX(-5),"OPTIONS");
+            if(VOLUMEONE)
+                menutext(c,67+16*4 ,SHX(-6),PHX(-6),"HOW TO ORDER");
+            else
+                menutext(c,67+16*4 ,SHX(-6),PHX(-6)," HELP");
 
-//            if(numplayers > 1)
-//                menutext(c,67+16*5 ,SHX(-7),1,"QUIT TO TITLE");
-//            else menutext(c,67+16*5 ,SHX(-7),PHX(-7),"QUIT TO TITLE");
-//            menutext(c,67+16*6,SHX(-8),PHX(-8),"QUIT GAME");
+            if(numplayers > 1)
+                menutext(c,67+16*5 ,SHX(-7),1,"QUIT TO TITLE");
+            else menutext(c,67+16*5 ,SHX(-7),PHX(-7),"QUIT TO TITLE");
+            menutext(c,67+16*6,SHX(-8),PHX(-8),"QUIT GAME");
 
-//            break;
+            break;
 
         case 100: // Title menu
             rotateSprite(160<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
@@ -1283,7 +1283,7 @@ function menus() {
             else if(x == -1)
             {
                 cmenu(100);
-                KB_FlushKeyboardQueue();
+                KB.flushKeyboardQueue();
             }
 
             menutext(c,70,SHX(-2),PHX(-2),skill_names[0]);
@@ -1774,7 +1774,7 @@ function menus() {
 //                    }
 
 //                    KB_ClearLastScanCode();
-//                    KB_FlushKeyboardQueue();
+//                    KB.flushKeyboardQueue();
 //                    KB_ClearKeysDown();
 //                    waiting4key = false;
 //                }					
@@ -2183,7 +2183,7 @@ function menus() {
 //                {
 //                    if( ud.savegame[current_menu-360][0] == 0 )
 //                    {
-//                        KB_FlushKeyboardQueue();
+//                        KB.flushKeyboardQueue();
 //                        cmenu(351);
 //                    }
 //                    else
@@ -2292,7 +2292,7 @@ function menus() {
 //                            current_menu = 2000+x;
 //                        else
 //                        {
-//                            KB_FlushKeyboardQueue();
+//                            KB.flushKeyboardQueue();
 //                            current_menu = (360+x);
 //                            ud.savegame[x][0] = 0;
 //                            inputloc = 0;
@@ -2472,7 +2472,7 @@ function menus() {
 //            _handle_events();
 //            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
 //            {
-//                KB_FlushKeyboardQueue();
+//                KB.flushKeyboardQueue();
 //                ps[myconnectindex].gm = MODE_DEMO;
 //                if(ud.recstat == 1)
 //                    closedemowrite();

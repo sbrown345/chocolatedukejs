@@ -7390,7 +7390,8 @@ function getzrange(x, y, z, sectnum, ceilz, ceilhit, florz, florhit, walldist, c
 }
 
 // 7978
-function setView(x1, y1, x2, y2) {
+var setView = setview;
+function setview(x1, y1, x2, y2) {
     var i;
 
     windowx1 = x1;

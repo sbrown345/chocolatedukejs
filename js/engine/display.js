@@ -286,8 +286,9 @@ function handle_events() {
     var event;
 	//while(SDL_PollEvent(&event))
     //root_sdl_event_filter(&event);
-} 
+}
 
+var _handle_events = handle_events;
 
 function _readlastkeyhit() {
     return(lastkey);

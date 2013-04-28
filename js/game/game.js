@@ -5539,8 +5539,9 @@ Game.playBack = function () {
                         if (foundemo)
                             kclose(recfilep);
                         ud.playing_demo_rev = 0;
-                        isPlayingBack = false;//return 0;
-                        throw "todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??";
+                        isPlayingBack = false;
+                        console.warn("todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??");
+                        return 0;
                     }
                 });
         })
