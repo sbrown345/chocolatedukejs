@@ -309,7 +309,7 @@ function menus() {
 	var current_resolution = 0;
     var text = "";
     
-    getPackets();
+    getpackets();
 
     if(((ControllerType == controltype.keyboardandmouse)||
 		(ControllerType == controltype.joystickandmouse)) 
@@ -3125,7 +3125,7 @@ function playanm(filename, t) {
                 //goto ENDOFANIMLOOP;
                 throw new Error("goto label todo");
             }
-            getPackets();
+            getpackets();
         }).add(function () {
             if (t == 10) ototalclock += 14;
             else if (t == 9) ototalclock += 10;

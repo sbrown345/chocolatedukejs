@@ -70,6 +70,11 @@ Multi.unstable.initMultiPlayers = function (multiOption, comRateOption, priority
     throw new Error("todo - network stuff");
 };
 
+//368
+Multi.unstable.getoutputcirclesize = function (multiOption, comRateOption, priority) {
+    return 0;
+};
+
 //519
 Multi.unstable.flushPackets = function (multiOption, comRateOption, priority) {
     //todo

@@ -118,7 +118,7 @@ var user_quote_time = new Int16Array(MAXUSERQUOTES);
 var user_quote = new Array(MAXUSERQUOTES);
 
 //459
-function getPackets() {
+function getpackets() {
     //int32_t i, j, k, l;
     //short other, packbufleng;
     //input *osyn, *nsyn;
@@ -155,7 +155,310 @@ function faketimerhandler() {
         return; // Returns here when playing a demo.
     }
 
-    throw new Error("todo");
+
+    //YES : Add 120tick
+    ototalclock += TICSPERFRAME;
+
+    //Check network stuff.
+    getpackets();
+    if (getoutputcirclesize() >= 16)
+        return;
+
+
+    for(i=connecthead;i>=0;i=connectpoint2[i])
+        if (i != myconnectindex)
+            if (movefifoend[i] < movefifoend[myconnectindex]-200)
+                return;
+
+    if( !Console.isActive())
+    {
+        Control.getInput(myconnectindex);
+    }
+
+    avgfvel += loc.fvel; // x
+    avgsvel += loc.svel; // y
+    avgavel += loc.avel;
+    avghorz += loc.horz;
+    avgbits |= loc.bits;
+    if (movefifoend[myconnectindex]&(movesperpacket-1))
+    {
+        throw "todo"
+        //copybufbyte(&inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex],
+		//	&inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex],sizeof(input));
+        //movefifoend[myconnectindex]++;
+        return;
+    }
+
+    nsyn = [inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex]]; // wrap in array to keep syntax
+    nsyn[0].fvel = avgfvel/movesperpacket|0;
+    nsyn[0].svel = avgsvel/movesperpacket|0;
+    nsyn[0].avel = avgavel/movesperpacket|0;
+    nsyn[0].horz = avghorz/movesperpacket|0;
+    nsyn[0].bits = avgbits;
+    avgfvel = avgsvel = avgavel = avghorz = avgbits = 0;
+    movefifoend[myconnectindex]++;
+
+    if (numplayers < 2)
+    {
+        if (ud.multimode > 1) for(i=connecthead;i>=0;i=connectpoint2[i])
+            if(i != myconnectindex)
+            {
+                //clearbufbyte(&inputfifo[movefifoend[i]&(MOVEFIFOSIZ-1)][i],sizeof(input),0L);
+                if(ud.playerai)
+                    computergetinput(i,inputfifo[movefifoend[i]&(MOVEFIFOSIZ-1)][i]);
+                movefifoend[i]++;
+            }
+        return;
+    }
+
+    for(i=connecthead;i>=0;i=connectpoint2[i])
+        if (i != myconnectindex)
+        {
+            k = (movefifoend[myconnectindex]-1)-movefifoend[i];
+            myminlag[i] = min(myminlag[i],k);
+            mymaxlag = max(mymaxlag,k);
+        }
+
+    if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
+    {
+        i = mymaxlag-bufferjitter; mymaxlag = 0;
+        if (i > 0) bufferjitter += ((3+i)>>2);
+        else if (i < 0) bufferjitter -= ((1-i)>>2);
+    }
+
+    if (networkmode == 1)
+    {
+        packbuf[0] = 17;
+
+        if ((movefifoend[myconnectindex]-1) == 0) 
+        {
+            packbuf[0] = 16;
+        }
+
+        j = 1;
+
+        //Fix timers and buffer/jitter value
+        if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
+        {
+            if (myconnectindex != connecthead)
+            {
+                i = myminlag[connecthead]-otherminlag;
+                if (klabs(i) > 8)
+                {
+                    i >>= 1;
+                }
+                else 
+                    if (klabs(i) > 2) 
+                    {
+                        i = ksgn(i);
+                    }
+                    else 
+                    {
+                        i = 0;
+                    }
+
+                totalclock -= TICSPERFRAME*i;
+                myminlag[connecthead] -= i; otherminlag += i;
+            }
+
+            if (myconnectindex == connecthead)
+                for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+                    packbuf[j++] = min(max(myminlag[i],-128),127);
+
+            for(i=connecthead;i>=0;i=connectpoint2[i])
+                myminlag[i] = 0x7fffffff;
+        }
+
+        osyn = inputfifo[(movefifoend[myconnectindex]-2)&(MOVEFIFOSIZ-1)][myconnectindex];
+        nsyn = inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex];
+
+        k = j;
+        packbuf[j++] = 0;
+
+        if (nsyn[0].fvel != osyn[0].fvel)
+        {
+            packbuf[j++] = nsyn[0].fvel;
+            packbuf[j++] = (nsyn[0].fvel>>8);
+            packbuf[k] |= 1;
+        }
+        if (nsyn[0].svel != osyn[0].svel)
+        {
+            packbuf[j++] = nsyn[0].svel;
+            packbuf[j++] = (nsyn[0].svel>>8);
+            packbuf[k] |= 2;
+        }
+        if (nsyn[0].avel != osyn[0].avel)
+        {
+            packbuf[j++] = nsyn[0].avel;
+            packbuf[k] |= 4;
+        }
+        if ((nsyn[0].bits^osyn[0].bits)&0x000000ff) packbuf[j++] = (nsyn[0].bits&255), packbuf[k] |= 8;
+        if ((nsyn[0].bits^osyn[0].bits)&0x0000ff00) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[k] |= 16;
+        if ((nsyn[0].bits^osyn[0].bits)&0x00ff0000) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[k] |= 32;
+        if ((nsyn[0].bits^osyn[0].bits)&0xff000000) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[k] |= 64;
+        if (nsyn[0].horz != osyn[0].horz)
+        {
+            packbuf[j++] = nsyn[0].horz;
+            packbuf[k] |= 128;
+        }
+
+        while (syncvalhead[myconnectindex] != syncvaltail)
+        {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+            syncvaltail++;
+        }
+
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+            if (i != myconnectindex)
+                sendpacket(i,packbuf,j);
+
+        return;
+    }
+    if (myconnectindex != connecthead)   //Slave
+    {
+        //Fix timers and buffer/jitter value
+        if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
+        {
+            i = myminlag[connecthead]-otherminlag;
+            if (klabs(i) > 8) i >>= 1;
+            else if (klabs(i) > 2) i = ksgn(i);
+            else i = 0;
+
+            totalclock -= TICSPERFRAME*i;
+            myminlag[connecthead] -= i; otherminlag += i;
+
+            for(i=connecthead;i>=0;i=connectpoint2[i])
+                myminlag[i] = 0x7fffffff;
+        }
+
+        packbuf[0] = 1; packbuf[1] = 0; j = 2;
+
+        osyn = inputfifo[(movefifoend[myconnectindex]-2)&(MOVEFIFOSIZ-1)][myconnectindex];
+        nsyn = inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex];
+
+        if (nsyn[0].fvel != osyn[0].fvel)
+        {
+            packbuf[j++] = nsyn[0].fvel;
+            packbuf[j++] = (nsyn[0].fvel>>8);
+            packbuf[1] |= 1;
+        }
+        if (nsyn[0].svel != osyn[0].svel)
+        {
+            packbuf[j++] = nsyn[0].svel;
+            packbuf[j++] = (nsyn[0].svel>>8);
+            packbuf[1] |= 2;
+        }
+        if (nsyn[0].avel != osyn[0].avel)
+        {
+            packbuf[j++] = nsyn[0].avel;
+            packbuf[1] |= 4;
+        }
+        if ((nsyn[0].bits^osyn[0].bits)&0x000000ff) packbuf[j++] = (nsyn[0].bits&255), packbuf[1] |= 8;
+        if ((nsyn[0].bits^osyn[0].bits)&0x0000ff00) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[1] |= 16;
+        if ((nsyn[0].bits^osyn[0].bits)&0x00ff0000) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[1] |= 32;
+        if ((nsyn[0].bits^osyn[0].bits)&0xff000000) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[1] |= 64;
+        if (nsyn[0].horz != osyn[0].horz)
+        {
+            packbuf[j++] = nsyn[0].horz;
+            packbuf[1] |= 128;
+        }
+
+        while (syncvalhead[myconnectindex] != syncvaltail)
+        {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+            syncvaltail++;
+        }
+
+        sendpacket(connecthead,packbuf,j);
+        return;
+    }
+
+    //This allows allow packet-resends
+    for(i=connecthead;i>=0;i=connectpoint2[i])
+        if (movefifoend[i] <= movefifosendplc)
+        {
+            packbuf[0] = 127;
+            for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+                sendpacket(i,packbuf,1);
+            return;
+        }
+
+    throw "todo, watch out for osyn and nsyn references"
+    while (1)  //Master
+    {
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+            if (playerquitflag[i] && (movefifoend[i] <= movefifosendplc)) return;
+
+        osyn = inputfifo[(movefifosendplc-1)&(MOVEFIFOSIZ-1)][0];
+        nsyn = inputfifo[(movefifosendplc  )&(MOVEFIFOSIZ-1)][0];
+
+        //MASTER -> SLAVE packet
+        packbuf[0] = 0; j = 1;
+
+        //Fix timers and buffer/jitter value
+        if ((movefifosendplc&(TIMERUPDATESIZ-1)) == 0)
+        {
+            for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+                if (playerquitflag[i])
+                    packbuf[j++] = min(max(myminlag[i],-128),127);
+
+            for(i=connecthead;i>=0;i=connectpoint2[i])
+                myminlag[i] = 0x7fffffff;
+        }
+
+        k = j;
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+            j += playerquitflag[i];
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+        {
+            if (playerquitflag[i] == 0) continue;
+
+            packbuf[k] = 0;
+            if (nsyn[i].fvel != osyn[i].fvel)
+            {
+                packbuf[j++] = nsyn[i].fvel;
+                packbuf[j++] = (nsyn[i].fvel>>8);
+                packbuf[k] |= 1;
+            }
+            if (nsyn[i].svel != osyn[i].svel)
+            {
+                packbuf[j++] = nsyn[i].svel;
+                packbuf[j++] = (nsyn[i].svel>>8);
+                packbuf[k] |= 2;
+            }
+            if (nsyn[i].avel != osyn[i].avel)
+            {
+                packbuf[j++] = nsyn[i].avel;
+                packbuf[k] |= 4;
+            }
+            if ((nsyn[i].bits^osyn[i].bits)&0x000000ff) packbuf[j++] = (nsyn[i].bits&255), packbuf[k] |= 8;
+            if ((nsyn[i].bits^osyn[i].bits)&0x0000ff00) packbuf[j++] = ((nsyn[i].bits>>8)&255), packbuf[k] |= 16;
+            if ((nsyn[i].bits^osyn[i].bits)&0x00ff0000) packbuf[j++] = ((nsyn[i].bits>>16)&255), packbuf[k] |= 32;
+            if ((nsyn[i].bits^osyn[i].bits)&0xff000000) packbuf[j++] = ((nsyn[i].bits>>24)&255), packbuf[k] |= 64;
+            if (nsyn[i].horz != osyn[i].horz)
+            {
+                packbuf[j++] = nsyn[i].horz;
+                packbuf[k] |= 128;
+            }
+            k++;
+        }
+
+        while (syncvalhead[myconnectindex] != syncvaltail)
+        {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+            syncvaltail++;
+        }
+
+        for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+            if (playerquitflag[i])
+            {
+                sendpacket(i,packbuf,j);
+                if (nsyn[i].bits&(1<<26))
+                    playerquitflag[i] = 0;
+            }
+
+        movefifosendplc += movesperpacket;
+    }
 }
 
 //1234
@@ -1169,7 +1472,7 @@ function displayrest(smoothratio) {
 
     if( ud.pause_on==1 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
     {
-        if (!CONSOLE_IsActive()) //Addfaz Console Pause Game line addition 
+        if (!Console.isActive()) //Addfaz Console Pause Game line addition 
         {
             menutext(160,100,0,0,"GAME PAUSED");
         }
@@ -4599,7 +4902,7 @@ function logo() {
                     q.setPositionAtStart()
                         .addIf(function () { return !KB.keyWaiting() && nomorelogohack == 0; },
                             function () {
-                                getPackets();
+                                getpackets();
 
                                 q.setPositionAtStart()
                                     .add(function () {
@@ -4650,7 +4953,7 @@ function logo() {
                                 return totalclock < (120 * 7);
                             }, function () {
                                 console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
-                                getPackets();
+                                getpackets();
                             });
                         });
 
@@ -5174,7 +5477,7 @@ Game.playBack = function () {
                     //appendImageDebug = false;
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm) {
-                        getPackets();
+                        getpackets();
                     }
                 }).endIf()
                 .addIf(function() {
@@ -5202,7 +5505,7 @@ Game.playBack = function () {
                     {
                        throw "todo"
                         //ControlInfo noshareinfo;
-                        //if( !CONSOLE_IsActive() )
+                        //if( !Console.isActive() )
                         //{
                         //    CONTROL_GetInput( &noshareinfo );
                         //    if( ACTION(gamefunc_SendMessage) )
@@ -5229,7 +5532,7 @@ Game.playBack = function () {
                         if (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
                             rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
 
-                    getPackets();
+                    getpackets();
                     nextpage();
 
                     if (ps[myconnectindex].gm == MODE_END || ps[myconnectindex].gm == MODE_GAME) {
