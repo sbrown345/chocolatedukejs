@@ -48,7 +48,7 @@ function patchstatusbar(x1, y1, x2, y2) {
 }
 
 var recfilep, totalreccnt;
-//uint8_t  debug_on = 0,actor_tog = 0,memorycheckoveride=0;
+var debug_on = 0,actor_tog = 0,memorycheckoveride=0;
 //uint8_t *rtsptr;
 
 //extern uint8_t  syncstate;
@@ -123,7 +123,7 @@ function getpackets() {
     //short other, packbufleng;
     //input *osyn, *nsyn;
 
-    sampleTimer();
+    sampletimer();
     //if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
     //{
     //    qe = 1;
@@ -459,6 +459,66 @@ function faketimerhandler() {
 
         movefifosendplc += movesperpacket;
     }
+}
+
+//1173
+function checksync() {
+	var i;
+
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+		if (syncvalhead[i] == syncvaltottail) break;
+	if (i < 0)
+	{
+		syncstat = 0;
+		do
+		{
+			for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+			{
+				if (syncval[i][syncvaltottail&(MOVEFIFOSIZ-1)] != syncval[connecthead][syncvaltottail&(MOVEFIFOSIZ-1)])
+				{
+					syncstat = 1;
+				}
+			}
+
+			syncvaltottail++;
+			for(i=connecthead;i>=0;i=connectpoint2[i])
+			{
+				if (syncvalhead[i] == syncvaltottail) 
+				{
+					break;
+				}
+			}
+		} while (i < 0);
+	}
+
+	if (connectpoint2[connecthead] < 0) 
+	{
+		syncstat = 0;
+	}
+
+	if (syncstat)
+	{
+		minitext(21,30+35+30, "Out Of Sync - Please restart game", COLOR_ON,2+8+16);
+		// FIX_00090: Removed info key. FPS were shown after CRC msg. CRC not always removed. (Turrican)
+		for(i=connecthead;i>=0;i=connectpoint2[i])
+		{	
+			if (ud.mapCRC[connecthead]!=ud.mapCRC[i])
+			{
+				minitext(21,30+42+30, "Map CRC mismatching. Please use exactly the same map.", COLOR_ON,2+8+16);
+				dispVersion();
+			}
+			else
+				minitext(21,30+42+30, "Verify the con files. Close your P2P if any", COLOR_ON,2+8+16);
+
+		}
+	}
+
+	if (syncstate)
+	{
+		//printext256(4L,160L,31,0,"Missed Network packet!",0);
+		//printext256(4L,138L,31,0,"RUN DN3DHELP.EXE for information.",0);
+		minitext(21,30+35+30, "Missed Network packet!", COLOR_ON,2+8+16);
+	}
 }
 
 //1234
@@ -1584,7 +1644,7 @@ Game.se40code = function(x, y, z, a, h, smoothratio) {
 
 //3229
 var oyrepeat = -1;
-Game.displayRooms = function (snum, smoothratio) {
+var displayrooms = Game.displayRooms = function (snum, smoothratio) {
     var cposx, cposy, cposz, dst, j, fz, cz;
     var sect, cang, k, choriz;
     var p;
@@ -4387,6 +4447,11 @@ function animatesprites( x, y, a, smoothratio) {
     }
 }
 
+//uint8_t  cheatbuf[10],cheatbuflen;
+function cheats() {
+    //todo
+}
+
 //6626
 var nonsharedtimer;
 function nonsharedkeys()
@@ -5132,6 +5197,11 @@ function load_duke3d_groupfile() {
 var q = new Queue();
 
 function main(argc, argv) {
+    var i, j;
+    var filehandle;
+    
+    var kbdKey;
+    
     console.log("*** Chocolate DukeNukem3D JavaScript v" + CHOCOLATE_DUKE_REV_X + "." + CHOCOLATE_DUKE_REV_DOT_Y + " ***");
 
     ud.multimode = 1; // xduke: must be done before checkcommandline or that will prevent Fakeplayer and AI
@@ -5263,13 +5333,96 @@ function main(argc, argv) {
         })
         .add(function () {
             ud.warp_on = 0;
+            
+            //The main game loop is here.
             console.log("Start game loop");
             q.setPositionAtStart()
                 .addWhile(function () {
                     q.setPositionAtStart(); // important!
                     return !(ps[myconnectindex].gm & MODE_END);
                 }, function () {
-                    throw new Error("todo");
+                    sampletimer();	
+                    if( ud.recstat == 2 || ud.multimode > 1 || ( ud.show_help == 0 && (ps[myconnectindex].gm&MODE_MENU) != MODE_MENU ) )
+                        if( ps[myconnectindex].gm&MODE_GAME )
+                        {
+                            // (" It's stuck here ")
+                            //printf("ps[myconnectindex].gm&MODE_GAME\n");
+                            if( moveloop() ) {
+                                return;//continue;
+                            }
+                        }
+
+                    if( ps[myconnectindex].gm&MODE_EOL || ps[myconnectindex].gm&MODE_RESTART )
+                    {
+
+                        if( ps[myconnectindex].gm&MODE_EOL )
+                        {
+                            closedemowrite();
+
+                            ready2send = 0;
+
+                            i = ud.screen_size;
+                            ud.screen_size = 0;
+                            vscrn();
+                            ud.screen_size = i;
+                            dobonus(0);
+
+                            if(ud.eog)
+                            {
+                                ud.eog = 0;
+                                if(ud.multimode < 2)
+                                {
+                                    if(VOLUMEONE)
+                                        doorders();
+
+                                    ps[myconnectindex].gm = MODE_MENU;
+                                    cmenu(0);
+                                    probey = 0;
+                                    throw "goto MAIN_LOOP_RESTART";
+                                }
+                                else
+                                {
+                                    ud.m_level_number = 0;
+                                    ud.level_number = 0;
+                                }
+                            }
+                        }
+
+                        ready2send = 0;
+                        if(numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
+
+                        enterlevel(ps[myconnectindex].gm);
+                        return;//continue;
+                    }
+
+                    cheats();
+
+                    if( !Console.isActive() )
+                        nonsharedkeys();
+
+
+                    if( (ud.show_help == 0 && ud.multimode < 2 && !(ps[myconnectindex].gm&MODE_MENU) ) || ud.multimode > 1 || ud.recstat == 2)
+                        i = Math.min(Math.max((totalclock-ototalclock)*((65536/TICSPERFRAME)|0),0),65536);
+                else
+				i = 65536;
+
+                    displayrooms(screenpeek,i);
+                    displayrest(i);
+
+                    if (ps[myconnectindex].gm & MODE_DEMO)
+                        throw "goto MAIN_LOOP_RESTART;";
+
+                    if(debug_on) 
+                        caches();
+
+                    checksync();
+
+                    if (VOLUMEONE)
+                        if(ud.show_help == 0 && show_shareware > 0 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
+                            rotateSprite((320-50)<<16,9<<16,65536,0,BETAVERSION,0,0,2+8+16+128,0,0,xdim-1,ydim-1);
+
+                    nextpage();
+
                 });
         })
         .flush();
@@ -6033,6 +6186,33 @@ function fakedomovethings() {
     //sprite[p.i].cstat = backcstat;
 }
 
+//9011
+function  moveloop() {
+    var i;
+
+    if (numplayers > 1)
+    {
+        while (fakemovefifoplc < movefifoend[myconnectindex]) 
+        {
+            fakedomovethings();
+        }
+    }
+
+
+    getpackets();
+
+    if (numplayers < 2) bufferjitter = 0;
+    while (movefifoend[myconnectindex]-movefifoplc > bufferjitter)
+    {
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+            if (movefifoplc == movefifoend[i]) break;
+        if (i >= 0) break;
+        if (Game.doMoveThings()) return 1;
+    }
+    return 0;
+}
+
+
 //9495
 Game.doMoveThings = function() {
     var i, j;
@@ -6047,7 +6227,7 @@ Game.doMoveThings = function() {
             if (multiwhat) {
                 // FIX_00058: Save/load game crash in both single and multiplayer
                 screencapt = 1;
-                Engine.displayRooms(myconnectindex, 65536);
+                Game.displayRooms(myconnectindex, 65536);
                 savetemp("duke3d.tmp", tiles[MAXTILES - 1].data, 160 * 100);
                 screencapt = 0;
 

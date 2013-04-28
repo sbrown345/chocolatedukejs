@@ -475,7 +475,7 @@ function initTimer(ticksPerSecond) {
     return 0;
 }
 
-function sampleTimer() {
+function sampletimer() {
     var i, n;
 
     if (!timerFreq) {
