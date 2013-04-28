@@ -5254,8 +5254,7 @@ function main(argc, argv) {
             console.log("Demo loop");
         })
         .add(function () {
-            console.log("EO demo loop");
-            throw new Error("todo");
+            console.log("EO demo loop TODO: check return value etc");
             //if (just played back)
             FX.stopAllSounds();
             clearsoundlocks();
@@ -5431,7 +5430,7 @@ Game.playBack = function () {
     // DEMO LOOP
     q.setPositionAtStart()
         .addWhile(function () {
-            return ud.reccnt > 0 || foundemo === 0;
+            return isPlayingBack && (ud.reccnt > 0 || foundemo === 0);
         }, function () {
             q.setPositionAtStart();
             console.log("demo loopframeCount: %i", frameCount++);
@@ -5544,6 +5543,13 @@ Game.playBack = function () {
                 });
         })
         .add(function () {
+            
+            if (!isPlayingBack) {
+                // it's not playing back so ignore this code. todo: make asyncQ.js work better!
+                return;
+            }
+
+            console.log("bit after demo loop")
             kclose(recfilep);
             ud.playing_demo_rev = 0;
             if(ps[myconnectindex].gm&MODE_MENU)
@@ -5551,7 +5557,7 @@ Game.playBack = function () {
                 throw "goto RECHECK;" //can do GOTO with async stuff?
             }
 
-            isPlayingBack = true;
+            //isPlayingBack = true;
         });
 
     // put no code here
