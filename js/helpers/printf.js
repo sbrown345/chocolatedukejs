@@ -1,48 +1,29 @@
-﻿var overrideDefaultConsole = true;
-var skipAllLogging = true;
+﻿var skipAllLogging = true;
 
-console.log2 = function () {
-    var args = Array.prototype.slice.call(arguments), format;
-    format = args.shift();
-    var formatter = new Formatter(format);
-    var string = formatter.format.apply(formatter, args);
-
-    console.log2.output.push(string);
-    console.log2.output.push("\n");
-};
-
-printf = function() {
+var printf = skipAllLogging ? function() {
+} : function() {
     var args = Array.prototype.slice.call(arguments), format;
     format = args.shift();
     var formatter = new Formatter(format.replace(/%u/g, "%i"));
     var string = formatter.format.apply(formatter, args);
 
-    console.log2.output.push(string);
+    printf.output.push(string);
 };
 
-if (overrideDefaultConsole) {
-    console.log = console.log2;
-}
-
-console.log2.concat = function (arr) {
+printf.concat = function (arr) {
     var s, len, i;
     len = arr.length;
     for (s = "", i = 0; i < len; s += arr[i], i++);
     return s;
 };
 
-if (skipAllLogging) {
-    console.log = printf = function() {
-    };
-}
+printf.output = [];
 
-console.log2.output = [];
-
-console.log2flush = function () {
-    var logText = console.log2.concat(console.log2.output);
+printf.flush = function () {
+    var logText = printf.concat(printf.output);
     //console.log(logText);
     sendTextNew(logText);
-    console.log2.output = [];
+    printf.output = [];
     
 };
 

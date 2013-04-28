@@ -53,7 +53,7 @@ Config.getSetupFilename = function () {
         setupFilename = SETUPFILENAME;
     }
 
-    console.log("Using Setup file: '" + setupFilename + "'");
+    printf("Using Setup file: '" + setupFilename + "'\n");
 };
 
 Config.readSetup = function () {

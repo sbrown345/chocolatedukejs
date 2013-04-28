@@ -469,7 +469,7 @@ function transNumber() {
             if (typeof labelcode[i] == "undefined") {
                 debugger;
             }
-            //console.log("transNumber *scriptptr: %i from labelcode[%i]: %i", script[scriptPtr], i, labelcode[i]);
+            //printf("transNumber *scriptptr: %i from labelcode[%i]: %i\n", script[scriptPtr], i, labelcode[i]);
             scriptPtr++;
             textptrIdx += l;
             return;
@@ -485,7 +485,7 @@ function transNumber() {
     }
 
     script[scriptPtr] = parseInt(tempBufStr, 10);
-    //console.log("transNumber:", script[scriptPtr]);
+    //\n("transNumber:\n", script[scriptPtr]);
     scriptPtr++;
 
     textptrIdx += l;
@@ -535,7 +535,7 @@ function parseCommand(readFromGrp) {
                 getLabel();
                 scriptPtr--;
                 labelcode[labelcnt] = scriptPtr;
-                //console.log("case 17 labelcode[%i] = %i", labelcnt, scriptPtr);
+                //printf("case 17 labelcode[%i] = %i\n", labelcnt, scriptPtr);
                 labelcnt++;
 
                 parsing_state = 1;
@@ -615,7 +615,7 @@ function parseCommand(readFromGrp) {
 
             transNumber();
             if (i == labelcnt) {
-                //console.log("case 19 labelcode[%i] = %i", labelcnt, script[scriptPtr - 1]);
+                //printf("case 19 labelcode[%i] = %i\n", labelcnt, script[scriptPtr - 1]);
                 labelcode[labelcnt++] = script[scriptPtr - 1];
             }
             scriptPtr -= 2;
@@ -671,7 +671,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i == labelcnt) {
-                    //console.log("case 32 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //printf("case 32 labelcode[%i] = %i\n", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr;
                 }
                 for (j = 0; j < 2; j++) {
@@ -822,7 +822,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i === labelcnt) {
-                    //console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //printf("case 7 labelcode[%i] = %i\n", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr; // todo is this right??
                 }
 
@@ -879,7 +879,7 @@ function parseCommand(readFromGrp) {
                 }
 
                 if (i == labelcnt) {
-                    //console.log("case 7 labelcode[%i] = %i", labelcnt, scriptPtr);
+                    //printf("case 7 labelcode[%i] = %i\n", labelcnt, scriptPtr);
                     labelcode[labelcnt++] = scriptPtr; // todo is this right??
                 }
 
@@ -911,7 +911,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            //console.log("parsing_actor[0] = %i", parsing_actor[0]);
+            //printf("parsing_actor[0] = %i\n", parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -919,7 +919,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                //console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]); // ? todo check
+                //printf("*parsing_actor[%i] = %i\n", j, script[parsing_actor[j]]); // ? todo check
                 if (j == 3) {
                     j = 0;
                     while (keyword() == -1) {
@@ -937,7 +937,7 @@ function parseCommand(readFromGrp) {
                     }
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    //console.log("*parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                    //printf("*parsing_actor[%i] = %i\n", j, script[parsing_actor[j]]);
                 }
             }
 
@@ -958,7 +958,7 @@ function parseCommand(readFromGrp) {
             num_squigilly_brackets = 0;
             scriptPtr--;
             parsing_actor[0] = scriptPtr;
-            //console.log("parsing_actor[%i] = %i", 0, parsing_actor[0]);
+            //printf("parsing_actor[%i] = %i\n", 0, parsing_actor[0]);
 
             transNumber();
             scriptPtr--;
@@ -971,7 +971,7 @@ function parseCommand(readFromGrp) {
 
             for (j = 0; j < 4; j++) {
                 script[parsing_actor[j]] = 0;
-                //console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                //printf("parsing_actor[%i] = %i\n", j, script[parsing_actor[j]]);
                 if (j === 3) {
                     j = 0;
                     while (keyword() === -1) {
@@ -990,7 +990,7 @@ function parseCommand(readFromGrp) {
 
                     transNumber();
                     script[parsing_actor[j]] = script[scriptPtr - 1];
-                    //console.log("parsing_actor[%i] = %i", j, script[parsing_actor[j]]);
+                    //printf("parsing_actor[%i] = %i\n", j, script[parsing_actor[j]]);
 
                 }
             }
@@ -1100,7 +1100,7 @@ function parseCommand(readFromGrp) {
                     transNumber();
                     scriptPtr--;
                     j |= script[scriptPtr];
-                    //console.log("ifnosounds j: %i", j);
+                    //printf("ifnosounds j: %i\n", j);
                 } while (keyword() == -1);
                 script[scriptPtr] = j;
                 scriptPtr++;
@@ -1310,7 +1310,7 @@ function parseCommand(readFromGrp) {
                 textptrIdx++;
                 i++;
                 if (i > 13) {
-                    console.log(soundName);
+                    printf(soundName + "\n");
                     console.error("  * ERROR!(L%i) Sound filename exceeded limit of 13 characters.", line_number);
                     error++;
                     while (textptr[textptrIdx] != ' ') {
@@ -1350,7 +1350,7 @@ function parseCommand(readFromGrp) {
                     error++;
                 }
                 parsing_actor[0] = undefined;
-                //console.log("case 4 parsing_actor = 0");
+                //printf("case 4 parsing_actor = 0\n");
             }
 
             return 0;
@@ -3017,7 +3017,7 @@ function execute( i, p, x) {
 
     if(g_t[4]) {
         g_sp.lotag += TICSPERFRAME;
-        //console.log("script[g_t[4]+4]: %i", script[g_t[4] + 4]);
+        //printf("script[g_t[4]+4]: %i\n", script[g_t[4] + 4]);
         if(g_sp.lotag > script[g_t[4] + 4]/**(int32_t *)(g_t[4]+16) */)
         {
             g_t[2]++;

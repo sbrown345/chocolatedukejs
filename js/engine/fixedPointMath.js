@@ -16,7 +16,7 @@ function mulscale(input1, input2, input3) {
     if ((input3 | 0) != input3) throw "input3 not an integer";
 
     var output = Math.floor(input1 * input2 / Math.pow(2, input3));
-    //console.log("mulscale: %i, %i, %i = %i", input1, input2, input3, output);
+    //printf("mulscale: %i, %i, %i = %i\n", input1, input2, input3, output);
     return output;
 }
 
@@ -157,14 +157,14 @@ function copybufbyte(s, sPos, d, dPos, c) {
 
 
 function qinterpolatedown16(buffer, bufferOffset, num, val, add) {
-    console.log("qinterpolatedown16 num: %i, val: %i, numadd: %i", num, val, add);
+    printf("qinterpolatedown16 num: %i, val: %i, numadd: %i\n", num, val, add);
     if (typeof qinterpolatedown16short === "number") throw "wrong type, should be array";
     if (arguments.length !== 5) throw "bad args";
 
     // ...maybe the same person who provided this too?
     for (var i = 0; i < num; i++) {
         buffer[bufferOffset + i] = (val >> 16);
-        //console.log("buffer[%i] = %i",  i, buffer[bufferOffset+i]);
+        //printf("buffer[%i] = %i\n",  i, buffer[bufferOffset+i]);
         val += add;
     }
 }

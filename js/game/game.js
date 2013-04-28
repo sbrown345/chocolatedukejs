@@ -1592,7 +1592,7 @@ Game.displayRooms = function (snum, smoothratio) {
     var tang;
 
     p = ps[snum];
-    console.log("displayrooms snum: %i, p.posx: %i, p.posy: %i, p.posz: %i", snum, p.posx, p.posy, p.posz);
+    printf("displayrooms snum: %i, p.posx: %i, p.posy: %i, p.posz: %i\n", snum, p.posx, p.posy, p.posz);
     
     if (pub > 0) {
         if (ud.screen_size > 8) {
@@ -1697,7 +1697,7 @@ Game.displayRooms = function (snum, smoothratio) {
             //view(p,&cposx,&cposy,&cposz,&sect,cang,choriz);
         }
 
-        console.log("snum: %i, cposx: %i, cposy: %i, cposz: %i", snum, cposx, cposy, cposz);
+        printf("snum: %i, cposx: %i, cposy: %i, cposz: %i\n", snum, cposx, cposy, cposz);
         
         cz = hittype[p.i].ceilingz;
         fz = hittype[p.i].floorz;
@@ -1980,7 +1980,7 @@ function spawn(j, pn) {
     var sp;
     var text = "";
 
-    //console.log("spawn j: %i, pn: %i", j, pn);
+    //printf("spawn j: %i, pn: %i\n", j, pn);
     if (j >= 0) {
         i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
             ,pn,0,0,0,0,0,0,j,0);
@@ -3659,8 +3659,8 @@ function spawn(j, pn) {
             break;
     }
 
-    //console.log("cstat: %i", sp.cstat);
-    //console.log("sect: %i", sect); //todo: CHECK sect and all objects
+    //printf("cstat: %i\n", sp.cstat);
+    //printf("sect: %i\n", sect); //todo: CHECK sect and all objects
     // todo check all... spritetype (Sprite)
 
     return i;
@@ -5082,7 +5082,6 @@ function Startup() {
     if (nHostForceDisableAutoaim)
         ud.auto_aim = 0;
 
-    console.log("loadTmb()");
     loadTmb();
 }
 
@@ -5195,7 +5194,6 @@ function main(argc, argv) {
         throw new Error("todo");
     }
 
-    console.log("genSpriteRemaps()");
     genSpriteRemaps();
 
     setBrightness(ud.brightness >> 2, ps[myconnectindex].palette);
@@ -5253,7 +5251,7 @@ function main(argc, argv) {
             return ud.warp_on == 0 && isPlayingBack;
         }, function () {
             Game.playBack();
-            //console.log("Demo loop");
+            console.log("Demo loop");
         })
         .add(function () {
             console.log("EO demo loop");
@@ -5436,7 +5434,7 @@ Game.playBack = function () {
             return ud.reccnt > 0 || foundemo === 0;
         }, function () {
             q.setPositionAtStart();
-            //console.log("demo loopframeCount: %i", frameCount++);
+            console.log("demo loopframeCount: %i", frameCount++);
 
             q.addIf(function() {
                 return foundemo;
@@ -6165,7 +6163,7 @@ Game.doMoveThings = function() {
 
     if (ud.recstat == 1) record();
 
-    console.log("b4 movedummy ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
+    printf("b4 movedummy ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i\n", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
     if (ud.pause_on == 0) {
         global_random = krand();
         movedummyplayers(); //ST 13
@@ -6175,31 +6173,31 @@ Game.doMoveThings = function() {
         Game.cheatKeys(i);
 
         if (ud.pause_on == 0) {
-            console.log("b4 ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
+            printf("b4 ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i\n", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
             Player.processInput(i);
-            console.log("after ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
+            printf("after ps[0].posy: %i, ps[0].posyv: %i, ps[0].ang: %i, sprite[69].ang: %i\n", ps[0].posy, ps[0].posyv, ps[0].ang, sprite[69].ang);
             checksectors(i);
         }
     }
 
     if (ud.pause_on == 0) {
-        console.log("b4 fta sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 fta sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
         movefta(); //ST 2
-        console.log("b4 moveweapons sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
+        printf("b4 moveweapons sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
         moveweapons(); //ST 5 (must be last)
-        console.log("b4 movetransports sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 movetransports sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
         movetransports(); //ST 9
 
-        console.log("b4 moveplayers sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 moveplayers sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
         moveplayers(); //ST 10
-        console.log("after moveplayers sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
+        printf("after moveplayers sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
         movefallers(); //ST 12
         moveexplosions(); //ST 4
 
         moveactors(); //ST 1
-        console.log("after moveactors sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
+        printf("after moveactors sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
         moveeffectors(); //ST 3
-        console.log("after moveeffectors sprite[69].ang: %i, headspritestat[10]: %i", sprite[69].ang, headspritestat[10]);
+        printf("after moveeffectors sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
 
         movestandables(); //ST 6
         doanimations();

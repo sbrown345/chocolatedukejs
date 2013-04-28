@@ -436,7 +436,6 @@ function kopen4load(filename, readfromGrp) {
         archive = grpSet.archives[k];
 
         for (var i = archive.numFiles - 1; i >= 0; i--) {
-            //console.log(i, archive.gfilelist[i].trim().length, archive.gfilelist[i].toLowerCase().trim() == filename.toLowerCase().trim(), filename.toLowerCase(), archive.gfilelist[i].toLowerCase())
             if (archive.gfilelist[i].toLowerCase().trim() == filename.toLowerCase().trim()) {
                 openFiles[newHandle].type = fileType.GRP_FILE;
                 openFiles[newHandle].used = 1;
@@ -663,10 +662,8 @@ function uncompress(lzwinbuf, compleng, lzwoutbuf) {
         }
 
         lzwoutbuf[outbytecnt++] = dat;
-        //console.log2(printfFormatter("lzwoutbuf[outbytecnt-1]: " + lzwoutbuf[outbytecnt - 1]));
         for (i = leng - 1; i >= 0; i--) {
             lzwoutbuf[outbytecnt++] = lzwbuf1[i];
-            //console.log2(printfFormatter("lzwoutbuf[outbytecnt-1]: " + lzwoutbuf[outbytecnt - 1]));
         }
 
         lzwbuf2[currstr - 1] = dat; lzwbuf2[currstr] = dat;
@@ -714,14 +711,12 @@ function kdfread(buffer, dasizeof, count, fil) {
         }
         
         for (j = 0; j < dasizeof; j++) {
-            //console.log2(printfFormatter("i: %i, j: %i:, k: %i, ptr[j]: %i, lzwbuf4[j+k]: %i all: %i", i, j, k, ptr.array[ptr.position + j], lzwbuf4[j + k], ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255)));
             ptr.array[ptr.position + j + dasizeof] = /*(uint8_t )*/ ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255);
         }
 
         k += dasizeof;
         ptr.position += dasizeof;
     }
-    //console.log2flush();
 
     var ds = new DataStream(ptr.array);
     for ( i = 0; i < count; i++) {
@@ -740,7 +735,6 @@ function kdfread(buffer, dasizeof, count, fil) {
         buffer[i].svel = struct.svel;
         buffer[i].bits = struct.bits;
     }
-    //console.log(buffer);
     lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
 

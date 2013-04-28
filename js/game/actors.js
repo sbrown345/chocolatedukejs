@@ -1329,7 +1329,7 @@ function movestandables()
         t = hittype[i].temp_data;
         s = sprite[i];
         sect = s.sectnum;
-        //console.log("movestandables, i: %i, sect: %i",i, sect);
+        //printf("movestandables, i: %i, sect: %i\n",i, sect);
         
         if (sect < 0) { deletesprite(i); { i = nexti; continue BOLT; } }
 
@@ -2627,16 +2627,16 @@ function movetransports()
         }
 
         onfloorz = hittype[i].temp_data[4];
-        console.log("movetransports onfloorz: %i, i: %i", onfloorz, i);
+        printf("movetransports onfloorz: %i, i: %i\n", onfloorz, i);
         if(hittype[i].temp_data[0] > 0) hittype[i].temp_data[0]--;
 
         j = headspritesect[sect];
-        console.log("j: %i, sect: %i, headspritesect[137]: %i", j, sect,  headspritesect[137]);
+        printf("j: %i, sect: %i, headspritesect[137]: %i\n", j, sect, headspritesect[137]);
         JBOLT:
         while(j >= 0)
         {
             nextj = nextspritesect[j];
-            console.log("nextj: %i", nextj)
+            printf("nextj: %i\n", nextj)
             switch(sprite[j].statnum)
             {
                 case 10:    // Player
@@ -2677,7 +2677,7 @@ function movetransports()
                                 ps[p].bobposy = ps[p].oposy = ps[p].posy = sprite[sprite[i].owner].y;
                                 ps[p].oposz = ps[p].posz = sprite[sprite[i].owner].z-PHEIGHT;
 
-                                console.log("2257 changespritesect: %i", sprite[sprite[i].owner].sectnum);
+                                printf("2257 changespritesect: %i\n", sprite[sprite[i].owner].sectnum);
                                 changespritesect(j, sprite[sprite[i].owner].sectnum);
                                 ps[p].cursectnum = sprite[j].sectnum;
 
@@ -2708,7 +2708,7 @@ function movetransports()
                                 hittype[ps[p].i].bposy = ps[p].posy;
                                 hittype[ps[p].i].bposz = ps[p].posz;
 
-                                console.log("2288 changespritesect: %i", sprite[sprite[i].owner].sectnum);
+                                printf("2288 changespritesect: %i\n", sprite[sprite[i].owner].sectnum);
                                 changespritesect(j,sprite[sprite[i].owner].sectnum);
                                 ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
 
@@ -2763,7 +2763,7 @@ function movetransports()
                                 ps[p].transporter_hold = -2;
                             ps[p].cursectnum = sprite[sprite[i].owner].sectnum;
 
-                            console.log("2343 changespritesect: %i", sprite[sprite[i].owner].sectnum);
+                            printf("2343 changespritesect: %i\n", sprite[sprite[i].owner].sectnum);
                             changespritesect(j, sprite[sprite[i].owner].sectnum);
                             setsprite(ps[p].i,ps[p].posx,ps[p].posy,ps[p].posz+PHEIGHT);
 

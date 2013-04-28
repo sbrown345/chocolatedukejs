@@ -283,14 +283,14 @@ function scansector(sectnum) {
         if ((wall[z].point2 < z) && (scanfirst < numscans)) {
             bunchWallsList[numscans - 1] = scanfirst;
             scanfirst = numscans;
-            console.log("scanfirst: %i", scanfirst);
+            printf("scanfirst: %i", scanfirst);
         }
     };
 
     if (sectnum < 0)
         return;
 
-    console.log("start scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
+    printf("start scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
     if (automapping)
         show2dsector[sectnum >> 3] |= pow2char[sectnum & 7];
 
@@ -348,7 +348,7 @@ function scansector(sectnum) {
 
             x2 = wal2.x - globalposx;
             y2 = wal2.y - globalposy;
-            //console.log("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
+            //printf("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
 
             // If this is a portal...
             if ((nextsectnum >= 0) && ((wal.cstat & 32) == 0))
@@ -458,7 +458,7 @@ function scansector(sectnum) {
             pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
-            //console.log("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+            //printf("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
 
             bunchWallsList[numscans] = numscans + 1;
             numscans++;
@@ -491,7 +491,7 @@ function scansector(sectnum) {
     } while (numSectorsToVisit > 0);
     // do this until the stack of sectors to visit if empty.
     
-    console.log("end scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
+    printf("end scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
 }
 
 
@@ -1651,7 +1651,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
 //1729
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
-    console.log("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, ", dax1, dax2, sectnum, dastat);
+    printf("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, ", dax1, dax2, sectnum, dastat);
     var i, j, j_, l, x, y, dx, dy, wx, wy, y1, y2, daz;
     var daslope, dasqr;
     var shoffs, shinc, m1, m2, mptr1, mptr2, nptr1, nptr2;
@@ -1822,7 +1822,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
-        //console.log("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+        //printf("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
         //if (sectnum == 55 && x == 28 && y1 == 0 && y2 == 1)
         //    debugger;
         if (y1 <= y2) {
@@ -2452,7 +2452,7 @@ Engine.draWalls = function (bunch) {
                 }
             }
             if (numhits < 0) {
-                console.log("drawals numhits < 0 return");
+                printf("drawals numhits < 0 return");
                 return;
             }
             if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
@@ -2557,7 +2557,7 @@ Engine.draWalls = function (bunch) {
             }
         }
     }
-    console.log("eo drawals")
+    printf("eo drawals")
     appendCanvasImageToPage();
 };
 
@@ -2788,7 +2788,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     globalposx = daposx;
     globalposy = daposy;
     globalposz = daposz;
-    console.log("drawrooms dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
+    printf("drawrooms dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
     globalang = (daang & 2047); //FCS: Mask and keep only 11 bits of angle value.
 
     globalhoriz = mulscale16(dahoriz - 100, xdimenscale) + (ydimen >> 1);
@@ -2879,7 +2879,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     scansector(globalcursectnum);
 
     if (inpreparemirror) {
-        console.log("test, is this block working?");
+        printf("test, is this block working?");
         inpreparemirror = 0;
         mirrorsx1 = xdimen - 1;
         mirrorsx2 = 0;
@@ -2921,7 +2921,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
     // When every bunches have been tested for rendition.
     while ((numbunches > 0) && (numhits > 0)) {
-        console.log("drawrooms numbunches: %i", numbunches)
+        printf("drawrooms numbunches: %i", numbunches)
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.
         clearbuf(tempbuf,0,((numbunches+3)>>2),0);
@@ -2941,7 +2941,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
 
         /* Double-check */
         for (i = 0; i < numbunches; i++) {
-            console.log("drawrooms  Double-check i: %i, tempbuf[i]: %i", i, tempbuf[i]);
+            printf("drawrooms  Double-check i: %i, tempbuf[i]: %i", i, tempbuf[i]);
             if (tempbuf[i])
                 continue;
             if ((j = bunchfront(i, closest)) < 0)
@@ -3186,29 +3186,29 @@ function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
         sect.lotag = kread16(fil);
         sect.hitag = kread16(fil);
         sect.extra = kread16(fil);
-        //    console.log("x: %i", x);
-        //    console.log("wallptr: %i", sect.wallptr);
-        //    console.log("wallnum: %i", sect.wallnum);
-        //    console.log("ceilingz: %i", sect.ceilingz);
-        //    console.log("ceilingstat: %i", sect.ceilingstat);
-        //    console.log("ceilingpicnum: %i", sect.ceilingpicnum);
-        //    console.log("ceilingheinum: %i", sect.ceilingheinum);
-        //    console.log("ceilingshade: %i", sect.ceilingshade);
-        //    console.log("ceilingpal: %i", sect.ceilingpal);
-        //    console.log("ceilingxpanning: %i", sect.ceilingxpanning);
-        //    console.log("ceilingypanning: %i", sect.ceilingypanning);
-        //    console.log("floorpicnum: %i", sect.floorpicnum);
-        //    console.log("floorheinum: %i", sect.floorheinum);
-        //    console.log("floorshade: %i", sect.floorshade);
-        //    console.log("floorpal: %i", sect.floorpal);
-        //    console.log("floorxpanning: %i", sect.floorxpanning);
-        //    console.log("floorypanning: %i", sect.floorypanning);
-        //    console.log("floorypanning: %i", sect.floorypanning);
-        //    console.log("visibility: %i", sect.visibility);
-        //    console.log("filler: %i", sect.filler);
-        //    console.log("lotag: %i", sect.lotag);
-        //    console.log("hitag: %i", sect.hitag);
-        //    console.log("extra: %i", sect.extra);
+        //    printf("x: %i\n", x);
+        //    printf("wallptr: %i\n", sect.wallptr);
+        //    printf("wallnum: %i\n", sect.wallnum);
+        //    printf("ceilingz: %i\n", sect.ceilingz);
+        //    printf("ceilingstat: %i\n", sect.ceilingstat);
+        //    printf("ceilingpicnum: %i\n", sect.ceilingpicnum);
+        //    printf("ceilingheinum: %i\n", sect.ceilingheinum);
+        //    printf("ceilingshade: %i\n", sect.ceilingshade);
+        //    printf("ceilingpal: %i\n", sect.ceilingpal);
+        //    printf("ceilingxpanning: %i\n", sect.ceilingxpanning);
+        //    printf("ceilingypanning: %i\n", sect.ceilingypanning);
+        //    printf("floorpicnum: %i\n", sect.floorpicnum);
+        //    printf("floorheinum: %i\n", sect.floorheinum);
+        //    printf("floorshade: %i\n", sect.floorshade);
+        //    printf("floorpal: %i\n", sect.floorpal);
+        //    printf("floorxpanning: %i\n", sect.floorxpanning);
+        //    printf("floorypanning: %i\n", sect.floorypanning);
+        //    printf("floorypanning: %i\n", sect.floorypanning);
+        //    printf("visibility: %i\n", sect.visibility);
+        //    printf("filler: %i\n", sect.filler);
+        //    printf("lotag: %i\n", sect.lotag);
+        //    printf("hitag: %i"\n, sect.hitag);
+        //    printf("extra: %i\n", sect.extra);
     }
 
     numwalls = kread16(fil);
@@ -3231,23 +3231,23 @@ function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
         w.lotag = kread16(fil);
         w.hitag = kread16(fil);
         w.extra = kread16(fil);
-        //console.log("x: %i", x);
-        //console.log("w.x: %i", w.x);
-        //console.log("y: %i", w.y);
-        //console.log("point2: %i", w.point2);
-        //console.log("nextwall: %i", w.nextwall);
-        //console.log("nextsector: %i", w.nextsector);
-        //console.log("cstat: %i", w.cstat);
-        //console.log("picnum: %i", w.picnum);
-        //console.log("overpicnum: %i", w.overpicnum);
-        //console.log("shade: %i", w.shade);
-        //console.log("pal: %i", w.pal);
-        //console.log("xrepeat: %i", w.xrepeat);
-        //console.log("yrepeat: %i", w.yrepeat);
-        //console.log("xpanning: %i", w.xpanning);
-        //console.log("lotag: %i", w.lotag);
-        //console.log("hitag: %i", w.hitag);
-        //console.log("extra: %i", w.extra);
+        //printf("x: %i\n", x);
+        //printf("w.x: %i\n", w.x);
+        //printf("y: %i\n", w.y);
+        //printf("point2: %i\n", w.point2);
+        //printf("nextwall: %i\n", w.nextwall);
+        //printf("nextsector: %i\n", w.nextsector);
+        //printf("cstat: %i\n", w.cstat);
+        //printf("picnum: %i\n", w.picnum);
+        //printf("overpicnum: %i\n", w.overpicnum);
+        //printf("shade: %i\n", w.shade);
+        //printf("pal: %i\n", w.pal);
+        //printf("xrepeat: %i\n", w.xrepeat);
+        //printf("yrepeat: %i\n", w.yrepeat);
+        //printf("xpanning: %i\n", w.xpanning);
+        //printf("lotag: %i\n", w.lotag);
+        //printf("hitag: %i\n", w.hitag);
+        //printf("extra: %i\n", w.extra);
     }
 
     numsprites = kread16(fil);
@@ -3276,30 +3276,30 @@ function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
         s.lotag = kread16(fil);
         s.hitag = kread16(fil);
         s.extra = kread16(fil);
-        //console.log("x: %i", x);
-        //console.log("s.x: %i", s.x);
-        //console.log("y: %i", s.y);
-        //console.log("z: %i", s.z);
-        //console.log("cstat: %i", s.cstat);
-        //console.log("picnum: %i", s.picnum);
-        //console.log("shade: %i", s.shade);
-        //console.log("pal: %i", s.pal);
-        //console.log("clipdist: %i", s.clipdist);
-        //console.log("filler: %i", s.filler);
-        //console.log("filler: %i", s.filler);
-        //console.log("xrepeat: %i", s.xrepeat);
-        //console.log("yrepeat: %i", s.yrepeat);
-        //console.log("xoffset: %i", s.xoffset);
-        //console.log("yoffset: %i", s.yoffset);
-        //console.log("sectnum: %i", s.sectnum);
-        //console.log("statnum: %i", s.statnum);
-        //console.log("ang: %i", s.ang);
-        //console.log("owner: %i", s.owner);
-        //console.log("xvel: %i", s.xvel);
-        //console.log("yvel: %i", s.yvel);
-        //console.log("lotag: %i", s.lotag);
-        //console.log("hitag: %i", s.hitag);
-        //console.log("extra: %i", s.extra);
+        //printf("x: %i\n", x);
+        //printf("s.x: %i\n", s.x);
+        //printf("y: %i\n", s.y);
+        //printf("z: %i\n", s.z);
+        //printf("cstat: %i\n", s.cstat);
+        //printf("picnum: %i\n", s.picnum);
+        //printf("shade: %i\n", s.shade);
+        //printf("pal: %i\n", s.pal);
+        //printf("clipdist: %i\n", s.clipdist);
+        //printf("filler: %i\n", s.filler);
+        //printf("filler: %i\n", s.filler);
+        //printf("xrepeat: %i\n", s.xrepeat);
+        //printf("yrepeat: %i\n", s.yrepeat);
+        //printf("xoffset: %i\n", s.xoffset);
+        //printf("yoffset: %i\n", s.yoffset);
+        //printf("sectnum: %i\n", s.sectnum);
+        //printf("statnum: %i\n", s.statnum);
+        //printf("ang: %i\n", s.ang);
+        //printf("owner: %i\n", s.owner);
+        //printf("xvel: %i\n", s.xvel);
+        //printf("yvel: %i\n", s.yvel);
+        //printf("lotag: %i\n", s.lotag);
+        //printf("hitag: %i\n", s.hitag);
+        //printf("extra: %i\n", s.extra);
     }
 
     for (i = 0; i < numsprites; i++) {
@@ -4156,7 +4156,7 @@ function nextpage() {
 
     beforedrawrooms = 1;
     numframes++;
-    //console.log("numframes: %i", numframes);
+    //printf("numframes: %i\n", numframes);
 }
 
 
@@ -5607,7 +5607,7 @@ Engine.insertSpriteSect = function (sectnum) {
     }
 
     blanktouse = headspritesect[MAXSECTORS];
-    console.log("insertspritesect blanktouse: %i, nextspritesect[blanktouse]: %i", blanktouse, nextspritesect[blanktouse]);
+    printf("insertspritesect blanktouse: %i, nextspritesect[blanktouse]: %i\n", blanktouse, nextspritesect[blanktouse]);
 
     headspritesect[MAXSECTORS] = nextspritesect[blanktouse];
     if (headspritesect[MAXSECTORS] >= 0)
@@ -5673,9 +5673,9 @@ Engine.deleteSpriteSect = function (deleteme) {
         prevspritesect[headspritesect[MAXSECTORS]] = deleteme;
     prevspritesect[deleteme] = -1;
     nextspritesect[deleteme] = headspritesect[MAXSECTORS];
-    console.log("b4 del headspritesect[MAXSECTORS]: %i, deleteme: %i", headspritesect[MAXSECTORS],deleteme)
+    printf("b4 del headspritesect[MAXSECTORS]: %i, deleteme: %i\n", headspritesect[MAXSECTORS],deleteme)
     headspritesect[MAXSECTORS] = deleteme;
-    console.log("after del headspritesect[MAXSECTORS]: %i", headspritesect[MAXSECTORS])
+    printf("after del headspritesect[MAXSECTORS]: %i\n", headspritesect[MAXSECTORS])
 
     sprite[deleteme].sectnum = MAXSECTORS;
     return (0);
@@ -6627,7 +6627,7 @@ function clipmove(x, y, z, sectnum,
 
     goalx = (x.$) + (xvect >> 14);
     goaly = (y.$) + (yvect >> 14);
-    console.log("sectnum: %i, goaly: %i, yvect: %i", sectnum.$, goaly, yvect);
+    printf("sectnum: %i, goaly: %i, yvect: %i\n", sectnum.$, goaly, yvect);
 
     clipnum = 0;
 
@@ -7001,7 +7001,7 @@ function pushmove( x,  y,  z,  sectnum, walldist,  ceildist,  flordist, cliptype
                 endwall = sec.wallptr, startwall = endwall + sec.wallnum;
 
             for (i = startwall, wal = wall[walIdx = startwall]; i != endwall; i += dir, walIdx += dir, wal = wall[walIdx]) {
-                console.log("pushmove: i: %i, picnum: %i, nextsector: %i", i, wal.picnum, wal.nextsector);
+                printf("pushmove: i: %i, picnum: %i, nextsector: %i\n", i, wal.picnum, wal.nextsector);
                 if (clipinsidebox(x.$, y.$, i, walldist - 4) == 1) {
                     j = 0;
                     if (wal.nextsector < 0) j = 1;
@@ -7141,7 +7141,7 @@ function krand() {
     // and swap values around so they eval in the same order as the C version (regex: krand.+krand      and TRAND.+TRAND)
 
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
-    console.log("result: %i", randomseed >>> 16);
+    printf("result: %i\n", randomseed >>> 16);
     return randomseed >>> 16;
 }
 
@@ -7549,7 +7549,7 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
     }
 
     if (palookup[palnum] == null) {
-        console.log("palookup[palnum] "); // todo
+        printf("palookup[palnum] \n"); // todo
         palookup[palnum] = new Uint8Array(numpalookups << 8);
         //todo: cache stuff??????
     } 

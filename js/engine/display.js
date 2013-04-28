@@ -512,6 +512,6 @@ Timer.getPlatformTicks = function() {
 var fakeTime = 0;
 //Timer.getPlatformTicks = function () {
 //    fakeTime += 50;
-//    console.log("fakeTime: %i", fakeTime);
+//    printf("fakeTime: %i", fakeTime);
 //    return fakeTime;
 //};

@@ -11,9 +11,7 @@
 // https://github.com/mudcube/MIDI.js/blob/master/soundfont-generator/ruby/soundfont_builder.rb
 
 Music.registerTimbreBank = function() {
-    console.log("registerTimbreBank ?? ");
 };
 
 Music.stopSong = function () {
-    console.log("todo Music.stopSong");
 };
