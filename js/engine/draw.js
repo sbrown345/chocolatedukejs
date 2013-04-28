@@ -406,9 +406,37 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
 //417
 // another try for wallscan. maybe merge the two together later
 // this draws a 4 pixel wide column. top to bottom.
+
+var pa0;
+var paPos0;
+var pa1;
+var paPos1;
+var pa2;
+var paPos2;
+var pa3;
+var paPos3;
+
+var destPosition;
+var texture;
+
+var bufplce0;
+var bufplce1;
+var bufplce2;
+var bufplce3;
+
+var vplce0;
+var vplce1;
+var vplce2;
+var vplce3;
+
+var vince0;
+var vince1;
+var vince2;
+var vince3;
+
 function vlineasm4_2(columnIndex, frameBufferPosition) {
-    if (!RENDER_DRAW_WALL_INSIDE)
-        return;
+    //if (!RENDER_DRAW_WALL_INSIDE)
+    //    return;
 
     if (arguments.length != 2) {
         throw new Error("todo: vlineasm4_2 should have 2 arguments");
@@ -422,49 +450,70 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     var dest = new PointerHelper(frameplace.array, -ylookup[columnIndex]);
     var destArray = dest.array;
 
-    var pa0 = palookupoffse[0].array;
-    var paPos0 = palookupoffse[0].position;
-    var pa1 = palookupoffse[1].array;
-    var paPos1 = palookupoffse[1].position;
-    var pa2 = palookupoffse[2].array;
-    var paPos2 = palookupoffse[2].position;
-    var pa3 = palookupoffse[3].array;
-    var paPos3 = palookupoffse[3].position;
+    pa0 = palookupoffse[0].array;
+    paPos0 = palookupoffse[0].position;
+    pa1 = palookupoffse[1].array;
+    paPos1 = palookupoffse[1].position;
+    pa2 = palookupoffse[2].array;
+    paPos2 = palookupoffse[2].position;
+    pa3 = palookupoffse[3].array;
+    paPos3 = palookupoffse[3].position;
 
-    var destPosition = dest.position;
-    var texture = tiles[globalpicnum].data;
-    
-    for (; i < ((destPosition >>> 0) - bytesperline) < (destPosition >>> 0) ; destPosition += bytesperline) {
-        
+    destPosition = dest.position;
+    texture = tiles[globalpicnum].data;
+
+    bufplce0 = bufplce[0];
+    bufplce1 = bufplce[1];
+    bufplce2 = bufplce[2];
+    bufplce3 = bufplce[3];
+
+    vplce0 = vplce[0];
+    vplce1 = vplce[1];
+    vplce2 = vplce[2];
+    vplce3 = vplce[3];
+
+    vince0 = vince[0];
+    vince1 = vince[1];
+    vince2 = vince[2];
+    vince3 = vince[3];
+
+    for (; i < ((destPosition >>> 0) - bytesperline) < (destPosition >>> 0); destPosition += bytesperline) {
+
         //// unoptimized:
         //for (i = 0; i < 4; i++) {
         //    temp = (vplce[i]) >>> mach3_al;
         //    temp = tiles[globalpicnum].data[bufplce[i] + temp];
 
         //    //if (pixelsAllowed-- > 0) {
-            //destArray[destPosition + index + i] = palookupoffse[i].getByte(temp);
+        //destArray[destPosition + index + i] = palookupoffse[i].getByte(temp);
         //    //if (flatColor) destArray[destPosition + index + i] = 250;
         //    //printf("px:%i\n", destArray[destPosition + index + i]);
         //    //}
 
         //    //appendCanvasImageToPage((destPosition + index + i) + "=" + palookup[palookupoffse[i]][temp]);
-            //vplce[i] += vince[i];
+        //vplce[i] += vince[i];
         //}
 
-        destArray[destPosition + index] = pa0[paPos0 + texture[bufplce[0] + ((vplce[0]) >>> mach3_al)]];
-        vplce[0] += vince[0];
-   
-        destArray[destPosition + index + 1] = pa1[paPos1 + texture[bufplce[1] + ((vplce[1]) >>> mach3_al)]];
-        vplce[1] += vince[1];
-   
-        destArray[destPosition + index + 2] = pa2[paPos2 + texture[bufplce[2] + ((vplce[2]) >>> mach3_al)]];
-        vplce[2] += vince[2];
-   
-        destArray[destPosition + index + 3] = pa3[paPos3 + texture[bufplce[3] + ((vplce[3]) >>> mach3_al)]];
-        vplce[3] += vince[3];
+        // more ideas: use subarray instead of destPosition + 
+        //             use bufplce0, bufplce1, vplce0, vplce1 etc
+        destArray[destPosition + index] = pa0[paPos0 + texture[bufplce0 + ((vplce0) >>> mach3_al)]];
+        vplce0 += vince0;
+
+        destArray[destPosition + index + 1] = pa1[paPos1 + texture[bufplce1 + ((vplce1) >>> mach3_al)]];
+        vplce1 += vince1;
+
+        destArray[destPosition + index + 2] = pa2[paPos2 + texture[bufplce2 + ((vplce2) >>> mach3_al)]];
+        vplce2 += vince2;
+
+        destArray[destPosition + index + 3] = pa3[paPos3 + texture[bufplce3 + ((vplce3) >>> mach3_al)]];
+        vplce3 += vince3;
         i = 1; // required for for loop
     }
-
+    
+    vplce[0] = vplce0;
+    vplce[1] = vplce1;
+    vplce[2] = vplce2;
+    vplce[3] = vplce3;
     dest.position = destPosition;
 }
 
