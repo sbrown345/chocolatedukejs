@@ -421,21 +421,51 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     var index = frameBufferPosition + ylookup[columnIndex];
     var dest = new PointerHelper(frameplace.array, -ylookup[columnIndex]);
     var destArray = dest.array;
-    for (; i < ((dest.position >>> 0) - bytesperline) < (dest.position >>> 0) ; dest.position += bytesperline) {
-        for (i = 0; i < 4; i++) {
-            temp = (vplce[i]) >>> mach3_al;
-            temp = tiles[globalpicnum].data[bufplce[i] + temp];
 
-            //if (pixelsAllowed-- > 0) {
-            destArray[dest.position + index + i] = palookupoffse[i].getByte(temp);
-            //if (flatColor) destArray[dest.position + index + i] = 250;
-            //printf("px:%i\n", destArray[dest.position + index + i]);
-            //}
+    var pa0 = palookupoffse[0].array;
+    var paPos0 = palookupoffse[0].position;
+    var pa1 = palookupoffse[1].array;
+    var paPos1 = palookupoffse[1].position;
+    var pa2 = palookupoffse[2].array;
+    var paPos2 = palookupoffse[2].position;
+    var pa3 = palookupoffse[3].array;
+    var paPos3 = palookupoffse[3].position;
 
-            //appendCanvasImageToPage((dest.position + index + i) + "=" + palookup[palookupoffse[i]][temp]);
-            vplce[i] += vince[i];
-        }
+    var destPosition = dest.position;
+    var texture = tiles[globalpicnum].data;
+    
+    for (; i < ((destPosition >>> 0) - bytesperline) < (destPosition >>> 0) ; destPosition += bytesperline) {
+        
+        //// unoptimised:
+        //for (i = 0; i < 4; i++) {
+        //    temp = (vplce[i]) >>> mach3_al;
+        //    temp = tiles[globalpicnum].data[bufplce[i] + temp];
+
+        //    //if (pixelsAllowed-- > 0) {
+            //destArray[destPosition + index + i] = palookupoffse[i].getByte(temp);
+        //    //if (flatColor) destArray[destPosition + index + i] = 250;
+        //    //printf("px:%i\n", destArray[destPosition + index + i]);
+        //    //}
+
+        //    //appendCanvasImageToPage((destPosition + index + i) + "=" + palookup[palookupoffse[i]][temp]);
+            //vplce[i] += vince[i];
+        //}
+
+        destArray[destPosition + index] = pa0[paPos0 + texture[bufplce[0] + ((vplce[0]) >>> mach3_al)]];
+        vplce[0] += vince[0];
+   
+        destArray[destPosition + index + 1] = pa1[paPos1 + texture[bufplce[1] + ((vplce[1]) >>> mach3_al)]];
+        vplce[1] += vince[1];
+   
+        destArray[destPosition + index + 2] = pa2[paPos2 + texture[bufplce[2] + ((vplce[2]) >>> mach3_al)]];
+        vplce[2] += vince[2];
+   
+        destArray[destPosition + index + 3] = pa3[paPos3 + texture[bufplce[3] + ((vplce[3]) >>> mach3_al)]];
+        vplce[3] += vince[3];
+        i = 1; // required for for loop
     }
+
+    dest.position = destPosition;
 }
 
 //451
