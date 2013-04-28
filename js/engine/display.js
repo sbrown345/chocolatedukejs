@@ -42,16 +42,16 @@ function _platform_init(argc, argv, title, iconName) {
     // todo: Setup_UnstableNetworking, command line args
 
     scancodes[27] = 0x01; // Esc
-    //scancodes[SDLK_1] = 0x02;
-    //scancodes[SDLK_2] = 0x03;
-    //scancodes[SDLK_3] = 0x04;
-    //scancodes[SDLK_4] = 0x05;
-    //scancodes[SDLK_5] = 0x06;
-    //scancodes[SDLK_6] = 0x07;
-    //scancodes[SDLK_7] = 0x08;
-    //scancodes[SDLK_8] = 0x09;
-    //scancodes[SDLK_9] = 0x0A;
-    //scancodes[SDLK_0] = 0x0B;
+    scancodes[48] = 0x02; // 0 
+    scancodes[49] = 0x03; // 1
+    scancodes[50] = 0x04; // 2
+    scancodes[51] = 0x05; // 3
+    scancodes[52] = 0x06; // 4
+    scancodes[53] = 0x07; // 5
+    scancodes[54] = 0x08; // 6
+    scancodes[55] = 0x09; // 7
+    scancodes[56] = 0x0A; // 8
+    scancodes[57] = 0x0B; // 9
     //scancodes[SDLK_MINUS] = 0x0C; /* was 0x4A */
     //scancodes[SDLK_EQUALS] = 0x0D; /* was 0x4E */
     //scancodes[SDLK_BACKSPACE] = 0x0E;
@@ -68,7 +68,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_p] = 0x19;
     //scancodes[SDLK_LEFTBRACKET] = 0x1A;
     //scancodes[SDLK_RIGHTBRACKET] = 0x1B;
-    //scancodes[SDLK_RETURN] = 0x1C;
+    scancodes[13] = 0x1C; // Return/enter
     //scancodes[SDLK_LCTRL] = 0x1D;
     //scancodes[SDLK_a] = 0x1E;
     //scancodes[SDLK_s] = 0x1F;
@@ -128,7 +128,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_F12] = 0x58;
     //scancodes[SDLK_PAUSE] = 0x59; /* SBF - technically incorrect */
 
-    //scancodes[SDLK_KP_ENTER] = 0xE01C;
+    scancodes[13] = 0xE01C; // Return/enter
     //scancodes[SDLK_RCTRL] = 0xE01D;
     //scancodes[SDLK_KP_DIVIDE] = 0xE035;
     //scancodes[SDLK_PRINT] = 0xE037; /* SBF - technically incorrect */
@@ -137,10 +137,10 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_HOME] = 0xE047;
     scancodes[38] = 0xE048; // Up
     //scancodes[SDLK_PAGEUP] = 0xE049;
-    //scancodes[SDLK_LEFT] = 0xE04B;
-    //scancodes[SDLK_RIGHT] = 0xE04D;
+    scancodes[37] = 0xE04B; // Left
+    scancodes[39] = 0xE04D; // Right
     //scancodes[SDLK_END] = 0xE04F;
-    //scancodes[SDLK_DOWN] = 0xE050;
+    scancodes[40] = 0xE050; // Down
     //scancodes[SDLK_PAGEDOWN] = 0xE051;
     //scancodes[SDLK_INSERT] = 0xE052;
     //scancodes[SDLK_DELETE] = 0xE053;

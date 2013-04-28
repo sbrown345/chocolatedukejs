@@ -1092,118 +1092,118 @@ function menus() {
 
 //            break;
 
-//        case 100: // Title menu
-//            rotateSprite(160<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
-//            menutext(160,24,0,0,"SELECT AN EPISODE");
-//            if(PLUTOPAK)
-//            {            //////if(boardfilename[0])
-//                //
-//                // uncomment this for user map
-//                //x = probe(160,60,20,5);
-//                x = probe(160,60,20,4);
+        case 100: // Title menu
+            rotateSprite(160<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
+            menutext(160,24,0,0,"SELECT AN EPISODE");
+            if(PLUTOPAK)
+            {            //////if(boardfilename[0])
+                //
+                // uncomment this for user map
+                //x = probe(160,60,20,5);
+                x = probe(160,60,20,4);
 
-//                //////else x = probe(160,60,20,4);
-//            }
-//            else
-//            {
-//                if(boardfilename[0])
-//                    x = probe(160,60,20,4);
-//                else x = probe(160,60,20,3);
-//            }
-//            if(x >= 0)
-//            {
+                //////else x = probe(160,60,20,4);
+            }
+            else
+            {
+                if(boardfilename[0])
+                    x = probe(160,60,20,4);
+                else x = probe(160,60,20,3);
+            }
+            if(x >= 0)
+            {
 
-//                if (VOLUMEONE)
-//                {
-//                    if(x > 0)
-//                        cmenu(20000);
-//                    else
-//                    {
-//                        ud.m_volume_number = x;
-//                        ud.m_level_number = 0;
-//                        cmenu(110);
-//                    }
-//                }
+                if (VOLUMEONE)
+                {
+                    if(x > 0)
+                        cmenu(20000);
+                    else
+                    {
+                        ud.m_volume_number = x;
+                        ud.m_level_number = 0;
+                        cmenu(110);
+                    }
+                }
 
-//                else
-//                {
+                else
+                {
 
-//                    if((x == 3 && boardfilename[0])&&!PLUTOPAK)
-//                    {
-//                        ud.m_volume_number = 0;
-//                        ud.m_level_number = 7;
-//                    }
-//                    else
+                    if((x == 3 && boardfilename[0])&&!PLUTOPAK)
+                    {
+                        ud.m_volume_number = 0;
+                        ud.m_level_number = 7;
+                    }
+                    else
 
-//                        /*
-//                        if(x == 4 && boardfilename[0])
-//                        {
-//                            ud.m_volume_number = 0;
-//                            ud.m_level_number = 7;
-//                        }
-//                        */
+                        /*
+                        if(x == 4 && boardfilename[0])
+                        {
+                            ud.m_volume_number = 0;
+                            ud.m_level_number = 7;
+                        }
+                        */
 
-//                        // USER MAP
-//                        if((x == 4)&&PLUTOPAK)
-//                        {
-//                            //CONSOLE_Printf("MENU_USER_MAP");
-//                            //
-//                            //[Todo: generate file list starting from .\\maps]")
+                        // USER MAP
+                        if((x == 4)&&PLUTOPAK)
+                        {
+                            //CONSOLE_Printf("MENU_USER_MAP");
+                            //
+                            //[Todo: generate file list starting from .\\maps]")
 
-//                            cmenu(MENU_USER_MAP); // cmenu(101)
-//                            break;
-//                        }
-//                        else
-//                        {
-//                            ud.m_volume_number = x;
-//                            ud.m_level_number = 0;
-//                        }
-//                    cmenu(110);
-//                }
-//            }
-//            else if(x == -1)
-//            {
-//                if(ps[myconnectindex].gm&MODE_GAME) cmenu(50);
-//                else cmenu(0);
-//            }
+                            cmenu(MENU_USER_MAP); // cmenu(101)
+                            break;
+                        }
+                        else
+                        {
+                            ud.m_volume_number = x;
+                            ud.m_level_number = 0;
+                        }
+                    cmenu(110);
+                }
+            }
+            else if(x == -1)
+            {
+                if(ps[myconnectindex].gm&MODE_GAME) cmenu(50);
+                else cmenu(0);
+            }
 
-//            menutext(160,60,SHX(-2),PHX(-2),volume_names[0]);
+            menutext(160,60,SHX(-2),PHX(-2),volume_names[0]);
 
-//            c = 80;
-//            if (VOLUMEONE)
-//            {
-//                menutext(160,60+20,SHX(-3),1,volume_names[1]);
-//                menutext(160,60+20+20,SHX(-4),1,volume_names[2]);
-//                if(PLUTOPAK)
-//                    menutext(160,60+20+20,SHX(-5),1,volume_names[3]);
-//            }
-//            else
-//            {
-//                menutext(160,60+20,SHX(-3),PHX(-3),volume_names[1]);
-//                menutext(160,60+20+20,SHX(-4),PHX(-4),volume_names[2]);
-//                if(PLUTOPAK)
-//                {            
-//                    menutext(160,60+20+20+20,SHX(-5),PHX(-5),volume_names[3]);
-//                    //if(boardfilename[0])
-//                    //{
+            c = 80;
+            if (VOLUMEONE)
+            {
+                menutext(160,60+20,SHX(-3),1,volume_names[1]);
+                menutext(160,60+20+20,SHX(-4),1,volume_names[2]);
+                if(PLUTOPAK)
+                    menutext(160,60+20+20,SHX(-5),1,volume_names[3]);
+            }
+            else
+            {
+                menutext(160,60+20,SHX(-3),PHX(-3),volume_names[1]);
+                menutext(160,60+20+20,SHX(-4),PHX(-4),volume_names[2]);
+                if(PLUTOPAK)
+                {            
+                    menutext(160,60+20+20+20,SHX(-5),PHX(-5),volume_names[3]);
+                    //if(boardfilename[0])
+                    //{
 
-//                    // uncomment this for usermap
-//                    //menutext(160,60+20+20+20+20,SHX(-6),PHX(-6),"USER MAP");
+                    // uncomment this for usermap
+                    //menutext(160,60+20+20+20+20,SHX(-6),PHX(-6),"USER MAP");
 		           
-//                    //gametextpal(160,60+20+20+20+20+3,boardfilename,16+(sintable[(totalclock<<4)&2047]>>11),2);
-//                    //}
-//                }
-//                else
-//                {	/*
-//		            if(boardfilename[0])
-//				    {
-//						menutext(160,60+20+20+20,SHX(-6),PHX(-6),"USER MAP");
-//						gametext(160,60+20+20+20+6,boardfilename,2,2+8+16);
-//					}
-//					*/
-//                }
-//            }
-//            break;
+                    //gametextpal(160,60+20+20+20+20+3,boardfilename,16+(sintable[(totalclock<<4)&2047]>>11),2);
+                    //}
+                }
+                else
+                {	/*
+		            if(boardfilename[0])
+				    {
+						menutext(160,60+20+20+20,SHX(-6),PHX(-6),"USER MAP");
+						gametext(160,60+20+20+20+6,boardfilename,2,2+8+16);
+					}
+					*/
+                }
+            }
+            break;
 
 //        case 101: // MENU_USER_MAP
 //            c = (320>>1);
@@ -1240,57 +1240,57 @@ function menus() {
 //            }
 //            break;
 
-//        case 110:
-//            c = (320>>1);
-//            rotateSprite(c<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
-//            menutext(c,24,0,0,"SELECT SKILL");
-//            x = probe(c,70,19,4);
-//            if(x >= 0)
-//            {
-//                switch(x)
-//                {
-//                    case 0: globalskillsound = JIBBED_ACTOR6;break;
-//                    case 1: globalskillsound = BONUS_SPEECH1;break;
-//                    case 2: globalskillsound = DUKE_GETWEAPON2;break;
-//                    case 3: globalskillsound = JIBBED_ACTOR5;break;
-//                }
+        case 110:
+            c = (320>>1);
+            rotateSprite(c<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
+            menutext(c,24,0,0,"SELECT SKILL");
+            x = probe(c,70,19,4);
+            if(x >= 0)
+            {
+                switch(x)
+                {
+                    case 0: globalskillsound = JIBBED_ACTOR6;break;
+                    case 1: globalskillsound = BONUS_SPEECH1;break;
+                    case 2: globalskillsound = DUKE_GETWEAPON2;break;
+                    case 3: globalskillsound = JIBBED_ACTOR5;break;
+                }
 
-//                sound(globalskillsound);
+                sound(globalskillsound);
 
-//                ud.m_player_skill = x+1;
-//                if(x == 3) ud.m_respawn_monsters = 1;
-//                else ud.m_respawn_monsters = 0;
+                ud.m_player_skill = x+1;
+                if(x == 3) ud.m_respawn_monsters = 1;
+                else ud.m_respawn_monsters = 0;
 
-//                ud.m_monsters_off = ud.monsters_off = 0;
+                ud.m_monsters_off = ud.monsters_off = 0;
 
-//                ud.m_respawn_items = 0;
-//                ud.m_respawn_inventory = 0;
+                ud.m_respawn_items = 0;
+                ud.m_respawn_inventory = 0;
 
-//                ud.multimode = 1;
+                ud.multimode = 1;
 
-//                // if (ud.showcinematics) 
-//                //if(ud.m_volume_number == 3) // not needed to play cinematics. Black screen not nice
-//                //{
-//                //    flushperms();
-//                //    setview(0,0,xdim-1,ydim-1);
-//                //    clearview(0L);
-//                //    nextpage();
-//                //}
+                // if (ud.showcinematics) 
+                //if(ud.m_volume_number == 3) // not needed to play cinematics. Black screen not nice
+                //{
+                //    flushperms();
+                //    setview(0,0,xdim-1,ydim-1);
+                //    clearview(0L);
+                //    nextpage();
+                //}
 				
-//                newgame(ud.m_volume_number,ud.m_level_number,ud.m_player_skill);
-//                enterlevel(MODE_GAME);
-//            }
-//            else if(x == -1)
-//            {
-//                cmenu(100);
-//                KB_FlushKeyboardQueue();
-//            }
+                newgame(ud.m_volume_number,ud.m_level_number,ud.m_player_skill);
+                enterlevel(MODE_GAME);
+            }
+            else if(x == -1)
+            {
+                cmenu(100);
+                KB_FlushKeyboardQueue();
+            }
 
-//            menutext(c,70,SHX(-2),PHX(-2),skill_names[0]);
-//            menutext(c,70+19,SHX(-3),PHX(-3),skill_names[1]);
-//            menutext(c,70+19+19,SHX(-4),PHX(-4),skill_names[2]);
-//            menutext(c,70+19+19+19,SHX(-5),PHX(-5),skill_names[3]);
-//            break;
+            menutext(c,70,SHX(-2),PHX(-2),skill_names[0]);
+            menutext(c,70+19,SHX(-3),PHX(-3),skill_names[1]);
+            menutext(c,70+19+19,SHX(-4),PHX(-4),skill_names[2]);
+            menutext(c,70+19+19+19,SHX(-5),PHX(-5),skill_names[3]);
+            break;
 
 //        case 200:
 

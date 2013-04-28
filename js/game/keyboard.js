@@ -228,5 +228,10 @@ KB.keyWaiting = function () {
 };
 
 KB.flushKeyboardQueue = function () {
-    // todo
+    //_handle_events();
+    keyIsWaiting = false;
+    for (var i = 0; i < KB.keyDown.length; i++) {
+        KB.keyDown.length[i] = 0;
+    }
+    // FIX_00077: Menu goes directly to the "NEW GAME" sub-menu when starting new game (Turrican)
 };

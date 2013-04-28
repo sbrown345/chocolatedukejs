@@ -27,7 +27,8 @@ function intomenusounds() {
 }
 
 //258
-function playMusic(filename) {
+function playmusic(filename) {
+    console.assert(filename instanceof Ref);
     if (MusicToggle == 0) return;
     //if (MusicDevice == NumSoundCards) return;
 

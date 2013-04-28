@@ -657,12 +657,13 @@ PreMap.setupBackdrop = function (sky) {
 };
 
 //990
-PreMap.newGame = function (vn, ln, sk) {
+PreMap.newGame = newgame;
+function newgame(vn, ln, sk) {
     var p = ps[0];
     var i;
 
     if (globalskillsound >= 0) {
-        throw new Error("todo???");
+        while (Sound[globalskillsound].lock >= 200);
     }
 
     globalskillsound = -1;
@@ -753,40 +754,37 @@ PreMap.resetpSpriteVars = function (g) {
 
     EGS(ps[0].cursectnum, ps[0].posx, ps[0].posy, ps[0].posz,
         APLAYER, 0, 0, 0, ps[0].ang, 0, 0, 0, 10);
-    if (ud.recstat != 2) {
-        throw "todo"; //for (i = 0; i < MAXPLAYERS; i++) {
-        //    aimmode[i] = ps[i].aim_mode;
-        //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
-        //    {
-        //        for(j=0;j<MAX_WEAPONS;j++)
-        //        {
-        //            tsbar[i].ammo_amount[j] = ps[i].ammo_amount[j];
-        //            tsbar[i].gotweapon[j] = ps[i].gotweapon[j];
-        //        }
+    if (ud.recstat != 2) for (i = 0; i < MAXPLAYERS; i++) {
+        aimmode[i] = ps[i].aim_mode;
+        if (ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0) {
+            for (j = 0; j < MAX_WEAPONS; j++) {
+                tsbar[i].ammo_amount[j] = ps[i].ammo_amount[j];
+                tsbar[i].gotweapon[j] = ps[i].gotweapon[j];
+            }
 
-        //        tsbar[i].shield_amount = ps[i].shield_amount;
-        //        tsbar[i].curr_weapon = ps[i].curr_weapon;
-        //        tsbar[i].inven_icon = ps[i].inven_icon;
+            tsbar[i].shield_amount = ps[i].shield_amount;
+            tsbar[i].curr_weapon = ps[i].curr_weapon;
+            tsbar[i].inven_icon = ps[i].inven_icon;
 
-        //        tsbar[i].firstaid_amount = ps[i].firstaid_amount;
-        //        tsbar[i].steroids_amount = ps[i].steroids_amount;
-        //        tsbar[i].holoduke_amount = ps[i].holoduke_amount;
-        //        tsbar[i].jetpack_amount = ps[i].jetpack_amount;
-        //        tsbar[i].heat_amount = ps[i].heat_amount;
-        //        tsbar[i].scuba_amount = ps[i].scuba_amount;
-        //        tsbar[i].boot_amount = ps[i].boot_amount;
-        //    }
+            tsbar[i].firstaid_amount = ps[i].firstaid_amount;
+            tsbar[i].steroids_amount = ps[i].steroids_amount;
+            tsbar[i].holoduke_amount = ps[i].holoduke_amount;
+            tsbar[i].jetpack_amount = ps[i].jetpack_amount;
+            tsbar[i].heat_amount = ps[i].heat_amount;
+            tsbar[i].scuba_amount = ps[i].scuba_amount;
+            tsbar[i].boot_amount = ps[i].boot_amount;
+        }
     }
 
     PreMap.resetPlayerStats(0); // reset a player 
 
     for (i = 1; i < MAXPLAYERS; i++) // reset all the others
-        ps[i] = new PlayerType();
+        PreMap.resetPlayerStats(i);
 
     //// FIX_00080: Out Of Synch in demos. Tries recovering OOS in old demos v27/28/29/116/117/118. New: v30/v119.
-    if (numplayers < 2 && !(g & MODE_DEMO))
-        throw new Error("todo");  // todo    memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice)); 
-
+    if (numplayers < 2 && !(g & MODE_DEMO)) {
+        ud.wchoice[0].set(ud.mywchoice); // memcpy(ud.wchoice[0],ud.mywchoice,sizeof(ud.mywchoice)); 
+    }
 
     if (g & MODE_DEMO && (ud.playing_demo_rev == BYTEVERSION_27 ||
     					ud.playing_demo_rev == BYTEVERSION_28 ||
@@ -820,27 +818,26 @@ PreMap.resetpSpriteVars = function (g) {
     }
 
     if (ud.recstat != 2) for (i = 0; i < MAXPLAYERS; i++) {
-        throw new Error("todo");
-        //    ps[i].aim_mode = aimmode[i];
-        //    if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
-        //    {
-        //        for(j=0;j<MAX_WEAPONS;j++)
-        //        {
-        //            ps[i].ammo_amount[j] = tsbar[i].ammo_amount[j];
-        //            ps[i].gotweapon[j] = tsbar[i].gotweapon[j];
-        //        }
-        //        ps[i].shield_amount = tsbar[i].shield_amount;
-        //        ps[i].curr_weapon = tsbar[i].curr_weapon;
-        //        ps[i].inven_icon = tsbar[i].inven_icon;
+        ps[i].aim_mode = aimmode[i];
+        if(ud.multimode > 1 && ud.coop == 1 && ud.last_level >= 0)
+        {
+            for(j=0;j<MAX_WEAPONS;j++)
+            {
+                ps[i].ammo_amount[j] = tsbar[i].ammo_amount[j];
+                ps[i].gotweapon[j] = tsbar[i].gotweapon[j];
+            }
+            ps[i].shield_amount = tsbar[i].shield_amount;
+            ps[i].curr_weapon = tsbar[i].curr_weapon;
+            ps[i].inven_icon = tsbar[i].inven_icon;
 
-        //        ps[i].firstaid_amount = tsbar[i].firstaid_amount;
-        //        ps[i].steroids_amount= tsbar[i].steroids_amount;
-        //        ps[i].holoduke_amount = tsbar[i].holoduke_amount;
-        //        ps[i].jetpack_amount = tsbar[i].jetpack_amount;
-        //        ps[i].heat_amount = tsbar[i].heat_amount;
-        //        ps[i].scuba_amount= tsbar[i].scuba_amount;
-        //        ps[i].boot_amount = tsbar[i].boot_amount;
-        //    }
+            ps[i].firstaid_amount = tsbar[i].firstaid_amount;
+            ps[i].steroids_amount= tsbar[i].steroids_amount;
+            ps[i].holoduke_amount = tsbar[i].holoduke_amount;
+            ps[i].jetpack_amount = tsbar[i].jetpack_amount;
+            ps[i].heat_amount = tsbar[i].heat_amount;
+            ps[i].scuba_amount= tsbar[i].scuba_amount;
+            ps[i].boot_amount = tsbar[i].boot_amount;
+        }
     }
 
     numplayersprites = 0;
@@ -981,7 +978,32 @@ PreMap.waitForEverybody = function () {
 PreMap.doFrontScreens = function () {
     var i, j;
     if (ud.recstat !== 2) {
-        throw new Error("todo");
+        ps[myconnectindex].palette = palette;
+        for(j=0;j<63;j+=7) palto(0,0,0,j);
+        i = ud.screen_size;
+        ud.screen_size = 0;
+        vscrn();
+        clearView(0);
+
+        rotateSprite(320<<15,200<<15,65536,0,LOADSCREEN,0,0,2+8+64,0,0,xdim-1,ydim-1);
+
+        if( boardfilename[0] != 0 && ud.level_number == 7 && ud.volume_number == 0 )
+        {
+            menutext(160,90,0,0,"ENTERING USER MAP");
+            gametextpal(160,90+10,boardfilename,14,2);
+        }
+        else
+        {
+            menutext(160,90,0,0,"ENTERING");
+            menutext(160,90+16+8,0,0,level_names[(ud.volume_number*11) + ud.level_number]);
+        }
+
+        nextpage();
+
+        for(j=63;j>0;j-=7) palto(0,0,0,j);
+
+        KB.flushKeyboardQueue();
+        ud.screen_size = i;
     } else {
         clearView(0);
         ps[myconnectindex].palette = palette;
@@ -1035,7 +1057,8 @@ PreMap.resetMys = function () {
 };
 
 //1451
-PreMap.enterLevel = function (g) {
+PreMap.enterLevel = enterlevel;
+function enterlevel(g) {
     var i;
     var l;
     var levname;
@@ -1112,9 +1135,10 @@ PreMap.enterLevel = function (g) {
     docacheit();
 
     if (ud.recstat != 2) {
-        throw new Error("todo");
-        //music_select = (ud.volume_number*11) + ud.level_number;
-        //playmusic(&music_fn[0][music_select][0]);
+        music_select = (ud.volume_number*11) + ud.level_number;
+        var musicRef = new Ref(music_fn[0][music_select][0])
+        playmusic(musicRef);
+        music_fn[0][music_select][0] = musicRef.$;
     }
 
     if ((g & MODE_GAME) || (g & MODE_EOL))

@@ -23,9 +23,27 @@ var CRC_BASE_GRP_FULL_13 = 0xBBC9CE44;
 var CRC_BASE_GRP_PLUTONIUM_14 = 0xF514A6AC;
 var CRC_BASE_GRP_ATOMIC_15 = 0xFD3DCFF1;
 
+window.__defineGetter__("PLUTOPAK", function () {
+    return !VOLUMEONE && !VOLUMEALL;
+});
+
 window.__defineGetter__("VOLUMEONE", function () {
     return getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
 });
+
+// VOLUMEALL = 1.3d full
+window.__defineGetter__("VOLUMEALL", function () {
+    return getGRPcrc32(0) == CRC_BASE_GRP_FULL_13 || conVersion == 13 && getGRPcrc32(0) != CRC_BASE_GRP_SHAREWARE_13 && getGRPcrc32(0) != CRC_BASE_GRP_PLUTONIUM_14 && getGRPcrc32(0) != CRC_BASE_GRP_ATOMIC_15;
+});
+
+var SCREENSHOTPATH = "screenshots";
+
+
+
+// #define TEN
+// #define BETA
+
+// #define AUSTRALIA
 
 var MAXSLEEPDIST = 16384;
 var SLEEPTIME = 24 * 64;

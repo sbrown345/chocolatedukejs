@@ -3118,7 +3118,8 @@ function transmaskwallscan(x1, x2) {
 }
 
 //3179
-Engine.loadBoard = function (filename, daposx, daposy, daposz, daang, dacursectnum) {
+Engine.loadBoard = loadboard;
+function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
     var x = 0;
     var fil, i, numsprites;
     var sect;

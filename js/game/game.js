@@ -2994,50 +2994,49 @@ function spawn(j, pn) {
                 case 36:
                     break;
                 case 20:
-                    throw new Error("todo");
-                    //        {
-                    //            int32_t q;
+                    {
+                        var q;
 
-                    //            startwall = sector[sect].wallptr;
-                    //            endwall = startwall+sector[sect].wallnum;
+                        startwall = sector[sect].wallptr;
+                        endwall = startwall+sector[sect].wallnum;
 
-                    //            //find the two most clostest wall x's and y's
-                    //            q = 0x7fffffff;
+                        //find the two most clostest wall x's and y's
+                        q = 0x7fffffff;
 
-                    //            for(s=startwall;s<endwall;s++)
-                    //            {
-                    //                x = wall[s].x;
-                    //                y = wall[s].y;
+                        for(s=startwall;s<endwall;s++)
+                        {
+                            x = wall[s].x;
+                            y = wall[s].y;
 
-                    //                d = FindDistance2D(sp.x-x,sp.y-y);
-                    //                if( d < q )
-                    //                {
-                    //                    q = d;
-                    //                    clostest = s;
-                    //                }
-                    //            }
+                            d = FindDistance2D(sp.x-x,sp.y-y);
+                            if( d < q )
+                            {
+                                q = d;
+                                clostest = s;
+                            }
+                        }
 
-                    //            hittype[i].temp_data[1] = clostest;
+                        hittype[i].temp_data[1] = clostest;
 
-                    //            q = 0x7fffffff;
+                        q = 0x7fffffff;
 
-                    //            for(s=startwall;s<endwall;s++)
-                    //            {
-                    //                x = wall[s].x;
-                    //                y = wall[s].y;
+                        for(s=startwall;s<endwall;s++)
+                        {
+                            x = wall[s].x;
+                            y = wall[s].y;
 
-                    //                d = FindDistance2D(sp.x-x,sp.y-y);
-                    //                if(d < q && s != hittype[i].temp_data[1])
-                    //                {
-                    //                    q = d;
-                    //                    clostest = s;
-                    //                }
-                    //            }
+                            d = FindDistance2D(sp.x-x,sp.y-y);
+                            if(d < q && s != hittype[i].temp_data[1])
+                            {
+                                q = d;
+                                clostest = s;
+                            }
+                        }
 
-                    //            hittype[i].temp_data[2] = clostest;
-                    //        }
+                        hittype[i].temp_data[2] = clostest;
+                    }
 
-                    //        break;
+                    break;
 
                 case 3:
 
@@ -4617,7 +4616,9 @@ function logo() {
                         nextpage();
 
                         //MIDI start here
-                        playMusic(env_music_fn[0]);
+                        var envMusRef = new Ref(env_music_fn[0]);
+                        playmusic(envMusRef);
+                        env_music_fn[0] = envMusRef.$;
 
                         // "REALITY IS OUR GAME" Screen
                         for (i = 0; i < 64; i += 7) {

@@ -176,7 +176,7 @@ var display_mirror = 0, typebuflen = 0;
 //char typebuf[41];
 
 var music_fn = [new Array(11), new Array(11), new Array(11), new Array(11)];
-//uint8_t music_select;
+var music_select;
 var env_music_fn = new Array(4);
 var rtsplaying = 0;
 
