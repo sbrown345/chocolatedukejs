@@ -436,7 +436,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     
     for (; i < ((destPosition >>> 0) - bytesperline) < (destPosition >>> 0) ; destPosition += bytesperline) {
         
-        //// unoptimised:
+        //// unoptimized:
         //for (i = 0; i < 4; i++) {
         //    temp = (vplce[i]) >>> mach3_al;
         //    temp = tiles[globalpicnum].data[bufplce[i] + temp];

@@ -1292,88 +1292,88 @@ function menus() {
             menutext(c,70+19+19+19,SHX(-5),PHX(-5),skill_names[3]);
             break;
 
-//        case 200:
+        case 200:
 
-//            rotateSprite(320<<15,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
-//            menutext(320>>1,24,0,0,"OPTIONS");
+            rotateSprite(320<<15,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
+            menutext(320>>1,24,0,0,"OPTIONS");
 
-//            c = (320>>1)-120;
+            c = (320>>1)-120;
 
-//            x = probe(c+6,43,16,6);
+            x = probe(c+6,43,16,6);
 
-//            if(x == -1)
-//            { if(ps[myconnectindex].gm&MODE_GAME) cmenu(50);else cmenu(0); }
+            if(x == -1)
+            { if(ps[myconnectindex].gm&MODE_GAME) cmenu(50);else cmenu(0); }
 
-//            switch(x)
-//            {
-//                case 0:
-//                    cmenu(702); // game options
-//                    break;
+            switch(x)
+            {
+                case 0:
+                    cmenu(702); // game options
+                    break;
 
-//                case 1:
-//                    cmenu(703); // keybaord setup
-//                    probey = 7;
-//                    break;
+                case 1:
+                    cmenu(703); // keybaord setup
+                    probey = 7;
+                    break;
 
-//                case 2:
-//                    cmenu(701); // mouse setup
-//                    break;
+                case 2:
+                    cmenu(701); // mouse setup
+                    break;
 
-//                case 3:
-//                    cmenu(700);  // sound setup
-//                    break;
+                case 3:
+                    cmenu(700);  // sound setup
+                    break;
 
-//                case 4:  
-//                    cmenu(706); // Video setup
-//                    lastkeysetup = 0;
-//                    current_resolution = 0; // in case we don't find it
-//                    for(i=0; i<validmodecnt; i++)
-//                    {
-//                        if(validmodexdim[i] == xdim && validmodeydim[i] == ydim)
-//                            current_resolution = i;
-//                    }
-//                    break;
+                case 4:  
+                    cmenu(706); // Video setup
+                    lastkeysetup = 0;
+                    current_resolution = 0; // in case we don't find it
+                    for(i=0; i<validmodecnt; i++)
+                    {
+                        if(validmodexdim[i] == xdim && validmodeydim[i] == ydim)
+                            current_resolution = i;
+                    }
+                    break;
 
-//                case 5: // record on/off
-//                    if( (ps[myconnectindex].gm&MODE_GAME) )
-//                    {
-//                        closedemowrite();
-//                        break;
-//                    }
-//                    ud.m_recstat = !ud.m_recstat;
-//                    break;
+                case 5: // record on/off
+                    if( (ps[myconnectindex].gm&MODE_GAME) )
+                    {
+                        closedemowrite();
+                        break;
+                    }
+                    ud.m_recstat = !ud.m_recstat;
+                    break;
 
-//                    //case -7:
-//                    //	gametext(320>>1,43+16*6,"*** DISABLED. WILL BE FIXED SOON***",0,2+8+16); // center-i
-//                    //	break;
+                    //case -7:
+                    //	gametext(320>>1,43+16*6,"*** DISABLED. WILL BE FIXED SOON***",0,2+8+16); // center-i
+                    //	break;
 
-//            }
+            }
 
-//            menutext(c,43,SHX(-6),PHX(-6),"GAME OPTIONS");
+            menutext(c,43,SHX(-6),PHX(-6),"GAME OPTIONS");
 
-//            menutext(c,43+16,SHX(-6),PHX(-6),"SETUP KEYBOARD");
+            menutext(c,43+16,SHX(-6),PHX(-6),"SETUP KEYBOARD");
 
-//            menutext(c,43+16+16,SHX(-6),PHX(-6),"SETUP MOUSE");
+            menutext(c,43+16+16,SHX(-6),PHX(-6),"SETUP MOUSE");
 
-//            menutext(c,43+16+16+16,SHX(-8),PHX(-8),"SETUP SOUND");
+            menutext(c,43+16+16+16,SHX(-8),PHX(-8),"SETUP SOUND");
 
-//            menutext(c,43+16+16+16+16,SHX(-8),PHX(-8),"SETUP VIDEO");
+            menutext(c,43+16+16+16+16,SHX(-8),PHX(-8),"SETUP VIDEO");
 
-//            if( (ps[myconnectindex].gm&MODE_GAME) && ud.m_recstat != 1 )
-//            {
-//                menutext(c,43+16+16+16+16+16,SHX(-10),1,"RECORD");
-//                menutext(c+160+40,43+16+16+16+16+16,SHX(-10),1,"OFF");
-//            }
-//            else
-//            {
-//                menutext(c,43+16+16+16+16+16,SHX(-10),PHX(-10),"RECORD");
+            if( (ps[myconnectindex].gm&MODE_GAME) && ud.m_recstat != 1 )
+            {
+                menutext(c,43+16+16+16+16+16,SHX(-10),1,"RECORD");
+                menutext(c+160+40,43+16+16+16+16+16,SHX(-10),1,"OFF");
+            }
+            else
+            {
+                menutext(c,43+16+16+16+16+16,SHX(-10),PHX(-10),"RECORD");
 
-//                if(ud.m_recstat == 1)
-//                    menutext(c+160+40,43+16+16+16+16+16,SHX(-10),PHX(-10),"ON");
-//                else menutext(c+160+40,43+16+16+16+16+16,SHX(-10),PHX(-10),"OFF");
-//            }
+                if(ud.m_recstat == 1)
+                    menutext(c+160+40,43+16+16+16+16+16,SHX(-10),PHX(-10),"ON");
+                else menutext(c+160+40,43+16+16+16+16+16,SHX(-10),PHX(-10),"OFF");
+            }
 
-//            break;
+            break;
 
 //        case 700:
 
@@ -1713,103 +1713,103 @@ function menus() {
 
 //            break;
 
-//        case 703:
+        case 703:
 
-//            // black translucent background underneath lists
-//            rotateSprite(0<<16, 0<<16, 65536<<5, 0, BLANK, 8, 0, 1+2+8+16+64,
-//			    scale(0,xdim,320),scale(0,ydim,200),
-//			    scale(320-0,xdim,320)-1,scale(200-34,ydim,200)-1);
+            // black translucent background underneath lists
+            rotateSprite(0<<16, 0<<16, 65536<<5, 0, BLANK, 8, 0, 1+2+8+16+64,
+			    scale(0,xdim,320),scale(0,ydim,200),
+			    scale(320-0,xdim,320)-1,scale(200-34,ydim,200)-1);
 
-//            c = (320>>1)-120-25;
-//            rotateSprite(320<<15,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
-//            menutext(320>>1,24,0,0,"SETUP KEYBOARD");
+            c = (320>>1)-120-25;
+            rotateSprite(320<<15,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
+            menutext(320>>1,24,0,0,"SETUP KEYBOARD");
 
-//            onbar = 0;
-//            x = probeXduke(c+210+lastkeysetup*62,46+16+16+16,0,NUMGAMEFUNCTIONS,20000);
-//            if(waiting4key)
-//            {
-//                probey = waiting4key-1; // force it to stay at the same location
-//                x=-(waiting4key-1)-2;
-//            }
+            onbar = 0;
+            x = probeXduke(c+210+lastkeysetup*62,46+16+16+16,0,NUMGAMEFUNCTIONS,20000);
+            if(waiting4key)
+            {
+                probey = waiting4key-1; // force it to stay at the same location
+                x=-(waiting4key-1)-2;
+            }
 
-//            if (( KB.keyPressed( sc_RightArrow ) || KB.keyPressed( sc_LeftArrow ) ||
-//				 KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_kpad_6 )) &&
-//				!waiting4key) // set left or right column flag
-//            {
-//                lastkeysetup = !lastkeysetup;
-//                KB.clearKeyDown( sc_RightArrow ); KB.clearKeyDown( sc_LeftArrow );
-//                KB.clearKeyDown( sc_kpad_4 ); KB.clearKeyDown( sc_kpad_6 );
-//                sound(KICK_HIT);
-//            }
+            if (( KB.keyPressed( sc_RightArrow ) || KB.keyPressed( sc_LeftArrow ) ||
+				 KB.keyPressed( sc_kpad_4 ) || KB.keyPressed( sc_kpad_6 )) &&
+				!waiting4key) // set left or right column flag
+            {
+                lastkeysetup = !lastkeysetup;
+                KB.clearKeyDown( sc_RightArrow ); KB.clearKeyDown( sc_LeftArrow );
+                KB.clearKeyDown( sc_kpad_4 ); KB.clearKeyDown( sc_kpad_6 );
+                sound(KICK_HIT);
+            }
 
-//            if (KB.keyPressed(sc_Delete) && -2>=x && x>=(-NUMGAMEFUNCTIONS-1) && !waiting4key) // clear a key
-//            {
-//                if(lastkeysetup)
-//                    CONTROL_MapKey(-x-2, KeyMapping[-x-2].key1, 0);
-//                else
-//                    CONTROL_MapKey(-x-2, 0, KeyMapping[-x-2].key2);
+            if (KB.keyPressed(sc_Delete) && -2>=x && x>=(-NUMGAMEFUNCTIONS-1) && !waiting4key) // clear a key
+            {
+                if(lastkeysetup)
+                    CONTROL_MapKey(-x-2, KeyMapping[-x-2].key1, 0);
+                else
+                    CONTROL_MapKey(-x-2, 0, KeyMapping[-x-2].key2);
 
-//                KB.clearKeyDown( sc_Delete ); // Avoid repeating delete
-//                sound(EXITMENUSOUND);
-//            }
+                KB.clearKeyDown( sc_Delete ); // Avoid repeating delete
+                sound(EXITMENUSOUND);
+            }
 
-//            if ( (0<=x && x<NUMGAMEFUNCTIONS) || waiting4key) // set a key
-//            {
-//                if(!waiting4key)
-//                { 
-//                    waiting4key = x+1; // so it's always true
-//                    KB_ClearLastScanCode(); // clear the enter hit that was just hit
-//                }
+            if ( (0<=x && x<NUMGAMEFUNCTIONS) || waiting4key) // set a key
+            {
+                if(!waiting4key)
+                { 
+                    waiting4key = x+1; // so it's always true
+                    KB_ClearLastScanCode(); // clear the enter hit that was just hit
+                }
 
-//                if(KB_GetLastScanCode())
-//                {
-//                    if(KB_GetLastScanCode() != sc_Escape)  // ESC is reserved for menu. Using it for controls could discard it completely, eg: AutoRun = "Escape"
-//                    {
-//                        if(lastkeysetup)		
-//                            CONTROL_MapKey(waiting4key-1, KeyMapping[waiting4key-1].key1, KB_GetLastScanCode());
-//                        else
-//                            CONTROL_MapKey(waiting4key-1, KB_GetLastScanCode(), KeyMapping[waiting4key-1].key2);
+                if(KB_GetLastScanCode())
+                {
+                    if(KB_GetLastScanCode() != sc_Escape)  // ESC is reserved for menu. Using it for controls could discard it completely, eg: AutoRun = "Escape"
+                    {
+                        if(lastkeysetup)		
+                            CONTROL_MapKey(waiting4key-1, KeyMapping[waiting4key-1].key1, KB_GetLastScanCode());
+                        else
+                            CONTROL_MapKey(waiting4key-1, KB_GetLastScanCode(), KeyMapping[waiting4key-1].key2);
 
-//                        sound(KICK_HIT);
-//                    }
+                        sound(KICK_HIT);
+                    }
 
-//                    KB_ClearLastScanCode();
-//                    KB.flushKeyboardQueue();
-//                    KB_ClearKeysDown();
-//                    waiting4key = false;
-//                }					
-//            }
+                    KB_ClearLastScanCode();
+                    KB.flushKeyboardQueue();
+                    KB.clearKeysDown();
+                    waiting4key = false;
+                }					
+            }
 
-//            if(!waiting4key) 
-//                switch(x)
-//                {
-//                    case -1:
-//                        cmenu(200);
-//                        probey = 1; // back to setup keyboard
-//                        break;
-//                }
+            if(!waiting4key) 
+                switch(x)
+                {
+                    case -1:
+                        cmenu(200);
+                        probey = 1; // back to setup keyboard
+                        break;
+                }
 
-//            // display and scroll the whole keyboard list
-//            j = 7; // -j .. 0 .. j lines => 2*j+1 lines
-//            if(-2>=x && x>=(-NUMGAMEFUNCTIONS-1)) // -2 to -54 (53 values . 0.52)
-//            {
-//                for(i=-j; i<=+j; i++)
-//                    if(NUMGAMEFUNCTIONS > (-x-2+i) && (-x-2+i) >= 0)
-//                    {
-//                        gametext(c-10,47-16+8*(i+j),gamefunctions[-x-2+i],i?0:0,2+8+16); // disp name
-//                        if (i ||  lastkeysetup || !waiting4key || (totalclock%128 < 64)) // blink 1st key
-//                            gametext(c+185,47-16+8*(i+j),KB_ScanCodeToString( KeyMapping[-x-2+i].key1 )?KB_ScanCodeToString( KeyMapping[-x-2+i].key1 ):"...",i?0:0,2+8+16); // center-i
-//                        if (i || !lastkeysetup || !waiting4key || (totalclock%128 < 64)) // blink 2nd key
-//                            gametext(c+247,47-16+8*(i+j),KB_ScanCodeToString( KeyMapping[-x-2+i].key2 )?KB_ScanCodeToString( KeyMapping[-x-2+i].key2 ):"...",i?0:0,2+8+16); // center-i
-//                    }
-//            }
+            // display and scroll the whole keyboard list
+            j = 7; // -j .. 0 .. j lines => 2*j+1 lines
+            if(-2>=x && x>=(-NUMGAMEFUNCTIONS-1)) // -2 to -54 (53 values . 0.52)
+            {
+                for(i=-j; i<=+j; i++)
+                    if(NUMGAMEFUNCTIONS > (-x-2+i) && (-x-2+i) >= 0)
+                    {
+                        gametext(c-10,47-16+8*(i+j),gamefunctions[-x-2+i],i?0:0,2+8+16); // disp name
+                        if (i ||  lastkeysetup || !waiting4key || (totalclock%128 < 64)) // blink 1st key
+                            gametext(c+185,47-16+8*(i+j),KB_ScanCodeToString( KeyMapping[-x-2+i].key1 )?KB_ScanCodeToString( KeyMapping[-x-2+i].key1 ):"...",i?0:0,2+8+16); // center-i
+                        if (i || !lastkeysetup || !waiting4key || (totalclock%128 < 64)) // blink 2nd key
+                            gametext(c+247,47-16+8*(i+j),KB_ScanCodeToString( KeyMapping[-x-2+i].key2 )?KB_ScanCodeToString( KeyMapping[-x-2+i].key2 ):"...",i?0:0,2+8+16); // center-i
+                    }
+            }
 
-//            if(waiting4key)
-//                gametext(320>>1,47-16+8*(2*j+2)-4,"*** HIT A NEW KEY ***",0,2+8+16); // center-i
-//            else
-//                gametext(320>>1,47-16+8*(2*j+2)-4,"*** HIT ENTER OR DEL KEY ***",0,2+8+16); // center-i
+            if(waiting4key)
+                gametext(320>>1,47-16+8*(2*j+2)-4,"*** HIT A NEW KEY ***",0,2+8+16); // center-i
+            else
+                gametext(320>>1,47-16+8*(2*j+2)-4,"*** HIT ENTER OR DEL KEY ***",0,2+8+16); // center-i
 
-//            break;
+            break;
 
 //        case 704: // mouse button setup, frm menu 701
 //            c = (320>>1)-120-25;
@@ -2434,35 +2434,35 @@ function menus() {
 //            }
 //            break;
 
-//        case 500: // from f10
-//        case 501: // from menu 0
-//        case 502: // from menu 50
+        case 500: // from f10
+        case 501: // from menu 0
+        case 502: // from menu 50
 
-//            c = 320>>1;
+            c = 320>>1;
 
-//            gametext(c,90,"Are you sure you want to quit?",0,2+8+16);
-//            gametext(c,99,"(Y/N)",0,2+8+16);
+            gametext(c,90,"Are you sure you want to quit?",0,2+8+16);
+            gametext(c,99,"(Y/N)",0,2+8+16);
 
-//            _handle_events();
-//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
-//            {
-//                gameexitanycase();
-//            }
+            _handle_events();
+            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
+            {
+                gameexitanycase();
+            }
 
-//            x = probe(186,124,0,0);
-//            if(x == -1 || KB.keyPressed(sc_N) || RMB)
-//            {
-//                KB.clearKeyDown(sc_N);
-//                quittimer = 0;
-//                // FIX_00073: menu off messed up. While in game hit Esc . select quit . press esc => stuck in menu
-//                if (current_menu==500)
-//                    ps[myconnectindex].gm &= ~MODE_MENU;
-//                else if(current_menu==501)
-//                    cmenu(0);
-//                else
-//                    cmenu(50);
-//            }
-//            break;
+            x = probe(186,124,0,0);
+            if(x == -1 || KB.keyPressed(sc_N) || RMB)
+            {
+                KB.clearKeyDown(sc_N);
+                quittimer = 0;
+                // FIX_00073: menu off messed up. While in game hit Esc . select quit . press esc => stuck in menu
+                if (current_menu==500)
+                    ps[myconnectindex].gm &= ~MODE_MENU;
+                else if(current_menu==501)
+                    cmenu(0);
+                else
+                    cmenu(50);
+            }
+            break;
 
 //        case 503:
 //            c = 320>>1;

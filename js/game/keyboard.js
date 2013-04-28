@@ -135,7 +135,7 @@ var MAXKEYBOARDSCAN  	=	128	;
 */
 
 KB.keyDown = new Uint8Array(MAXKEYBOARDSCAN);   // Keyboard state array
-//var kb_scancode KB_LastScan;
+var KB_LastScan;
 
 var keyIsWaiting = false;
 
@@ -152,12 +152,21 @@ window.addEventListener("keyup", function (e) {
 });
 
 // "Macros"
+
+function KB_GetLastScanCode() { return KB_LastScan; }
+
 KB.keyPressed = function (scan) {
     return KB.keyDown[(scan)] != 0;
 };
 
 KB.clearKeyDown = function (scan) {
     return KB.keyDown[(scan)] == 0;
+};
+
+var KB_SetLastScanCode = function(scancode) { KB_LastScan = (scancode); };
+
+var KB_ClearLastScanCode = function () {
+    KB_SetLastScanCode(sc_None);
 };
 
 // Functions

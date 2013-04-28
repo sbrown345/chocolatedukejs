@@ -163,7 +163,7 @@ Queue.prototype = {
 
         var that = this;
 
-        //shiftArg(); // http://ajaxian.com/archives/settimeout-delay
+        //shiftArg(); 
         setZeroTimeout(shiftArg);
 
         function shiftArg() {
@@ -220,6 +220,7 @@ Queue.prototype = {
 
 
 (function () {
+    // http://ajaxian.com/archives/settimeout-delay
     var timeouts = [];
     var messageName = "zero-timeout-message";
 
