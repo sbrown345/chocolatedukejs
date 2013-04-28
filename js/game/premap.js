@@ -1135,10 +1135,20 @@ function enterlevel(g) {
     docacheit();
 
     if (ud.recstat != 2) {
-        music_select = (ud.volume_number*11) + ud.level_number;
-        var musicRef = new Ref(music_fn[0][music_select][0])
-        playmusic(musicRef);
-        music_fn[0][music_select][0] = musicRef.$;
+        music_select = (ud.volume_number * 11) + ud.level_number;
+
+        var track = "";
+        outerLoop:
+        for (var k = 0, musicTotal = 0; k < music_fn.length; k++) {
+            for (var m = 0; m < music_fn[k].length; m++, musicTotal++) {
+                if (musicTotal == music_select) {
+                    track = music_fn[k][m];
+                    break outerLoop;
+                }
+            }
+        }
+
+        playmusic(track);
     }
 
     if ((g & MODE_GAME) || (g & MODE_EOL))

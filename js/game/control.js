@@ -38,7 +38,7 @@ Control.updateKeyboardState = function (key, pressed) {
 
 //479
 Control.getInput = function(info) {
-    console.log("todo Control.getInput");
+    //todo
     handle_events();
 };
 
@@ -47,8 +47,8 @@ Control.getMouseSensitivity_Y = function() {
 };
 
 //743
-Control.startup = function() {
-    console.log("todo Control.startup");
+Control.startup = function () {
+    //todo
 };
 
 var Mouse = {};

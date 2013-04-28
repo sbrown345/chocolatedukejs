@@ -143,11 +143,52 @@ var keyIsWaiting = false;
 //static uint8_t  shiftedScancodeToASCII[ MAXKEYBOARDSCAN ];
 //static uint8_t  extscanToSC[ MAXKEYBOARDSCAN ];
 
+var events = [];
+
+
+// todo: un-SDLyfy this
+var SDL_RELEASED = 0;
+var SDL_PRESSED = 1;
+
+var SDL_NOEVENT = 0, /**< Unused (do not remove) */
+    SDL_ACTIVEEVENT = 1, /**< Application loses/gains visibility */
+    SDL_KEYDOWN = "2 SDL_KEYDOWN", /**< Keys pressed */
+    SDL_KEYUP = "3 SDL_KEYUP", /**< Keys released */
+    SDL_MOUSEMOTION = 4, /**< Mouse moved */
+    SDL_MOUSEBUTTONDOWN = 5, /**< Mouse button pressed */
+    SDL_MOUSEBUTTONUP = 6, /**< Mouse button released */
+    SDL_JOYAXISMOTION = 7, /**< Joystick axis motion */
+    SDL_JOYBALLMOTION = 8, /**< Joystick trackball motion */
+    SDL_JOYHATMOTION = 9, /**< Joystick hat position change */
+    SDL_JOYBUTTONDOWN = 10, /**< Joystick button pressed */
+    SDL_JOYBUTTONUP = 11, /**< Joystick button released */
+    SDL_QUIT = 12, /**< User-requested quit */
+    SDL_SYSWMEVENT = 13, /**< System specific event */
+    SDL_EVENT_RESERVEDA = 14, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVEDB = 15, /**< Reserved for future use.. */
+    SDL_VIDEORESIZE = 16, /**< User resized video mode */
+    SDL_VIDEOEXPOSE = 17, /**< Screen needs to be redrawn */
+    SDL_EVENT_RESERVED2 = 18, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVED3 = 19, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVED4 = 20, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVED5 = 21, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVED6 = 22, /**< Reserved for future use.. */
+    SDL_EVENT_RESERVED7 = 23, /**< Reserved for future use.. */
+    SDL_USEREVENT = 24,
+    /** This last event is only for bounding internal arrays
+    *  It is the number of bits in the event mask datatype -- Uint32
+        */
+    SDL_NUMEVENTS = 32;
+
 window.addEventListener("keydown", function (e) {
-    sdl_key_filter(e, false);
+    console.log("keydown")
+    events.push({ type: SDL_KEYDOWN, key: { type: SDL_KEYDOWN, keyCode: e.keyCode, state: SDL_PRESSED } });
+    //sdl_key_filter(e, false);
 });
 
 window.addEventListener("keyup", function (e) {
+    console.log("keyup")
+    events.push({ type: SDL_KEYUP, key: { type: SDL_KEYUP, keyCode: e.keyCode, state: SDL_RELEASED } });
     //sdl_key_filter(e, true);
 });
 
@@ -237,7 +278,7 @@ KB.keyWaiting = function () {
 };
 
 KB.flushKeyboardQueue = function () {
-    //_handle_events();
+    _handle_events();
     keyIsWaiting = false;
     for (var i = 0; i < KB.keyDown.length; i++) {
         KB.keyDown.length[i] = 0;

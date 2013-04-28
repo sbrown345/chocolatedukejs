@@ -5324,7 +5324,7 @@ function main(argc, argv) {
             console.log("Demo loop");
         })
         .add(function () {
-            console.log("EO demo loop TODO: check return value etc");
+            //console.log("EO demo loop TODO: check return value etc");
             //if (just played back)
             FX.stopAllSounds();
             clearsoundlocks();
@@ -5586,7 +5586,7 @@ Game.playBack = function () {
             return isPlayingBack && (ud.reccnt > 0 || foundemo === 0);
         }, function () {
             q.setPositionAtStart();
-            console.log("demo loopframeCount: %i", frameCount++);
+            //console.log("demo loopframeCount: %i", frameCount++);
 
             q.addIf(function() {
                 return foundemo;
@@ -5690,7 +5690,7 @@ Game.playBack = function () {
                             kclose(recfilep);
                         ud.playing_demo_rev = 0;
                         isPlayingBack = false;
-                        console.warn("todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??");
+                        //todo: how to return value???????? maybe it coudl check if a value has returned (not undefined?) then return that up the chain??
                         return 0;
                     }
                 });

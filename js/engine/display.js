@@ -215,7 +215,8 @@ function go_to_new_vid_mode(screenMode) {
 }
 
 //454
-function sdl_key_filter(event, keyReleased) {
+function sdl_key_filter(event) {
+    console.log("sdl_key_filter", event)
 //    var extended;
 
 //    if ( (event.key.keysym.sym == SDLK_m) &&
@@ -258,7 +259,7 @@ function sdl_key_filter(event, keyReleased) {
 //    }								
 
 //    if (!handle_keypad_enter_hack(event))
-        lastkey = scancodes[event.keyCode];
+        lastkey = scancodes[event.key.keyCode];
 
 ////	printf("key.keysym.sym=%d\n", event.key.keysym.sym);
 
@@ -273,19 +274,55 @@ function sdl_key_filter(event, keyReleased) {
 //        lastkey = (scancodes[event.key.keysym.sym] & 0xFF);
 //    } /* if */
 
-    if (keyReleased)
-        lastkey += 128;  /* +128 signifies that the key is released in DOS. */
+        if (event.key.state == SDL_RELEASED)
+            lastkey += 128;  /* +128 signifies that the key is released in DOS. */
 
     keyhandler();
     return(0);
-} 
+}
+
+function root_sdl_event_filter(event) {
+    switch (event.type)
+    {
+        case SDL_KEYUP:
+            // FIX_00003: Pause mode is now fully responsive - (Thx to Jonathon Fowler tips)
+            //todo pause key: //if(event.key.keysym.sym == SDLK_PAUSE)
+            //    break;
+        case SDL_KEYDOWN:
+            return(sdl_key_filter(event));
+        case SDL_JOYBUTTONDOWN:
+        case SDL_JOYBUTTONUP:
+            {
+                //Do Nothing
+
+                //printf("Joybutton UP/DOWN\n");
+                //return(sdl_joystick_button_filter((const SDL_MouseButtonEvent*)event));
+                return 0;
+            }
+        case SDL_JOYBALLMOTION:
+        case SDL_MOUSEMOTION:
+            return(sdl_mouse_motion_filter(event));
+        case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONDOWN:
+            return(sdl_mouse_button_filter(/*(const SDL_MouseButtonEvent*)*/event));
+        case SDL_QUIT:
+            /* !!! rcg TEMP */
+            Error(EXIT_SUCCESS, "Exit through SDL\n"); 
+        default:
+            //printf("This event is not handled: %d\n",event.type);
+            break;
+    } /* switch */
+
+    return(1);
+} /* root_sdl_event_filter
+}
 
 /* sdl_key_filter */
 //560
 function handle_events() {
-    var event;
-	//while(SDL_PollEvent(&event))
-    //root_sdl_event_filter(&event);
+    while (events.length) {
+        root_sdl_event_filter(events.shift());
+    }
 }
 
 var _handle_events = handle_events;
@@ -409,7 +446,7 @@ function _nextpage() {
     var ticks;
 
     // todo: handle_events
-    //handle_events();
+    handle_events();
 
     // SDL_UpdateRect alternative
     updateCanvas();
