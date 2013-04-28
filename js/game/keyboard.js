@@ -180,17 +180,27 @@ var SDL_NOEVENT = 0, /**< Unused (do not remove) */
         */
     SDL_NUMEVENTS = 32;
 
-window.addEventListener("keydown", function (e) {
-    console.log("keydown")
+
+var lastEvent;
+var heldKeys = {};
+window.onkeydown = function (e) {
+    if (lastEvent && lastEvent.keyCode == e.keyCode) {
+        return;
+    }
+    lastEvent = e;
+    heldKeys[e.keyCode] = true;
+    console.log("keydown", e.keyCode)
     events.push({ type: SDL_KEYDOWN, key: { type: SDL_KEYDOWN, keyCode: e.keyCode, state: SDL_PRESSED } });
     //sdl_key_filter(e, false);
-});
+};
 
-window.addEventListener("keyup", function (e) {
-    console.log("keyup")
+window.onkeyup = function (e) {
+    lastEvent = null;
+    delete heldKeys[e.keyCode];
+    console.log("keyup", e.keyCode)
     events.push({ type: SDL_KEYUP, key: { type: SDL_KEYUP, keyCode: e.keyCode, state: SDL_RELEASED } });
     //sdl_key_filter(e, true);
-});
+};
 
 // "Macros"
 

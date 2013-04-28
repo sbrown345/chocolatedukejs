@@ -61,7 +61,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_e] = 0x12;
     //scancodes[SDLK_r] = 0x13;
     //scancodes[SDLK_t] = 0x14;
-    //scancodes[SDLK_y] = 0x15;
+    scancodes[89] = 0x15; //SDLK_y
     //scancodes[SDLK_u] = 0x16;
     //scancodes[SDLK_i] = 0x17;
     //scancodes[SDLK_o] = 0x18;
@@ -69,7 +69,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_LEFTBRACKET] = 0x1A;
     //scancodes[SDLK_RIGHTBRACKET] = 0x1B;
     scancodes[13] = 0x1C; // Return/enter
-    //scancodes[SDLK_LCTRL] = 0x1D;
+    scancodes[17] = 0x1D; //SDLK_LCTRL
     //scancodes[SDLK_a] = 0x1E;
     //scancodes[SDLK_s] = 0x1F;
     //scancodes[SDLK_d] = 0x20;
@@ -89,7 +89,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_c] = 0x2E;
     //scancodes[SDLK_v] = 0x2F;
     //scancodes[SDLK_b] = 0x30;
-    //scancodes[SDLK_n] = 0x31;
+    scancodes[78] = 0x31;//SDLK_n
     //scancodes[SDLK_m] = 0x32;
     //scancodes[SDLK_COMMA] = 0x33;
     //scancodes[SDLK_PERIOD] = 0x34;
@@ -129,7 +129,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_PAUSE] = 0x59; /* SBF - technically incorrect */
 
     scancodes[13] = 0xE01C; // Return/enter
-    //scancodes[SDLK_RCTRL] = 0xE01D;
+    scancodes[17] = 0xE01D; // SDLK_RCTRL
     //scancodes[SDLK_KP_DIVIDE] = 0xE035;
     //scancodes[SDLK_PRINT] = 0xE037; /* SBF - technically incorrect */
     //scancodes[SDLK_SYSREQ] = 0xE037; /* SBF - for windows... */
