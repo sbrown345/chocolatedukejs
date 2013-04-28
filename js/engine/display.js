@@ -97,7 +97,7 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_RSHIFT] = 0x36;
     //scancodes[SDLK_KP_MULTIPLY] = 0x37;
     //scancodes[SDLK_LALT] = 0x38;
-    //scancodes[SDLK_SPACE] = 0x39;
+    scancodes[32] = 0x39; //SDLK_SPACE
     //scancodes[SDLK_CAPSLOCK] = 0x3A;
     //scancodes[SDLK_F1] = 0x3B;
     //scancodes[SDLK_F2] = 0x3C;

@@ -146,7 +146,7 @@ var keyIsWaiting = false;
 var events = [];
 
 
-// todo: un-SDLyfy this
+// todo: un-SDLify this
 var SDL_RELEASED = 0;
 var SDL_PRESSED = 1;
 
@@ -189,15 +189,15 @@ window.onkeydown = function (e) {
     }
     lastEvent = e;
     heldKeys[e.keyCode] = true;
-    console.log("keydown", e.keyCode)
+    console.log("keydown", e.keyCode);
     events.push({ type: SDL_KEYDOWN, key: { type: SDL_KEYDOWN, keyCode: e.keyCode, state: SDL_PRESSED } });
     //sdl_key_filter(e, false);
 };
 
 window.onkeyup = function (e) {
     lastEvent = null;
-    delete heldKeys[e.keyCode];
-    console.log("keyup", e.keyCode)
+    heldKeys[e.keyCode] = false;
+    console.log("keyup", e.keyCode);
     events.push({ type: SDL_KEYUP, key: { type: SDL_KEYUP, keyCode: e.keyCode, state: SDL_RELEASED } });
     //sdl_key_filter(e, true);
 };
@@ -278,6 +278,144 @@ KB.clearKeysDown = function () {
     keyIsWaiting = false;
 };
 
+
+//146
+
+function key2scancode(name, scancode) {
+    this.name = name;
+    this.code = scancode;
+}
+
+var keyname2scancode = [
+    new key2scancode(",", sc_Comma),
+    new key2scancode(".", sc_Period),
+    new key2scancode("Enter", sc_Return),
+    new key2scancode("Escape", sc_Escape),
+    new key2scancode("Space", sc_Space),
+    new key2scancode("BakSpc", sc_BackSpace),
+    new key2scancode("Tab", sc_Tab),
+    new key2scancode("LAlt", sc_LeftAlt),
+    new key2scancode("LCtrl", sc_LeftControl),
+    new key2scancode("CapLck", sc_CapsLock),
+    new key2scancode("LShift", sc_LeftShift),
+    new key2scancode("RShift", sc_RightShift),
+    new key2scancode("F1", sc_F1),
+    new key2scancode("F2", sc_F2),
+    new key2scancode("F3", sc_F3),
+    new key2scancode("F4", sc_F4),
+    new key2scancode("F5", sc_F5),
+    new key2scancode("F6", sc_F6),
+    new key2scancode("F7", sc_F7),
+    new key2scancode("F8", sc_F8),
+    new key2scancode("F9", sc_F9),
+    new key2scancode("F10", sc_F10),
+    new key2scancode("F11", sc_F11),
+    new key2scancode("F12", sc_F12),
+    new key2scancode("Kpad*", sc_Kpad_Star),
+    new key2scancode("Pause", sc_Pause),
+    new key2scancode("ScrLck", sc_ScrollLock),
+    new key2scancode("NumLck", sc_NumLock), // 6 chars Max please.
+    new key2scancode("/", sc_Slash),
+    new key2scancode(";", sc_SemiColon),
+    new key2scancode("'", sc_Quote),
+    new key2scancode("`", sc_Tilde),
+    new key2scancode("\\", sc_BackSlash),
+    new key2scancode("[", sc_OpenBracket),
+    new key2scancode("]", sc_CloseBracket),
+    new key2scancode("1", sc_1),
+    new key2scancode("2", sc_2),
+    new key2scancode("3", sc_3),
+    new key2scancode("4", sc_4),
+    new key2scancode("5", sc_5),
+    new key2scancode("6", sc_6),
+    new key2scancode("7", sc_7),
+    new key2scancode("8", sc_8),
+    new key2scancode("9", sc_9),
+    new key2scancode("0", sc_0),
+    new key2scancode("-", sc_Minus),
+    new key2scancode("=", sc_Equals),
+    new key2scancode("+", sc_Plus),
+    new key2scancode("Kpad1", sc_kpad_1),
+    new key2scancode("Kpad2", sc_kpad_2),
+    new key2scancode("Kpad3", sc_kpad_3),
+    new key2scancode("Kpad4", sc_kpad_4),
+    new key2scancode("Kpad5", sc_kpad_5),
+    new key2scancode("Kpad6", sc_kpad_6),
+    new key2scancode("Kpad7", sc_kpad_7),
+    new key2scancode("Kpad8", sc_kpad_8),
+    new key2scancode("Kpad9", sc_kpad_9),
+    new key2scancode("Kpad0", sc_kpad_0),
+    new key2scancode("Kpad-", sc_kpad_Minus),
+    new key2scancode("Kpad+", sc_kpad_Plus),
+    new key2scancode("Kpad.", sc_kpad_Period),
+    new key2scancode("A", sc_A),
+    new key2scancode("B", sc_B),
+    new key2scancode("C", sc_C),
+    new key2scancode("D", sc_D),
+    new key2scancode("E", sc_E),
+    new key2scancode("F", sc_F),
+    new key2scancode("G", sc_G),
+    new key2scancode("H", sc_H),
+    new key2scancode("I", sc_I),
+    new key2scancode("J", sc_J),
+    new key2scancode("K", sc_K),
+    new key2scancode("L", sc_L),
+    new key2scancode("M", sc_M),
+    new key2scancode("N", sc_N),
+    new key2scancode("O", sc_O),
+    new key2scancode("P", sc_P),
+    new key2scancode("Q", sc_Q),
+    new key2scancode("R", sc_R),
+    new key2scancode("S", sc_S),
+    new key2scancode("T", sc_T),
+    new key2scancode("U", sc_U),
+    new key2scancode("V", sc_V),
+    new key2scancode("W", sc_W),
+    new key2scancode("X", sc_X),
+    new key2scancode("Y", sc_Y),
+    new key2scancode("Z", sc_Z),
+    new key2scancode("Up", sc_UpArrow),
+    new key2scancode("Down", sc_DownArrow),
+    new key2scancode("Left", sc_LeftArrow),
+    new key2scancode("Right", sc_RightArrow),
+    new key2scancode("Insert", sc_Insert),
+    new key2scancode("Delete", sc_Delete),
+    new key2scancode("Home", sc_Home),
+    new key2scancode("End", sc_End),
+    new key2scancode("PgUp", sc_PgUp),
+    new key2scancode("PgDn", sc_PgDn),
+    new key2scancode("RAlt", sc_RightAlt),
+    new key2scancode("RCtrl", sc_RightControl),
+    new key2scancode("Kpad/", sc_kpad_Slash),
+    new key2scancode("KpdEnt", sc_kpad_Enter),
+    new key2scancode("PrtScn", sc_PrintScreen),
+    new key2scancode(/*NULL*/null, 0)
+];
+
+function KB_ScanCodeToString(scancode) {
+    var i;
+    for (i = 0; keyname2scancode[i].name != null; i++) {
+        if (keyname2scancode[i].code == scancode)
+            return keyname2scancode[i].name;
+    }
+
+    return null;
+}
+
+function KB_StringToScanCode(string) {
+    var name = null;
+    var i = 0;
+    name = keyname2scancode[i].name;
+    for (; name; ++i, name = keyname2scancode[i].name) {
+        if (name == string)
+            break;
+    }
+
+    return keyname2scancode[i].code;
+}
+
+
+//297
 KB.startup = function () {
     // todo
 };

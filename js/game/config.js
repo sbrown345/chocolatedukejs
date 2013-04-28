@@ -38,11 +38,12 @@ var mouseSensitivity_X;
 var mouseSensitivity_Y;
 
 var setupFilename = "";
-var scriptHandle = 0;
+var scripthandle = 0;
 var setupread = 0;
 
 var Config = {};
 
+//95
 Config.getSetupFilename = function () {
     setupFilename = "";
 
@@ -56,44 +57,43 @@ Config.getSetupFilename = function () {
     printf("Using Setup file: '" + setupFilename + "'\n");
 };
 
-Config.readSetup = function () {
-    console.log("Config.readSetup... todo");
 
-    Config.setDefaults();
+/*
+===================
+=
+= CONFIG_FunctionNameToNum
+=
+===================
+*/
 
-    scriptHandle = Script.load(setupFilename);
+function CONFIG_FunctionNameToNum(func) {
+    var i;
 
-    //..
-    if(ud.mywchoice[0] == 0 && ud.mywchoice[1] == 0)
-    {
-        ud.mywchoice[0] = 3;
-        ud.mywchoice[1] = 4;
-        ud.mywchoice[2] = 5;
-        ud.mywchoice[3] = 7;
-        ud.mywchoice[4] = 8;
-        ud.mywchoice[5] = 6;
-        ud.mywchoice[6] = 0;
-        ud.mywchoice[7] = 2;
-        ud.mywchoice[8] = 9;
-        ud.mywchoice[9] = 1;
-
-        //todo:
-        //for(dummy=0;dummy<10;dummy++)
-        //{
-        //    sprintf(buf,"WeaponChoice%d",dummy);
-        //    SCRIPT_GetNumber( scripthandle, "Misc", buf, &ud.mywchoice[dummy]);
-        //}
+    for (i = 0; i < NUMGAMEFUNCTIONS; i++) {
+        if (func == gamefunctions[i]) {
+            return i;
+        }
     }
+    return -1;
+}
 
-    //..
+/*
+===================
+=
+= CONFIG_FunctionNumToName
+=
+===================
+*/
 
-    // todo: Config.readSetup
-};
+function CONFIG_FunctionNumToName(func) {
+    if (-1 < func && func < NUMGAMEFUNCTIONS) {
+        return gamefunctions[func];
+    } else {
+        return null;
+    }
+}
 
-Config.readSaveNames = function() {
-    console.log("todo readSaveNames...");
-};
-
+//214
 Config.setDefaults = function () {
     console.log("Config.readSetup...");
     // sound
@@ -151,4 +151,104 @@ Config.setDefaults = function () {
 
     // Controller
     ControllerType = controltype.keyboardandmouse;
+};
+
+//280
+
+function CONFIG_ReadKeys() {
+    var i;
+    var numkeyentries;
+    var $function;
+    var keyname1 = "";
+    var keyname2 = "";
+    var key1, key2;
+
+    // set default keys in case duke3d.cfg was not found
+
+    // FIX_00011: duke3d.cfg not needed anymore to start the game. Will create a default one
+    //            if not found and use default keys.
+
+    for (i = 0; i < NUMKEYENTRIES; i++) {
+        $function = CONFIG_FunctionNameToNum(keydefaults[i].entryKey);
+        key1 = KB_StringToScanCode(keydefaults[i].keyname1);
+        key2 = KB_StringToScanCode(keydefaults[i].keyname2);
+        CONTROL_MapKey($function, key1, key2);
+    }
+
+
+    numkeyentries = SCRIPT_NumberEntries(scripthandle, "KeyDefinitions");
+
+    for (i = 0; i < numkeyentries; i++)  // i = number in which the functions appear in duke3d.cfg
+    {
+        $function = CONFIG_FunctionNameToNum(SCRIPT_Entry(scripthandle, "KeyDefinitions", i));
+        if ($function != -1)  // ensure it is in the list gamefunctions[$function]
+        {
+            memset(keyname1, 0, sizeof(keyname1));
+            memset(keyname2, 0, sizeof(keyname2));
+            SCRIPT_GetDoubleString(
+                scripthandle,
+                "KeyDefinitions",
+                SCRIPT_Entry(scripthandle, "KeyDefinitions", i),
+                keyname1,
+                keyname2
+            );
+            key1 = 0;
+            key2 = 0;
+            if (keyname1[0]) {
+                key1 = KB_StringToScanCode(keyname1);
+            }
+            if (keyname2[0]) {
+                key2 = KB_StringToScanCode(keyname2);
+            }
+            CONTROL_MapKey($function, key1, key2);
+        }
+    }
+}
+
+
+//541
+Config.readSaveNames = function () {
+    console.log("todo readSaveNames...");
+};
+
+
+//593
+Config.readSetup = function () {
+    console.log("Config.readSetup... todo");
+
+    Config.setDefaults();
+
+    scripthandle = Script.load(setupFilename);
+
+    //..
+    if(ud.mywchoice[0] == 0 && ud.mywchoice[1] == 0)
+    {
+        ud.mywchoice[0] = 3;
+        ud.mywchoice[1] = 4;
+        ud.mywchoice[2] = 5;
+        ud.mywchoice[3] = 7;
+        ud.mywchoice[4] = 8;
+        ud.mywchoice[5] = 6;
+        ud.mywchoice[6] = 0;
+        ud.mywchoice[7] = 2;
+        ud.mywchoice[8] = 9;
+        ud.mywchoice[9] = 1;
+
+        //todo:
+        //for(dummy=0;dummy<10;dummy++)
+        //{
+        //    sprintf(buf,"WeaponChoice%d",dummy);
+        //    SCRIPT_GetNumber( scripthandle, "Misc", buf, &ud.mywchoice[dummy]);
+        //}
+    }
+
+    //..
+
+    // todo: Config.readSetup
+    
+
+    CONFIG_ReadKeys();
+
+    // todo
+
 };

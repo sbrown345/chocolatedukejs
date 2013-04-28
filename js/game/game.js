@@ -124,7 +124,7 @@ function getpackets() {
     //input *osyn, *nsyn;
 
     sampletimer();
-    //if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
+    //if(qe == 0 && KB.keyPressed(sc_LeftControl) && KB.keyPressed(sc_LeftAlt) && KB.keyPressed(sc_Delete))
     //{
     //    qe = 1;
     //    gameexit("Quick Exit.");
@@ -145,7 +145,7 @@ function faketimerhandler() {
     var osyn, nsyn;
 
     ////Check if we should quit the game.
-    //todo if(qe == 0 && KB_KeyPressed(sc_LeftControl) && KB_KeyPressed(sc_LeftAlt) && KB_KeyPressed(sc_Delete))
+    //todo if(qe == 0 && KB.keyPressed(sc_LeftControl) && KB.keyPressed(sc_LeftAlt) && KB.keyPressed(sc_Delete))
     //{
     //    qe = 1;
     //    gameexit("Quick Exit.");
@@ -170,9 +170,8 @@ function faketimerhandler() {
             if (movefifoend[i] < movefifoend[myconnectindex]-200)
                 return;
 
-    if( !Console.isActive())
-    {
-        Control.getInput(myconnectindex);
+    if( !Console.isActive()) {
+        getinput(myconnectindex);
     }
 
     avgfvel += loc.fvel; // x
@@ -215,8 +214,8 @@ function faketimerhandler() {
         if (i != myconnectindex)
         {
             k = (movefifoend[myconnectindex]-1)-movefifoend[i];
-            myminlag[i] = min(myminlag[i],k);
-            mymaxlag = max(mymaxlag,k);
+            myminlag[i] = Math.min(myminlag[i], k);
+            mymaxlag = Math.max(mymaxlag,k);
         }
 
     if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
@@ -263,7 +262,7 @@ function faketimerhandler() {
 
             if (myconnectindex == connecthead)
                 for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-                    packbuf[j++] = min(max(myminlag[i],-128),127);
+                    packbuf[j++] = Math.min(Math.max(myminlag[i], -128), 127);
 
             for(i=connecthead;i>=0;i=connectpoint2[i])
                 myminlag[i] = 0x7fffffff;
@@ -400,7 +399,7 @@ function faketimerhandler() {
         {
             for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
                 if (playerquitflag[i])
-                    packbuf[j++] = min(max(myminlag[i],-128),127);
+                    packbuf[j++] = Math.min(Math.max(myminlag[i], -128), 127);
 
             for(i=connecthead;i>=0;i=connectpoint2[i])
                 myminlag[i] = 0x7fffffff;
@@ -4467,7 +4466,7 @@ function nonsharedkeys()
     //    CONTROL_GetInput( &noshareinfo );
     //}
     
-    //if( KB_KeyPressed( sc_F12 ) )
+    //if( KB.keyPressed( sc_F12 ) )
     //{
     //    KB_ClearKeyDown( sc_F12 );
     //    takescreenshot();
@@ -4563,16 +4562,16 @@ function nonsharedkeys()
     //if( SHIFTS_IS_PRESSED || ALT_IS_PRESSED )
     //{
     //    i = 0;
-    //    if( KB_KeyPressed( sc_F1) ) { KB_ClearKeyDown(sc_F1);i = 1; }
-    //    if( KB_KeyPressed( sc_F2) ) { KB_ClearKeyDown(sc_F2);i = 2; }
-    //    if( KB_KeyPressed( sc_F3) ) { KB_ClearKeyDown(sc_F3);i = 3; }
-    //    if( KB_KeyPressed( sc_F4) ) { KB_ClearKeyDown(sc_F4);i = 4; }
-    //    if( KB_KeyPressed( sc_F5) ) { KB_ClearKeyDown(sc_F5);i = 5; }
-    //    if( KB_KeyPressed( sc_F6) ) { KB_ClearKeyDown(sc_F6);i = 6; }
-    //    if( KB_KeyPressed( sc_F7) ) { KB_ClearKeyDown(sc_F7);i = 7; }
-    //    if( KB_KeyPressed( sc_F8) ) { KB_ClearKeyDown(sc_F8);i = 8; }
-    //    if( KB_KeyPressed( sc_F9) ) { KB_ClearKeyDown(sc_F9);i = 9; }
-    //    if( KB_KeyPressed( sc_F10) ) {KB_ClearKeyDown(sc_F10);i = 10; }
+    //    if( KB.keyPressed( sc_F1) ) { KB_ClearKeyDown(sc_F1);i = 1; }
+    //    if( KB.keyPressed( sc_F2) ) { KB_ClearKeyDown(sc_F2);i = 2; }
+    //    if( KB.keyPressed( sc_F3) ) { KB_ClearKeyDown(sc_F3);i = 3; }
+    //    if( KB.keyPressed( sc_F4) ) { KB_ClearKeyDown(sc_F4);i = 4; }
+    //    if( KB.keyPressed( sc_F5) ) { KB_ClearKeyDown(sc_F5);i = 5; }
+    //    if( KB.keyPressed( sc_F6) ) { KB_ClearKeyDown(sc_F6);i = 6; }
+    //    if( KB.keyPressed( sc_F7) ) { KB_ClearKeyDown(sc_F7);i = 7; }
+    //    if( KB.keyPressed( sc_F8) ) { KB_ClearKeyDown(sc_F8);i = 8; }
+    //    if( KB.keyPressed( sc_F9) ) { KB_ClearKeyDown(sc_F9);i = 9; }
+    //    if( KB.keyPressed( sc_F10) ) {KB_ClearKeyDown(sc_F10);i = 10; }
 
     //    if(i)
     //    {
@@ -4667,7 +4666,7 @@ function nonsharedkeys()
     //        inputloc = 0;
     //    }
 
-    //    if( KB_KeyPressed(sc_F1) || ( ud.show_help && ( KB_KeyPressed(sc_Space) || KB_KeyPressed(sc_Enter) || KB_KeyPressed(sc_kpad_Enter) ) ) )
+    //    if( KB.keyPressed(sc_F1) || ( ud.show_help && ( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) ) ) )
     //    {
     //        KB_ClearKeyDown(sc_F1);
     //        KB_ClearKeyDown(sc_Space);
@@ -4694,7 +4693,7 @@ function nonsharedkeys()
 
     //    //        if(ud.multimode < 2)
     //    {
-    //        if(ud.recstat != 2 && KB_KeyPressed( sc_F2 ) )
+    //        if(ud.recstat != 2 && KB.keyPressed( sc_F2 ) )
     //        {
     //            KB_ClearKeyDown( sc_F2 );
 
@@ -4726,7 +4725,7 @@ function nonsharedkeys()
     //            }
     //        }
 
-    //        if(KB_KeyPressed( sc_F3 ))
+    //        if(KB.keyPressed( sc_F3 ))
     //        {
     //            KB_ClearKeyDown( sc_F3 );
 
@@ -4748,7 +4747,7 @@ function nonsharedkeys()
     //        }
     //    }
 
-    //    if(KB_KeyPressed( sc_F4 ) && FXDevice != NumSoundCards )
+    //    if(KB.keyPressed( sc_F4 ) && FXDevice != NumSoundCards )
     //    {
     //        KB_ClearKeyDown( sc_F4 );
     //        FX_StopAllSounds();
@@ -4764,7 +4763,7 @@ function nonsharedkeys()
 
     //    }
 
-    //    if( KB_KeyPressed( sc_F6 ) && (ps[myconnectindex].gm&MODE_GAME))
+    //    if( KB.keyPressed( sc_F6 ) && (ps[myconnectindex].gm&MODE_GAME))
     //    {
     //        KB_ClearKeyDown( sc_F6 );
 
@@ -4802,7 +4801,7 @@ function nonsharedkeys()
     //        }
     //    }
 
-    //    if(KB_KeyPressed( sc_F7 ) )
+    //    if(KB.keyPressed( sc_F7 ) )
     //    {
     //        KB_ClearKeyDown(sc_F7);
     //        if( ps[myconnectindex].over_shoulder_on )
@@ -4816,7 +4815,7 @@ function nonsharedkeys()
     //        FTA(109+ps[myconnectindex].over_shoulder_on,ps[myconnectindex],1);
     //    }
 
-    //    if( KB_KeyPressed( sc_F5 ) && MusicDevice != NumSoundCards )
+    //    if( KB.keyPressed( sc_F5 ) && MusicDevice != NumSoundCards )
     //    {
     //        KB_ClearKeyDown( sc_F5 );
     //        strcpy(text,&music_fn[0][music_select][0]);
@@ -4826,14 +4825,14 @@ function nonsharedkeys()
 
     //    }
 
-    //    if(KB_KeyPressed( sc_F8 ))
+    //    if(KB.keyPressed( sc_F8 ))
     //    {
     //        KB_ClearKeyDown( sc_F8 );
     //        ud.fta_on = !ud.fta_on;
     //        FTA(24-ud.fta_on,ps[myconnectindex],1);
     //    }
 
-    //    if(KB_KeyPressed( sc_F9 ) && (ps[myconnectindex].gm&MODE_GAME) )
+    //    if(KB.keyPressed( sc_F9 ) && (ps[myconnectindex].gm&MODE_GAME) )
     //    {
     //        KB_ClearKeyDown( sc_F9 );
 
@@ -4852,7 +4851,7 @@ function nonsharedkeys()
     //        }
     //    }
 
-    //    if(KB_KeyPressed( sc_F10 ))
+    //    if(KB.keyPressed( sc_F10 ))
     //    {
     //        KB_ClearKeyDown( sc_F10 );
     //        cmenu(500);
@@ -4918,7 +4917,7 @@ function nonsharedkeys()
     //    vscrn();
     //}
 
-    //if(KB_KeyPressed( sc_F11 ))
+    //if(KB.keyPressed( sc_F11 ))
     //{
     //    KB_ClearKeyDown( sc_F11 );
     //    // FIX_00030: Brightness step was not the same from the keys vs menu 
@@ -5268,7 +5267,7 @@ function main(argc, argv) {
 
     setBrightness(ud.brightness >> 2, ps[myconnectindex].palette);
 
-    // todo:   if(KB_KeyPressed( sc_Escape ) )  
+    // todo:   if(KB.keyPressed( sc_Escape ) )  
     //gameexit(" ");
 
     FX.stopAllSounds();

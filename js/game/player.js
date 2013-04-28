@@ -2,6 +2,9 @@
 
 var Player = {};
 
+var turnheldtime = 0;
+var lastcontroltime = 0;
+
 //34
 Player.setPal = setpal;
 function setpal(p) {
@@ -1781,6 +1784,313 @@ function displayweapon(snum) {
 
     displayloogie(snum);
 
+}
+
+//1787
+var TURBOTURNTIME = (TICRATE / 8) | 0; // 7
+var NORMALTURN = 15;
+var PREAMBLETURN = 5;
+var NORMALKEYMOVE = 40;
+var MAXVEL = ((NORMALKEYMOVE * 2) + 10);
+var MAXSVEL = ((NORMALKEYMOVE * 2) + 10);
+var MAXANGVEL = 127;
+var MAXHORIZ = 127;
+
+var myaimmode = 0, myaimstat = 0, omyaimstat = 0;
+
+function getinput(snum) {
+    var j, daang;
+    // MED
+    var info = new ControlInfo();
+    var tics;
+    var running;
+    var turnamount;
+    var keymove;
+    var momx, momy;
+    var p;
+
+    // FIX_00038: Improved Mouse accuracy (losses of integer computation)    
+    var previousInfoDyaw = 0;
+    var previousInfoDpitch = 0;
+    var previousInfoDyawSvel = 0;
+
+    momx = momy = 0;
+    p = ps[snum];
+
+    Control.getInput(info);
+
+    // FIX_00021: Duke was moving when moving the mouse up/down. Y axis move is disabled.
+    info.dz = 0; // remove y axis
+
+    if ((p.gm & MODE_MENU) || (p.gm & MODE_TYPE) || (ud.pause_on && !KB.keyPressed(sc_Pause))) {
+        loc.fvel = vel = 0;
+        loc.svel = svel = 0;
+        loc.avel = angvel = 0;
+        loc.horz = horiz = 0;
+        loc.bits = ((gamequit) << 26);
+        info.dz = info.dyaw = 0;
+        return;
+    }
+
+    tics = totalclock - lastcontroltime;
+    lastcontroltime = totalclock;
+
+
+    if (MouseAiming)
+        myaimmode = ACTION(gamefunc_Mouse_Aiming); // mouse aiming button is temporary
+    else {		// mouse aiming button is a toggle
+        omyaimstat = myaimstat; myaimstat = ACTION(gamefunc_Mouse_Aiming);
+        if (myaimstat > omyaimstat) {
+            myaimmode ^= 1;
+            FTA(44 + myaimmode, p, 1);
+        }
+    }
+
+    // FIX_00039: Toggle autoaim between Normal (full) and partial (on bullet weapons only)
+    if (ACTION(gamefunc_Auto_Aim) && nHostForceDisableAutoaim == 0) {
+        ud.auto_aim++;
+        ud.auto_aim = ((ud.auto_aim - 1) % 2) + 1;
+        fta_quotes[103] = "AUTOAIM " + ud.auto_aim ? (ud.auto_aim == 1) ? "BULLET ONLY" : "NORMAL (FULL)" : "OFF";
+        vscrn();	// FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
+        // This is because we use the same FTA for BULLET and NORMAL text: duke doesn't see we 
+        // changed the text and doesnt issue a refresh 
+        FTA(103, ps[screenpeek], 1); // Originally reserved for "screen saved". Now used dynamically. 
+        CONTROL_ClearAction(gamefunc_Auto_Aim);
+    }
+
+    if (multiflag == 1) {
+        loc.bits = 1 << 17;
+        loc.bits |= multiwhat << 18;
+        loc.bits |= multipos << 19;
+        multiflag = 0;
+        return;
+    }
+
+    loc.bits = ACTION(gamefunc_Jump);
+    loc.bits |= ACTION(gamefunc_Crouch) << 1;
+    loc.bits |= ACTION(gamefunc_Fire) << 2;
+    loc.bits |= ACTION(gamefunc_Aim_Up) << 3;
+    loc.bits |= ACTION(gamefunc_Aim_Down) << 4;
+    loc.bits |= ACTION(gamefunc_Run) << 5;
+    loc.bits |= (ud.auto_aim == 2) << 6; // 2 = normal, 1 = bullet only, 0 = disabled (not implemented)
+    loc.bits |= ud.weaponautoswitch << 7;
+
+    j = 0;
+    if (ACTION(gamefunc_Weapon_1))
+        j = 1;
+    if (ACTION(gamefunc_Weapon_2))
+        j = 2;
+    if (ACTION(gamefunc_Weapon_3))
+        j = 3;
+    if (ACTION(gamefunc_Weapon_4))
+        j = 4;
+    if (ACTION(gamefunc_Weapon_5))
+        j = 5;
+    if (ACTION(gamefunc_Weapon_6))
+        j = 6;
+
+    if (ACTION(gamefunc_Previous_Weapon))
+        j = 11;
+    if (ACTION(gamefunc_Next_Weapon))
+        j = 12;
+
+    if (!VOLUMEONE) {
+        if (ACTION(gamefunc_Weapon_7))
+            j = 7;
+        if (ACTION(gamefunc_Weapon_8))
+            j = 8;
+        if (ACTION(gamefunc_Weapon_9))
+            j = 9;
+        if (ACTION(gamefunc_Weapon_10))
+            j = 10;
+    }
+
+    loc.bits |= j << 8;
+    loc.bits |= ACTION(gamefunc_Steroids) << 12;
+    loc.bits |= ACTION(gamefunc_Look_Up) << 13;
+    loc.bits |= ACTION(gamefunc_Look_Down) << 14;
+    loc.bits |= ACTION(gamefunc_NightVision) << 15;
+    if (ud.gitdat_mdk) {
+        if (sprite[ps[myconnectindex].i].extra < max_player_health && ps[myconnectindex].firstaid_amount) // avoid medkit overloading controls
+            loc.bits |= ACTION(gamefunc_MedKit) << 16;
+    }
+    else {
+        loc.bits |= ACTION(gamefunc_MedKit) << 16;
+    }
+    loc.bits |= ACTION(gamefunc_Center_View) << 18;
+    loc.bits |= ACTION(gamefunc_Holster_Weapon) << 19;
+    if (ACTION(gamefunc_Hide_Weapon)) {
+        ud.hideweapon = !ud.hideweapon;
+        vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
+        CONTROL_ClearAction(gamefunc_Hide_Weapon);
+    }
+    loc.bits |= ACTION(gamefunc_Inventory_Left) << 20;
+    loc.bits |= KB.keyPressed(sc_Pause) << 21;
+    loc.bits |= ACTION(gamefunc_Quick_Kick) << 22;
+    loc.bits |= myaimmode << 23;
+    loc.bits |= ACTION(gamefunc_Holo_Duke) << 24;
+    loc.bits |= ACTION(gamefunc_Jetpack) << 25;
+    loc.bits |= (gamequit << 26);
+    loc.bits |= ACTION(gamefunc_Inventory_Right) << 27;
+    loc.bits |= ACTION(gamefunc_TurnAround) << 28;
+    loc.bits |= ACTION(gamefunc_Open) << 29;
+    loc.bits |= ACTION(gamefunc_Inventory) << 30;
+    loc.bits |= KB.keyPressed(sc_Escape) << 31;
+
+    running = ACTION(gamefunc_Run) | ud.auto_run;
+    svel = vel = angvel = horiz = 0;
+
+    if (CONTROL_JoystickEnabled) {
+        if (running) {
+            info.dz *= 2;
+        }
+    }
+
+    if (ACTION(gamefunc_Strafe)) {
+        svel = -(info.dyaw + previousInfoDyawSvel) / 8;
+    }
+    else {
+        angvel = (info.dyaw + previousInfoDyaw) / 64;
+    }
+
+    previousInfoDyaw = (previousInfoDyaw + info.dyaw) % 64; // % xduke: dont waste mouse tics
+    previousInfoDyawSvel = (previousInfoDyawSvel + info.dyaw) % 8;
+
+    // svel -= info.dx;
+    svel = -info.dx >> 6; // This helps the analog feel a bit.
+
+    vel = -info.dz >> 6;
+
+    // Account for which mode we're in. (1, 2 or 7)
+    switch (ControllerType) {
+        case controltype.keyboardandjoystick:
+
+        case controltype.joystickandmouse:
+
+            if (CONTROL_JoystickEnabled) {
+                if (ud.mouseflip) {
+                    horiz = -(info.dpitch + previousInfoDpitch) / (314 - 128);
+                }
+                else {
+                    horiz = (info.dpitch + previousInfoDpitch) / (314 - 128);
+                }
+                horiz = (horiz >= 0) ? horiz + 1 : horiz; // xduke: fix assymetry (speed of 2 is like -1)
+                previousInfoDpitch = (previousInfoDpitch + info.dpitch) % (314 - 128);
+                info.dpitch = 0;
+            }
+            break;
+
+        default:
+            // If Mouse aim active
+            if (myaimmode) {
+                //
+                //
+                if (ud.mouseflip) {
+                    horiz = -(info.dpitch + previousInfoDpitch) / (314 - 128);
+                }
+                else {
+                    horiz = (info.dpitch + previousInfoDpitch) / (314 - 128);
+                }
+                horiz = (horiz >= 0) ? horiz + 1 : horiz; // xduke: fix assymetry (speed of 2 is like -1)
+                previousInfoDpitch = (previousInfoDpitch + info.dpitch) % (314 - 128);
+                info.dpitch = 0;
+            }
+            break;
+    }
+
+
+
+    if (running) {
+        turnamount = NORMALTURN << 1;
+        keymove = NORMALKEYMOVE << 1;
+    }
+    else {
+        turnamount = NORMALTURN;
+        keymove = NORMALKEYMOVE;
+    }
+
+    if (ACTION(gamefunc_Strafe)) {
+        if (ACTION(gamefunc_Turn_Left)) {
+            svel -= -keymove;
+        }
+        if (ACTION(gamefunc_Turn_Right)) {
+            svel -= keymove;
+        }
+    }
+    else {
+        if (ACTION(gamefunc_Turn_Left)) {
+            turnheldtime += tics;
+            if (turnheldtime >= TURBOTURNTIME) {
+                angvel -= turnamount;
+            }
+            else {
+                angvel -= PREAMBLETURN;
+            }
+        }
+        else if (ACTION(gamefunc_Turn_Right)) {
+            turnheldtime += tics;
+            if (turnheldtime >= TURBOTURNTIME) {
+                angvel += turnamount;
+            }
+            else {
+                angvel += PREAMBLETURN;
+            }
+        }
+        else {
+            turnheldtime = 0;
+        }
+    }
+
+    if (ACTION(gamefunc_Strafe_Left))
+        svel += keymove;
+
+    if (ACTION(gamefunc_Strafe_Right))
+        svel += -keymove;
+
+    if (ACTION(gamefunc_Move_Forward))
+        vel += keymove;
+
+    if (ACTION(gamefunc_Move_Backward))
+        vel += -keymove;
+
+    if (vel < -MAXVEL) vel = -MAXVEL;
+    if (vel > MAXVEL) vel = MAXVEL;
+    if (svel < -MAXSVEL) svel = -MAXSVEL;
+    if (svel > MAXSVEL) svel = MAXSVEL;
+    if (angvel < -MAXANGVEL) angvel = -MAXANGVEL;
+    if (angvel > MAXANGVEL) angvel = MAXANGVEL;
+    if (horiz < -MAXHORIZ) horiz = -MAXHORIZ;
+    if (horiz > MAXHORIZ) horiz = MAXHORIZ;
+
+    if (ud.scrollmode && ud.overhead_on) {
+        ud.folfvel = vel;
+        ud.folavel = angvel;
+        loc.fvel = 0;
+        loc.svel = 0;
+        loc.avel = 0;
+        loc.horz = 0;
+        return;
+    }
+
+    if (numplayers > 1)
+        daang = myang;
+    else daang = p.ang;
+
+    momx = mulscale9(vel, sintable[(daang + 2560) & 2047]);
+    momy = mulscale9(vel, sintable[(daang + 2048) & 2047]);
+
+    momx += mulscale9(svel, sintable[(daang + 2048) & 2047]);
+    momy += mulscale9(svel, sintable[(daang + 1536) & 2047]);
+
+    momx += fricxv;
+    momy += fricyv;
+
+    loc.fvel = momx;
+    loc.svel = momy;
+    loc.avel = angvel;
+    //	if(loc.avel)
+    //		printf("getinput loc.avel=%d\n", loc.avel);
+    loc.horz = horiz;
 }
 
 //2131
