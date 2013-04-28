@@ -147,8 +147,8 @@ window.addEventListener("keydown", function (e) {
     sdl_key_filter(e, false);
 });
 
-window.addEventListener("keyup", function(e) {
-    sdl_key_filter(e, true);
+window.addEventListener("keyup", function (e) {
+    //sdl_key_filter(e, true);
 });
 
 // "Macros"

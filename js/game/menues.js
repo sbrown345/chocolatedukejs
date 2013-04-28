@@ -2,7 +2,7 @@
 
 var probey = 0, lastprobey = 0, last_menu, globalskillsound = -1;
 var sh, onbar, buttonstat = 0, deletespot;
-var last_zero, last_fifty, last_threehundred = 0;
+var last_zero = 0, last_fifty = 0, last_threehundred = 0;
 //var fileselect = 1, menunamecnt;
 //var  menuname[256][17];
 
