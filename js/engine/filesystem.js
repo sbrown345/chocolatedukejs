@@ -402,12 +402,16 @@ function crc16(array, data_p, length) {
 var fileType = { SYSTEM_FILE: 0, GRP_FILE: 1 };
 
 function OpenFile() {
+    this.clear();
+}
+
+OpenFile.prototype.clear = function() {
     this.type = 0;
     this.fd = 0; //Either the fileDescriptor or the fileIndex in a GRP depending on the type.
     this.cursor = 0; //lseek cursor
     this.grpID = 0; //GRP id
     this.used = 0; //Marker 1=used
-}
+};
 
 var MAXOPENFILES = 64;
 var openFiles = structArray(OpenFile, MAXOPENFILES);
@@ -616,7 +620,7 @@ function kclose(handle) {
         throw new Error("Invalide handle. Unrecoverable error.");
     }
 
-    openFiles[handle] = new OpenFile();
+    openFiles[handle].clear();
 }
 
 //474
