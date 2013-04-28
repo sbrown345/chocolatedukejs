@@ -494,8 +494,6 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
         //vplce[i] += vince[i];
         //}
 
-        // more ideas: use subarray instead of destPosition + 
-        //             use bufplce0, bufplce1, vplce0, vplce1 etc
         destArray[destPosition + index] = pa0[paPos0 + texture[bufplce0 + ((vplce0) >>> mach3_al)]];
         vplce0 += vince0;
 
@@ -800,6 +798,8 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         return;
 
     //printf("slopevlinCount: %i\n", slopevlinCount);
+    var palookupGlobalpal = palookup[globalpal];
+    var frameplaceArray = frameplace.array;
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
@@ -829,7 +829,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
         ebx = esi;
         edx = edi;
         //printf("doCount: %i b4 while edx: %u, ebx: %u, ecx: %u\n", doCount, edx, ebx, ecx);
-        while ((ecx & 0xff))
+        for (; ecx & 0xff ;)
         {
             ebx >>>= slopemach_ah2;
             esi += ecx;
@@ -843,12 +843,12 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             //printf("i3.position: %i, ebx: %u\n", i3.position, ebx);
             i3.position-=4;
             //printf("1doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
-            eax = ((eax & 0xffffff00) | palookup[globalpal][edx + ebx]);
+            eax = ((eax & 0xffffff00) | palookupGlobalpal[edx + ebx]);
             //printf("2doCount: %i, whileCount: %i, eax %u\n", doCount, whileCount, eax);
             ebx = esi;
 
             //if (pixelsAllowed-- > 0) {
-                frameplace.array[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
+            frameplaceArray[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
                 //if (flatColor) frameplace.array[i1] = 44;
                 //printf("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
                 wrote++;
