@@ -8,7 +8,7 @@ function SCRIPT_findinchildren (parent, s)
 {
     var cur = parent;
 
-    if (cur == null) return null;
+    if (cur == null) return null; //todo:  check these nulls, it was NULL which is 0
     cur = cur.child;
     if (cur == null) return null;
     while (cur != null)

@@ -1037,6 +1037,40 @@ function operatemasterswitches(low) {
     }
 }
 
+//1131
+function operateforcefields( s,  low)
+{
+    var i, p;
+
+    for(p=numanimwalls;p>=0;p--)
+    {
+        i = animwall[p].wallnum;
+
+        if(low == wall[i].lotag || low == -1)
+            switch(wall[i].overpicnum)
+        {
+            case W_FORCEFIELD  :
+            case W_FORCEFIELD+1:
+            case W_FORCEFIELD+2:
+            case BIGFORCE:
+
+                animwall[p].tag = 0;
+
+                if( wall[i].cstat )
+                {
+                    wall[i].cstat   = 0;
+
+                    if( s >= 0 && sprite[s].picnum == SECTOREFFECTOR &&
+                        sprite[s].lotag == 30)
+                            wall[i].lotag = 0;
+                }
+                else
+                    wall[i].cstat = 85;
+                break;
+        }
+    }
+}
+
 //1165
 function checkhitswitch(snum,w,switchtype)
 {

@@ -172,37 +172,38 @@ function CONFIG_ReadKeys() {
         $function = CONFIG_FunctionNameToNum(keydefaults[i].entryKey);
         key1 = KB_StringToScanCode(keydefaults[i].keyname1);
         key2 = KB_StringToScanCode(keydefaults[i].keyname2);
+        console.log($function, keydefaults[i].keyname1, key1, keydefaults[i].keyname2,key2)
         CONTROL_MapKey($function, key1, key2);
     }
 
 
-    //numkeyentries = SCRIPT_NumberEntries(scripthandle, "KeyDefinitions");
+    numkeyentries = SCRIPT_NumberEntries(scripthandle, "KeyDefinitions");
 
-    //for (i = 0; i < numkeyentries; i++)  // i = number in which the functions appear in duke3d.cfg
-    //{
-    //    $function = CONFIG_FunctionNameToNum(SCRIPT_Entry(scripthandle, "KeyDefinitions", i));
-    //    if ($function != -1)  // ensure it is in the list gamefunctions[$function]
-    //    {
-    //        memset(keyname1, 0, sizeof(keyname1));
-    //        memset(keyname2, 0, sizeof(keyname2));
-    //        SCRIPT_GetDoubleString(
-    //            scripthandle,
-    //            "KeyDefinitions",
-    //            SCRIPT_Entry(scripthandle, "KeyDefinitions", i),
-    //            keyname1,
-    //            keyname2
-    //        );
-    //        key1 = 0;
-    //        key2 = 0;
-    //        if (keyname1[0]) {
-    //            key1 = KB_StringToScanCode(keyname1);
-    //        }
-    //        if (keyname2[0]) {
-    //            key2 = KB_StringToScanCode(keyname2);
-    //        }
-    //        CONTROL_MapKey($function, key1, key2);
-    //    }
-    //}
+    for (i = 0; i < numkeyentries; i++)  // i = number in which the functions appear in duke3d.cfg
+    {
+        $function = CONFIG_FunctionNameToNum(SCRIPT_Entry(scripthandle, "KeyDefinitions", i));
+        if ($function != -1)  // ensure it is in the list gamefunctions[$function]
+        {
+            memset(keyname1, 0, sizeof(keyname1));
+            memset(keyname2, 0, sizeof(keyname2));
+            SCRIPT_GetDoubleString(
+                scripthandle,
+                "KeyDefinitions",
+                SCRIPT_Entry(scripthandle, "KeyDefinitions", i),
+                keyname1,
+                keyname2
+            );
+            key1 = 0;
+            key2 = 0;
+            if (keyname1[0]) {
+                key1 = KB_StringToScanCode(keyname1);
+            }
+            if (keyname2[0]) {
+                key2 = KB_StringToScanCode(keyname2);
+            }
+            CONTROL_MapKey($function, key1, key2);
+        }
+    }
 }
 
 

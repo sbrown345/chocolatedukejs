@@ -216,7 +216,7 @@ function go_to_new_vid_mode(screenMode) {
 
 //454
 function sdl_key_filter(event) {
-    console.log("sdl_key_filter", event)
+    //console.log("sdl_key_filter", event)
 //    var extended;
 
 //    if ( (event.key.keysym.sym == SDLK_m) &&

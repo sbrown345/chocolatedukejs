@@ -45,7 +45,7 @@ function ACTION(i) {
     if ((KB.keyDown[KeyMapping[i].key1]) ||
 		(KB.keyDown[KeyMapping[i].key2])
 	  ) {
-        console.log("ACTION", i, KeyMapping[i])
+        //console.log("ACTION", i, KeyMapping[i])
         return 1;
     }
     
@@ -68,9 +68,9 @@ function CONTROL_MapKey(which, key1, key2)
 		else
 			key2=0;
 
-		printf("Discarding ESCAPE key for function : %s\n", gamefunctions[which]);
+		console.log("Discarding ESCAPE key for function : %s", gamefunctions[which]);
 	}
-
+    
 	if(key1 || key2)
 		KeyMapping[which].key_active = true;
 	else 
