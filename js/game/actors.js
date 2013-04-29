@@ -1961,7 +1961,7 @@ function movestandables()
 
                 if( x < 2048 )
                 {
-                    if( SP == 1 )
+                    if (sprite[i].yvel == 1)
                         camsprite = i;
                 }
                 else if( camsprite != -1 && hittype[i].temp_data[0] == 1)

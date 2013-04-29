@@ -7629,6 +7629,8 @@ function clearView(dacol) {
     faketimerhandler();
 }
 
+
+//9258
 /* MUST USE RESTOREFORDRAWROOMS AFTER DRAWING */
 var setviewcnt = 0;
 var bakvidoption = new Int32Array(4);
@@ -7638,25 +7640,24 @@ var bakwindowx1 = new Int32Array(4), bakwindowy1 = new Int32Array(4);
 var bakwindowx2 = new Int32Array(4), bakwindowy2 = new Int32Array(4);
 
 function setviewback() {
-    console.log("todo setviewback");
-    //var i, j, k;
+    var i, j, k;
 
-    //if (setviewcnt <= 0) return;
-    //setviewcnt--;
+    if (setviewcnt <= 0) return;
+    setviewcnt--;
 
-    //setview(bakwindowx1[setviewcnt],bakwindowy1[setviewcnt],
-    //        bakwindowx2[setviewcnt],bakwindowy2[setviewcnt]);
-    //copybufbyte(&bakumost[windowx1],&startumost[windowx1],(windowx2-windowx1+1)*sizeof(startumost[0]));
-    //copybufbyte(&bakdmost[windowx1],&startdmost[windowx1],(windowx2-windowx1+1)*sizeof(startdmost[0]));
-    //vidoption = bakvidoption[setviewcnt];
-    //frameplace = bakframeplace[setviewcnt];
-    //if (setviewcnt == 0)
-    //    k = bakxsiz[0];
-    //else
-    //    k = Math.max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
-    //j = 0;
-    //for(i=0; i<=k; i++) ylookup[i] = j, j += bytesperline;
-    //setBytesPerLine(bytesperline);
+    setview(bakwindowx1[setviewcnt],bakwindowy1[setviewcnt],
+            bakwindowx2[setviewcnt],bakwindowy2[setviewcnt]);
+    copybufbyte(bakumost, windowx1, startumost, windowx1, (windowx2 - windowx1 + 1) * 2);
+    copybufbyte(bakdmost, windowx1, startdmost, windowx1, (windowx2 - windowx1 + 1) * 2);
+    vidoption = bakvidoption[setviewcnt];
+    frameplace.position = bakframeplace[setviewcnt]; //todo check this line
+    if (setviewcnt == 0)
+        k = bakxsiz[0];
+    else
+        k = Math.max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
+    j = 0;
+    for(i=0; i<=k; i++) ylookup[i] = j, j += bytesperline;
+    setBytesPerLine(bytesperline);
 }
 
 
@@ -7701,6 +7702,61 @@ function getflorzofslope(sectnum, dax, day) {
     return (sector[sectnum].floorz + scale(sector[sectnum].floorheinum, j, i));
 }
 
+//9293
+function preparemirror(dax, day, daz,
+    daang, dahoriz, dawall,
+    dasector, tposx, tposy, tang) {
+    console.assert(tposx instanceof Ref);
+    console.assert(tposy instanceof Ref);
+    console.assert(tang instanceof Ref);
+
+    var i, j, x, y, dx, dy;
+
+    x = wall[dawall].x;
+    dx = wall[wall[dawall].point2].x - x;
+    y = wall[dawall].y;
+    dy = wall[wall[dawall].point2].y - y;
+    j = dx * dx + dy * dy;
+    if (j == 0) return;
+    i = (((dax - x) * dx + (day - y) * dy) << 1);
+    tposx.$ = (x << 1) + scale(dx, i, j) - dax;
+    tposy.$ = (y << 1) + scale(dy, i, j) - day;
+    tang.$ = (((getangle(dx, dy) << 1) - daang) & 2047);
+
+    inpreparemirror = 1;
+}
+
+
+function completemirror() {
+    var i, dy, p;
+
+    /* Can't reverse with uninitialized data */
+    if (inpreparemirror) {
+        inpreparemirror = 0;
+        return;
+    }
+    if (mirrorsx1 > 0) mirrorsx1--;
+    if (mirrorsx2 < windowx2-windowx1-1) mirrorsx2++;
+    if (mirrorsx2 < mirrorsx1) return;
+
+    transarea += (mirrorsx2-mirrorsx1)*(windowy2-windowy1);
+
+    p = new PointerHelper(frameplace, ylookup[windowy1 + mirrorsy1] + windowx1 + mirrorsx1);
+    i = windowx2-windowx1-mirrorsx2-mirrorsx1;
+    mirrorsx2 -= mirrorsx1;
+    // FIX_00085: Optimized Video driver. FPS increases by +20%.
+    for(dy=mirrorsy2-mirrorsy1-1; dy>=0; dy--)
+    {
+        copybufbyte(p.array, p.position, tempbuf, 0, mirrorsx2 + 1);
+        tempbuf[mirrorsx2] = tempbuf[mirrorsx2-1];
+        copybufreverse(tempbuf, mirrorsx2, p, p.position + i, mirrorsx2 + 1);
+        p.position += ylookup[1];
+        faketimerhandler();
+    }
+}
+
+
+//9408
 /*
  FCS:
  

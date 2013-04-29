@@ -155,6 +155,25 @@ function copybufbyte(s, sPos, d, dPos, c) {
     }
 }
 
+function copybufreverse(s, sPos, d,  dPos, c)
+{
+    if (arguments.length != 5) throw "arg error";
+    sPos = sPos * s.BYTES_PER_ELEMENT;
+    dPos = dPos * d.BYTES_PER_ELEMENT;
+    var p = new PointerHelper(s, sPos), q = new PointerHelper(d, dPos);
+    while ((c--) > 0) {
+        q.setByte(p.getByte());
+        q.position++;
+        p.position--;
+    }
+}
+
+//void copybufreverse(void *S, void *D, int32_t c)
+//{
+//	uint8_t  *p = (uint8_t *)S, *q = (uint8_t *)D;
+//	while((c--) > 0) 
+//		*(q++) = *(p--);
+//}
 
 function qinterpolatedown16(buffer, bufferOffset, num, val, add) {
     printf("qinterpolatedown16 num: %i, val: %i, numadd: %i\n", num, val, add);

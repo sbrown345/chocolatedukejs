@@ -197,7 +197,7 @@ window.onkeydown = function (e) {
 window.onkeyup = function (e) {
     lastEvent = null;
     heldKeys[e.keyCode] = false;
-    console.log("keyup", e.keyCode);
+    //console.log("keyup", e.keyCode);
     events.push({ type: SDL_KEYUP, key: { type: SDL_KEYUP, keyCode: e.keyCode, state: SDL_RELEASED } });
     //sdl_key_filter(e, true);
 };

@@ -45,6 +45,7 @@ function ACTION(i) {
     if ((KB.keyDown[KeyMapping[i].key1]) ||
 		(KB.keyDown[KeyMapping[i].key2])
 	  ) {
+        console.log("ACTION", i, KeyMapping[i])
         return 1;
     }
     
@@ -89,6 +90,20 @@ Control.getInput = function(info) {
 Control.getMouseSensitivity_Y = function() {
     return mouseSensitivity_Y;
 };
+
+function CONTROL_ClearAction( whichbutton )
+{
+	KB.keyDown[KeyMapping[whichbutton].key1] = 0;
+    KB.keyDown[KeyMapping[whichbutton].key2] = 0;
+
+
+    //TODO!
+    ////RESJOYBUTTON(whichbutton);
+    ////RESHATBUTTON(whichbutton);
+	
+    ////RESMOUSEDIGITALAXIS(whichbutton);
+}
+
 
 //743
 Control.startup = function () {

@@ -51,6 +51,49 @@ function callsound(sn,whatsprite)
 }
 
 
+function check_activator_motion( lotag )
+{
+    var i, j;
+    var s;
+
+    i = headspritestat[8];
+    while ( i >= 0 )
+    {
+        if ( sprite[i].lotag == lotag )
+        {
+            s = sprite[i];
+
+            for ( j = animatecnt-1; j >= 0; j-- )
+                if ( s.sectnum == animatesect[j] )
+                    return( 1 );
+
+            j = headspritestat[3];
+            while ( j >= 0 )
+            {
+                if(s.sectnum == sprite[j].sectnum)
+                    switch(sprite[j].lotag)
+                    {
+                        case 11:
+                        case 30:
+                            if ( hittype[j].temp_data[4] )
+                                return( 1 );
+                            break;
+                        case 20:
+                        case 31:
+                        case 32:
+                        case 18:
+                            if ( hittype[j].temp_data[0] )
+                                return( 1 );
+                            break;
+                    }
+
+                j = nextspritestat[j];
+            }
+        }
+        i = nextspritestat[i];
+    }
+    return( 0 );
+}
 //124
 function isadoorwall(dapic) {
     switch (dapic) {
@@ -863,6 +906,29 @@ function operatesectors(sn,ii)
     }
 }
 
+
+//1000
+function operaterespawns(low) {
+    var i, j, nexti;
+
+    i = headspritestat[11];
+    while (i >= 0) {
+        nexti = nextspritestat[i];
+        if (sprite[i].lotag == low) switch (sprite[i].picnum) {
+            case RESPAWN:
+                if (badguypic(sprite[i].hitag) && ud.monsters_off) break;
+
+                j = spawn(i, TRANSPORTERSTAR);
+                sprite[j].z -= (32 << 8);
+
+                sprite[i].extra = 66 - 12;   // Just a way to killit
+                break;
+        }
+        i = nexti;
+    }
+}
+
+
 //1023
 
 function operateactivators(low,snum)
@@ -958,26 +1024,16 @@ function operateactivators(low,snum)
     operaterespawns(low);
 }
 
-function operaterespawns(low)
-{
-    var i, j, nexti;
+//1116
+function operatemasterswitches(low) {
+    var i;
 
-    i = headspritestat[11];
+    i = headspritestat[6];
     while(i >= 0)
     {
-        nexti = nextspritestat[i];
-        if(sprite[i].lotag == low) switch(sprite[i].picnum)
-        {
-            case RESPAWN:
-                if( badguypic(sprite[i].hitag) && ud.monsters_off ) break;
-
-                j = spawn(i,TRANSPORTERSTAR);
-                sprite[j].z -= (32<<8);
-
-                sprite[i].extra = 66-12;   // Just a way to killit
-                break;
-        }
-        i = nexti;
+        if( sprite[i].picnum == MASTERSWITCH && sprite[i].lotag == low && sprite[i].yvel == 0 )
+            sprite[i].yvel = 1;
+        i = nextspritestat[i];
     }
 }
 

@@ -52,6 +52,19 @@ function incur_damage(p) {
     }
 }
 
+//95
+function forceplayerangle(p)
+{
+    var n;
+
+    n = 128-(TRAND&255);
+
+    p.horiz += 64;
+    p.return_to_center = 9;
+    p.look_ang = n>>1;
+    p.rotscrnang = n>>1;
+}
+
 //107
 
 function tracers( x1, y1, z1, x2, y2, z2, n) {

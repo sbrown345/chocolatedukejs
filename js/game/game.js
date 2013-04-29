@@ -982,6 +982,79 @@ function display_boardfilename_FPS_weapon(offx, offy, stepx, stepy)
     }
 }
 
+//1830
+
+// FIX_00026: Weapon can now be hidden (on your screen only).
+function drawsmallweapon( weapon,  scale,  x,  y)
+{
+	var t = 60000.0;
+	var s=0;
+	var offsetx=0, offsety=0;
+
+
+	switch(weapon)
+	{	
+	case  KNEE_WEAPON			: s=0;					break;
+	case  PISTOL_WEAPON			: s=FIRSTGUNSPRITE;
+		offsetx = 8;
+		offsety = 7;
+		break;
+	case  SHOTGUN_WEAPON		: s=SHOTGUNSPRITE;
+		t = 45000;
+		offsetx = -1;
+		offsety = 9;
+		break;
+	case  CHAINGUN_WEAPON		: s=CHAINGUNSPRITE;  	
+		t = 45000;
+		offsetx = -1;
+		offsety = 9;
+		break;
+	case  RPG_WEAPON			: s=RPGSPRITE;
+		t = 45000;
+		offsetx = 4;
+		offsety = 9;
+		break;
+	case  HANDBOMB_WEAPON		: s=HEAVYHBOMB;	
+		t=20000;
+		offsetx = 16;
+		offsety = 13;
+		break;
+	case  SHRINKER_WEAPON		: s=SHRINKERSPRITE;		
+		t = 30000;
+		offsetx = 6;
+		offsety = 14;
+		break;
+	case  DEVISTATOR_WEAPON		: s=DEVISTATORSPRITE;
+		t = 45000;
+		offsetx = 3;
+		offsety = 9;
+		break;
+	case  TRIPBOMB_WEAPON		: s=TRIPBOMBSPRITE;		
+		t = 75000;			
+		offsetx = 10;
+		offsety = 12;
+		break;
+	case  FREEZE_WEAPON			:	s=FREEZESPRITE;	
+		t = 45000;
+		offsetx = 1;
+		offsety = 6;
+		break;
+	case  HANDREMOTE_WEAPON		: s=0;					
+		break;
+	case  GROW_WEAPON			: s=GROWSPRITEICON;		
+		t = 30000;
+		offsetx = 6;
+		offsety = 4;
+		break;
+	default						: s=0;
+	}
+
+	if(s)
+	    rotateSprite((x + toInt16(offsetx * scale)) << 16, (y + toInt16(offsety * scale)) << 16, (t * scale), 0, s, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+
+	return;
+}
+
 //1900
 
 function coolgaugetext(snum) {
@@ -1793,9 +1866,38 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
         Game.se40code(cposx, cposy, cposz, cang, choriz, smoothratio);
 
         if ((gotpic[MIRROR >> 3] & (1 << (MIRROR & 7))) > 0) {
-            throw "todo"
+            dst = 0x7fffffff;
+            i = 0;
+            for (k = 0; k < mirrorcnt; k++) {
+                j = klabs(wall[mirrorwall[k]].x - cposx);
+                j += klabs(wall[mirrorwall[k]].y - cposy);
+                if (j < dst) dst = j, i = k;
+            }
+
+            if (wall[mirrorwall[i]].overpicnum == MIRROR) {
+                var tposxRef = new Ref(tposx),
+                    tposyRef = new Ref(tposy),
+                    tangRef = new Ref(tang);
+                preparemirror(cposx, cposy, cposz, cang, choriz, mirrorwall[i], mirrorsector[i], tposxRef, tposyRef, tangRef);
+                tposx = tposxRef.$;
+                tposy = tposyRef.$;
+                tang = tangRef.$;
+
+                j = visibility;
+                visibility = (j >> 1) + (j >> 2);
+
+                drawrooms(tposx, tposy, cposz, tang, choriz, mirrorsector[i] + MAXSECTORS);
+
+                display_mirror = 1;
+                animatesprites(tposx, tposy, tang, smoothratio);
+                display_mirror = 0;
+
+                drawmasks();
+                completemirror(); //Reverse screen x-wise in this function
+                visibility = j;
+            }
         }
-        
+
         //todo check drawrooms
         drawrooms(cposx, cposy, cposz, cang, choriz, sect);
         printf("b4 animatesprites tsprite[1].picnum: %i\n", tsprite[1].picnum);
@@ -6401,6 +6503,83 @@ Game.doMoveThings = function() {
     return 0;
 };
 
+function vglass( x, y, a, wn, n)
+{
+	var z, zincs;
+	var sect;
+
+	sect = wall[wn].nextsector;
+	if(sect == -1) return;
+	zincs = (( sector[sect].floorz-sector[sect].ceilingz ) / n)|0;
+
+	for(z = sector[sect].ceilingz;z < sector[sect].floorz; z += zincs )
+		EGS(sect,x,y,z-(TRAND&8191),GLASSPIECES+(z&(TRAND%3)),-32,36,36,a+128-(TRAND&255),16+(TRAND&31),0,-1,5);
+}
+
+function lotsofglass( i, wallnum, n)
+{
+	var j, xv, yv, z, x1, y1;
+	var sect, a;
+
+	sect = -1;
+
+	if(wallnum < 0)
+	{
+		for(j=n-1; j >= 0 ;j--)
+		{
+		    a = sprite[i].ang - 256 + (TRAND & 511) + 1024;
+			EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),1024-(TRAND&1023),i,5);
+		}
+		return;
+	}
+
+	j = n+1;
+
+	x1 = wall[wallnum].x;
+	y1 = wall[wallnum].y;
+
+	xv = wall[wall[wallnum].point2].x-x1;
+	yv = wall[wall[wallnum].point2].y-y1;
+
+	x1 -= ksgn(yv);
+	y1 += ksgn(xv);
+
+	xv = (xv / j)|0;
+	yv = (yv / j)|0;
+
+	var sectRef = new Ref(sect);
+	for(j=n;j>0;j--)
+	{
+		x1 += xv;
+		y1 += yv;
+
+	    sectRef.$ = sect;
+        updatesector(x1,y1,sectRef);
+        sect = sectRef.$;
+        if(sect >= 0)
+		{
+			z = sector[sect].floorz-(TRAND&(klabs(sector[sect].ceilingz-sector[sect].floorz)));
+			if( z < -(32<<8) || z > (32<<8) )
+				z = sprite[i].z-(32<<8)+(TRAND&((64<<8)-1));
+			a = sprite[i].ang-1024;
+			EGS(sprite[i].sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),-(TRAND&1023),i,5);
+		}
+	}
+}
+
+function spriteglass( i, n)
+{
+	var j, k, a, z;
+
+	for(j=n;j>0;j--)
+	{
+		a = TRAND&2047;
+		z = sprite[i].z-((TRAND&16)<<8);
+		k = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,z,GLASSPIECES+(j%3),TRAND&15,36,36,a,32+(TRAND&63),-512-(TRAND&2047),i,5);
+		sprite[k].pal = sprite[i].pal;
+	}
+}
+
 //10402
 function ceilingglass(i,sectnum,n) {
 	var j, xv, yv, z, x1, y1;
@@ -6461,7 +6640,7 @@ function lotsofcolourglass( i, wallnum, n)
 		z = sector[sect.$].floorz - (TRAND & (klabs(sector[sect.$].ceilingz - sector[sect.$].floorz)));
 		if( z < -(32<<8) || z > (32<<8) )
 			z = sprite[i].z-(32<<8)+(TRAND&((64<<8)-1));
-		a = SA-1024;
+		a = sprite[i].ang-1024;
 		k = EGS(sprite[i].sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),-(TRAND&2047),i,5);
 		sprite[k].pal = TRAND&7;
 	}

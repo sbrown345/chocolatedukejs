@@ -2627,54 +2627,53 @@ function parse() {
             g_t[0] = 0;
             break;
         case 48:
-            throw "todo"
-            //insptr+=2;
-            //switch(*(insptr-1))
-            //{
-            //    case 0:
-            //        ps[g_p].steroids_amount = script[insptr];
-            //        ps[g_p].inven_icon = 2;
-            //        break;
-            //    case 1:
-            //        ps[g_p].shield_amount +=          script[insptr];// 100;
-            //        if(ps[g_p].shield_amount > max_player_health)
-            //            ps[g_p].shield_amount = max_player_health;
-            //        break;
-            //    case 2:
-            //        ps[g_p].scuba_amount =             script[insptr];// 1600;
-            //        ps[g_p].inven_icon = 6;
-            //        break;
-            //    case 3:
-            //        ps[g_p].holoduke_amount =          script[insptr];// 1600;
-            //        ps[g_p].inven_icon = 3;
-            //        break;
-            //    case 4:
-            //        ps[g_p].jetpack_amount =           script[insptr];// 1600;
-            //        ps[g_p].inven_icon = 4;
-            //        break;
-            //    case 6:
-            //        switch(g_sp.pal)
-            //        {
-            //            case  0: ps[g_p].got_access |= 1;break;
-            //            case 21: ps[g_p].got_access |= 2;break;
-            //            case 23: ps[g_p].got_access |= 4;break;
-            //        }
-            //        break;
-            //    case 7:
-            //        ps[g_p].heat_amount = script[insptr];
-            //        ps[g_p].inven_icon = 5;
-            //        break;
-            //    case 9:
-            //        ps[g_p].inven_icon = 1;
-            //        ps[g_p].firstaid_amount = script[insptr];
-            //        break;
-            //    case 10:
-            //        ps[g_p].inven_icon = 7;
-            //        ps[g_p].boot_amount = script[insptr];
-            //        break;
-            //}
-            //insptr++;
-            //break;
+            insptr+=2;
+            switch(script[insptr-1])
+            {
+                case 0:
+                    ps[g_p].steroids_amount = script[insptr];
+                    ps[g_p].inven_icon = 2;
+                    break;
+                case 1:
+                    ps[g_p].shield_amount +=          script[insptr];// 100;
+                    if(ps[g_p].shield_amount > max_player_health)
+                        ps[g_p].shield_amount = max_player_health;
+                    break;
+                case 2:
+                    ps[g_p].scuba_amount =             script[insptr];// 1600;
+                    ps[g_p].inven_icon = 6;
+                    break;
+                case 3:
+                    ps[g_p].holoduke_amount =          script[insptr];// 1600;
+                    ps[g_p].inven_icon = 3;
+                    break;
+                case 4:
+                    ps[g_p].jetpack_amount =           script[insptr];// 1600;
+                    ps[g_p].inven_icon = 4;
+                    break;
+                case 6:
+                    switch(g_sp.pal)
+                    {
+                        case  0: ps[g_p].got_access |= 1;break;
+                        case 21: ps[g_p].got_access |= 2;break;
+                        case 23: ps[g_p].got_access |= 4;break;
+                    }
+                    break;
+                case 7:
+                    ps[g_p].heat_amount = script[insptr];
+                    ps[g_p].inven_icon = 5;
+                    break;
+                case 9:
+                    ps[g_p].inven_icon = 1;
+                    ps[g_p].firstaid_amount = script[insptr];
+                    break;
+                case 10:
+                    ps[g_p].inven_icon = 7;
+                    ps[g_p].boot_amount = script[insptr];
+                    break;
+            }
+            insptr++;
+            break;
         case 50:
             hitradius(g_i, script[insptr + 1], script[insptr + 2], script[insptr + 3], script[insptr + 4], script[insptr + 5]);
             insptr+=6;
@@ -2772,28 +2771,33 @@ function parse() {
             parseifelse(ud.multimode > 1);
             break;
         case 66:
-            throw "todo"
-            //insptr++;
-            //if( sector[g_sp.sectnum].lotag == 0 )
-            //{
-            //    neartag(g_sp.x,g_sp.y,g_sp.z-(32<<8),g_sp.sectnum,g_sp.ang,&neartagsector,&neartagwall,&neartagsprite,&neartaghitdist,768L,1);
-            //    if( neartagsector >= 0 && isanearoperator(sector[neartagsector].lotag) )
-            //        if( (sector[neartagsector].lotag&0xff) == 23 || sector[neartagsector].floorz == sector[neartagsector].ceilingz )
-            //            if( (sector[neartagsector].lotag&16384) == 0 )
-            //                if( (sector[neartagsector].lotag&32768) == 0 )
-            //            {
-            //                j = headspritesect[neartagsector];
-            //                while(j >= 0)
-            //                {
-            //                    if(sprite[j].picnum == ACTIVATOR)
-            //                        break;
-            //                    j = nextspritesect[j];
-            //                }
-            //                if(j == -1)
-            //                    operatesectors(neartagsector,g_i);
-            //            }
-            //}
-            //break;
+            insptr++;
+            if (sector[g_sp.sectnum].lotag == 0) {
+                var neartagsectorRef = new Ref(neartagsector),
+                    neartagwallRef = new Ref(neartagwall),
+                    neartagspriteRef = new Ref(neartagsprite),
+                    neartaghitdistRef = new Ref(neartaghitdist);
+                neartag(g_sp.x, g_sp.y, g_sp.z - (32 << 8), g_sp.sectnum, g_sp.ang, neartagsectorRef, neartagwallRef, neartagspriteRef, neartaghitdistRef, 768, 1);
+                neartagsector.$ = neartagsectorRef;
+                neartagwall.$ = neartagwallRef;
+                neartagsprite.$ = neartagspriteRef;
+                neartaghitdist.$ = neartaghitdistRef;
+
+                if (neartagsector >= 0 && isanearoperator(sector[neartagsector].lotag))
+                    if ((sector[neartagsector].lotag & 0xff) == 23 || sector[neartagsector].floorz == sector[neartagsector].ceilingz)
+                        if ((sector[neartagsector].lotag & 16384) == 0)
+                            if ((sector[neartagsector].lotag & 32768) == 0) {
+                                j = headspritesect[neartagsector];
+                                while (j >= 0) {
+                                    if (sprite[j].picnum == ACTIVATOR)
+                                        break;
+                                    j = nextspritesect[j];
+                                }
+                                if (j == -1)
+                                    operatesectors(neartagsector, g_i);
+                            }
+            }
+            break;
         case 67:
             parseifelse(ceilingspace(g_sp.sectnum));
             break;
@@ -2858,52 +2862,51 @@ function parse() {
 
         case 75:
             {
-                throw "todo"
-                //insptr++;
-                //j = 0;
-                //switch(*(insptr++))
-                //{
-                //    case 0:if( ps[g_p].steroids_amount != script[insptr])
-                //           j = 1;
-                //        break;
-                //    case 1:if(ps[g_p].shield_amount != max_player_health )
-                //            j = 1;
-                //        break;
-                //    case 2:if(ps[g_p].scuba_amount != script[insptr]) j = 1;break;
-                //    case 3:if(ps[g_p].holoduke_amount != script[insptr]) j = 1;break;
-                //    case 4:if(ps[g_p].jetpack_amount != script[insptr]) j = 1;break;
-                //    case 6:
-                //        switch(g_sp.pal)
-                //        {
-                //            case  0: if(ps[g_p].got_access&1) j = 1;break;
-                //            case 21: if(ps[g_p].got_access&2) j = 1;break;
-                //            case 23: if(ps[g_p].got_access&4) j = 1;break;
-                //        }
-                //        break;
-                //    case 7:if(ps[g_p].heat_amount != script[insptr]) j = 1;break;
-                //    case 9:
-                //        if(ps[g_p].firstaid_amount != script[insptr]) j = 1;break;
-                //    case 10:
-                //        if(ps[g_p].boot_amount != script[insptr]) j = 1;break;
-                //}
+                insptr++;
+                j = 0;
+                switch(script[insptr++])
+                {
+                    case 0:if( ps[g_p].steroids_amount != script[insptr])
+                           j = 1;
+                        break;
+                    case 1:if(ps[g_p].shield_amount != max_player_health )
+                            j = 1;
+                        break;
+                    case 2:if(ps[g_p].scuba_amount != script[insptr]) j = 1;break;
+                    case 3:if(ps[g_p].holoduke_amount != script[insptr]) j = 1;break;
+                    case 4:if(ps[g_p].jetpack_amount != script[insptr]) j = 1;break;
+                    case 6:
+                        switch(g_sp.pal)
+                        {
+                            case  0: if(ps[g_p].got_access&1) j = 1;break;
+                            case 21: if(ps[g_p].got_access&2) j = 1;break;
+                            case 23: if(ps[g_p].got_access&4) j = 1;break;
+                        }
+                        break;
+                    case 7:if(ps[g_p].heat_amount != script[insptr]) j = 1;break;
+                    case 9:
+                        if(ps[g_p].firstaid_amount != script[insptr]) j = 1;break;
+                    case 10:
+                        if(ps[g_p].boot_amount != script[insptr]) j = 1;break;
+                }
 
-                //parseifelse(j);
-                //break;
+                parseifelse(j);
+                break;
             }
         case 38:
+            insptr++;
+            if( ps[g_p].knee_incs == 0 && sprite[ps[g_p].i].xrepeat >= 40 )
+                if( cansee(g_sp.x,g_sp.y,g_sp.z-(4<<8),g_sp.sectnum,ps[g_p].posx,ps[g_p].posy,ps[g_p].posz+(16<<8),sprite[ps[g_p].i].sectnum) )
+            {
+                ps[g_p].knee_incs = 1;
+                if(ps[g_p].weapon_pos == 0)
+                    ps[g_p].weapon_pos = -1;
+                ps[g_p].actorsqu = g_i;
+            }
+            break;
+        case 90:
             throw "todo"
-        //    insptr++;
-        //    if( ps[g_p].knee_incs == 0 && sprite[ps[g_p].i].xrepeat >= 40 )
-        //        if( cansee(g_sp.x,g_sp.y,g_sp.z-(4<<8),g_sp.sectnum,ps[g_p].posx,ps[g_p].posy,ps[g_p].posz+(16<<8),sprite[ps[g_p].i].sectnum) )
-        //    {
-        //        ps[g_p].knee_incs = 1;
-        //        if(ps[g_p].weapon_pos == 0)
-        //            ps[g_p].weapon_pos = -1;
-        //        ps[g_p].actorsqu = g_i;
-        //    }
-        //    break;
-        //case 90:
-        //    {
+            //    {
         //        var s1;
 
         //        s1 = g_sp.sectnum;
@@ -2926,7 +2929,7 @@ function parse() {
         //                }
         //            }
         //            parseifelse( j );
-        //    }
+            //}
 
             break;
         case 80:
