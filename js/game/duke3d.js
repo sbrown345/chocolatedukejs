@@ -43,7 +43,7 @@ var SCREENSHOTPATH = "screenshots";
 // #define TEN
 // #define BETA
 
-// #define AUSTRALIA
+var AUSTRALIA = false;
 
 var MAXSLEEPDIST = 16384;
 var SLEEPTIME = 24 * 64;

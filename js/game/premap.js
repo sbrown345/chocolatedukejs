@@ -676,7 +676,25 @@ function newgame(vn, ln, sk) {
     }
 
     if (ud.showcinematics && ln == 0 && vn == 3 && ud.multimode < 2 && ud.lockout == 0) {
-        throw new Error("todo");
+        console.warn("TODO - make async ")
+        playmusic(env_music_fn[1]);
+
+        flushperms();
+        setview(0,0,xdim-1,ydim-1);
+        clearView(0);
+        nextpage();
+
+        playanm("vol41a.anm",6);
+        clearView(0);
+        nextpage();
+        playanm("vol42a.anm",7);
+        //        clearview(0L);
+        //      nextpage();
+        playanm("vol43a.anm",9);
+        clearView(0);
+        nextpage();
+
+        FX.stopAllSounds();
     }
 
     show_shareware = 26 * 34;

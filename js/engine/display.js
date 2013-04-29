@@ -44,7 +44,7 @@ function _platform_init(argc, argv, title, iconName) {
     scancodes[27] = 0x01; // Esc
     scancodes[48] = 0x02; // 0 
     scancodes[49] = 0x03; // 1
-    scancodes[50] = 0x04; // 2
+    scancodes[50] = 0x04; // 2z
     scancodes[51] = 0x05; // 3
     scancodes[52] = 0x06; // 4
     scancodes[53] = 0x07; // 5
@@ -84,11 +84,11 @@ function _platform_init(argc, argv, title, iconName) {
     //scancodes[SDLK_BACKQUOTE] = 0x29;
     scancodes[16] = 0x2A; //SDLK_LSHIFT
     //scancodes[SDLK_BACKSLASH] = 0x2B;
-    //scancodes[90] = 0x2C;//SDLK_z
-    //scancodes[88] = 0x2D;//SDLK_x
-    //scancodes[67] = 0x2E; //SDLK_c
-    //scancodes[86] = 0x2F; //SDLK_v
-    //scancodes[66] = 0x30; //SDLK_b
+    scancodes[90] = 0x2C;//SDLK_z
+    scancodes[88] = 0x2D;//SDLK_x
+    scancodes[67] = 0x2E; //SDLK_c
+    scancodes[86] = 0x2F; //SDLK_v
+    scancodes[66] = 0x30; //SDLK_b
     scancodes[78] = 0x31;//SDLK_n
     //scancodes[SDLK_m] = 0x32;
     //scancodes[SDLK_COMMA] = 0x33;
