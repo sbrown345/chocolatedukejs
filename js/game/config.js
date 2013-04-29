@@ -172,7 +172,6 @@ function CONFIG_ReadKeys() {
         $function = CONFIG_FunctionNameToNum(keydefaults[i].entryKey);
         key1 = KB_StringToScanCode(keydefaults[i].keyname1);
         key2 = KB_StringToScanCode(keydefaults[i].keyname2);
-        console.log($function, keydefaults[i].keyname1, key1, keydefaults[i].keyname2,key2)
         CONTROL_MapKey($function, key1, key2);
     }
 

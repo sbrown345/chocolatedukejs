@@ -189,7 +189,7 @@ window.onkeydown = function (e) {
     }
     lastEvent = e;
     heldKeys[e.keyCode] = true;
-    console.log("keydown", e.keyCode);
+    //console.log("keydown", e.keyCode);
     events.push({ type: SDL_KEYDOWN, key: { type: SDL_KEYDOWN, keyCode: e.keyCode, state: SDL_PRESSED } });
     //sdl_key_filter(e, false);
 };

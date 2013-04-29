@@ -1470,6 +1470,12 @@ function activatebysector(sect,j)
         operatesectors(sect,j);
 }
 
+function breakwall(newpn, spr, dawallnum) {
+    wall[dawallnum].picnum = newpn;
+    spritesound(VENT_BUST, spr);
+    spritesound(GLASS_HEAVYBREAK, spr);
+    lotsofglass(spr, dawallnum, 10);
+}
 
 //1568
 
@@ -1478,7 +1484,6 @@ function checkhitwall(spr,dawallnum,x, y, z, atwith)
     var  j, i, sn = -1, darkestwall;
     var wal;
    
-
     wal = wall[dawallnum];
 
     if(wal.overpicnum == MIRROR)
