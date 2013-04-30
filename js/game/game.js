@@ -18,7 +18,20 @@ function appendCanvasImageToPage(text) {
     document.getElementById("canvasDebug").appendChild(img);
 }
 
-var nHostForceDisableAutoaim = 0;
+var MINITEXT_BLUE = 0;
+var MINITEXT_RED = 2;
+var MINITEXT_YELLOW = 23;
+var MINITEXT_GRAY = 17;
+
+var COLOR_ON = MINITEXT_YELLOW;
+var COLOR_OFF = MINITEXT_BLUE;
+
+var IDFSIZE = 479985668;
+// var IDFSIZE 9961476
+// var IDFSIZE 16384
+var IDFILENAME = "DUKE3D.IDF";
+
+var TIMERUPDATESIZ = 32;
 
 var cameradist = 0, cameraclock = 0;
 var  eightytwofifty = 0;
@@ -110,6 +123,48 @@ function gametext(x, y, t, s, dabits) {
 
     return (x);
 }
+
+function minitext(x, y, str, p, sb) {
+    var ac;
+    var buf;
+    var t, tIdx = 0;
+
+    buf = str;
+    t = buf.toUpperCase();
+
+    while (t[tIdx]) {
+        if (t.charCodeAt(tIdx) == 32) { x += 5; t++; continue; }
+        else ac = t.charCodeAt(tIdx) - '!'.charCodeAt(0) + MINIFONT;
+
+        rotateSprite(x << 16, y << 16, 65536, 0, ac, 0, p, sb, 0, 0, xdim - 1, ydim - 1);
+        x += 4; // tilesizx[ac]+1;
+
+        tIdx++;
+    }
+    return (x);
+}
+
+function minitextshade(x, y, str, s, p, sb) {
+    var ac;
+    var buf;
+    var t, tIdx = 0;
+
+    buf = str;
+    t = buf.toUpperCase();
+
+
+    while (t[tIdx]) {
+        if (t.charCodeAt(tIdx) == 32) { x += 5; t++; continue; }
+        else ac = t.charCodeAt(tIdx) - '!'.charCodeAt(0) + MINIFONT;
+
+        rotateSprite(x << 16, y << 16, 65536, 0, ac, s, p, sb, 0, 0, xdim - 1, ydim - 1);
+        x += 4; // tilesizx[ac]+1;
+
+        tIdx++;
+    }
+    return (x);
+}
+
 
 //392
 var MAXUSERQUOTES = 4;
@@ -755,6 +810,27 @@ function myospal(x, y, tilenum, shade, orientation, p) {
     rotateSprite(x << 16, y << 16, 65536, a, tilenum, shade, p, 2 | orientation, windowx1, windowy1, windowx2, windowy2);
 }
 
+
+function invennum( x, y,  num1,  ha,  sbits)
+{
+    ha = toUint8(ha);
+    var  dabuf = num1.toString();
+	if(num1 > 99)
+	{
+	    rotateSprite((x-4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+	    rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(1)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(2)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+	}
+	else if(num1 > 9)
+	{
+	    rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(1)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+	}
+	else
+	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+}
+
+
 function orderweaponnum(ind,x,y, num1,  num2,  ha) {
     ha = toUint8(ha);
     rotateSprite((x - 7) << 16, y << 16, 65536, 0, THREEBYFIVE + ind + 1, ha - 10, 7, 10 + 128, 0, 0, xdim - 1, ydim - 1);
@@ -1317,64 +1393,124 @@ function coolgaugetext(snum) {
             digitalnumber(230-22,200-17,p.ammo_amount[i],-16,10+16+128);
         }
     }
+    if (u&(2048+4096+8192))
+    {
+        if (u != (0xffffffff | 0))
+        {
+            if (u&(2048+4096)) { patchstatusbar(231,179,265,197); }
+            else { patchstatusbar(250,190,261,195); }
+        }
+        if (p.inven_icon)
+        {
+            o = 0; permbit = 128;
 
-    //if (u&(2048+4096+8192))
-    //{
-    //    if (u != (0xffffffff | 0))
-    //    {
-    //        if (u&(2048+4096)) { patchstatusbar(231,179,265,197); }
-    //        else { patchstatusbar(250,190,261,195); }
-    //    }
-    //    if (p.inven_icon)
-    //    {
-    //        o = 0; permbit = 128;
-
-    //        if (u&(2048+4096))
-    //        {
-    //            switch(p.inven_icon)
-    //            {
-    //                case 1: i = FIRSTAID_ICON; break;
-    //                case 2: i = STEROIDS_ICON; break;
-    //                case 3: i = HOLODUKE_ICON; break;
-    //                case 4: i = JETPACK_ICON; break;
-    //                case 5: i = HEAT_ICON; break;
-    //                case 6: i = AIRTANK_ICON; break;
-    //                case 7: i = BOOT_ICON; break;
-    //            }
-    //            rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
-    //            minitext(292-30-o,190,"%",6,10+16+permbit);
-    //            if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
-    //        }
-    //        if (u&(2048+4096))
-    //        {
-    //            switch(p.inven_icon)
-    //            {
-    //                case 3: j = p.holoduke_on; break;
-    //                case 4: j = p.jetpack_on; break;
-    //                case 5: j = p.heat_on; break;
-    //                default: j = 0x80000000 | 0;
-    //            }
-    //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-    //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
-    //        }
-    //        if (u&8192)
-    //        {
-    //            switch(p.inven_icon)
-    //            {
-    //                case 1: i = p.firstaid_amount; break;
-    //                case 2: i = ((p.steroids_amount+3)>>2); break;
-    //                case 3: i = ((p.holoduke_amount+15)/24); break;
-    //                case 4: i = ((p.jetpack_amount+15)>>4); break;
-    //                case 5: i = p.heat_amount/12; break;
-    //                case 6: i = ((p.scuba_amount+63)>>6); break;
-    //                case 7: i = (p.boot_amount>>1); break;
-    //            }
-    //            invennum(284-30-o,200-6,(uint8_t )i,0,10+permbit);
-    //        }
-    //    }
-    //}
+            if (u&(2048+4096))
+            {
+                switch(p.inven_icon)
+                {
+                    case 1: i = FIRSTAID_ICON; break;
+                    case 2: i = STEROIDS_ICON; break;
+                    case 3: i = HOLODUKE_ICON; break;
+                    case 4: i = JETPACK_ICON; break;
+                    case 5: i = HEAT_ICON; break;
+                    case 6: i = AIRTANK_ICON; break;
+                    case 7: i = BOOT_ICON; break;
+                }
+                rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
+                minitext(292-30-o,190,"%",6,10+16+permbit);
+                if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
+            }
+            if (u&(2048+4096))
+            {
+                switch(p.inven_icon)
+                {
+                    case 3: j = p.holoduke_on; break;
+                    case 4: j = p.jetpack_on; break;
+                    case 5: j = p.heat_on; break;
+                    default: j = 0x80000000 | 0;
+                }
+                if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
+                else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+            }
+            if (u&8192)
+            {
+                switch(p.inven_icon)
+                {
+                    case 1: i = p.firstaid_amount; break;
+                    case 2: i = ((p.steroids_amount+3)>>2); break;
+                    case 3: i = ((p.holoduke_amount+15)/24); break;
+                    case 4: i = ((p.jetpack_amount+15)>>4); break;
+                    case 5: i = p.heat_amount/12; break;
+                    case 6: i = ((p.scuba_amount+63)>>6); break;
+                    case 7: i = (p.boot_amount>>1); break;
+                }
+                invennum(284-30-o,200-6,i,0,10+permbit);
+            }
+        }
+    }
 }
 
+//var AVERAGEFRAMES = 16;
+//static int32_t frameval[AVERAGEFRAMES], framecnt = 0;
+
+function tics(offx, offy, color)
+{
+    console.warn("todo!")
+	//int32_t i;
+	//char  fps[512], mapname[512];
+	//int32_t currentFps;
+	//static int32_t fpsAvg = 0, savedFps = 0;
+	//static boolean toggle = true;
+	//char text[512];
+
+	//strcpy(mapname,boardfilename);
+	//for(i=0;i<512;i++)
+	//	if(mapname[i]=='.')
+	//		mapname[i]=0;
+
+	//if( mapname[0] != 0 && ud.m_level_number == 7 && ud.m_volume_number == 0 )
+	//	sprintf(text, "%s", mapname);
+	//else
+	//	//sprintf(tempbuf, "%s", level_names[ud.volume_number*11 + ud.level_number]);
+	//	sprintf(text, "e%dl%d", ud.volume_number+1, ud.level_number+1);
+
+
+	//i = totalclock;
+
+	//if (i != frameval[framecnt])
+	//{
+	//	currentFps = (TICRATE*AVERAGEFRAMES)/(i-frameval[framecnt]);
+	//	fpsAvg = ((fpsAvg<<3)+(fpsAvg<<2) + (currentFps<<2))>>4;
+
+	//	frameval[framecnt] = i;
+	//}
+
+	//framecnt = ((framecnt+1)&(AVERAGEFRAMES-1));
+
+	//// refresh screen and update visible FPS. This is to allow a refresh
+	//// of the screen when the screensize > 4 w/o compromising the FPS.
+	//if(ud.screen_size>8)
+	//	if ((totalclock%64) < 32)
+	//	{
+	//		if(toggle)
+	//		{
+	//			vscrn();
+	//			savedFps = fpsAvg;
+	//		}
+	//		toggle = false;
+	//	}
+	//	else
+	//	{
+	//		toggle = true;
+	//	}
+	//else
+	//	savedFps = fpsAvg;
+
+	//sprintf(fps," %d", savedFps);
+	//strcat(text, fps);
+
+	//minitext(offx,offy,text,color,2+8+16+128);
+}
 //2238
 
 function coords( snum)

@@ -619,6 +619,31 @@ function insertspriteq(i) {
 }
 
 
+function lotsofmoney(s, n) {
+    var i, j;
+    for (i = n; i > 0; i--) {
+        j = EGS(s.sectnum, s.x, s.y, s.z - (krand() % (47 << 8)), MONEY, -32, 8, 8, krand() & 2047, 0, 0, 0, 5);
+        sprite[j].cstat = krand() & 12;
+    }
+}
+
+function lotsofmail(s, n) {
+    var i, j;
+    for (i = n; i > 0; i--) {
+        j = EGS(s.sectnum, s.x, s.y, s.z - (krand() % (47 << 8)), MAIL, -32, 8, 8, krand() & 2047, 0, 0, 0, 5);
+        sprite[j].cstat = krand() & 12;
+    }
+}
+
+function lotsofpaper(s, n) {
+    var i, j;
+    for (i = n; i > 0; i--) {
+        j = EGS(s.sectnum, s.x, s.y, s.z - (krand() % (47 << 8)), PAPER, -32, 8, 8, krand() & 2047, 0, 0, 0, 5);
+        sprite[j].cstat = krand() & 12;
+    }
+}
+
+
 function guts(s,gtype, n, p) {
     var gutz,floorz;
     var i,a,j;
