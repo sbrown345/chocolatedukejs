@@ -26,6 +26,47 @@ function cmenu(cm) {
     lastprobey = -1;
 }
 
+//182
+
+function loadpheader(spot, vn, ln, psk, nump) {
+    console.assert(vn instanceof Ref);
+    console.assert(ln instanceof Ref);
+    console.assert(psk instanceof Ref);
+    console.assert(nump instanceof Ref);
+    var fn = "game0.sav";
+    var fil;
+    var bv;
+
+    fn[4] = spot + '0';
+
+    if ((fil = TCkopen4load(fn, 0)) == -1) return (-1);
+
+    tiles[MAXTILES - 3].lock = 255;
+
+    bv = kdfread(4, 1, fil);
+    if (bv != BYTEVERSION) {
+        FTA(114, ps[myconnectindex], 1);
+        kclose(fil);
+        return 1;
+    }
+
+    nump.$ = kread32(1, fil);
+
+    kdfread(tempbuf, 19, 1, fil);
+    vn.$ = kread32(fil);
+    ln.$ = kread32(fil);
+    psk.$ = kread32(fil);
+
+    if (!tiles[MAXTILES - 3].data)
+        allocache(tiles[MAXTILES - 3].data, 160 * 100, tiles[MAXTILES - 3].lock);
+    tiles[MAXTILES - 3].dim.width = 100;
+    tiles[MAXTILES - 3].dim.height = 160;
+    kdfread(tiles[MAXTILES - 3].data, 160, 100, fil);
+    kclose(fil);
+    return (0);
+}
+
+
 window.__defineGetter__("LMB", function () { return buttonstat & 1; });
 window.__defineGetter__("RMB", function () { return buttonstat & 2; });
 
@@ -360,14 +401,40 @@ function SHX(X) { return 0; }
 // ((x==X)*(-sh))
 function PHX(X) { return 0; }
 //// ((x==X)?1:2)
-//#define MWIN(X) rotatesprite( 320<<15,200<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
-//#define MWINXY(X,OX,OY) rotatesprite( ( 320+(OX) )<<15, ( 200+(OY) )<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
+//#define MWIN(X) rotateSprite( 320<<15,200<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
+//#define MWINXY(X,OX,OY) rotateSprite( ( 320+(OX) )<<15, ( 200+(OY) )<<15,X,0,MENUSCREEN,-16,0,10+64,0,0,xdim-1,ydim-1)
 
 
 
 // 1208
 var volnum, levnum, plrskl, numplr;
 var lastsavedpos = -1;
+
+function dispnames ()
+{
+    var x, c = 160;
+
+    c += 64;
+    for(x = 0;x <= 108;x += 12)
+        rotateSprite((c+91-64)<<16,(x+56)<<16,65536,0,TEXTBOX,24,0,10,0,0,xdim-1,ydim-1);
+
+    rotateSprite(22<<16,97<<16,65536,0,WINDOWBORDER2,24,0,10,0,0,xdim-1,ydim-1);
+    rotateSprite(180<<16,97<<16,65536,1024,WINDOWBORDER2,24,0,10,0,0,xdim-1,ydim-1);
+    rotateSprite(99<<16,50<<16,65536,512,WINDOWBORDER1,24,0,10,0,0,xdim-1,ydim-1);
+    rotateSprite(103<<16,144<<16,65536,1024+512,WINDOWBORDER1,24,0,10,0,0,xdim-1,ydim-1);
+
+    minitext(c,48,ud.savegame[0],2,10+16);
+    minitext(c,48+12,ud.savegame[1],2,10+16);
+    minitext(c,48+12+12,ud.savegame[2],2,10+16);
+    minitext(c,48+12+12+12,ud.savegame[3],2,10+16);
+    minitext(c,48+12+12+12+12,ud.savegame[4],2,10+16);
+    minitext(c,48+12+12+12+12+12,ud.savegame[5],2,10+16);
+    minitext(c,48+12+12+12+12+12+12,ud.savegame[6],2,10+16);
+    minitext(c,48+12+12+12+12+12+12+12,ud.savegame[7],2,10+16);
+    minitext(c,48+12+12+12+12+12+12+12+12,ud.savegame[8],2,10+16);
+    minitext(c,48+12+12+12+12+12+12+12+12+12,ud.savegame[9],2,10+16);
+}
+
 
 //1424
 function menus() {
@@ -1530,8 +1597,7 @@ function menus() {
             menutext(c,43,SHX(-2),(FXDevice == NumSoundCards),"SOUND");
             menutext(c,43+16+16,SHX(-4),(FXDevice==NumSoundCards)||SoundToggle==0,"SOUND VOLUME");
             {
-                throw "todo"
-                //l = FXVolume;
+                throw "todo"; //l = FXVolume;
                 //FXVolume >>= 2;
                 //bar(c+167+40,43+16+16,(short *)&FXVolume,4,(FXDevice!=NumSoundCards)&&x==2,SHX(-4),SoundToggle==0||(FXDevice==NumSoundCards));
                 //if(l != FXVolume)
@@ -1542,8 +1608,7 @@ function menus() {
             menutext(c,43+16,SHX(-3),(MusicDevice==NumSoundCards),"MUSIC");
             menutext(c,43+16+16+16,SHX(-5),(MusicDevice==NumSoundCards)||(numplayers > 1 && eightytwofifty)||MusicToggle==0,"MUSIC VOLUME");
             {
-                throw "todo"
-                //l = MusicVolume;
+                throw "todo"; //l = MusicVolume;
                 //MusicVolume >>= 2;
                 //bar(c+167+40,43+16+16+16,
                 //    (short *)&MusicVolume,4,
@@ -1656,8 +1721,7 @@ function menus() {
             }
 
             {            
-                throw "todo"
-                //var sense;
+                throw "todo"; //var sense;
 
                 //sense = CONTROL_GetMouseSensitivity_X();
                 //menutext(c,43+16*0,SHX(-7),PHX(-7),"X SENSITIVITY");
@@ -2253,7 +2317,7 @@ function menus() {
                         ready2send = 1;
                         totalclock = ototalclock;
                     }
-                    throw "goto DISPLAYNAMES;"
+                    throw "goto DISPLAYNAMES;";
                 }
 
                 if( x == 1 )
@@ -2293,32 +2357,52 @@ function menus() {
 
             if(current_menu == 300)
             {
-                if( ud.savegame[probey][0] )
+                if( ud.savegame[probey]/*[0]*/ )
                 {
-                    if( lastprobey != probey )
-                    {
-                        throw "todo" //todo
-                        ////loadpheader(probey,&volnum,&levnum,&plrskl,&numplr);
-                        ////lastprobey = probey;
+                    if (lastprobey != probey) {
+                        var volnumRef = new Ref(volnum),
+                            levnumRef = new Ref(levnum),
+                            plrsklRef = new Ref(plrskl),
+                            numplrRef = new Ref(numplr);
+                        loadpheader(probey, volnumRef, levnumRef, plrsklRef, numplrRef);
+                        volnum = volnumRef.$;
+                        levnum = levnumRef.$;
+                        plrskl = plrsklRef.$;
+                        numplr = numplrRef.$;
+                        lastprobey = probey;
                     }
-
+                    var numFmt = new function(num) {
+                        return num > 9 ? num : "0" + num;
+                    }
                     rotateSprite(101<<16,97<<16,65536,512,MAXTILES-3,-32,0,4+10+64,0,0,xdim-1,ydim-1);
-                    sprintf(text,"PLAYERS: %-2d                      ",numplr);
+                    //text = "PLAYERS: %-2d                      ",numplr);
+                    text = "PLAYERS: " + numFmt(numplr) + "                      ";
                     gametext(160,158,text,0,2+8+16);
-                    sprintf(text,"EPISODE: %-2d / LEVEL: %-2d / SKILL: %-2d",1+volnum,1+levnum,plrskl);
+                    text = "EPISODE: " + numFmt(volnum) +
+                        " / LEVEL: " + numFmt(levnum) +
+                        " / SKILL: " + numFmt(plrskl);
+                    //sprintf(text,"EPISODE: %-2d / LEVEL: %-2d / SKILL: %-2d",1+volnum,1+levnum,plrskl);
                     gametext(160,170,text,0,2+8+16);
                 }
                 else menutext(69,70,0,0,"EMPTY");
             }
             else
             {
-                if( ud.savegame[probey][0] )
+                if( ud.savegame[probey] )
                 {
-                    throw "todo" //todo
-                    ////if(lastprobey != probey)
-                    ////    loadpheader(probey,&volnum,&levnum,&plrskl,&numplr);
-                    ////lastprobey = probey;
-                    ////rotateSprite(101<<16,97<<16,65536,512,MAXTILES-3,-32,0,4+10+64,0,0,xdim-1,ydim-1);
+                    if (lastprobey != probey) {
+                        var volnumRef = new Ref(volnum),
+                            levnumRef = new Ref(levnum),
+                            plrsklRef = new Ref(plrskl),
+                            numplrRef = new Ref(numplr);
+                        loadpheader(probey, volnumRef, levnumRef, plrsklRef, numplrRef);
+                        volnum = volnumRef.$;
+                        levnum = levnumRef.$;
+                        plrskl = plrsklRef.$;
+                        numplr = numplrRef.$;
+                    }
+                    lastprobey = probey;
+                    rotateSprite(101<<16,97<<16,65536,512,MAXTILES-3,-32,0,4+10+64,0,0,xdim-1,ydim-1);
                 }
                 else menutext(69,70,0,0,"EMPTY");
                 sprintf(text,"PLAYERS: %-2d                      ",ud.multimode);
@@ -2362,18 +2446,18 @@ function menus() {
                 case 9:
                     if( current_menu == 300)
                     {
-                        if( ud.savegame[x][0] )
+                        if( ud.savegame[x] )
                             current_menu = (1000+x);
                     }
                     else
                     {
-                        if( ud.savegame[x][0] != 0)
+                        if( ud.savegame[x] )
                             current_menu = 2000+x;
                         else
                         {
                             KB.flushKeyboardQueue();
                             current_menu = (360+x);
-                            ud.savegame[x][0] = 0;
+                            ud.savegame[x] = null;
                             inputloc = 0;
                         }
                     }
@@ -3107,6 +3191,77 @@ function menus() {
         cameradist = 65536;
     }
 }
+
+//2494
+var inputloc = 0;
+function strget( x, y,t, dalen, c)
+{
+    throw "todo"
+    //var ch,sc;
+
+    //while(KB.keyWaiting()) ??????????????????
+    //{
+    //    sc = 0;
+    //    ch = KB_Getch();
+
+    //    if (ch == 0)
+    //    {
+
+    //        sc = KB_Getch();
+    //        if( sc == 104) return(1);
+
+    //        continue;
+    //    }
+    //    else
+    //    {
+    //        if(ch == 8) // asc_BackSpace
+    //        {
+    //            if( inputloc > 0 )
+    //            {
+    //                inputloc--;
+    //                *(t+inputloc) = 0;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            if(ch == asc_Enter || sc == 104)
+    //            {
+    //                KB_ClearKeyDown(sc_Enter);
+    //                KB_ClearKeyDown(sc_kpad_Enter);
+    //                return (1);
+    //            }
+    //            else if(ch == asc_Escape)
+    //            {
+    //                KB_ClearKeyDown(sc_Escape);
+    //                return (-1);
+    //            }
+    //            else if ( ch >= 32 && inputloc < dalen && ch < 127)
+    //            {
+    //                ch = toupper(ch);
+    //                *(t+inputloc) = ch;
+    //                *(t+inputloc+1) = 0;
+    //                inputloc++;
+    //            }
+    //        }
+    //    }
+    //}
+
+    //if( c == 999 ) return(0);
+    //if( c == 998 )
+    //{
+    //    char  b[41],ii;
+    //    for(ii=0;ii<inputloc;ii++)
+    //        b[ii] = '*';
+    //    b[ii] = 0;
+    //    x = gametext(x,y,b,c,2+8+16);
+    //}
+    //else x = gametext(x,y,t,c,2+8+16);
+    //c = 4-(sintable[(totalclock<<4)&2047]>>11);
+    //rotateSprite((x+8)<<16,(y+4)<<16,32768L,0,SPINNINGNUKEICON+((totalclock>>3)%7),c,0,2+8,0,0,xdim-1,ydim-1);
+
+    //return (0);
+}
+
 
 // 4152
 function palto(r, g, b, e) {
