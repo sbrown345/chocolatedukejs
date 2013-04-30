@@ -460,6 +460,41 @@ function faketimerhandler() {
     }
 }
 
+var cacnum;
+
+//typedef struct { 
+//    uint8_t *hand;
+//    int32_t leng;
+//    uint8_t  *lock; } 
+//cactype;
+var cactype = [];
+
+function caches()
+{
+    // todo
+    console.log("todo caches")
+    //var i,k;
+    //var text = "";
+
+    //k = 0;
+    //for(i=0;i<cacnum;i++)
+    //    if ((*cac[i].lock) >= 200)
+    //    {
+    //        sprintf(text,"Locked- %d: Leng:%d, Lock:%d",i,cac[i].leng,*cac[i].lock);
+    //        printext256(0L,k,31,-1,text,1); k += 6;
+    //    }
+
+    //k += 6;
+
+    //for(i=1;i<11;i++)
+    //    if (lumplockbyte[i] >= 200) {
+    //        text = "RTS Locked %hd:" + i;
+    //        printext256(0,k,31,-1,text,1); k += 6;
+    //    }
+
+
+}
+
 //1173
 function checksync() {
 	var i;
@@ -1338,6 +1373,50 @@ function coolgaugetext(snum) {
     //        }
     //    }
     //}
+}
+
+//2238
+
+function coords( snum)
+{
+	var x = 200, y = 0;
+    var text;
+	// x = 250 is too much on the right and
+	// will make the text going out of the screen 
+	// if screen <= (320x200)
+	// This will also *write beyond the video 
+	// buffer limit* and will crash the game.
+
+	if(ud.coop != 1)
+	{
+		if(ud.multimode > 1 && ud.multimode < 5)
+			y = 8;
+		else if(ud.multimode > 4)
+			y = 16;
+	}
+
+    text = "X= " + ps[snum].posx;
+	printext256(x,y,31,-1,text,1);
+	text = "Y= " + ps[snum].posy;
+	printext256(x,y+7,31,-1,text,1);
+	text = "Z= " + ps[snum].posz;
+	printext256(x,y+14,31,-1,text,1);
+	text = "A= " + ps[snum].ang;
+	printext256(x,y+21,31,-1,text,1);
+	text = "ZV= " + ps[snum].poszv;
+	printext256(x,y+28,31,-1,text,1);
+	text = "OG= " + ps[snum].on_ground;
+	printext256(x,y+35,31,-1,text,1);
+	text = "AM= " + ps[snum].ammo_amount[GROW_WEAPON];
+	printext256(x,y+43,31,-1,text,1);
+	text = "LFW= " + ps[snum].last_full_weapon;
+	printext256(x,y+50,31,-1,text,1);
+	text = "SECTL= " + sector[ps[snum].cursectnum].lotag;
+	printext256(x,y+57,31,-1,text,1);
+	text = "SEED= " + randomseed;
+	printext256(x,y+64,31,-1,text,1);
+	text = "THOLD= " + ps[snum].transporter_hold;
+	printext256(x,y+64+7,31,-1,text,1);
 }
 
 //2279
@@ -4548,9 +4627,487 @@ function animatesprites( x, y, a, smoothratio) {
     }
 }
 
-//uint8_t  cheatbuf[10],cheatbuflen;
+var NUMCHEATCODES = 26;
+var cheatquotes = [
+    "cornholio", // 0
+    "stuff", // 1
+    "scotty###", // 2
+    "coords", // 3
+    "view", // 4
+    "time", // 5
+    "unlock", // 6
+    "cashman", // 7 
+    "items", // 8
+    "rate", // 9
+    "skill#", // 10
+    "beta", // 11
+    "hyper", // 12
+    "monsters", // 13
+    "<RESERVED>", // 14
+    "<RESERVED>", // 15
+    "todd", // 16
+    "showmap", // 17
+    "kroz", // 18
+    "allen", // 19
+    "clip", // 20
+    "weapons", // 21
+    "inventory", // 22
+    "keys", // 23
+    "debug"		// 24
+    //    {"ending"}
+];
+
+var cheatbuf = new Uint8Array(10),cheatbuflen=0;
 function cheats() {
-    //todo
+    var ch, i, j, k, weapon;
+
+    if( (ps[myconnectindex].gm&MODE_TYPE) || (ps[myconnectindex].gm&MODE_MENU))
+        return;
+
+    if ( ps[myconnectindex].cheat_phase == 1)
+    {
+        while (KB.keyWaiting())
+        {
+            FOUNDCHEAT:
+                while (true) {
+                    
+                    ch = String.fromCharCode(KB_Getch());
+                    ch = ch.toLowerCase();
+                    console.log("char: %s",ch)
+
+                    if( !( (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') ) )
+                    {
+                        ps[myconnectindex].cheat_phase = 0;
+                        //             FTA(46,ps[myconnectindex]);
+                        return;
+                    }
+
+                    cheatbuf[cheatbuflen++] = ch.charCodeAt(0);
+                    cheatbuf[cheatbuflen] = 0;
+
+                    if(cheatbuflen > 11)
+                    {
+                        ps[myconnectindex].cheat_phase = 0;
+                        return;
+                    }
+
+                    for(k = 0;k < NUMCHEATCODES;k++)
+                    {
+                        for(j = 0;j<cheatbuflen;j++)
+                        {
+                            if (cheatquotes[k] && (cheatbuf[j] == cheatquotes[k].charCodeAt(j) || (cheatquotes[k][j] == '#' && ch >= '0' && ch <= '9'))) {
+                                console.log("cheatquotes[k][j+1]", cheatquotes[k][j + 1])
+                                console.log("cheatquotes[k][j+1] == 0", cheatquotes[k][j + 1] == 0)
+                                if (!cheatquotes[k][j + 1] ) { break FOUNDCHEAT; /*goto FOUNDCHEAT;*/ }
+                                if (j == cheatbuflen - 1) return;
+                            }
+                            else break;
+                        }
+                    }
+
+                    ps[myconnectindex].cheat_phase = 0;
+                    return;
+                }
+
+            //FOUNDCHEAT:
+                {
+                    switch(k)
+                    {
+                        case 0: // cornholio
+                        case 18: // kroz
+
+                            ud.god = 1-ud.god;
+
+                            if(ud.god)
+                            { // set on
+                                pus = 1;
+                                pub = 1;
+                                sprite[ps[myconnectindex].i].cstat = 257;
+
+                                hittype[ps[myconnectindex].i].temp_data[0] = 0;
+                                hittype[ps[myconnectindex].i].temp_data[1] = 0;
+                                hittype[ps[myconnectindex].i].temp_data[2] = 0;
+                                hittype[ps[myconnectindex].i].temp_data[3] = 0;
+                                hittype[ps[myconnectindex].i].temp_data[4] = 0;
+                                hittype[ps[myconnectindex].i].temp_data[5] = 0;
+
+                                sprite[ps[myconnectindex].i].hitag = 0;
+                                sprite[ps[myconnectindex].i].lotag = 0;
+                                sprite[ps[myconnectindex].i].pal =
+                                    ps[myconnectindex].palookup;
+
+                                FTA(17,ps[myconnectindex],1);
+                            }
+                            else // set off
+                            {
+                                ud.god = 0;
+                                sprite[ps[myconnectindex].i].extra = max_player_health;
+                                hittype[ps[myconnectindex].i].extra = -1;
+                                ps[myconnectindex].last_extra = max_player_health;
+                                FTA(18,ps[myconnectindex],1);
+                            }
+
+                            sprite[ps[myconnectindex].i].extra = max_player_health;
+                            hittype[ps[myconnectindex].i].extra = 0;
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+
+                            return;
+
+                        case 1: // stuff
+
+                            if(VOLUMEONE)
+                                j = 6;
+                            else
+                                j = 0;
+
+                            for ( weapon = PISTOL_WEAPON;weapon < MAX_WEAPONS-j;weapon++ )
+                                ps[myconnectindex].gotweapon[weapon]  = 1;
+
+                            for ( weapon = PISTOL_WEAPON;
+                                weapon < (MAX_WEAPONS-j);
+                                weapon++ )
+                                addammo( weapon, ps[myconnectindex], max_ammo_amount[weapon] );
+
+                            ps[myconnectindex].ammo_amount[GROW_WEAPON] = 50;
+
+                            ps[myconnectindex].steroids_amount =         400;
+                            ps[myconnectindex].heat_amount     =        1200;
+                            ps[myconnectindex].boot_amount          =    200;
+                            ps[myconnectindex].shield_amount =           100;
+                            ps[myconnectindex].scuba_amount =            6400;
+                            ps[myconnectindex].holoduke_amount =         2400;
+                            ps[myconnectindex].jetpack_amount =          1600;
+                            ps[myconnectindex].firstaid_amount =         max_player_health;
+
+                            ps[myconnectindex].got_access =              7;
+                            FTA(5,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].inven_icon = 1;
+                            return;
+
+                        case 2:  // dnscotty###
+                        case 10: // skill#
+
+                            if(k == 2)
+                            {
+                                var volnume,levnume;
+                                volnume = cheatbuf[6] - '0';
+                                levnume = (cheatbuf[7] - '0')*10+(cheatbuf[8]-'0');
+
+                                volnume--;
+                                levnume--;
+                                if (VOLUMEONE)
+                                {
+                                    if( volnume > 0 )
+                                    {
+                                        ps[myconnectindex].cheat_phase = 0;
+                                        KB.flushKeyboardQueue();
+                                        return;
+                                    }
+                                }
+
+                                if((volnume > 4)&&PLUTOPAK)
+                                {
+                                    ps[myconnectindex].cheat_phase = 0;
+                                    KB.flushKeyboardQueue();
+                                    return;
+                                }
+                                else
+
+                                    if((volnume > 3)&&!PLUTOPAK)
+                                    {
+                                        ps[myconnectindex].cheat_phase = 0;
+                                        KB.flushKeyboardQueue();
+                                        return;
+                                    }
+                                    else
+
+                                        if(volnume == 0)
+                                        {
+                                            if(levnume > 5)
+                                            {
+                                                ps[myconnectindex].cheat_phase = 0;
+                                                KB.flushKeyboardQueue();
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if(levnume >= 11)
+                                            {
+                                                ps[myconnectindex].cheat_phase = 0;
+                                                KB.flushKeyboardQueue();
+                                                return;
+                                            }
+                                        }
+
+                                ud.m_volume_number = ud.volume_number = volnume;
+                                ud.m_level_number = ud.level_number = levnume;
+
+                            }
+                            else ud.m_player_skill = ud.player_skill =
+                                cheatbuf[5] - '1';
+
+                            if(numplayers > 1 && myconnectindex == connecthead)
+                            {
+                                tempbuf[0] = 5;
+                                tempbuf[1] = ud.m_level_number;
+                                tempbuf[2] = ud.m_volume_number;
+                                tempbuf[3] = ud.m_player_skill;
+                                tempbuf[4] = ud.m_monsters_off;
+                                tempbuf[5] = ud.m_respawn_monsters;
+                                tempbuf[6] = ud.m_respawn_items;
+                                tempbuf[7] = ud.m_respawn_inventory;
+                                tempbuf[8] = ud.m_coop;
+                                tempbuf[9] = ud.m_marker;
+                                tempbuf[10] = ud.m_ffire;
+
+                                throw "todo sendpacket stuff"
+                                //////for(i=connecthead;i>=0;i=connectpoint2[i])
+                                //////    sendpacket(i,(uint8_t*)tempbuf,11);
+                            }
+                            else ps[myconnectindex].gm |= MODE_RESTART;
+
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 3: // coords
+                            ps[myconnectindex].cheat_phase = 0;
+                            ud.coords = 1-ud.coords;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 4: // view
+                            if( ps[myconnectindex].over_shoulder_on )
+                                ps[myconnectindex].over_shoulder_on = 0;
+                            else
+                            {
+                                ps[myconnectindex].over_shoulder_on = 1;
+                                cameradist = 0;
+                                cameraclock = totalclock;
+                            }
+                            // FTA(22,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 5: // time
+                            // FTA(21,ps[myconnectindex]);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 6: // unlock
+                            for(i=numsectors-1;i>=0;i--) //Unlock
+                            {
+                                j = sector[i].lotag;
+                                if(j == -1 || j == 32767) continue;
+                                if( (j & 0x7fff) > 2 )
+                                {
+                                    if( j&(0xffff-16384) )
+                                        sector[i].lotag &= (0xffff-16384);
+                                    operatesectors(i,ps[myconnectindex].i);
+                                }
+                            }
+                            operateforcefields(ps[myconnectindex].i,-1);
+
+                            FTA(100,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 7: // cashman
+                            ud.cashman = 1-ud.cashman;
+                            KB.clearKeyDown(sc_N);
+                            ps[myconnectindex].cheat_phase = 0;
+                            return;
+
+                        case 8: // items
+                            ps[myconnectindex].steroids_amount =         400;
+                            ps[myconnectindex].heat_amount     =        1200;
+                            ps[myconnectindex].boot_amount          =    200;
+                            ps[myconnectindex].shield_amount =           100;
+                            ps[myconnectindex].scuba_amount =            6400;
+                            ps[myconnectindex].holoduke_amount =         2400;
+                            ps[myconnectindex].jetpack_amount =          1600;
+
+                            ps[myconnectindex].firstaid_amount =         max_player_health;
+                            ps[myconnectindex].got_access =              7;
+                            FTA(5,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 9: // rate
+                            ud.tickrate ^= 1;
+                            vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 11: // beta
+                            FTA(105,ps[myconnectindex],1);
+                            KB.clearKeyDown(sc_H);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 12: // hyper
+                            ps[myconnectindex].steroids_amount = 399;
+                            ps[myconnectindex].heat_amount = 1200;
+                            ps[myconnectindex].cheat_phase = 0;
+                            FTA(37,ps[myconnectindex],1);
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 13: // monsters
+                            if(actor_tog == 3) actor_tog = 0;
+                            actor_tog++;
+                            ps[screenpeek].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 14: // <RESERVED>
+                        case 25: // ??
+                            ud.eog = 1;
+                            ps[myconnectindex].gm |= MODE_EOL;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 15: // <RESERVED>
+                            ps[myconnectindex].gm = MODE_EOL;
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 16: // todd
+                            FTA(99,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 17: // showmap
+                            ud.showallmap = 1-ud.showallmap;
+                            if(ud.showallmap)
+                            {
+                                for(i=0;i<(MAXSECTORS>>3);i++)
+                                    show2dsector[i] = 255;
+                                for(i=0;i<(MAXWALLS>>3);i++)
+                                    show2dwall[i] = 255;
+                                FTA(111,ps[myconnectindex],1);
+                            }
+                            else
+                            {
+                                for(i=0;i<(MAXSECTORS>>3);i++)
+                                    show2dsector[i] = 0;
+                                for(i=0;i<(MAXWALLS>>3);i++)
+                                    show2dwall[i] = 0;
+                                FTA(1,ps[myconnectindex],1);
+                            }
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.flushKeyboardQueue();
+                            return;
+
+                        case 19: // allen
+                            FTA(79,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            KB.clearKeyDown(sc_N);
+                            return;
+
+                        case 20: // clip
+                            ud.clipping = 1-ud.clipping;
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].cheat_phase = 0;
+                            FTA(112+ud.clipping,ps[myconnectindex],1);
+                            return;
+
+                        case 21: // weapons
+                            if(VOLUMEONE)
+                                j = 6;
+                            else
+                                j = 0;
+
+                            for ( weapon = PISTOL_WEAPON;weapon < MAX_WEAPONS-j;weapon++ )
+                            {
+                                addammo( weapon, ps[myconnectindex], max_ammo_amount[weapon] );
+                                ps[myconnectindex].gotweapon[weapon]  = 1;
+                            }
+
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].cheat_phase = 0;
+                            FTA(119,ps[myconnectindex],1);
+                            return;
+
+                        case 22: // inventory
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].cheat_phase = 0;
+                            ps[myconnectindex].steroids_amount =         400;
+                            ps[myconnectindex].heat_amount     =        1200;
+                            ps[myconnectindex].boot_amount          =    200;
+                            ps[myconnectindex].shield_amount =           100;
+                            ps[myconnectindex].scuba_amount =            6400;
+                            ps[myconnectindex].holoduke_amount =         2400;
+                            ps[myconnectindex].jetpack_amount =          1600;
+                            ps[myconnectindex].firstaid_amount =         max_player_health;
+                            FTA(120,ps[myconnectindex],1);
+                            ps[myconnectindex].cheat_phase = 0;
+                            return;
+
+                        case 23: // keys
+                            ps[myconnectindex].got_access =              7;
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].cheat_phase = 0;
+                            FTA(121,ps[myconnectindex],1);
+                            return;
+
+                        case 24: // debug
+                            debug_on = 1-debug_on;
+                            KB.flushKeyboardQueue();
+                            ps[myconnectindex].cheat_phase = 0;
+                            break;
+                    }
+                }
+        }
+    }
+
+    else
+    {
+        if( KB.keyPressed(sc_D) )
+        {
+            if( ps[myconnectindex].cheat_phase >= 0 && numplayers < 2 && ud.recstat == 0)
+                ps[myconnectindex].cheat_phase = -1;
+        }
+
+        if( KB.keyPressed(sc_N) )
+        {
+            if( ps[myconnectindex].cheat_phase == -1 )
+            {
+                if(ud.player_skill == 4)
+                {
+                    FTA(22,ps[myconnectindex],1);
+                    ps[myconnectindex].cheat_phase = 0;
+                }
+                else
+                {
+                    ps[myconnectindex].cheat_phase = 1;
+                    //                    FTA(25,ps[myconnectindex]);
+                    cheatbuflen = 0;
+                }
+                KB.flushKeyboardQueue();
+            }
+            else if(ps[myconnectindex].cheat_phase != 0)
+            {
+                ps[myconnectindex].cheat_phase = 0;
+                KB.clearKeyDown(sc_D);
+                KB.clearKeyDown(sc_N);
+            }
+        }
+    }
 }
 
 //6626
@@ -4570,7 +5127,7 @@ function nonsharedkeys()
     
     //if( KB.keyPressed( sc_F12 ) )
     //{
-    //    KB_ClearKeyDown( sc_F12 );
+    //    KB.clearKeyDown( sc_F12 );
     //    takescreenshot();
     //    // FTA(103,ps[myconnectindex]); done better in takescreenshot()
     //}
@@ -4664,16 +5221,16 @@ function nonsharedkeys()
     //if( SHIFTS_IS_PRESSED || ALT_IS_PRESSED )
     //{
     //    i = 0;
-    //    if( KB.keyPressed( sc_F1) ) { KB_ClearKeyDown(sc_F1);i = 1; }
-    //    if( KB.keyPressed( sc_F2) ) { KB_ClearKeyDown(sc_F2);i = 2; }
-    //    if( KB.keyPressed( sc_F3) ) { KB_ClearKeyDown(sc_F3);i = 3; }
-    //    if( KB.keyPressed( sc_F4) ) { KB_ClearKeyDown(sc_F4);i = 4; }
-    //    if( KB.keyPressed( sc_F5) ) { KB_ClearKeyDown(sc_F5);i = 5; }
-    //    if( KB.keyPressed( sc_F6) ) { KB_ClearKeyDown(sc_F6);i = 6; }
-    //    if( KB.keyPressed( sc_F7) ) { KB_ClearKeyDown(sc_F7);i = 7; }
-    //    if( KB.keyPressed( sc_F8) ) { KB_ClearKeyDown(sc_F8);i = 8; }
-    //    if( KB.keyPressed( sc_F9) ) { KB_ClearKeyDown(sc_F9);i = 9; }
-    //    if( KB.keyPressed( sc_F10) ) {KB_ClearKeyDown(sc_F10);i = 10; }
+    //    if( KB.keyPressed( sc_F1) ) { KB.clearKeyDown(sc_F1);i = 1; }
+    //    if( KB.keyPressed( sc_F2) ) { KB.clearKeyDown(sc_F2);i = 2; }
+    //    if( KB.keyPressed( sc_F3) ) { KB.clearKeyDown(sc_F3);i = 3; }
+    //    if( KB.keyPressed( sc_F4) ) { KB.clearKeyDown(sc_F4);i = 4; }
+    //    if( KB.keyPressed( sc_F5) ) { KB.clearKeyDown(sc_F5);i = 5; }
+    //    if( KB.keyPressed( sc_F6) ) { KB.clearKeyDown(sc_F6);i = 6; }
+    //    if( KB.keyPressed( sc_F7) ) { KB.clearKeyDown(sc_F7);i = 7; }
+    //    if( KB.keyPressed( sc_F8) ) { KB.clearKeyDown(sc_F8);i = 8; }
+    //    if( KB.keyPressed( sc_F9) ) { KB.clearKeyDown(sc_F9);i = 9; }
+    //    if( KB.keyPressed( sc_F10) ) {KB.clearKeyDown(sc_F10);i = 10; }
 
     //    if(i)
     //    {
@@ -4761,7 +5318,7 @@ function nonsharedkeys()
 
     //    if( ud.multimode > 1 && ACTION(gamefunc_SendMessage) )
     //    {
-    //        KB_FlushKeyboardQueue();
+    //        KB.flushKeyboardQueue();
     //        CONTROL_ClearAction( gamefunc_SendMessage );
     //        ps[myconnectindex].gm |= MODE_TYPE;
     //        typebuf[0] = 0;
@@ -4770,10 +5327,10 @@ function nonsharedkeys()
 
     //    if( KB.keyPressed(sc_F1) || ( ud.show_help && ( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) ) ) )
     //    {
-    //        KB_ClearKeyDown(sc_F1);
-    //        KB_ClearKeyDown(sc_Space);
-    //        KB_ClearKeyDown(sc_kpad_Enter);
-    //        KB_ClearKeyDown(sc_Enter);
+    //        KB.clearKeyDown(sc_F1);
+    //        KB.clearKeyDown(sc_Space);
+    //        KB.clearKeyDown(sc_kpad_Enter);
+    //        KB.clearKeyDown(sc_Enter);
     //        ud.show_help ++;
 
     //        if( ud.show_help > 2 )
@@ -4797,7 +5354,7 @@ function nonsharedkeys()
     //    {
     //        if(ud.recstat != 2 && KB.keyPressed( sc_F2 ) )
     //        {
-    //            KB_ClearKeyDown( sc_F2 );
+    //            KB.clearKeyDown( sc_F2 );
 
     //            if(movesperpacket == 4 && connecthead != myconnectindex)
     //                return;
@@ -4829,7 +5386,7 @@ function nonsharedkeys()
 
     //        if(KB.keyPressed( sc_F3 ))
     //        {
-    //            KB_ClearKeyDown( sc_F3 );
+    //            KB.clearKeyDown( sc_F3 );
 
     //            if(movesperpacket == 4 && connecthead != myconnectindex)
     //                return;
@@ -4851,7 +5408,7 @@ function nonsharedkeys()
 
     //    if(KB.keyPressed( sc_F4 ) && FXDevice != NumSoundCards )
     //    {
-    //        KB_ClearKeyDown( sc_F4 );
+    //        KB.clearKeyDown( sc_F4 );
     //        FX_StopAllSounds();
     //        clearsoundlocks();
 
@@ -4867,14 +5424,14 @@ function nonsharedkeys()
 
     //    if( KB.keyPressed( sc_F6 ) && (ps[myconnectindex].gm&MODE_GAME))
     //    {
-    //        KB_ClearKeyDown( sc_F6 );
+    //        KB.clearKeyDown( sc_F6 );
 
     //        if(movesperpacket == 4 && connecthead != myconnectindex)
     //            return;
 
     //        if(lastsavedpos == -1) goto FAKE_F2;
 
-    //        KB_FlushKeyboardQueue();
+    //        KB.flushKeyboardQueue();
 
     //        if(sprite[ps[myconnectindex].i].extra <= 0)
     //        {
@@ -4905,7 +5462,7 @@ function nonsharedkeys()
 
     //    if(KB.keyPressed( sc_F7 ) )
     //    {
-    //        KB_ClearKeyDown(sc_F7);
+    //        KB.clearKeyDown(sc_F7);
     //        if( ps[myconnectindex].over_shoulder_on )
     //            ps[myconnectindex].over_shoulder_on = 0;
     //        else
@@ -4919,7 +5476,7 @@ function nonsharedkeys()
 
     //    if( KB.keyPressed( sc_F5 ) && MusicDevice != NumSoundCards )
     //    {
-    //        KB_ClearKeyDown( sc_F5 );
+    //        KB.clearKeyDown( sc_F5 );
     //        strcpy(text,&music_fn[0][music_select][0]);
     //        strcat(text,".  USE SHIFT-F5 TO CHANGE.");
     //        strcpy(fta_quotes[26],text);
@@ -4929,14 +5486,14 @@ function nonsharedkeys()
 
     //    if(KB.keyPressed( sc_F8 ))
     //    {
-    //        KB_ClearKeyDown( sc_F8 );
+    //        KB.clearKeyDown( sc_F8 );
     //        ud.fta_on = !ud.fta_on;
     //        FTA(24-ud.fta_on,ps[myconnectindex],1);
     //    }
 
     //    if(KB.keyPressed( sc_F9 ) && (ps[myconnectindex].gm&MODE_GAME) )
     //    {
-    //        KB_ClearKeyDown( sc_F9 );
+    //        KB.clearKeyDown( sc_F9 );
 
     //        if(movesperpacket == 4 && myconnectindex != connecthead)
     //            return;
@@ -4955,7 +5512,7 @@ function nonsharedkeys()
 
     //    if(KB.keyPressed( sc_F10 ))
     //    {
-    //        KB_ClearKeyDown( sc_F10 );
+    //        KB.clearKeyDown( sc_F10 );
     //        cmenu(500);
     //        FX_StopAllSounds();
     //        clearsoundlocks();
@@ -5021,7 +5578,7 @@ function nonsharedkeys()
 
     //if(KB.keyPressed( sc_F11 ))
     //{
-    //    KB_ClearKeyDown( sc_F11 );
+    //    KB.clearKeyDown( sc_F11 );
     //    // FIX_00030: Brightness step was not the same from the keys vs menu 
     //    if(SHIFTS_IS_PRESSED) ud.brightness-=8; // Keyboard step must be 8, as the brightness cursor step.
     //    else ud.brightness+=8;
@@ -5761,7 +6318,7 @@ Game.playBack = function () {
                         //    CONTROL_GetInput( &noshareinfo );
                         //    if( ACTION(gamefunc_SendMessage) )
                         //    {
-                        //        KB_FlushKeyboardQueue();
+                        //        KB.flushKeyboardQueue();
                         //        CONTROL_ClearAction( gamefunc_SendMessage );
                         //        ps[myconnectindex].gm = MODE_TYPE;
                         //        typebuf[0] = 0;

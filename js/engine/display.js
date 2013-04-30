@@ -44,7 +44,7 @@ function _platform_init(argc, argv, title, iconName) {
     scancodes[27] = 0x01; // Esc
     scancodes[48] = 0x02; // 0 
     scancodes[49] = 0x03; // 1
-    scancodes[50] = 0x04; // 2z
+    scancodes[50] = 0x04; // 2
     scancodes[51] = 0x05; // 3
     scancodes[52] = 0x06; // 4
     scancodes[53] = 0x07; // 5
@@ -52,98 +52,98 @@ function _platform_init(argc, argv, title, iconName) {
     scancodes[55] = 0x09; // 7
     scancodes[56] = 0x0A; // 8
     scancodes[57] = 0x0B; // 9
-    //scancodes[SDLK_MINUS] = 0x0C; /* was 0x4A */
-    //scancodes[SDLK_EQUALS] = 0x0D; /* was 0x4E */
-    //scancodes[SDLK_BACKSPACE] = 0x0E;
-    //scancodes[SDLK_TAB] = 0x0F;
-    //scancodes[SDLK_q] = 0x10;
-    //scancodes[SDLK_w] = 0x11;
-    //scancodes[SDLK_e] = 0x12;
-    //scancodes[SDLK_r] = 0x13;
-    //scancodes[SDLK_t] = 0x14;
-    scancodes[89] = 0x15; //SDLK_y
-    //scancodes[SDLK_u] = 0x16;
-    //scancodes[SDLK_i] = 0x17;
-    //scancodes[SDLK_o] = 0x18;
-    //scancodes[SDLK_p] = 0x19;
-    //scancodes[SDLK_LEFTBRACKET] = 0x1A;
-    //scancodes[SDLK_RIGHTBRACKET] = 0x1B;
+    scancodes[189] = 0x0C; /* was 0x4A */ // SDLK_MINUS
+    scancodes[187] = 0x0D; /* was 0x4E */ // SDLK_EQUALS
+    scancodes[8] = 0x0E; // SDLK_BACKSPACE
+    scancodes[9] = 0x0F; // SDLK_TAB
+    scancodes[81] = 0x10; // SDLK_q
+    scancodes[87] = 0x11; // SDLK_w
+    scancodes[69] = 0x12; // SDLK_e
+    scancodes[82] = 0x13; // SDLK_r
+    scancodes[84] = 0x14; // SDLK_t
+    scancodes[89] = 0x15; // SDLK_y
+    scancodes[85] = 0x16; // SDLK_u
+    scancodes[73] = 0x17; // SDLK_i
+    scancodes[79] = 0x18; // SDLK_o
+    scancodes[80] = 0x19; // SDLK_p
+    scancodes[219] = 0x1A; // SDLK_LEFTBRACKET
+    scancodes[221] = 0x1B; // SDLK_RIGHTBRACKET
     scancodes[13] = 0x1C; // Return/enter
-    scancodes[17] = 0x1D; //SDLK_LCTRL
-    scancodes[65] = 0x1E; //SDLK_a
-    scancodes[83] = 0x1F; //SDLK_s
-    scancodes[68] = 0x20; //SDLK_d
-    scancodes[70] = 0x21;//SDLK_f
-    scancodes[71] = 0x22;//SDLK_g
-    scancodes[72] = 0x23;//SDLK_h
-    scancodes[74] = 0x24;//SDLK_j
-    scancodes[75] = 0x25;//SDLK_k
-    scancodes[76] = 0x26;//SDLK_l
-    scancodes[186] = 0x27;//SDLK_SEMICOLON
-    //scancodes[SDLK_QUOTE] = 0x28;
-    //scancodes[SDLK_BACKQUOTE] = 0x29;
-    scancodes[16] = 0x2A; //SDLK_LSHIFT
-    //scancodes[SDLK_BACKSLASH] = 0x2B;
-    scancodes[90] = 0x2C;//SDLK_z
-    scancodes[88] = 0x2D;//SDLK_x
-    scancodes[67] = 0x2E; //SDLK_c
-    scancodes[86] = 0x2F; //SDLK_v
-    scancodes[66] = 0x30; //SDLK_b
-    scancodes[78] = 0x31;//SDLK_n
-    //scancodes[SDLK_m] = 0x32;
-    //scancodes[SDLK_COMMA] = 0x33;
-    //scancodes[SDLK_PERIOD] = 0x34;
-    //scancodes[SDLK_SLASH] = 0x35;
-    //scancodes[SDLK_RSHIFT] = 0x36;
-    //scancodes[SDLK_KP_MULTIPLY] = 0x37;
-    //scancodes[SDLK_LALT] = 0x38;
-    scancodes[32] = 0x39; //SDLK_SPACE
-    scancodes[20] = 0x3A;//SDLK_CAPSLOCK
-    //scancodes[SDLK_F1] = 0x3B;
-    //scancodes[SDLK_F2] = 0x3C;
-    //scancodes[SDLK_F3] = 0x3D;
-    //scancodes[SDLK_F4] = 0x3E;
-    //scancodes[SDLK_F5] = 0x3F;
-    //scancodes[SDLK_F6] = 0x40;
-    //scancodes[SDLK_F7] = 0x41;
-    //scancodes[SDLK_F8] = 0x42;
-    //scancodes[SDLK_F9] = 0x43;
-    //scancodes[SDLK_F10] = 0x44;
-    //scancodes[SDLK_NUMLOCK] = 0x45;
-    //scancodes[SDLK_SCROLLOCK] = 0x46;
-    //scancodes[SDLK_KP7] = 0x47;
-    //scancodes[SDLK_KP8] = 0x48;
-    //scancodes[SDLK_KP9] = 0x49;
-    //scancodes[SDLK_KP_MINUS] = 0x4A;
-    //scancodes[SDLK_KP4] = 0x4B;
-    //scancodes[SDLK_KP5] = 0x4C;
-    //scancodes[SDLK_KP6] = 0x4D;
-    //scancodes[SDLK_KP_PLUS] = 0x4E;
-    //scancodes[SDLK_KP1] = 0x4F;
-    //scancodes[SDLK_KP2] = 0x50;
-    //scancodes[SDLK_KP3] = 0x51;
-    //scancodes[SDLK_KP0] = 0x52;
-    //scancodes[SDLK_KP_PERIOD] = 0x53;
-    //scancodes[SDLK_F11] = 0x57;
-    //scancodes[SDLK_F12] = 0x58;
-    //scancodes[SDLK_PAUSE] = 0x59; /* SBF - technically incorrect */
+    scancodes[17] = 0x1D; // SDLK_LCTRL
+    scancodes[65] = 0x1E; // SDLK_a
+    scancodes[83] = 0x1F; // SDLK_s
+    scancodes[68] = 0x20; // SDLK_d
+    scancodes[70] = 0x21; // SDLK_f
+    scancodes[71] = 0x22; // SDLK_g
+    scancodes[72] = 0x23; // SDLK_h
+    scancodes[74] = 0x24; // SDLK_j
+    scancodes[75] = 0x25; // SDLK_k
+    scancodes[76] = 0x26; // SDLK_l
+    scancodes[186] = 0x27; // SDLK_SEMICOLON
+    scancodes[192] = 0x28; // SDLK_QUOTE
+    scancodes[223] = 0x29; // SDLK_BACKQUOTE
+    scancodes[16] = 0x2A; // SDLK_LSHIFT
+    scancodes[220] = 0x2B; // SDLK_BACKSLASH
+    scancodes[90] = 0x2C; // SDLK_z
+    scancodes[88] = 0x2D; // SDLK_x
+    scancodes[67] = 0x2E; // SDLK_c
+    scancodes[86] = 0x2F; // SDLK_v
+    scancodes[66] = 0x30; // SDLK_b
+    scancodes[78] = 0x31; // SDLK_n
+    scancodes[77] = 0x32; // SDLK_m
+    scancodes[188] = 0x33; // SDLK_COMMA
+    scancodes[190] = 0x34; // SDLK_PERIOD
+    scancodes[191] = 0x35; // SDLK_SLASH
+    scancodes[16] = 0x36; // SDLK_RSHIFT
+    scancodes[106] = 0x37; // SDLK_KP_MULTIPLY
+    scancodes[18] = 0x38; // SDLK_LALT
+    scancodes[32] = 0x39; // SDLK_SPACE
+    scancodes[20] = 0x3A; // SDLK_CAPSLOCK
+    scancodes[112] = 0x3B; // SDLK_F1
+    scancodes[113] = 0x3C; // SDLK_F2
+    scancodes[114] = 0x3D; // SDLK_F3
+    scancodes[115] = 0x3E; // SDLK_F4
+    scancodes[116] = 0x3F;  // SDLK_F5
+    scancodes[117] = 0x40; // SDLK_F6
+    scancodes[118] = 0x41; // SDLK_F7
+    scancodes[119] = 0x42; // SDLK_F8
+    scancodes[120] = 0x43; // SDLK_F9 (same as print?)
+    scancodes[121] = 0x44; // SDLK_F10
+    scancodes[144] = 0x45; // SDLK_NUMLOCK
+    scancodes[145] = 0x46; // SDLK_SCROLLOCK
+    scancodes[103] = 0x47; // SDLK_KP
+    scancodes[104] = 0x48; // SDLK_KP
+    scancodes[105] = 0x49; // SDLK_KP
+    scancodes[109] = 0x4A; // SDLK_KP_MINUS
+    scancodes[100] = 0x4B; // SDLK_KP4
+    scancodes[101] = 0x4C; // SDLK_KP5
+    scancodes[102] = 0x4D; // SDLK_KP6
+    scancodes[107] = 0x4E; // SDLK_KP_PLUS
+    scancodes[97] = 0x4F; // SDLK_KP1
+    scancodes[98] = 0x50; // SDLK_KP2
+    scancodes[99] = 0x51; // SDLK_KP3
+    scancodes[96] = 0x52; // SDLK_KP0
+    scancodes[110] = 0x53; //SDLK_KP_PERIOD
+    scancodes[122] = 0x57; // SDLK_F11
+    scancodes[123] = 0x58; // SDLK_F12
+    scancodes[19] = 0x59; /* SBF - technically incorrect - SDL */ // SDLK_PAUSE
 
     scancodes[13] = 0xE01C; // Return/enter
-    scancodes[17] = 0xE01D; // SDLK_RCTRL
-    //scancodes[SDLK_KP_DIVIDE] = 0xE035;
+    //scancodes[17] = 0xE01D; // SDLK_RCTRL 
+    scancodes[111] = 0xE035; // SDLK_KP_DIVIDE
     //scancodes[SDLK_PRINT] = 0xE037; /* SBF - technically incorrect */
     //scancodes[SDLK_SYSREQ] = 0xE037; /* SBF - for windows... */
-    //scancodes[SDLK_RALT] = 0xE038;
-    //scancodes[SDLK_HOME] = 0xE047;
+    //scancodes[SDLK_RALT] = 0xE038; //fires off 17 (breaking LCTRL) and 18 too (chrome)?
+    scancodes[36] = 0xE047; // SDLK_HOME
     scancodes[38] = 0xE048; // Up
-    //scancodes[SDLK_PAGEUP] = 0xE049;
+    scancodes[33] = 0xE049; // SDLK_PAGEUP
     scancodes[37] = 0xE04B; // Left
     scancodes[39] = 0xE04D; // Right
-    //scancodes[SDLK_END] = 0xE04F;
+    scancodes[35] = 0xE04F; // SDLK_END
     scancodes[40] = 0xE050; // Down
-    //scancodes[SDLK_PAGEDOWN] = 0xE051;
-    //scancodes[SDLK_INSERT] = 0xE052;
-    //scancodes[SDLK_DELETE] = 0xE053;
+    scancodes[34] = 0xE051; // SDLK_PAGEDOWN
+    scancodes[45] = 0xE052; // SDLK_INSERT
+    scancodes[46] = 0xE053; // SDLK_DELETE
 }
 
 // 226
@@ -420,6 +420,10 @@ PointerHelper.prototype.setByte = function (v) {
     this.array[this.position] = v;
 };
 
+PointerHelper.prototype.setByteOffset = function (v, offset) {
+    this.array[this.position + offset] = v;
+};
+
 PointerHelper.prototype.getByte = function (offset) {
     return this.array[this.position + (offset || 0)];
 };
@@ -441,6 +445,12 @@ PointerHelper.prototype.setInt32 = function (v) {
         this.int32Array = new Int32Array(this.array.buffer);
     this.int32Array[(this.position / 4) | 0] = v;
 };
+
+
+function _updateScreenRect(/*int32_t x, int32_t y, int32_t w, int32_t h*/) {
+    //SDL_UpdateRect(surface, x, y, w, h);
+    updateCanvas();
+}
 
 function _nextpage() {
     var ticks;

@@ -139,9 +139,9 @@ var KB_LastScan;
 
 var keyIsWaiting = false;
 
-//static uint8_t  scancodeToASCII[ MAXKEYBOARDSCAN ];
-//static uint8_t  shiftedScancodeToASCII[ MAXKEYBOARDSCAN ];
-//static uint8_t  extscanToSC[ MAXKEYBOARDSCAN ];
+var scancodeToASCII = new Uint8Array(MAXKEYBOARDSCAN);
+var shiftedScancodeToASCII = new Uint8Array(MAXKEYBOARDSCAN);
+var extscanToSC = new Uint8Array(MAXKEYBOARDSCAN);
 
 var events = [];
 
@@ -152,8 +152,8 @@ var SDL_PRESSED = 1;
 
 var SDL_NOEVENT = 0, /**< Unused (do not remove) */
     SDL_ACTIVEEVENT = 1, /**< Application loses/gains visibility */
-    SDL_KEYDOWN = "2 SDL_KEYDOWN", /**< Keys pressed */
-    SDL_KEYUP = "3 SDL_KEYUP", /**< Keys released */
+    SDL_KEYDOWN = 2,//"2 SDL_KEYDOWN", /**< Keys pressed */
+    SDL_KEYUP = 3,//"3 SDL_KEYUP", /**< Keys released */
     SDL_MOUSEMOTION = 4, /**< Mouse moved */
     SDL_MOUSEBUTTONDOWN = 5, /**< Mouse button pressed */
     SDL_MOUSEBUTTONUP = 6, /**< Mouse button released */
@@ -189,7 +189,7 @@ window.onkeydown = function (e) {
     }
     lastEvent = e;
     heldKeys[e.keyCode] = true;
-    //console.log("keydown", e.keyCode);
+    console.log("keydown", e.keyCode);
     events.push({ type: SDL_KEYDOWN, key: { type: SDL_KEYDOWN, keyCode: e.keyCode, state: SDL_PRESSED } });
     //sdl_key_filter(e, false);
 };
@@ -258,9 +258,8 @@ function keyhandler() {
         return;
     }
 
-    if (pressed)
-    {
-         KB.lastScan = lastkey;
+    if (pressed) {
+        KB_LastScan = lastkey;
     }
 
     KB.keyDown[lastkey] = pressed;
@@ -417,13 +416,171 @@ function KB_StringToScanCode(string) {
 
 //297
 KB.startup = function () {
-    // todo
+    var i;
+    for (i = 0; i < scancodeToASCII.length; i++) {
+        scancodeToASCII[i] = 0xFF;
+    }
+    
+    // !!! FIXME: incomplete?
+    scancodeToASCII[sc_A] = 'a'.charCodeAt(0);
+    scancodeToASCII[sc_B] = 'b'.charCodeAt(0);
+    scancodeToASCII[sc_C] = 'c'.charCodeAt(0);
+    scancodeToASCII[sc_D] = 'd'.charCodeAt(0);
+    scancodeToASCII[sc_E] = 'e'.charCodeAt(0);
+    scancodeToASCII[sc_F] = 'f'.charCodeAt(0);
+    scancodeToASCII[sc_G] = 'g'.charCodeAt(0);
+    scancodeToASCII[sc_H] = 'h'.charCodeAt(0);
+    scancodeToASCII[sc_I] = 'i'.charCodeAt(0);
+    scancodeToASCII[sc_J] = 'j'.charCodeAt(0);
+    scancodeToASCII[sc_K] = 'k'.charCodeAt(0);
+    scancodeToASCII[sc_L] = 'l'.charCodeAt(0);
+    scancodeToASCII[sc_M] = 'm'.charCodeAt(0);
+    scancodeToASCII[sc_N] = 'n'.charCodeAt(0);
+    scancodeToASCII[sc_O] = 'o'.charCodeAt(0);
+    scancodeToASCII[sc_P] = 'p'.charCodeAt(0);
+    scancodeToASCII[sc_Q] = 'q'.charCodeAt(0);
+    scancodeToASCII[sc_R] = 'r'.charCodeAt(0);
+    scancodeToASCII[sc_S] = 's'.charCodeAt(0);
+    scancodeToASCII[sc_T] = 't'.charCodeAt(0);
+    scancodeToASCII[sc_U] = 'u'.charCodeAt(0);
+    scancodeToASCII[sc_V] = 'v'.charCodeAt(0);
+    scancodeToASCII[sc_W] = 'w'.charCodeAt(0);
+    scancodeToASCII[sc_X] = 'x'.charCodeAt(0);
+    scancodeToASCII[sc_Y] = 'y'.charCodeAt(0);
+    scancodeToASCII[sc_Z] = 'z'.charCodeAt(0);
+    scancodeToASCII[sc_0] = '0'.charCodeAt(0);
+    scancodeToASCII[sc_1] = '1'.charCodeAt(0);
+    scancodeToASCII[sc_2] = '2'.charCodeAt(0);
+    scancodeToASCII[sc_3] = '3'.charCodeAt(0);
+    scancodeToASCII[sc_4] = '4'.charCodeAt(0);
+    scancodeToASCII[sc_5] = '5'.charCodeAt(0);
+    scancodeToASCII[sc_6] = '6'.charCodeAt(0);
+    scancodeToASCII[sc_7] = '7'.charCodeAt(0);
+    scancodeToASCII[sc_8] = '8'.charCodeAt(0);
+    scancodeToASCII[sc_9] = '9'.charCodeAt(0);
+    scancodeToASCII[sc_Escape] = asc_Escape;
+    scancodeToASCII[sc_Tab] = asc_Tab;
+    scancodeToASCII[sc_Space] = asc_Space;
+    scancodeToASCII[sc_Enter] = asc_Enter;
+    scancodeToASCII[sc_BackSpace] = asc_BackSpace;
+    scancodeToASCII[sc_Comma] = ','.charCodeAt(0);
+    scancodeToASCII[sc_Period] = '.'.charCodeAt(0);
+    scancodeToASCII[sc_Kpad_Star] = '*'.charCodeAt(0);
+    scancodeToASCII[sc_Slash] = '/'.charCodeAt(0);
+    scancodeToASCII[sc_SemiColon] = '.charCodeAt(0);'.charCodeAt(0);
+    scancodeToASCII[sc_Quote] = '\''.charCodeAt(0);
+    scancodeToASCII[sc_Tilde] = '`'.charCodeAt(0);
+    scancodeToASCII[sc_BackSlash] = '\\'.charCodeAt(0);
+    scancodeToASCII[sc_OpenBracket] = '['.charCodeAt(0);
+    scancodeToASCII[sc_CloseBracket] = ']'.charCodeAt(0);
+    scancodeToASCII[sc_Minus] = '-'.charCodeAt(0);
+    scancodeToASCII[sc_Equals] = '='.charCodeAt(0);
+    scancodeToASCII[sc_Plus] = '+'.charCodeAt(0);
+    scancodeToASCII[sc_kpad_Minus] = '-'.charCodeAt(0);
+    scancodeToASCII[sc_kpad_Period] = '.'.charCodeAt(0);
+    scancodeToASCII[sc_kpad_Plus] = '+'.charCodeAt(0);
+
+    // !!! FIXME: incomplete?
+    for (i = 0; i < shiftedScancodeToASCII.length; i++) {
+        shiftedScancodeToASCII[i] = 0xFF;
+    }
+    shiftedScancodeToASCII[sc_A] = 'A'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_B] = 'B'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_C] = 'C'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_D] = 'D'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_E] = 'E'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_F] = 'F'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_G] = 'G'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_H] = 'H'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_I] = 'I'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_J] = 'J'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_K] = 'K'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_L] = 'L'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_M] = 'M'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_N] = 'N'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_O] = 'O'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_P] = 'P'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Q] = 'Q'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_R] = 'R'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_S] = 'S'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_T] = 'T'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_U] = 'U'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_V] = 'V'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_W] = 'W'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_X] = 'X'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Y] = 'Y'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Z] = 'Z'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_0] = ')'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_1] = '!'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_2] = '@'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_3] = '#'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_4] = '$'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_5] = '%'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_6] = '^'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_7] = '&'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_8] = '*'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_9] = '('.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Comma] = '<'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Period] = '>'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Kpad_Star] = '*'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Slash] = '?'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_SemiColon] = ':'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Quote] = '\"'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Tilde] = '~'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_BackSlash] = '|'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_OpenBracket] = '{'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_CloseBracket] = '}'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Minus] = '_'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Equals] = '+'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_Plus] = '+'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_kpad_Minus] = '-'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_kpad_Period] = '.'.charCodeAt(0);
+    shiftedScancodeToASCII[sc_kpad_Plus] = '+'.charCodeAt(0);
+
+    for (i = 0; i < extscanToSC.length; i++) {
+        extscanToSC[i] = 0;
+    }
+
+    /* map extended keys to their Duke3D equivalents */
+    extscanToSC[0x1C] = sc_kpad_Enter;
+    extscanToSC[0x1D] = sc_RightControl;
+    extscanToSC[0x35] = sc_kpad_Slash;
+    extscanToSC[0x37] = sc_PrintScreen;
+    extscanToSC[0x38] = sc_RightAlt;
+    extscanToSC[0x47] = sc_Home;
+    extscanToSC[0x48] = sc_UpArrow;
+    extscanToSC[0x49] = sc_PgUp;
+    extscanToSC[0x4B] = sc_LeftArrow;
+    extscanToSC[0x4D] = sc_RightArrow;
+    extscanToSC[0x4F] = sc_End;
+    extscanToSC[0x50] = sc_DownArrow;
+    extscanToSC[0x51] = sc_PgDn;
+    extscanToSC[0x52] = sc_Insert;
+    extscanToSC[0x53] = sc_Delete;
+
+    KB.clearKeysDown();
 };
 
 KB.keyWaiting = function () {
-    //return keyIsWaiting;
-    return 0; // TODO (this is just for test)
+    _handle_events();
+    return keyIsWaiting;
 };
+
+function KB_Getch() {
+    //TODO: this needed??
+    //while (!keyIsWaiting) {
+    //    _idle(); /* pull the pud. */
+    //}
+    
+    keyIsWaiting = false;
+    if (KB_LastScan >= MAXKEYBOARDSCAN)
+        return (0xFF);
+
+    if (KB.keyDown[sc_LeftShift] || KB.keyDown[sc_RightShift])
+        return shiftedScancodeToASCII[KB_LastScan];
+
+    return scancodeToASCII[KB_LastScan];
+}
 
 KB.flushKeyboardQueue = function () {
     _handle_events();

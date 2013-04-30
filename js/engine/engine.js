@@ -7132,6 +7132,58 @@ function rotatepoint(xpivot,  ypivot,  x,  y,  daang,  x2,  y2)
     y2.$ = dmulscale14(y,dacos,x,dasin) + ypivot;
 }
 
+
+
+/*
+ * This is ryan's change. SDL requires me to call SDL_UpdateRect() to force
+ *  vid updates without a SDL_Flip() call, but there's no such thing in the
+ *  DOS version of this program, so text won't show up sometimes without
+ *  my update call in Linux.  However, to get a nice shadow effect on some
+ *  text, Ken draws a string at an offset and darker, and then on top of it
+ *  draws the actual string. Two SDL_UpdateRect() calls in over top of each
+ *  other cause flicker, so I have this function here so the shadow can
+ *  be drawn with _noupdate, and the actual string is draw with an update.
+ */
+function printext256( xpos,  ypos,  col,  backcol,  name,   fontsize)
+{
+    var stx, i, x, y, charxsiz;
+    var  fontptr, letptr, ptr;
+
+	
+
+    stx = xpos;
+
+    if (fontsize) {
+        fontptr = new PointerHelper(smallTextFont);
+        charxsiz = 4;
+    }
+    else {
+        fontptr = new PointerHelper(textFont);
+        charxsiz = 8;
+    }
+
+    //For each character in the string.
+    for(i=0; name[i]; i++)
+    {
+        letptr =  new PointerHelper(fontptr, name[i]<<3); // &fontptr[name[i]<<3];
+        ptr = new PointerHelper(frameplace.array, ylookup[ypos + 7] + (stx - fontsize));
+        for(y=7; y>=0; y--)
+        {
+            for(x=charxsiz-1; x>=0; x--) {
+                if (letptr.getByte(y) & pow2char[7 - fontsize - x])
+                    ptr.setByteOffset(col, x);
+                else if (backcol >= 0)
+                    ptr.setByteOffset(backcol, x);
+            }
+            ptr.position -= ylookup[1];
+        }
+        stx += charxsiz;
+    }
+   
+    //_updateScreenRect(xpos, ypos, charxsiz * i, 8);
+}
+
+
 //7795
 function krand() {
     //return 10 - breaks animation
