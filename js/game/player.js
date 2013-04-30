@@ -3336,8 +3336,9 @@ Player.processInput = function(snum) {
         j = 0;
         p.posx += p.posxv >> 14;
         p.posy += p.posyv >> 14;
-        throw "todo updatesector refs"
-        //updatesector(p.posx,p.posy,&p.cursectnum); todo!!!!!
+        var pcursectnumRef = new Ref(p.cursectnum);
+        updatesector(p.posx,p.posy,pcursectnumRef);
+        p.cursectnum = pcursectnumRef.$;
         changespritesect(pi, p.cursectnum);
     } else {
         refX.$ = p.posx;
