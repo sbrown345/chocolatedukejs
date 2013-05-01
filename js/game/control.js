@@ -22,6 +22,7 @@ function _KeyMapping( ) {
 }
 
 var KeyMapping = structArray(_KeyMapping, MAXGAMEBUTTONS);
+var MouseDigitalAxeMapping = [new Int32Array(2), new Int32Array(2)];
 
 var Control = {};
 
@@ -87,9 +88,23 @@ Control.getInput = function(info) {
     handle_events();
 };
 
-Control.getMouseSensitivity_Y = function() {
+function CONTROL_GetMouseSensitivity_X() {
+    return mouseSensitivity_X;
+}
+
+function CONTROL_SetMouseSensitivity_X(newsensitivity) {
+    mouseSensitivity_X = newsensitivity;
+}
+
+// FIX_00014: Added Y cursor setup for mouse sensitivity in the menus 
+
+function CONTROL_GetMouseSensitivity_Y() {
     return mouseSensitivity_Y;
-};
+}
+
+function CONTROL_SetMouseSensitivity_Y(newsensitivity) {
+    mouseSensitivity_Y = newsensitivity;
+}
 
 function CONTROL_ClearAction( whichbutton )
 {

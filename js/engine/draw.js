@@ -25,11 +25,6 @@ var RENDER_SLOPPED_CEILING_AND_FLOOR = 1;
 var CLEAR_FRAMEBUFFER = !((RENDER_DRAW_WALL_BORDERS && RENDER_DRAW_WALL_INSIDE && RENDER_DRAW_CEILING_AND_FLOOR && RENDER_DRAW_TOP_AND_BOTTOM_COLUMN && RENDER_SLOPPED_CEILING_AND_FLOOR && MAX_PIXEL_RENDERERED != 0));
 // END VISUALIZE RENDERER
 
-var bytesperline = 0;
-function setBytesPerLine(_bytesPerLine) {
-    bytesperline = _bytesPerLine;
-}
-
 var asm1;
 var asm2;
 var asm3;
@@ -154,6 +149,69 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
 
     texture.position = texturePosition;
 }
+
+
+var rmmach_eax;
+var rmmach_ebx;
+var rmmach_ecx;
+var rmmach_edx;
+var setupTileHeight;
+function setuprmhlineasm4(i1, i2, i3, i4, tileHeight, i6)
+{
+    rmmach_eax = i1;
+    rmmach_ebx = i2;
+    rmmach_ecx = i3;
+    rmmach_edx = i4;
+    setupTileHeight = tileHeight;
+}
+
+
+//FCS: ????
+function rmhlineasm4(i1, shade, colorIndex, i4, i5, dest) {
+    var ebp = (dest - i1) >>> 0;
+    var rmach6b = (ebp - 1) >>> 0;
+    var numPixels;
+    
+    //printf("rmhlineasm4\n");
+    if (i1 <= 0)
+        return;
+//todo!
+    //numPixels = i1;
+    //do {
+	//    //colorIndex = ((colorIndex&0xffffff00)|(*((uint8_t *)shade)));
+	//    colorIndex = ((colorIndex&0xffffff00)|(*((uint8_t *)shade)));
+	//    i4 -= rmmach_eax;
+	//    ebp = (((i4+rmmach_eax) < i4) ? -1 : 0);
+	//    i5 -= rmmach_ebx;
+        
+	//    if ((i5 + rmmach_ebx) < i5)
+    //        shade -= (rmmach_ecx+1);
+	//    else
+    //        shade -= rmmach_ecx;
+        
+	//    ebp &= setupTileHeight;
+        
+    //    //Check if this colorIndex is the transparent color (255).
+	//    if ((colorIndex&0xff) != 255) {
+	//		if (pixelsAllowed-- > 0)
+	//		{
+	//			i1 = ((i1&0xffffff00)|(((uint8_t  *)colorIndex)[rmmach_edx]));
+	//			((uint8_t  *)rmach6b)[numPixels] = (i1&0xff);
+	//		}
+	//    }
+        
+	//    shade -= ebp;
+	//    numPixels--;
+        
+    //} while (numPixels);
+} 
+
+var bytesperline = 0;
+function setBytesPerLine(_bytesPerLine) {
+    bytesperline = _bytesPerLine;
+}
+
+
 
 // 220
 var mach3_al = 0;

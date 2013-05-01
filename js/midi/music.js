@@ -15,3 +15,7 @@ Music.registerTimbreBank = function() {
 
 Music.stopSong = function () {
 };
+
+Music.setVolume = function () {
+    //todo
+};

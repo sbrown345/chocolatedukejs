@@ -92,7 +92,7 @@ function probeXduke( x, y, i, n,  spriteSize)
 	var mi = 0;
 
 	// FIX_00075: Bad Sensitivity aint32_t Y axis when using mouse in menu (Thanks to Turrican)
-	mouseSens = Control.getMouseSensitivity_Y();
+	mouseSens = CONTROL_GetMouseSensitivity_X();
 	mouseSens = mouseSens ? mouseSens : 1;
 
     if( ((ControllerType == controltype.keyboardandmouse)||
@@ -1587,58 +1587,62 @@ function menus() {
                     break;
             }
 
-            if(SoundToggle && FXDevice != NumSoundCards) menutext(c+160+40,43,0,(FXDevice == NumSoundCards),"ON");
+            if (SoundToggle && FXDevice != NumSoundCards) menutext(c + 160 + 40, 43, 0, (FXDevice == NumSoundCards) ? 1 : 0, "ON");
             else menutext(c+160+40,43,0,(FXDevice == NumSoundCards),"OFF");
 
             if(MusicToggle && (MusicDevice != NumSoundCards) && (!eightytwofifty||numplayers<2))
-                menutext(c+160+40,43+16,0,(MusicDevice == NumSoundCards),"ON");
-            else menutext(c+160+40,43+16,0,(MusicDevice == NumSoundCards),"OFF");
+                menutext(c + 160 + 40, 43 + 16, 0, (MusicDevice == NumSoundCards) ? 1 : 0, "ON");
+            else menutext(c + 160 + 40, 43 + 16, 0, (MusicDevice == NumSoundCards) ? 1 : 0, "OFF");
 
-            menutext(c,43,SHX(-2),(FXDevice == NumSoundCards),"SOUND");
-            menutext(c,43+16+16,SHX(-4),(FXDevice==NumSoundCards)||SoundToggle==0,"SOUND VOLUME");
+            menutext(c, 43, SHX(-2), (FXDevice == NumSoundCards) ? 1 : 0, "SOUND");
+            menutext(c, 43 + 16 + 16, SHX(-4), ((FXDevice == NumSoundCards) || SoundToggle == 0) ? 1 : 0, "SOUND VOLUME");
             {
-                throw "todo"; //l = FXVolume;
-                //FXVolume >>= 2;
-                //bar(c+167+40,43+16+16,(short *)&FXVolume,4,(FXDevice!=NumSoundCards)&&x==2,SHX(-4),SoundToggle==0||(FXDevice==NumSoundCards));
-                //if(l != FXVolume)
-                //    FXVolume <<= 2;
-                //if(l != FXVolume)
-                //    FX_SetVolume( (short) FXVolume );
+                l = FXVolume;
+                FXVolume >>= 2;
+                var FXVolumeRef = new Ref(FXVolume);
+                bar(c+167+40,43+16+16,FXVolumeRef,4,(FXDevice!=NumSoundCards)&&x==2,SHX(-4),SoundToggle==0||(FXDevice==NumSoundCards));
+                FXVolume = FXVolumeRef.$;
+                if(l != FXVolume)
+                    FXVolume <<= 2;
+                if(l != FXVolume)
+                    FX.setVolume( FXVolume );
             }
-            menutext(c,43+16,SHX(-3),(MusicDevice==NumSoundCards),"MUSIC");
-            menutext(c,43+16+16+16,SHX(-5),(MusicDevice==NumSoundCards)||(numplayers > 1 && eightytwofifty)||MusicToggle==0,"MUSIC VOLUME");
+            menutext(c, 43 + 16, SHX(-3), (MusicDevice == NumSoundCards) ? 1 : 0, "MUSIC");
+            menutext(c, 43 + 16 + 16 + 16, SHX(-5), ((MusicDevice == NumSoundCards) || (numplayers > 1 && eightytwofifty) || MusicToggle == 0) ? 1 : 0, "MUSIC VOLUME");
             {
-                throw "todo"; //l = MusicVolume;
-                //MusicVolume >>= 2;
-                //bar(c+167+40,43+16+16+16,
-                //    (short *)&MusicVolume,4,
-                //    (eightytwofifty==0||numplayers < 2) && (MusicDevice!=NumSoundCards) && x==3,SHX(-5),
-                //    (numplayers > 1 && eightytwofifty)||MusicToggle==0||(MusicDevice==NumSoundCards));
-                //MusicVolume <<= 2;
-                //if(l != MusicVolume)
-                //{
-                //    STUBBED("Check this");
-                //    // !!! FIXME: Used to be Music_ not MUSIC_.  --ryan.
-                //    MUSIC_SetVolume( (short) MusicVolume );
-                //}
+                l = MusicVolume;
+                MusicVolume >>= 2;
+                var MusicVolumeRef = new Ref(MusicVolume);
+                bar(c+167+40,43+16+16+16,
+                    MusicVolumeRef,4,
+                    (eightytwofifty==0||numplayers < 2) && (MusicDevice!=NumSoundCards) && x==3,SHX(-5),
+                    (numplayers > 1 && eightytwofifty)||MusicToggle==0||(MusicDevice==NumSoundCards));
+                MusicVolume = MusicVolumeRef.$;
+                MusicVolume <<= 2;
+                if(l != MusicVolume)
+                {
+                    STUBBED("Check this");
+                    // !!! FIXME: Used to be Music_ not MUSIC_.  --ryan.
+                    Music.setVolume(MusicVolume);
+                }
             }
-            menutext(c,43+16+16+16+16,SHX(-6),(FXDevice==NumSoundCards)||SoundToggle==0,"DUKE TALK");
-            menutext(c,43+16+16+16+16+16,SHX(-7),(FXDevice==NumSoundCards)||SoundToggle==0,"AMBIENCE");
+            menutext(c,43+16+16+16+16,SHX(-6),((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"DUKE TALK");
+            menutext(c,43+16+16+16+16+16,SHX(-7),((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"AMBIENCE");
 
-            menutext(c,43+16+16+16+16+16+16,SHX(-8),(FXDevice==NumSoundCards)||SoundToggle==0,"FLIP STEREO");
+            menutext(c,43+16+16+16+16+16+16,SHX(-8),((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"FLIP STEREO");
 
-            if(VoiceToggle) menutext(c+160+40,43+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"ON");
-            else menutext(c+160+40,43+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"OFF");
+            if(VoiceToggle) menutext(c+160+40,43+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"ON");
+            else menutext(c+160+40,43+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"OFF");
 
-            if(AmbienceToggle) menutext(c+160+40,43+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"ON");
-            else menutext(c+160+40,43+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"OFF");
+            if(AmbienceToggle) menutext(c+160+40,43+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"ON");
+            else menutext(c+160+40,43+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"OFF");
 
-            if(ReverseStereo) menutext(c+160+40,43+16+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"ON");
-            else menutext(c+160+40,43+16+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"OFF");
+            if(ReverseStereo) menutext(c+160+40,43+16+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"ON");
+            else menutext(c+160+40,43+16+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"OFF");
 
-            menutext(c,43+16+16+16+16+16+16+16,SHX(-9),(FXDevice==NumSoundCards)||SoundToggle==0,"OPPONENT SOUND");
-            if(OpponentSoundToggle) menutext(c+160+40,43+16+16+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"ON");
-            else menutext(c+160+40,43+16+16+16+16+16+16+16,0,(FXDevice==NumSoundCards)||SoundToggle==0,"OFF");
+            menutext(c,43+16+16+16+16+16+16+16,SHX(-9),((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"OPPONENT SOUND");
+            if(OpponentSoundToggle) menutext(c+160+40,43+16+16+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"ON");
+            else menutext(c+160+40,43+16+16+16+16+16+16+16,0,((FXDevice==NumSoundCards)||SoundToggle==0)?1:0,"OFF");
 
             break;
 
@@ -1720,41 +1724,41 @@ function menus() {
                     break;
             }
 
-            {            
-                throw "todo"; //var sense;
+            {
 
-                //sense = CONTROL_GetMouseSensitivity_X();
-                //menutext(c,43+16*0,SHX(-7),PHX(-7),"X SENSITIVITY");
-                //bar(c+167+40,43+16*0,&sense,1,x==0,SHX(-7),PHX(-7));
-                //CONTROL_SetMouseSensitivity_X( sense );
+                var sense = new Ref(CONTROL_GetMouseSensitivity_X());
+                menutext(c,43+16*0,SHX(-7),PHX(-7),"X SENSITIVITY");
+                bar(c+167+40,43+16*0,sense,1,x==0,SHX(-7),PHX(-7));
+                CONTROL_SetMouseSensitivity_X( sense.$ );
 
-                //sense = CONTROL_GetMouseSensitivity_Y();
-                //menutext(c,43+16*1,SHX(-7),PHX(-7),"Y SENSITIVITY");
-                //bar(c+167+40,43+16*1,&sense,1,x==1,SHX(-7),PHX(-7));
-                //CONTROL_SetMouseSensitivity_Y( sense );
+                sense.$ = CONTROL_GetMouseSensitivity_Y();
+                menutext(c,43+16*1,SHX(-7),PHX(-7),"Y SENSITIVITY");
+                bar(c+167+40,43+16*1,sense,1,x==1,SHX(-7),PHX(-7));
+                CONTROL_SetMouseSensitivity_Y( sense.$ );
 
-                //menutext(c,43+16*2,SHX(-7),PHX(-7),"MOUSE AIM TYPE");
-                //if(MouseAiming) menutext(c+160+40,43+16*2,SHX(-7),PHX(-7),"HELD");
-                //else menutext(c+160+40,43+16*2,SHX(-7),PHX(-7),"TOGGLE");
+                menutext(c,43+16*2,SHX(-7),PHX(-7),"MOUSE AIM TYPE");
+                if(MouseAiming) menutext(c+160+40,43+16*2,SHX(-7),PHX(-7),"HELD");
+                else menutext(c+160+40,43+16*2,SHX(-7),PHX(-7),"TOGGLE");
 
-                //menutext(c,43+16*3,SHX(-7),MouseAiming,"MOUSE AIMING");
-                //if(myaimmode) menutext(c+160+40,43+16*3,SHX(-7),MouseAiming,"ON");
-                //else menutext(c+160+40,43+16*3,SHX(-7),MouseAiming,"OFF");
+                menutext(c,43+16*3,SHX(-7),MouseAiming,"MOUSE AIMING");
+                if(myaimmode) menutext(c+160+40,43+16*3,SHX(-7),MouseAiming,"ON");
+                else menutext(c+160+40,43+16*3,SHX(-7),MouseAiming,"OFF");
 
-                //menutext(c,43+16*4,SHX(-7),PHX(-7),"MOUSE AIMING FLIP");
-                //if(ud.mouseflip) menutext(c+160+40,43+16*4,SHX(-7),PHX(-7),"ON");
-                //else menutext(c+160+40,43+16*4,SHX(-7),PHX(-7),"OFF");
+                menutext(c,43+16*4,SHX(-7),PHX(-7),"MOUSE AIMING FLIP");
+                if(ud.mouseflip) menutext(c+160+40,43+16*4,SHX(-7),PHX(-7),"ON");
+                else menutext(c+160+40,43+16*4,SHX(-7),PHX(-7),"OFF");
 
 
-                //menutext(c,43+16*5,SHX(-7),PHX(-7),"MOUSE CURSOR");
-                //if(SDL_WM_GrabInput(SDL_GRAB_QUERY)==SDL_GRAB_ON)
-                //    menutext(c+160+40,43+16*5,SHX(-7),PHX(-7),"TAKEN");
-                //else
-                //    menutext(c+160+40,43+16*5,SHX(-7),PHX(-7),"FREE'D");
+                menutext(c, 43 + 16 * 5, SHX(-7), PHX(-7), "MOUSE CURSOR");
+                console.log("todo: html5 mouse stuff")
+                if(false /*SDL_WM_GrabInput(SDL_GRAB_QUERY)==SDL_GRAB_ON*/)
+                    menutext(c+160+40,43+16*5,SHX(-7),PHX(-7),"TAKEN");
+                else
+                    menutext(c+160+40,43+16*5,SHX(-7),PHX(-7),"FREE'D");
 
-                //menutext(c,43+16*6,SHX(-7),PHX(-7),"BUTTON SETUP...");
+                menutext(c,43+16*6,SHX(-7),PHX(-7),"BUTTON SETUP...");
 		
-                //menutext(c,43+16*7,SHX(-7),PHX(-7),"DIGITAL AXES SETUP...");	
+                menutext(c,43+16*7,SHX(-7),PHX(-7),"DIGITAL AXES SETUP...");	
             }
 
             break;
@@ -2216,7 +2220,7 @@ function menus() {
             }
 				
             menutext(c,43,0,0,"RESOLUTION");
-            sprintf(text, "%d x %d", validmodexdim[current_resolution],validmodeydim[current_resolution]);
+            text = validmodexdim[current_resolution] + " x " + validmodeydim[current_resolution];
             if (lastkeysetup == 0 || (totalclock%64 < 32)) // blink color after change
                 menutext(c+150,43,0,0,text);
             else
@@ -2232,9 +2236,9 @@ function menus() {
 
                 // FIX_00027: Added an extra small statusbar (HUD)
                 menutext(c,43+16*3,SHX(-5),PHX(-5),"SCREEN SIZE");
-                var screen_sizeRef = new Ref(ud.brightness);
+                var screen_sizeRef = new Ref(screen_size);
                 bar(c+167+40,43+16*3,screen_sizeRef,-4,x==3,SHX(-5),PHX(-5));
-                ud.brightness = screen_sizeRef.$;
+                screen_size = screen_sizeRef.$;
                 if(ud.screen_size==4)
                 {
                     if(screen_size==0)
@@ -2627,37 +2631,37 @@ function menus() {
             }
             break;
 
-//        case 503:
-//            c = 320>>1;
-//            gametext(c,90,"Quit to Title?",0,2+8+16);
-//            gametext(c,99,"(Y/N)",0,2+8+16);
+        case 503:
+            c = 320>>1;
+            gametext(c,90,"Quit to Title?",0,2+8+16);
+            gametext(c,99,"(Y/N)",0,2+8+16);
 
-//            _handle_events();
-//            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
-//            {
-//                KB.flushKeyboardQueue();
-//                ps[myconnectindex].gm = MODE_DEMO;
-//                if(ud.recstat == 1)
-//                    closedemowrite();
-//                if( ud.m_recstat != 2 && ud.last_level >= 0 && ud.multimode > 1 && ud.coop != 1)
-//                    dobonus(1);
-//                ud.last_level = -1;
-//                cmenu(0);
-//            }
+            _handle_events();
+            if( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) || KB.keyPressed(sc_Y) || LMB )
+            {
+                KB.flushKeyboardQueue();
+                ps[myconnectindex].gm = MODE_DEMO;
+                if(ud.recstat == 1)
+                    closedemowrite();
+                if( ud.m_recstat != 2 && ud.last_level >= 0 && ud.multimode > 1 && ud.coop != 1)
+                    dobonus(1);
+                ud.last_level = -1;
+                cmenu(0);
+            }
 
-//            x = probe(186,124,0,0);
+            x = probe(186,124,0,0);
 
-//            if(x == -1 || KB.keyPressed(sc_N) || RMB)
-//            {
-//                cmenu(50);
-//                if(ud.multimode < 2  && ud.recstat != 2)
-//                {
-//                    ready2send = 1;
-//                    totalclock = ototalclock;
-//                }
-//            }
+            if(x == -1 || KB.keyPressed(sc_N) || RMB)
+            {
+                cmenu(50);
+                if(ud.multimode < 2  && ud.recstat != 2)
+                {
+                    ready2send = 1;
+                    totalclock = ototalclock;
+                }
+            }
 
-//            break;
+            break;
 
 //        case 601:
 //            displayfragbar();

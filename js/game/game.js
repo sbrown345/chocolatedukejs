@@ -130,7 +130,7 @@ function minitext(x, y, str, p, sb) {
     var t, tIdx = 0;
 
     buf = str;
-    t = buf.toUpperCase();
+    t = (buf || "").toUpperCase();
 
     while (t[tIdx]) {
         if (t.charCodeAt(tIdx) == 32) { x += 5; t++; continue; }
@@ -150,7 +150,7 @@ function minitextshade(x, y, str, s, p, sb) {
     var t, tIdx = 0;
 
     buf = str;
-    t = buf.toUpperCase();
+    t = (buf || "").toUpperCase();
 
 
     while (t[tIdx]) {
@@ -6040,7 +6040,7 @@ function main(argc, argv) {
     getNames();
 
     if (ud.multimode > 1) {
-        throw new Error("todo");
+        playerswhenstarted = ud.multimode;
     }
 
     ud.last_level = -1;
@@ -6055,7 +6055,11 @@ function main(argc, argv) {
     console.log("Loading palette/lookups.");
 
     if (setGameMode(ScreenMode, ScreenWidth, ScreenHeight) < 0) {
-        throw new Error("todo");
+        console.log("\nVESA driver for ( %i * %i ) not found/supported!", xdim, ydim);
+        ScreenMode = 2;
+        ScreenWidth = 320;
+        ScreenHeight = 200;
+        setGameMode(ScreenMode, ScreenWidth, ScreenHeight);
     }
 
     genSpriteRemaps();

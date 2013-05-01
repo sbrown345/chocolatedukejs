@@ -334,6 +334,26 @@ function _readlastkeyhit() {
 
 //940
 Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
+    if (screenMode > MAXXDIM || screenHeight > MAXYDIM) {
+        printf("Resolution %dx%d is too high. Changed to %dx%d\n", screenWidth, screenHeight, MAXXDIM, MAXYDIM);
+        screenWidth = MAXXDIM;
+        screenHeight = MAXYDIM;
+    }
+    
+    getvalidvesamodes();
+
+    //validated = 0;
+    //for (i = 0; i < validmodecnt; i++) {
+    //    if (validmodexdim[i] == daxdim && validmodeydim[i] == daydim)
+    //        validated = 1;
+    //}
+
+    //if (!validated) {
+    //    printf("Resolution %dx%d unsupported. Changed to 640x480\n", daxdim, daydim);
+    //    daxdim = 640;
+    //    daydim = 480;
+    //}
+
     surface.width = screenWidth;
     surface.height = screenHeight;
     go_to_new_vid_mode(screenMode);
@@ -343,6 +363,37 @@ Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
 
     return 0;
 };
+
+//1045
+function add_vesa_mode(typestr, w, h) {
+    //printf("Adding %s resolution (%dx%d).\n", typestr, w, h);
+    validmode[validmodecnt] = validmodecnt;
+    validmodexdim[validmodecnt] = w;
+    validmodeydim[validmodecnt] = h;
+    validmodecnt++;
+}
+
+
+//1207
+var already_checked = 0;
+function getvalidvesamodes() {
+    var i;
+    var stdres = [
+        [320, 200], [640, 350], [640, 480],
+        [800, 600], [1024, 768]
+    ];
+
+    if (already_checked)
+        return;
+    
+    already_checked = 1;
+    
+    /* fill in the standard resolutions... */
+    for (i = 0; i < stdres.length ; i++)
+        add_vesa_mode("standard", stdres[i][0], stdres[i][1]);
+
+    // todo missing stuff...??
+}
 
 
 function Color() {

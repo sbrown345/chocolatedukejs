@@ -1,4 +1,82 @@
 ﻿'use strict';
+//
+// Setup program defines
+//
+var SETUPFILENAME = "duke3d.cfg";
+
+
+// Max number of players
+var MAXPLAYERS = 16;
+
+// Number of Mouse buttons
+var MAXMOUSEBUTTONS = 7;
+
+// Number of JOY buttons
+var MAXJOYBUTTONS = 32;
+
+var MAXJOYHATS = 6;
+
+// Number of EXTERNAL buttons
+
+//var MAXEXTERNALBUTTONS 6
+
+//
+// modem string defines
+//
+
+var MAXMODEMSTRING = 50;
+
+// MACRO defines
+
+var MAXMACROS = 10;
+var MAXMACROLENGTH = 34;
+
+// Phone list defines
+
+var PHONENUMBERLENGTH = 28;
+var PHONENAMELENGTH = 16;
+var MAXPHONEENTRIES = 10;
+
+// length of program functions
+
+var MAXFUNCTIONLENGTH = 30;
+
+// length of axis functions
+
+var MAXAXISFUNCTIONLENGTH = 30;
+
+// Max Player Name length
+
+var MAXPLAYERNAMELENGTH = 11;
+
+// Max RTS Name length
+
+var MAXRTSNAMELENGTH = 15;
+
+// Number of Mouse Axes
+
+var MAXMOUSEAXES = 2;
+
+// Number of JOY axes
+
+var MAXJOYAXES = 6;
+//4
+
+// Number of GAMEPAD axes
+
+var MAXGAMEPADAXES = 2;
+
+// MIN/MAX scale value for controller scales
+
+var MAXCONTROLSCALEVALUE = (1 << 19);
+
+// DEFAULT scale value for controller scales
+
+var DEFAULTCONTROLSCALEVALUE = (1 << 16);
+
+// base value for controller scales
+
+var BASECONTROLSCALEVALUE = (1 << 16);
 
 var total_lines, line_number;
 var checking_ifelse = 0, parsing_state = 0;
@@ -153,7 +231,7 @@ var keyw =
 var SETUPFILENAME = "duke3d.cfg";
 
 //// Max number of players
-//#define MAXPLAYERS 16 // dupe of engine const also called MAXPLAYERS????
+//var MAXPLAYERS 16 // dupe of engine const also called MAXPLAYERS????
 
 function loadefs(filename, readfromGrp) {
     var fs, fp;

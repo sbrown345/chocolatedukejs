@@ -201,8 +201,8 @@ var ylookup = new Int32Array(MAXYDIM + 1);
 var yxaspect, viewingrange;
 
 var validmodecnt;
-//EXTERN short validmode[256];
-//EXTERN int32_t validmodexdim[256], validmodeydim[256];
+var validmode = new Int16Array(256);
+var validmodexdim = new Int32Array(256), validmodeydim = new Int32Array(256);
 
 var numsectors, numwalls;
 var totalclock;
