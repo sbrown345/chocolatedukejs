@@ -795,6 +795,17 @@ function badguypic(pn) {
     return 0;
 }
 
+function myos(x, y, tilenum, shade, orientation) {
+    var p;
+    var a;
+
+    if (orientation & 4)
+        a = 1024;
+    else a = 0;
+
+    p = sector[ps[screenpeek].cursectnum].floorpal;
+    rotateSprite(x << 16, y << 16, 65536, a, tilenum, shade, p, 2 | orientation, windowx1, windowy1, windowx2, windowy2);
+}
 
 //1431
 function myospal(x, y, tilenum, shade, orientation, p) {
