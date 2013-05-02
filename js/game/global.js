@@ -142,7 +142,7 @@ var ps = structArray(PlayerType, MAXPLAYERS);
 //struct user_defs ud;
 
 var pus = 0, pub = 0;
-var syncstat, syncval = new multiDimArray(Uint8Array, MAXPLAYERS, MOVEFIFOSIZ);
+var syncstat, syncval = multiDimArray(Uint8Array, MAXPLAYERS, MOVEFIFOSIZ);
 var syncvalhead = new Int32Array(MAXPLAYERS), syncvaltail, syncvaltottail;
 
 var sync /*[MAXPLAYERS]*/, loc;
@@ -167,6 +167,7 @@ var vel, svel, angvel, horiz, ototalclock = 0, respawnactortime = 768, respawnit
 
 var script = new Int32Array(MAXSCRIPTSIZE), scriptIdx = 0, scriptPtr, insptr, insptrIdx = 0, labelcode = new Int32Array(MAXSECTORS * (40 / 4) /*Sector is 40 bytes, this is int32 array*/), labelcnt = 0;
 var actorscrptr = new Int32Array(MAXTILES), parsing_actor = new Array(4);
+
 var labels = new Array(50000 /*todo, not sure of limit...*/), textptr, textptrIdx = 0, error, warning;
 var killit_flag;
 var music_pointer;
