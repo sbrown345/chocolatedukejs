@@ -120,15 +120,18 @@ function AFLAMABLE(X) { (X === BOX || X === TREE1 || X === TREE2 || X === TIRE |
 //317
 function rnd(X) { ((TRAND >> 8) >= (255 - (X))); }
 
-function Sync() {
-    this.avel = 0;
-    this.horz = 0;
-    this.fvel = 0;
-    this.svel = 0;
-    this.bits = 0;
-}
-
 function Input() {
+    //var avel = new Int8Array(1);
+    //var horz = new Int8Array(1);
+    //var fvel = new Int16Array(1);
+    //var svel = new Int16Array(1);
+    //var bits = new Uint32Array(1);
+
+    //Object.defineProperty(this, 'avel', { get: function () { return avel[0]; }, set: function (v) { avel[0] = v; } });
+    //Object.defineProperty(this, 'horz', { get: function () { return horz[0]; }, set: function (v) { horz[0] = v; } });
+    //Object.defineProperty(this, 'fvel', { get: function () { return fvel[0]; }, set: function (v) { fvel[0] = v; } });
+    //Object.defineProperty(this, 'svel', { get: function () { return svel[0]; }, set: function (v) { svel[0] = v; } });
+    //Object.defineProperty(this, 'bits', { get: function () { return bits[0]; }, set: function (v) { bits[0] = v; } });
     this.avel = 0;
     this.horz = 0;
     this.fvel = 0;

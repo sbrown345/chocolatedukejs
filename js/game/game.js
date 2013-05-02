@@ -346,10 +346,10 @@ function faketimerhandler() {
             packbuf[j++] = nsyn[0].avel;
             packbuf[k] |= 4;
         }
-        if ((nsyn[0].bits^osyn[0].bits)&0x000000ff) packbuf[j++] = (nsyn[0].bits&255), packbuf[k] |= 8;
-        if ((nsyn[0].bits^osyn[0].bits)&0x0000ff00) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[k] |= 16;
-        if ((nsyn[0].bits^osyn[0].bits)&0x00ff0000) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[k] |= 32;
-        if ((nsyn[0].bits^osyn[0].bits)&0xff000000) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[k] |= 64;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x000000ff) >>> 0) packbuf[j++] = (nsyn[0].bits & 255), packbuf[k] |= 8;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x0000ff00) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 8) & 255), packbuf[k] |= 16;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x00ff0000) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 16) & 255), packbuf[k] |= 32;
+        if (((nsyn[0].bits^osyn[0].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[k] |= 64;
         if (nsyn[0].horz != osyn[0].horz)
         {
             packbuf[j++] = nsyn[0].horz;
@@ -407,10 +407,10 @@ function faketimerhandler() {
             packbuf[j++] = nsyn[0].avel;
             packbuf[1] |= 4;
         }
-        if ((nsyn[0].bits^osyn[0].bits)&0x000000ff) packbuf[j++] = (nsyn[0].bits&255), packbuf[1] |= 8;
-        if ((nsyn[0].bits^osyn[0].bits)&0x0000ff00) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[1] |= 16;
-        if ((nsyn[0].bits^osyn[0].bits)&0x00ff0000) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[1] |= 32;
-        if ((nsyn[0].bits^osyn[0].bits)&0xff000000) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[1] |= 64;
+        if (((nsyn[0].bits^osyn[0].bits)&0x000000ff)>>>0) packbuf[j++] = (nsyn[0].bits&255), packbuf[1] |= 8;
+        if (((nsyn[0].bits^osyn[0].bits)&0x0000ff00)>>>0) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[1] |= 16;
+        if (((nsyn[0].bits^osyn[0].bits)&0x00ff0000)>>>0) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[1] |= 32;
+        if (((nsyn[0].bits^osyn[0].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[1] |= 64;
         if (nsyn[0].horz != osyn[0].horz)
         {
             packbuf[j++] = nsyn[0].horz;
@@ -488,7 +488,7 @@ function faketimerhandler() {
             if ((nsyn[i].bits^osyn[i].bits)&0x000000ff) packbuf[j++] = (nsyn[i].bits&255), packbuf[k] |= 8;
             if ((nsyn[i].bits^osyn[i].bits)&0x0000ff00) packbuf[j++] = ((nsyn[i].bits>>8)&255), packbuf[k] |= 16;
             if ((nsyn[i].bits^osyn[i].bits)&0x00ff0000) packbuf[j++] = ((nsyn[i].bits>>16)&255), packbuf[k] |= 32;
-            if ((nsyn[i].bits^osyn[i].bits)&0xff000000) packbuf[j++] = ((nsyn[i].bits>>24)&255), packbuf[k] |= 64;
+            if (((nsyn[i].bits^osyn[i].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[i].bits>>24)&255), packbuf[k] |= 64;
             if (nsyn[i].horz != osyn[i].horz)
             {
                 packbuf[j++] = nsyn[i].horz;
@@ -1628,7 +1628,502 @@ function FTA(q, p, mode) {
 
 //2415
 Game.cheatKeys = function (snum) {
-    //todo
+    var i, k;
+    var dainv;
+    var sb_snum, j;
+    var p;
+    var playing_old_demo = 0;
+
+    sb_snum = sync[snum].bits;
+    p = ps[snum];
+
+    if(p.cheat_phase == 1) return;
+
+    i = p.aim_mode;
+    p.aim_mode = (sb_snum>>23)&1;
+    if(p.aim_mode < i)
+        p.return_to_center = 9;
+
+    if( (sb_snum&(1<<22)) && p.quick_kick == 0)
+        if( !PLUTOPAK || p.curr_weapon != KNEE_WEAPON || p.kickback_pic == 0 )
+            // FIX_00066: Removed the QuickKick restrictions for 1.3/1.3d (like 1.3d dos version behavior)
+        {
+            p.quick_kick = 14;
+            FTA(80,p,0);
+        }
+		
+    // FIX_00040: Preventing multi keypress locks
+    playing_old_demo =	ud.playing_demo_rev == BYTEVERSION_27     ||
+						ud.playing_demo_rev == BYTEVERSION_28     || 
+						ud.playing_demo_rev == BYTEVERSION_116    || 
+						ud.playing_demo_rev == BYTEVERSION_117;
+
+    if(!playing_old_demo)
+    {
+        // A more efficient toggle (make old demos going oos):
+        j = sb_snum & ((15<<8)|(1<<12)|(1<<15)|(1<<16)|(1<<22)|(1<<19)|(1<<20)|(1<<21)|(1<<24)|
+						(1<<25)|(1<<27)|(1<<28)|(1<<29)|(1<<30)|(1<<31));
+        sb_snum = j & ~p.interface_toggle_flag;
+        p.interface_toggle_flag = j;
+    }
+
+    if( playing_old_demo && !(sb_snum&((15<<8)|(1<<12)|(1<<15)|(1<<16)|(1<<22)|(1<<19)|(1<<20)|(1<<21)|(1<<24)|(1<<25)|(1<<27)|(1<<28)|(1<<29)|(1<<30)|(1<<31))) )
+        p.interface_toggle_flag = 0;
+    else if(((p.interface_toggle_flag == 0 && ( sb_snum&(1<<17) ) == 0) && playing_old_demo) ||
+		((sb_snum && ( sync[snum].bits&(1<<17) ) == 0) && !playing_old_demo))
+    {
+        if(playing_old_demo)
+            p.interface_toggle_flag = 1;
+
+        if( sb_snum&(1<<21) )
+        {
+            KB.clearKeyDown( sc_Pause );
+            ud.pause_on = !ud.pause_on;
+            if( ud.pause_on == 1 && sb_snum&(1<<5) ) ud.pause_on = 2;
+            if(ud.pause_on)
+            {
+                MUSIC_Pause();
+                FX.stopAllSounds();
+                clearsoundlocks();
+            }
+            else
+            {
+                if(MusicToggle) MUSIC_Continue();
+                pub = NUMPAGES;
+                pus = NUMPAGES;
+            }
+        }
+
+        if(ud.pause_on) return;
+        
+        if(sprite[p.i].extra <= 0) return;
+
+        if( sb_snum&(1<<30) && p.newowner == -1 )
+        {
+            switch(p.inven_icon)
+            {
+                case 4: sb_snum |= (1<<25);break;
+                case 3: sb_snum |= (1<<24);break;
+                case 5: sb_snum |= (1<<15);break;
+                case 1: sb_snum |= (1<<16);break;
+                case 2: sb_snum |= (1<<12);break;
+            }
+        }
+
+        if( sb_snum&(1<<15) && p.heat_amount > 0 )
+        {
+            p.heat_on = !p.heat_on;
+            setpal(p);
+            p.inven_icon = 5;
+            spritesound(NITEVISION_ONOFF,p.i);
+            FTA(106+(!p.heat_on),p,0);
+        }
+
+        if( (sb_snum&(1<<12)) )
+        {
+            if(p.steroids_amount == 400 )
+            {
+                p.steroids_amount--;
+                spritesound(DUKE_TAKEPILLS,p.i);
+                p.inven_icon = 2;
+                FTA(12,p,0);
+            }
+            return;
+        }
+
+        if(p.newowner == -1)
+            if( sb_snum&(1<<20) || sb_snum&(1<<27) || p.refresh_inventory)
+            {
+                p.invdisptime = 26*2;
+
+                if( sb_snum&(1<<27) ) k = 1;
+                else k = 0;
+
+                if(p.refresh_inventory) p.refresh_inventory = 0;
+                dainv = p.inven_icon;
+
+                i = 0;
+                CHECKINV1:
+                    while(true) {
+
+                        if(i < 9)
+                        {
+                            i++;
+
+                            switch(dainv)
+                            {
+                                case 4:
+                                    if(p.jetpack_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 5;
+                                    else dainv = 3;
+                                    continue CHECKINV1;
+                                case 6:
+                                    if(p.scuba_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 7;
+                                    else dainv = 5;
+                                    continue CHECKINV1;
+                                case 2:
+                                    if(p.steroids_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 3;
+                                    else dainv = 1;
+                                    continue CHECKINV1;
+                                case 3:
+                                    if(p.holoduke_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 4;
+                                    else dainv = 2;
+                                    continue CHECKINV1;
+                                case 0:
+                                case 1:
+                                    if(p.firstaid_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 2;
+                                    else dainv = 7;
+                                    continue CHECKINV1;
+                                case 5:
+                                    if(p.heat_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 6;
+                                    else dainv = 4;
+                                    continue CHECKINV1;
+                                case 7:
+                                    if(p.boot_amount > 0 && i > 1)
+                                        break;
+                                    if(k) dainv = 1;
+                                    else dainv = 6;
+                                    continue CHECKINV1;
+                            }
+                        }
+                        else dainv = 0;
+                        
+                        break;
+                    }
+                p.inven_icon = dainv;
+
+                switch(dainv)
+                {
+                    case 1: FTA(3,p,0);break;
+                    case 2: FTA(90,p,0);break;
+                    case 3: FTA(91,p,0);break;
+                    case 4: FTA(88,p,0);break;
+                    case 5: FTA(101,p,0);break;
+                    case 6: FTA(89,p,0);break;
+                    case 7: FTA(6,p,0);break;
+                }
+            }
+
+        j = ( (sb_snum&(15<<8))>>8 ) - 1;
+
+        if( j > 0 && p.kickback_pic > 0)
+            p.wantweaponfire = j;
+
+        if(p.last_pissed_time <= (26*218) && p.show_empty_weapon == 0 && p.kickback_pic == 0 && p.quick_kick == 0 && sprite[p.i].xrepeat > 32 && p.access_incs == 0 && p.knee_incs == 0 )
+        {
+            if(  ( p.weapon_pos == 0 || ( p.holster_weapon && p.weapon_pos == -9 ) ) )
+            {
+                if(j == 10 || j == 11)
+                {
+                    k = p.curr_weapon;
+                    j = ( j == 10 ? -1 : 1 );
+                    i = 0;
+
+                    while( ( k >= 0 && k < 10 ) || ( k == GROW_WEAPON && (p.subweapon&(1<<GROW_WEAPON) ) ) )
+                    {
+                        if(k == GROW_WEAPON)
+                        {
+                            if(j == -1)
+                                k = 5;
+                            else k = 7;
+
+                        }
+                        else
+                        {
+                            k += j;
+                            if( k == 6 && p.subweapon&(1<<GROW_WEAPON) )
+                                k = GROW_WEAPON;
+                        }
+
+                        if(k == -1) k = 9;
+                        else if(k == 10) k = 0;
+
+                        if( p.gotweapon[k] && p.ammo_amount[k] > 0 )
+                        {
+                            if( k == SHRINKER_WEAPON && p.subweapon&(1<<GROW_WEAPON) )
+                                k = GROW_WEAPON;
+                            j = k;
+                            break;
+                        }
+                        else
+                            if(k == GROW_WEAPON && p.ammo_amount[GROW_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[SHRINKER_WEAPON] > 0)
+                            {
+                                j = SHRINKER_WEAPON;
+                                p.subweapon &= ~(1<<GROW_WEAPON);
+                                break;
+                            }
+                            else
+                                if(k == SHRINKER_WEAPON && p.ammo_amount[SHRINKER_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[GROW_WEAPON] > 0)
+                                {
+                                    j = GROW_WEAPON;
+                                    p.subweapon |= (1<<GROW_WEAPON);
+                                    break;
+                                }
+
+                        i++;
+                        if(i == 10)
+                        {
+                            addweapon( p, KNEE_WEAPON );
+                            break;
+                        }
+                    }
+                }
+
+                k = -1;
+
+
+                if( j == HANDBOMB_WEAPON && p.ammo_amount[HANDBOMB_WEAPON] == 0 )
+                {
+                    k = headspritestat[1];
+                    while(k >= 0)
+                    {
+                        if( sprite[k].picnum == HEAVYHBOMB && sprite[k].owner == p.i )
+                        {
+                            p.gotweapon[HANDBOMB_WEAPON] = 1;
+                            j = HANDREMOTE_WEAPON;
+                            break;
+                        }
+                        k = nextspritestat[k];
+                    }
+                }
+
+                if(j == SHRINKER_WEAPON)
+                {
+                    if(screenpeek == snum) pus = NUMPAGES;
+
+                    if( p.curr_weapon != GROW_WEAPON && p.curr_weapon != SHRINKER_WEAPON )
+                    {
+                        if( p.ammo_amount[GROW_WEAPON] > 0 )
+                        {
+                            if( (p.subweapon&(1<<GROW_WEAPON)) == (1<<GROW_WEAPON) )
+                                j = GROW_WEAPON;
+                            else if(p.ammo_amount[SHRINKER_WEAPON] == 0)
+                            {
+                                j = GROW_WEAPON;
+                                p.subweapon |= (1<<GROW_WEAPON);
+                            }
+                        }
+                        else if( p.ammo_amount[SHRINKER_WEAPON] > 0 )
+                            p.subweapon &= ~(1<<GROW_WEAPON);
+                    }
+                    else if( p.curr_weapon == SHRINKER_WEAPON )
+                    {
+                        p.subweapon |= (1<<GROW_WEAPON);
+                        j = GROW_WEAPON;
+                    }
+                    else
+                        p.subweapon &= ~(1<<GROW_WEAPON);
+                }
+
+                if(p.holster_weapon)
+                {
+                    sb_snum |= 1<<19;
+                    p.weapon_pos = -9;
+                }
+                else if( p.gotweapon[j] && p.curr_weapon != j ) switch(j)
+                {
+                    case KNEE_WEAPON:
+                        addweapon( p, KNEE_WEAPON );
+                        break;
+                    case PISTOL_WEAPON:
+                        if ( p.ammo_amount[PISTOL_WEAPON] == 0 )
+                            if(p.show_empty_weapon == 0)
+                            {
+                                p.last_full_weapon = p.curr_weapon;
+                                p.show_empty_weapon = 32;
+                            }
+                        addweapon( p, PISTOL_WEAPON );
+                        break;
+                    case SHOTGUN_WEAPON:
+                        if( p.ammo_amount[SHOTGUN_WEAPON] == 0 && p.show_empty_weapon == 0)
+                        {
+                            p.last_full_weapon = p.curr_weapon;
+                            p.show_empty_weapon = 32;
+                        }
+                        addweapon( p, SHOTGUN_WEAPON);
+                        break;
+                    case CHAINGUN_WEAPON:
+                        if( p.ammo_amount[CHAINGUN_WEAPON] == 0 && p.show_empty_weapon == 0)
+                        {
+                            p.last_full_weapon = p.curr_weapon;
+                            p.show_empty_weapon = 32;
+                        }
+                        addweapon( p, CHAINGUN_WEAPON);
+                        break;
+                    case RPG_WEAPON:
+                        if( p.ammo_amount[RPG_WEAPON] == 0 )
+                            if(p.show_empty_weapon == 0)
+                            {
+                                p.last_full_weapon = p.curr_weapon;
+                                p.show_empty_weapon = 32;
+                            }
+                        addweapon( p, RPG_WEAPON );
+                        break;
+                    case DEVISTATOR_WEAPON:
+                        if( p.ammo_amount[DEVISTATOR_WEAPON] == 0 && p.show_empty_weapon == 0 )
+                        {
+                            p.last_full_weapon = p.curr_weapon;
+                            p.show_empty_weapon = 32;
+                        }
+                        addweapon( p, DEVISTATOR_WEAPON );
+                        break;
+                    case FREEZE_WEAPON:
+                        if( p.ammo_amount[FREEZE_WEAPON] == 0 && p.show_empty_weapon == 0)
+                        {
+                            p.last_full_weapon = p.curr_weapon;
+                            p.show_empty_weapon = 32;
+                        }
+                        addweapon( p, FREEZE_WEAPON );
+                        break;
+                    case GROW_WEAPON:
+                    case SHRINKER_WEAPON:
+
+                        if( p.ammo_amount[j] == 0 && p.show_empty_weapon == 0)
+                        {
+                            p.show_empty_weapon = 32;
+                            p.last_full_weapon = p.curr_weapon;
+                        }
+
+                        addweapon(p, j);
+                        break;
+                    case HANDREMOTE_WEAPON:
+                        if(k >= 0) // Found in list of [1]'s
+                        {
+                            p.curr_weapon = HANDREMOTE_WEAPON;
+                            p.last_weapon = -1;
+                            p.weapon_pos = 10;
+                        }
+                        break;
+                    case HANDBOMB_WEAPON:
+                        if( p.ammo_amount[HANDBOMB_WEAPON] > 0 && p.gotweapon[HANDBOMB_WEAPON] )
+                            addweapon( p, HANDBOMB_WEAPON );
+                        break;
+                    case TRIPBOMB_WEAPON:
+                        if( p.ammo_amount[TRIPBOMB_WEAPON] > 0 && p.gotweapon[TRIPBOMB_WEAPON] )
+                            addweapon( p, TRIPBOMB_WEAPON );
+                        break;
+                }
+            }
+
+            if( sb_snum&(1<<19) )
+            {
+                if( p.curr_weapon > KNEE_WEAPON )
+                {
+                    if(p.holster_weapon == 0 && p.weapon_pos == 0)
+                    {
+                        p.holster_weapon = 1;
+                        p.weapon_pos = -1;
+                        FTA(73,p,1);
+                    }
+                    else if(p.holster_weapon == 1 && p.weapon_pos == -9)
+                    {
+                        p.holster_weapon = 0;
+                        p.weapon_pos = 10;
+                        FTA(74,p,1);
+                    }
+                }
+            }
+        }
+
+        if( sb_snum&(1<<24) && p.newowner == -1 )
+        {
+            if( p.holoduke_on == -1 )
+            {
+
+                if( p.holoduke_amount > 0 )
+                {
+                    p.inven_icon = 3;
+
+                    p.holoduke_on = i =
+                        EGS(p.cursectnum,
+                        p.posx,
+                        p.posy,
+                        p.posz+(30<<8),APLAYER,-64,0,0,p.ang,0,0,-1,10);
+                    hittype[i].temp_data[3] = hittype[i].temp_data[4] = 0;
+                    sprite[i].yvel = snum;
+                    sprite[i].extra = 0;
+                    FTA(47,p,0);
+                }
+                else FTA(49,p,0);
+                spritesound(TELEPORTER,p.holoduke_on);
+
+            }
+            else
+            {
+                spritesound(TELEPORTER,p.holoduke_on);
+                p.holoduke_on = -1;
+                FTA(48,p,0);
+            }
+        }
+
+        if( sb_snum&(1<<16) )
+        {
+            if( p.firstaid_amount > 0 && sprite[p.i].extra < max_player_health )
+            {
+                j = max_player_health-sprite[p.i].extra;
+
+                if(p.firstaid_amount > j)
+                {
+                    p.firstaid_amount -= j;
+                    sprite[p.i].extra = max_player_health;
+                    p.inven_icon = 1;
+                }
+                else
+                {
+                    sprite[p.i].extra += p.firstaid_amount;
+                    p.firstaid_amount = 0;
+                    checkavailinven(p);
+                }
+                spritesound(DUKE_USEMEDKIT,p.i);
+            }
+        }
+
+        if( sb_snum&(1<<25) && p.newowner == -1)
+        {
+            if( p.jetpack_amount > 0 )
+            {
+                p.jetpack_on = !p.jetpack_on;
+                if(p.jetpack_on)
+                {
+                    p.inven_icon = 4;
+                    if(p.scream_voice > FX_Ok)
+                    {
+                        FX.stopSound(p.scream_voice);
+                        testcallback(DUKE_SCREAM);
+                        p.scream_voice = FX_Ok;
+                    }
+
+                    spritesound(DUKE_JETPACK_ON,p.i);
+
+                    FTA(52,p,0);
+                }
+                else
+                {
+                    p.hard_landing = 0;
+                    p.poszv = 0;
+                    spritesound(DUKE_JETPACK_OFF,p.i);
+                    stopsound(DUKE_JETPACK_IDLE);
+                    stopsound(DUKE_JETPACK_ON);
+                    FTA(53,p,0);
+                }
+            }
+            else FTA(50,p,0);
+        }
+
+        if(sb_snum&(1<<28) && p.one_eighty_count == 0)
+            p.one_eighty_count = -1024;
+    }
 };
 
 //2680
@@ -5506,7 +6001,7 @@ function nonsharedkeys()
     //            displayrooms(myconnectindex,65536);
     //            savetemp("duke3d.tmp",tiles[MAXTILES-1].data,160*100);
     //            screencapt = 0;
-    //            FX_StopAllSounds();
+    //            FX.stopAllSounds();
     //            clearsoundlocks();
 
     //            //                setview(0,0,xdim-1,ydim-1);
@@ -5528,7 +6023,7 @@ function nonsharedkeys()
     //                return;
 
     //            cmenu(300);
-    //            FX_StopAllSounds();
+    //            FX.stopAllSounds();
     //            clearsoundlocks();
 
     //            //                setview(0,0,xdim-1,ydim-1);
@@ -5545,7 +6040,7 @@ function nonsharedkeys()
     //    if(KB.keyPressed( sc_F4 ) && FXDevice != NumSoundCards )
     //    {
     //        KB.clearKeyDown( sc_F4 );
-    //        FX_StopAllSounds();
+    //        FX.stopAllSounds();
     //        clearsoundlocks();
 
     //        ps[myconnectindex].gm |= MODE_MENU;
@@ -5584,7 +6079,7 @@ function nonsharedkeys()
     //            current_menu = 360+lastsavedpos;
     //            probey = lastsavedpos;
     //        }
-    //        FX_StopAllSounds();
+    //        FX.stopAllSounds();
     //        clearsoundlocks();
 
     //        setview(0,0,xdim-1,ydim-1);
@@ -5636,7 +6131,7 @@ function nonsharedkeys()
 
     //        if( lastsavedpos >= 0 ) cmenu(15001);
     //        else cmenu(25000);
-    //        FX_StopAllSounds();
+    //        FX.stopAllSounds();
     //        clearsoundlocks();
     //        ps[myconnectindex].gm |= MODE_MENU;
     //        if(ud.multimode < 2 && ud.recstat != 2)
@@ -5650,7 +6145,7 @@ function nonsharedkeys()
     //    {
     //        KB.clearKeyDown( sc_F10 );
     //        cmenu(500);
-    //        FX_StopAllSounds();
+    //        FX.stopAllSounds();
     //        clearsoundlocks();
     //        ps[myconnectindex].gm |= MODE_MENU;
     //        if(ud.multimode < 2 && ud.recstat != 2)
@@ -7132,7 +7627,7 @@ Game.doMoveThings = function() {
         adduserquote(buf);
 
         if (j < 0 && networkmode == 0)
-            throw new Error("The 'MASTER/First player' just quit the game.  All\nplayers are returned from the game. This only happens in 5-8\nplayer mode as a different network scheme is used.");
+            throw "The 'MASTER/First player' just quit the game.  All\nplayers are returned from the game. This only happens in 5-8\nplayer mode as a different network scheme is used.";
     }
 
     if ((numplayers >= 2) && ((movefifoplc & 7) == 7)) {

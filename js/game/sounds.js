@@ -67,7 +67,11 @@ function stopenvsound() { }
 //525
 function pan3dsound() { }
 
+function testcallback() { }
+
 //652
 function clearsoundlocks() {
     // todo!
 }
+
+function testcallback () {}

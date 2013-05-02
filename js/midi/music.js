@@ -19,3 +19,7 @@ Music.stopSong = function () {
 Music.setVolume = function () {
     //todo
 };
+
+function MUSIC_Pause() { }
+
+function MUSIC_Continue() { }

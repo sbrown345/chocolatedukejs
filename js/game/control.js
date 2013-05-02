@@ -46,7 +46,7 @@ function ACTION(i) {
     if ((KB.keyDown[KeyMapping[i].key1]) ||
 		(KB.keyDown[KeyMapping[i].key2])
 	  ) {
-        //console.log("ACTION", i, KeyMapping[i])
+        console.log("ACTION", i, KeyMapping[i]);
         return 1;
     }
     

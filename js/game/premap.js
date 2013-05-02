@@ -1046,7 +1046,7 @@ PreMap.clearFifo = function () {
 
     clearbufbyte(myminlag,0, MAXPLAYERS<<2,0);
     loc = new Input();
-    sync = structArray(Sync, MAXPLAYERS);
+    sync = structArray(Input, MAXPLAYERS);
     inputfifo = new Array(MOVEFIFOSIZ);
     for (var i = 0; i < inputfifo.length; i++) {
         inputfifo[i] = structArray(Input, MAXPLAYERS);
