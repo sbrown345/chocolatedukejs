@@ -52,6 +52,20 @@ function incur_damage(p) {
     }
 }
 
+
+function quickkill(p)
+{
+    p.pals[0] = 48;
+    p.pals[1] = 48;
+    p.pals[2] = 48;
+    p.pals_time = 48;
+
+    sprite[p.i].extra = 0;
+    sprite[p.i].cstat |= 32768;
+    if(ud.god == 0) guts(sprite[p.i],JIBS6,8,myconnectindex);
+    return;
+}
+
 //95
 function forceplayerangle(p)
 {
@@ -3495,57 +3509,56 @@ Player.processInput = function(snum) {
 
     if(p.knee_incs > 0)
     {
-        throw "todo"
-//        p.knee_incs++;
-//        p.horiz -= 48;
-//        p.return_to_center = 9;
-//        if(p.knee_incs > 15)
-//        {
-//            p.knee_incs = 0;
-//            p.holster_weapon = 0;
-//            if(p.weapon_pos < 0)
-//                p.weapon_pos = -p.weapon_pos;
-//            if(p.actorsqu >= 0 && dist(sprite[pi],sprite[p.actorsqu]) < 1400 )
-//            {
-//                guts(sprite[p.actorsqu],JIBS6,7,myconnectindex);
-//                spawn(p.actorsqu,BLOODPOOL);
-//                spritesound(SQUISHED,p.actorsqu);
-//                switch(sprite[p.actorsqu].picnum)
-//                {
-//                    case FEM1:
-//                    case FEM2:
-//                    case FEM3:
-//                    case FEM4:
-//                    case FEM5:
-//                    case FEM6:
-//                    case FEM7:
-//                    case FEM8:
-//                    case FEM9:
-//                    case FEM10:
-//                    case PODFEM1:
-//                    case NAKED1:
-//                    case STATUE:
-//                        if(sprite[p.actorsqu].yvel)
-//                            operaterespawns(sprite[p.actorsqu].yvel);
-//                        break;
-//                }
+        p.knee_incs++;
+        p.horiz -= 48;
+        p.return_to_center = 9;
+        if(p.knee_incs > 15)
+        {
+            p.knee_incs = 0;
+            p.holster_weapon = 0;
+            if(p.weapon_pos < 0)
+                p.weapon_pos = -p.weapon_pos;
+            if(p.actorsqu >= 0 && dist(sprite[pi],sprite[p.actorsqu]) < 1400 )
+            {
+                guts(sprite[p.actorsqu],JIBS6,7,myconnectindex);
+                spawn(p.actorsqu,BLOODPOOL);
+                spritesound(SQUISHED,p.actorsqu);
+                switch(sprite[p.actorsqu].picnum)
+                {
+                    case FEM1:
+                    case FEM2:
+                    case FEM3:
+                    case FEM4:
+                    case FEM5:
+                    case FEM6:
+                    case FEM7:
+                    case FEM8:
+                    case FEM9:
+                    case FEM10:
+                    case PODFEM1:
+                    case NAKED1:
+                    case STATUE:
+                        if(sprite[p.actorsqu].yvel)
+                            operaterespawns(sprite[p.actorsqu].yvel);
+                        break;
+                }
 
-//                if(sprite[p.actorsqu].picnum == APLAYER)
-//                {
-//                    quickkill(&ps[sprite[p.actorsqu].yvel]);
-//                    ps[sprite[p.actorsqu].yvel].frag_ps = snum;
-//                }
-//                else if(badguy(sprite[p.actorsqu]))
-//                {
-//                    deletesprite(p.actorsqu);
-//                    p.actors_killed++;
-//                }
-//                else deletesprite(p.actorsqu);
-//            }
-//            p.actorsqu = -1;
-//        }
-//        else if(p.actorsqu >= 0)
-//            p.ang += getincangle(p.ang,getangle(sprite[p.actorsqu].x-p.posx,sprite[p.actorsqu].y-p.posy))>>2;
+                if(sprite[p.actorsqu].picnum == APLAYER)
+                {
+                    quickkill(ps[sprite[p.actorsqu].yvel]);
+                    ps[sprite[p.actorsqu].yvel].frag_ps = snum;
+                }
+                else if(badguy(sprite[p.actorsqu]))
+                {
+                    deletesprite(p.actorsqu);
+                    p.actors_killed++;
+                }
+                else deletesprite(p.actorsqu);
+            }
+            p.actorsqu = -1;
+        }
+        else if(p.actorsqu >= 0)
+            p.ang += getincangle(p.ang,getangle(sprite[p.actorsqu].x-p.posx,sprite[p.actorsqu].y-p.posy))>>2;
     }
 
     if( doincrements(p) ) return;
@@ -3630,52 +3643,52 @@ Player.processInput = function(snum) {
                     if ( p.ammo_amount[TRIPBOMB_WEAPON] > 0 )
                     {
                         var sx,sy,sz;
-                        var sect,hw,hitsp;
-                        throw "todo"
-                        var hitsectRef = new Ref(hitsect);
-                        var hitwallRef = new Ref(hitwall);
-                        var hitsprRef = new Ref(hitspr);
-                        var hitxRef = new Ref(hitx);
-                        var hityRef = new Ref(hity);
-                        var hitzRef = new Ref(hitz);
-                        //hitscan( p.posx, p.posy, p.posz,
-                        //            p.cursectnum, sintable[(p.ang+512)&2047],
-                        //            sintable[p.ang&2047], (100-p.horiz-p.horizoff)*32,
-                        //            hitsectRef,hitwallRef,hitsprRef,hitxRef,hityRef,hitzRef,CLIPMASK1);
-                        hitsect = hitsectRef.$;
-                        hitwall = hitwallRef.$;
-                        hitspr = hitsprRef.$;
-                        hitx = hitxRef.$;
-                        hity = hityRef.$;
-                        hitz = hitzRef.$;
+                        var sect, hw, hitsp;
+                        
+                        var sectRef = new Ref(sect);
+                        var hwRef = new Ref(hw);
+                        var hitspRef = new Ref(hitsp);
+                        var sxRef = new Ref(sx);
+                        var syRef = new Ref(sy);
+                        var szRef = new Ref(sz);
+                        hitscan( p.posx, p.posy, p.posz,
+                                    p.cursectnum, sintable[(p.ang+512)&2047],
+                                    sintable[p.ang&2047], (100-p.horiz-p.horizoff)*32,
+                                    sectRef, hwRef, hitspRef, sxRef, syRef, szRef, CLIPMASK1);
+                        sect = sectRef.$;
+                        hw = hwRef.$;
+                        hitsp = hitspRef.$;
+                        sx = sxRef.$;
+                        sy = syRef.$;
+                        sz = szRef.$;
 
-                        //if(sect < 0 || hitsp >= 0)
-                        //    break;
+                        if(sect < 0 || hitsp >= 0)
+                            break;
 
-                        //if( hw >= 0 && sector[sect].lotag > 2 )
-                        //    break;
+                        if( hw >= 0 && sector[sect].lotag > 2 )
+                            break;
 
-                        //if(hw >= 0 && wall[hw].overpicnum >= 0)
-                        //    if(wall[hw].overpicnum == BIGFORCE)
-                        //        break;
+                        if(hw >= 0 && wall[hw].overpicnum >= 0)
+                            if(wall[hw].overpicnum == BIGFORCE)
+                                break;
 
-                        //j = headspritesect[sect];
-                        //while(j >= 0)
-                        //{
-                        //    if( sprite[j].picnum == TRIPBOMB &&
-                        //        klabs(sprite[j].z-sz) < (12<<8) && ((sprite[j].x-sx)*(sprite[j].x-sx)+(sprite[j].y-sy)*(sprite[j].y-sy)) < (290*290) )
-                        //        break;
-                        //    j = nextspritesect[j];
-                        //}
+                        j = headspritesect[sect];
+                        while(j >= 0)
+                        {
+                            if( sprite[j].picnum == TRIPBOMB &&
+                                klabs(sprite[j].z-sz) < (12<<8) && ((sprite[j].x-sx)*(sprite[j].x-sx)+(sprite[j].y-sy)*(sprite[j].y-sy)) < (290*290) )
+                                break;
+                            j = nextspritesect[j];
+                        }
 
-                        //if(j == -1 && hw >= 0 && (wall[hw].cstat&16) == 0 )
-                        //    if( ( wall[hw].nextsector >= 0 && sector[wall[hw].nextsector].lotag <= 2 ) || ( wall[hw].nextsector == -1 && sector[sect].lotag <= 2 ) )
-                        //        if( ( (sx-p.posx)*(sx-p.posx) + (sy-p.posy)*(sy-p.posy) ) < (290*290) )
-                        //        {
-                        //            p.posz = p.oposz;
-                        //            p.poszv = 0;
-                        //            (p.kickback_pic) = 1;
-                        //        }
+                        if(j == -1 && hw >= 0 && (wall[hw].cstat&16) == 0 )
+                            if( ( wall[hw].nextsector >= 0 && sector[wall[hw].nextsector].lotag <= 2 ) || ( wall[hw].nextsector == -1 && sector[sect].lotag <= 2 ) )
+                                if( ( (sx-p.posx)*(sx-p.posx) + (sy-p.posy)*(sy-p.posy) ) < (290*290) )
+                                {
+                                    p.posz = p.oposz;
+                                    p.poszv = 0;
+                                    (p.kickback_pic) = 1;
+                                }
                     }
                     break;
 

@@ -3844,7 +3844,7 @@ function moveactors()
                 hittype[j].temp_data[0] = 3;
 
             case HEAVYHBOMB:
-
+                var gotoDETONATEB = false;
                 if( (s.cstat&32768) )
                 {
                     t[2]--;
@@ -3873,84 +3873,86 @@ function moveactors()
                         t[4] = 0;
                         l = 0;
                         s.xvel = 0;
-                        throw "goto DETONATEB";
+                        gotoDETONATEB = true;
                     }
                 }
-
-                if( s.picnum != BOUNCEMINE )
-                {
-                    makeitfall(i);
-
-                    if( sector[sect].lotag != 1 && s.z >= hittype[i].floorz-(FOURSLEIGHT) && s.yvel < 3 )
+                if (!gotoDETONATEB) {
+                    if( s.picnum != BOUNCEMINE )
                     {
-                        if( s.yvel > 0 || (s.yvel == 0 && hittype[i].floorz == sector[sect].floorz ))
-                            spritesound(PIPEBOMB_BOUNCE,i);
-                        s.zvel = -((4-s.yvel)<<8);
-                        if(sector[s.sectnum].lotag== 2)
-                            s.zvel >>= 2;
-                        s.yvel++;
+                        makeitfall(i);
+
+                        if( sector[sect].lotag != 1 && s.z >= hittype[i].floorz-(FOURSLEIGHT) && s.yvel < 3 )
+                        {
+                            if( s.yvel > 0 || (s.yvel == 0 && hittype[i].floorz == sector[sect].floorz ))
+                                spritesound(PIPEBOMB_BOUNCE,i);
+                            s.zvel = -((4-s.yvel)<<8);
+                            if(sector[s.sectnum].lotag== 2)
+                                s.zvel >>= 2;
+                            s.yvel++;
+                        }
+                        if( s.z < hittype[i].ceilingz ) // && sector[sect].lotag != 2 )
+                        {
+                            s.z = hittype[i].ceilingz+(3<<8);
+                            s.zvel = 0;
+                        }
                     }
-                    if( s.z < hittype[i].ceilingz ) // && sector[sect].lotag != 2 )
+
+                    j = movesprite(i,
+                        (s.xvel*(sintable[(s.ang+512)&2047]))>>14,
+                        (s.xvel*(sintable[s.ang&2047]))>>14,
+                        s.zvel,CLIPMASK0);
+
+                    if(sector[sprite[i].sectnum].lotag == 1 && s.zvel == 0)
                     {
-                        s.z = hittype[i].ceilingz+(3<<8);
-                        s.zvel = 0;
+                        s.z += (32<<8);
+                        if(t[5] == 0)
+                        {
+                            t[5] = 1;
+                            spawn(i,WATERSPLASH2);
+                        }
                     }
-                }
+                    else t[5] = 0;
 
-                j = movesprite(i,
-                    (s.xvel*(sintable[(s.ang+512)&2047]))>>14,
-                    (s.xvel*(sintable[s.ang&2047]))>>14,
-                    s.zvel,CLIPMASK0);
-
-                if(sector[sprite[i].sectnum].lotag == 1 && s.zvel == 0)
-                {
-                    s.z += (32<<8);
-                    if(t[5] == 0)
+                    if(t[3] == 0 && ( s.picnum == BOUNCEMINE || s.picnum == MORTER ) && (j || x < 844) )
                     {
-                        t[5] = 1;
-                        spawn(i,WATERSPLASH2);
-                    }
-                }
-                else t[5] = 0;
-
-                if(t[3] == 0 && ( s.picnum == BOUNCEMINE || s.picnum == MORTER ) && (j || x < 844) )
-                {
-                    t[3] = 1;
-                    t[4] = 0;
-                    l = 0;
-                    s.xvel = 0;
-                    throw "goto DETONATEB";
-                }
-
-                if(sprite[s.owner].picnum == APLAYER)
-                    l = sprite[s.owner].yvel;
-                else l = -1;
-
-                if(s.xvel > 0)
-                {
-                    s.xvel -= 5;
-                    if(sector[sect].lotag == 2)
-                        s.xvel -= 10;
-
-                    if(s.xvel < 0)
+                        t[3] = 1;
+                        t[4] = 0;
+                        l = 0;
                         s.xvel = 0;
-                    if(s.xvel&8) s.cstat ^= 4;
+                        gotoDETONATEB = true;
+                    }
                 }
 
-                if( (j&49152) == 32768 )
-                {
-                    j &= (MAXWALLS-1);
+                if (!gotoDETONATEB) {
 
-                    checkhitwall(i,j,s.x,s.y,s.z,s.picnum);
+                    if (sprite[s.owner].picnum == APLAYER)
+                        l = sprite[s.owner].yvel;
+                    else l = -1;
 
-                    k = getangle(
-                        wall[wall[j].point2].x-wall[j].x,
-                        wall[wall[j].point2].y-wall[j].y);
+                    if (s.xvel > 0) {
+                        s.xvel -= 5;
+                        if (sector[sect].lotag == 2)
+                            s.xvel -= 10;
 
-                    s.ang = ((k<<1) - s.ang)&2047;
-                    s.xvel >>= 1;
+                        if (s.xvel < 0)
+                            s.xvel = 0;
+                        if (s.xvel & 8) s.cstat ^= 4;
+                    }
+
+                    if ((j & 49152) == 32768) {
+                        j &= (MAXWALLS - 1);
+
+                        checkhitwall(i, j, s.x, s.y, s.z, s.picnum);
+
+                        k = getangle(
+                            wall[wall[j].point2].x - wall[j].x,
+                            wall[wall[j].point2].y - wall[j].y);
+
+                        s.ang = ((k << 1) - s.ang) & 2047;
+                        s.xvel >>= 1;
+                    }
                 }
-
+                gotoDETONATEB = false;
                 //DETONATEB:
 
 
