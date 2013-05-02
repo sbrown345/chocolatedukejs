@@ -520,7 +520,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     destPosition = dest.position;
     texture = tiles[globalpicnum].data;
 
-    bufplce0 = bufplce[0];
+    bufplce0 = bufplce[0]; // todo: this must be overkill, check what v8 is doing
     bufplce1 = bufplce[1];
     bufplce2 = bufplce[2];
     bufplce3 = bufplce[3];
