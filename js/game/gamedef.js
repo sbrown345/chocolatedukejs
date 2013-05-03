@@ -256,7 +256,7 @@ function loadefs(filename, readfromGrp) {
     actortype = new Uint8Array(MAXTILES);
 
     labelcnt = 0;
-    scriptPtr = scriptIdx + 1;
+    scriptPtr = scriptIdx + 1 + FIX_00093_Offset;
     warning = 0;
     error = 0;
     line_number = 1;
