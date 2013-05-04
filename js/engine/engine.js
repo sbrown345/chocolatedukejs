@@ -7645,20 +7645,19 @@ function makepalookup(palnum, remapbuf, r, g, b, dastat) {
 }
 
 //8244
+var setBrightnessNewPalette = new Uint8Array(256 * 4);
 function setBrightness(brightness, dapal) {
-    var newPalette = new Uint8Array(256 * 4);
-
     curbrightness = Math.min(Math.max(brightness, 0), 15);
 
     var k = 0;
     for (var i = 0; i < 256; i++) {
-        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 2]];
-        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 1]];
-        newPalette[k++] = briTable[curbrightness][dapal[i * 3 + 0]];
-        newPalette[k++] = 0;
+        setBrightnessNewPalette[k++] = briTable[curbrightness][dapal[i * 3 + 2]];
+        setBrightnessNewPalette[k++] = briTable[curbrightness][dapal[i * 3 + 1]];
+        setBrightnessNewPalette[k++] = briTable[curbrightness][dapal[i * 3 + 0]];
+        setBrightnessNewPalette[k++] = 0;
     }
 
-    VBE_setPalette(newPalette);
+    VBE_setPalette(setBrightnessNewPalette);
 }
 
 //8991
