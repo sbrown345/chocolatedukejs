@@ -100,13 +100,6 @@ function toInt16(v) {
     return toInt16.helper[0];
 }
 
-// todo: replace usages with >>> 0
-toUint32.helper = new Uint32Array(1);
-function toUint32(v) {
-    toUint32.helper[0] = v;
-    return toUint32.helper[0];
-}
-
 function ksgn(i1) {
     if (i1 < 0) return -1;
     else if (i1 > 0) return 1;

@@ -2272,7 +2272,7 @@ Engine.draWalls = function (bunch) {
 
                     globalorientation = wal.cstat;
                     globalpicnum = wal.picnum;
-                    if (toUint32(globalpicnum) >= MAXTILES) globalpicnum = 0;
+                    if ((globalpicnum >>> 0) >= MAXTILES) globalpicnum = 0;
                     globalxpanning = wal.xpanning;
                     globalypanning = wal.ypanning;
                     globalshiftval = (picsiz[globalpicnum]>>4);

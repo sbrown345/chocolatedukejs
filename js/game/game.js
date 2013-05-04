@@ -7525,7 +7525,7 @@ Game.doMoveThings = function() {
         if (sync[i].bits & (1 << 17)) {
             multiflag = 2;
             multiwhat = (sync[i].bits >> 18) & 1;
-            multipos = toUint32(sync[i].bits >> 19) & 15;
+            multipos = (sync[i].bits >>> 19) & 15;
             multiwho = i;
 
             if (multiwhat) {

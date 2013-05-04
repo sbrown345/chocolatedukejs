@@ -1189,7 +1189,7 @@ function movefx() {
                         hittype[i].temp_data[0] = 0;
                     }
                 }
-                else if(s.lotag < 999 && (toUint32(sector[s.sectnum].lotag)) < 9 && AmbienceToggle && sector[sprite[i].sectnum].floorz != sector[sprite[i].sectnum].ceilingz)
+                else if(s.lotag < 999 && ((sector[s.sectnum].lotag >>> 0)) < 9 && AmbienceToggle && sector[sprite[i].sectnum].floorz != sector[sprite[i].sectnum].ceilingz)
                 {
                     if( (soundm[s.lotag]&2) )
                     {
@@ -1225,7 +1225,7 @@ function movefx() {
                         else for(p=connecthead;p>=0;p=connectpoint2[p])
                             if( p == myconnectindex && ps[p].cursectnum == s.sectnum )
                             {
-                                j = s.lotag+(toUint32(global_random)%(s.hitag+1));
+                                j = s.lotag + ((global_random >>> 0) % (s.hitag + 1));
                                 sound(j);
                                 hittype[i].temp_data[4] =  26*40 + (global_random%(26*40));
                             }
@@ -6646,7 +6646,7 @@ function moveeffectors()   //STATNUM 3
                     {
                         if(cansee(s.x,s.y,s.z,sprite[i].sectnum,ps[p].posx,ps[p].posy,ps[p].posz,ps[p].cursectnum))
                         {
-                            if(x < toUint32(sh))
+                            if (x < (sh >>> 0))
                             {
                                 ud.camerasprite = i;
                                 t[0] = 999;
