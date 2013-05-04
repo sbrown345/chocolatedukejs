@@ -842,8 +842,8 @@ function low32(a) { return (a & 0xffffffff); }
 slopevlin.c = new bitwisef2i();
 function slopevlin(i1, i2, i3, i4, i5, i6) {
     //printf("slopevlin\n");
-    var doCount = 0;
-    var whileCount = 0;
+    //var doCount = 0;
+    //var whileCount = 0;
     var ecx,eax,ebx,edx,esi,edi;
     //#pragma This is so bad to cast asm3 to int then float :( !!!
     var a = asm3 + asm2_f[0]; // look @ krecipasm for float stuff
@@ -909,17 +909,17 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             frameplaceArray[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
                 //if (flatColor) frameplace.array[i1] = 44;
                 //printf("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
-                wrote++;
+                //wrote++;
             //}
             edx = edi;
             ecx = ((ecx & 0xffffff00) | ((ecx - 1) & 0xff));
-            whileCount++;
+            //whileCount++;
         }
         ebx = asm4;
         ebx -= 8;	// BITSOFPRECISIONPOW
 
 
-        doCount++;
+        //doCount++;
     } while (ebx > 0);
 
 

@@ -167,7 +167,7 @@ Queue.prototype = {
         setZeroTimeout(shiftArg);
 
         function shiftArg() {
-            if (that._methods[0]) {
+            if (that._methods.length) {
 
                 var methodObj = that._methods.shift();
                 var newArgs = [resp].concat(methodObj.args);
