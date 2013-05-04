@@ -440,7 +440,7 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
 
     frameBuffer.position += frameBufferPosition;
 
-    var i;
+    var i = 0;
     var temp;
 
     var index = (frameBuffer.position + ylookup[columnIndex]);
@@ -502,7 +502,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
 
     //printf("vlineasm4   \n");
     var i = 0;
-    var temp;
+    //var temp;
 
     var index = frameBufferPosition + ylookup[columnIndex];
     var dest = new PointerHelper(frameplace.array, -ylookup[columnIndex]);
