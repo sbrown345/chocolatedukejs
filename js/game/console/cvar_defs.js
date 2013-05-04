@@ -1,4 +1,6 @@
-﻿var CvarDefs = {};
+﻿'use strict';
+
+var CvarDefs = {};
 
 //
 // Variable declarations

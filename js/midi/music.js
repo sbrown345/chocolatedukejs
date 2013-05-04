@@ -1,4 +1,6 @@
-﻿var Music = {};
+﻿'use strict';
+
+var Music = {};
 
 // https://github.com/qiao/euphony used both these:
 // http://www.personalcopy.com/home.htm

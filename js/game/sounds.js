@@ -1,4 +1,6 @@
-﻿//230
+﻿'use strict';
+
+//230
 var menunum = 0;
 
 function intomenusounds() {
