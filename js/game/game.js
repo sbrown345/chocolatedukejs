@@ -6845,7 +6845,7 @@ Game.playBack = function () {
             return; //goto RECHECK;
         }
         for(t=0;t<63;t+=7) palto(0,0,0,t);
-        drawbackground();
+        Game.drawBackground();
 
         Console.handleInput();
         if( !Console.isActive())

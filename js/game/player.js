@@ -1974,10 +1974,10 @@ function getinput(snum) {
     }
 
     if (ACTION(gamefunc_Strafe)) {
-        svel = -(info.dyaw + previousInfoDyawSvel) / 8;
+        svel = -((info.dyaw + previousInfoDyawSvel) / 8)|0;
     }
     else {
-        angvel = (info.dyaw + previousInfoDyaw) / 64;
+        angvel = ((info.dyaw + previousInfoDyaw) / 64)|0;
     }
 
     previousInfoDyaw = (previousInfoDyaw + info.dyaw) % 64; // % xduke: dont waste mouse tics
@@ -1996,10 +1996,10 @@ function getinput(snum) {
 
             if (CONTROL_JoystickEnabled) {
                 if (ud.mouseflip) {
-                    horiz = -(info.dpitch + previousInfoDpitch) / (314 - 128);
+                    horiz = -((info.dpitch + previousInfoDpitch) / (314 - 128))|0;
                 }
                 else {
-                    horiz = (info.dpitch + previousInfoDpitch) / (314 - 128);
+                    horiz = ((info.dpitch + previousInfoDpitch) / (314 - 128))|0;
                 }
                 horiz = (horiz >= 0) ? horiz + 1 : horiz; // xduke: fix assymetry (speed of 2 is like -1)
                 previousInfoDpitch = (previousInfoDpitch + info.dpitch) % (314 - 128);
@@ -2013,10 +2013,10 @@ function getinput(snum) {
                 //
                 //
                 if (ud.mouseflip) {
-                    horiz = -(info.dpitch + previousInfoDpitch) / (314 - 128);
+                    horiz = -((info.dpitch + previousInfoDpitch) / (314 - 128))|0;
                 }
                 else {
-                    horiz = (info.dpitch + previousInfoDpitch) / (314 - 128);
+                    horiz = ((info.dpitch + previousInfoDpitch) / (314 - 128))|0;
                 }
                 horiz = (horiz >= 0) ? horiz + 1 : horiz; // xduke: fix assymetry (speed of 2 is like -1)
                 previousInfoDpitch = (previousInfoDpitch + info.dpitch) % (314 - 128);
@@ -3781,8 +3781,8 @@ Player.processInput = function(snum) {
                     if( k < 512 )
                     {
                         sprite[j].ang += 1024;
-                        sprite[j].zvel /= 3; sprite[j].zvel = sprite[j].zvel | 0;
-                        sprite[j].xvel /= 3; sprite[j].xvel = sprite[j].xvel | 0;
+                        sprite[j].zvel = (sprite[j].zvel / 3)|0;
+                        sprite[j].xvel =  (sprite[j].xvel /3)|0;
                     }
 
                     p.hbomb_on = 1;
