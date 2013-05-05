@@ -433,14 +433,14 @@ function VBE_setPalette(paletteBuffer, debug) {
     ////CODE EXPLORATION
     ////Used only to write the last palette to file.
     //memcpy(lastPalette, palettebuffer, 768);
-    var debugHtml = "";
+    //var debugHtml = "";
     for (var i = 0; i < 256; i++) {
         fmtSwap[sdlp] = (255 << 24) | // alpha
             ((paletteBuffer[p] / 63.0) * 255.0) << 16 | // blue
             ((paletteBuffer[p + 1] / 63.0) * 255.0) << 8 | // green
             ((paletteBuffer[p + 2] / 63.0) * 255.0); // red
 
-        colorPaletteRrb[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0; // just used for clearing screen
+        colorPaletteRrb[sdlp].b = ((paletteBuffer[p++] / 63.0) * 255.0) | 0; // safari/IE10
         colorPaletteRrb[sdlp].g = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
         colorPaletteRrb[sdlp].r = ((paletteBuffer[p++] / 63.0) * 255.0) | 0;
         p++;
@@ -522,6 +522,7 @@ function _nextpage() {
     total_rendered_frames++;
 }
 
+
 var imageData;
 //var buf = new ArrayBuffer(imageData.data.length);
 function updateCanvas() {
@@ -535,7 +536,7 @@ function updateCanvas() {
         }
 
         var buf = new ArrayBuffer(imageData.data.length); // creating new ones like this is faster than having them premade
-        var buf8 = new Uint8ClampedArray(buf); // won't work in safari 5.1
+        var buf8 = new Uint8ClampedArray(buf);
         var data = new Uint32Array(buf);
 
         var newImageData = frameplace.array;
@@ -549,6 +550,23 @@ function updateCanvas() {
         surfaceContext.putImageData(imageData, 0, 0);
     }
 }
+
+if (typeof Uint8ClampedArray === "undefined") {
+    updateCanvas = function () {
+        if (frameplace) {
+            var imageData = surface.getContext("2d").getImageData(0, 0, ScreenWidth, ScreenHeight);
+            var newImageData = frameplace.array;
+            for (var i = 0; i < newImageData.length; i++) {
+                imageData.data[i * 4] = colorPaletteRrb[newImageData[i]].r;
+                imageData.data[i * 4 + 1] = colorPaletteRrb[newImageData[i]].g;
+                imageData.data[i * 4 + 2] = colorPaletteRrb[newImageData[i]].b;
+                imageData.data[i * 4 + 3] = 255;
+            }
+            surface.getContext("2d").putImageData(imageData, 0, 0);
+        }
+    };
+}
+
 
 // 1769
 //-------------------------------------------------------------------------------------------------

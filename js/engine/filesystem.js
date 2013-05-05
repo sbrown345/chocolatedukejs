@@ -629,10 +629,23 @@ var lzwbuf1, lzwbuf4, lzwbuf5;
 var lzwbuflock = new Uint8Array(5);
 var lzwbuf2, lzwbuf3;
 
+if (!ArrayBuffer.prototype.slice) {
+    // IE10
+    ArrayBuffer.prototype.slice = function(start, end) {
+        var that = new Uint8Array(this);
+        if (end == undefined) end = that.length;
+        var result = new ArrayBuffer(end - start);
+        var resultArray = new Uint8Array(result);
+        for (var i = 0; i < resultArray.length; i++)
+            resultArray[i] = that[i + start];
+        return result;
+    };
+}
+
 //544
 function uncompress(lzwinbuf, compleng, lzwoutbuf) {
     var strtot, currstr, numbits, oneupnumbits;
-    var i, dat, leng, bitcnt, outbytecnt, longptr = new Int32Array(lzwinbuf.buffer);
+    var i, dat, leng, bitcnt, outbytecnt;
     var shortptr;
 
     shortptr = new Int16Array(lzwinbuf.buffer);
