@@ -23,18 +23,16 @@ var CRC_BASE_GRP_FULL_13 = 0xBBC9CE44;
 var CRC_BASE_GRP_PLUTONIUM_14 = 0xF514A6AC;
 var CRC_BASE_GRP_ATOMIC_15 = 0xFD3DCFF1;
 
-window.__defineGetter__("PLUTOPAK", function () {
-    return !VOLUMEONE && !VOLUMEALL;
-});
 
-window.__defineGetter__("VOLUMEONE", function () {
-    return getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13;
-});
+Object.defineProperty(window, 'PLUTOPAK', { get: function () { return !VOLUMEONE && !VOLUMEALL; } });
+
+Object.defineProperty(window, 'VOLUMEONE', { get: function () { return getGRPcrc32(0) === CRC_BASE_GRP_SHAREWARE_13; } });
 
 // VOLUMEALL = 1.3d full
-window.__defineGetter__("VOLUMEALL", function () {
-    return getGRPcrc32(0) == CRC_BASE_GRP_FULL_13 || conVersion == 13 && getGRPcrc32(0) != CRC_BASE_GRP_SHAREWARE_13 && getGRPcrc32(0) != CRC_BASE_GRP_PLUTONIUM_14 && getGRPcrc32(0) != CRC_BASE_GRP_ATOMIC_15;
-});
+Object.defineProperty(window, 'VOLUMEALL', {
+    get: function () {
+     return getGRPcrc32(0) == CRC_BASE_GRP_FULL_13 || conVersion == 13 && getGRPcrc32(0) != CRC_BASE_GRP_SHAREWARE_13 && getGRPcrc32(0) != CRC_BASE_GRP_PLUTONIUM_14 && getGRPcrc32(0) != CRC_BASE_GRP_ATOMIC_15;
+} });
 
 var SCREENSHOTPATH = "screenshots";
 
@@ -97,7 +95,7 @@ var seekplayer = 512;
 var furthestdir = 1024;
 var dodgebullet = 4096;
 
-window.__defineGetter__("TRAND", krand);
+Object.defineProperty(window, 'TRAND', { get: krand });
 
 //279
 var MAX_WEAPONS = 12;
@@ -149,12 +147,7 @@ Input.prototype.copyTo = function(obj) {
 
 ///* !!! FIXME: "sync" is defined in unistd.h ... :(  --ryan. */
 // todo fix: this is work around for macro: possibly confusing sync/duke_sync
-window.__defineSetter__("duke_sync", function (v) {
-    sync = v;
-});
-window.__defineGetter__("duke_sync", function () {
-    return sync;
-});
+Object.defineProperty(window, 'duke_sync', { get: function () { return sync; }, set: function (v) { sync = v; } });
 
 //extern input recsync[RECSYNCBUFSIZ];
 

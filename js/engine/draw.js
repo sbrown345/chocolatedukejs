@@ -435,7 +435,7 @@ function vlineasm4(columnIndex, bufplc, frameBufferPosition, frameBuffer) {
         return;
 
     if (arguments.length != 4) {
-        throw new Error("todo: vlineasm4 should have 4 arguments");
+        throw new Error("vlineasm4 should have 4 arguments");
     }
 
     frameBuffer.position += frameBufferPosition;
@@ -497,7 +497,7 @@ function vlineasm4_2(columnIndex, frameBufferPosition) {
     //    return;
 
     if (arguments.length != 2) {
-        throw new Error("todo: vlineasm4_2 should have 2 arguments");
+        throw new Error("vlineasm4_2 should have 2 arguments");
     }
 
     //printf("vlineasm4   \n");
@@ -801,25 +801,13 @@ var slopemach_edx;
 var slopemach_ah1;
 var slopemach_ah2;
 var asm2_f = new Float32Array(1);
+
 function bitwisef2i() {
     var uintArray = new Uint32Array(1);
     var floatArray = new Float32Array(uintArray.buffer);
-    
-    this.__defineGetter__("i", function () {
-        return uintArray[0];
-    });
 
-    this.__defineSetter__("i", function (val) {
-        uintArray[0] = val;
-    });
-    
-    this.__defineGetter__("f", function () {
-        return floatArray[0];
-    });
-
-    this.__defineSetter__("f", function (val) {
-        floatArray[0] = val;
-    });
+    Object.defineProperty(this, 'i', { get: function() { return uintArray[0]; }, set: function(v) { uintArray[0] = v; } });
+    Object.defineProperty(this, 'f', { get: function() { return floatArray[0]; }, set: function(v) { floatArray[0] = v; } });
 }
 
 setupslopevlin.c = new bitwisef2i();
@@ -835,7 +823,7 @@ function setupslopevlin(i1, i2, i3) {
 }
 
 //870
-function low32(a) { return (a & 0xffffffff); }
+function low32(a) { return (a & 0xffffffff);/*todo: does this even do anything?*/ }
 
 //FCS: Render RENDER_SLOPPED_CEILING_AND_FLOOR
 //var slopevlinCount = 0;

@@ -67,12 +67,12 @@ function loadpheader(spot, vn, ln, psk, nump) {
 }
 
 
-window.__defineGetter__("LMB", function () { return buttonstat & 1; });
-window.__defineGetter__("RMB", function () { return buttonstat & 2; });
+Object.defineProperty(window, 'LMB', { get: function () { return buttonstat & 1; } });
+Object.defineProperty(window, 'RMB', { get: function () { return buttonstat & 2; } });
 
 // FIX_00036: Mouse wheel can now be used in menu
-window.__defineGetter__("WHEELUP", function () { return buttonstat & 8; });
-window.__defineGetter__("WHEELDOWN", function () { return buttonstat & 16; });
+Object.defineProperty(window, 'WHEELUP', { get: function () { return buttonstat & 8; } });
+Object.defineProperty(window, 'WHEELDOWN', { get: function () { return buttonstat & 16; } });
 
 var minfo = new ControlInfo();
 

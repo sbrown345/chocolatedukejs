@@ -118,11 +118,15 @@ function Sprite() {
     this.x = 0;
     this.y = 0;
     this.z = 0;
-
+    
     var _cstat = new Int16Array(1);
-    this.__defineGetter__("cstat", function () {return _cstat[0];});
-    this.__defineSetter__("cstat", function (val) {_cstat[0] = val;});
-
+    Object.defineProperty(this, "cstat", {
+        get: function () { return _cstat[0]; },
+        set: function (newValue) { _cstat[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
+    
     this.picnum = 0;
     this.shade = 0;
     this.pal = 0;
@@ -139,22 +143,38 @@ function Sprite() {
     this.owner = 0;
     
     var _xvel = new Int16Array(1);
-    this.__defineGetter__("xvel", function () {return _xvel[0];});
-    this.__defineSetter__("xvel", function (val) {_xvel[0] = val;});
+    Object.defineProperty(this, "xvel", {
+        get: function () { return _xvel[0]; },
+        set: function (newValue) { _xvel[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
     var _yvel = new Int16Array(1);
-    this.__defineGetter__("yvel", function () { return _yvel[0]; });
-    this.__defineSetter__("yvel", function (val) { _yvel[0] = val; });
+    Object.defineProperty(this, "yvel", {
+        get: function () { return _yvel[0]; },
+        set: function (newValue) { _yvel[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
     var _zvel = new Int16Array(1);
-    this.__defineGetter__("zvel", function () { return _zvel[0]; });
-    this.__defineSetter__("zvel", function (val) { _zvel[0] = val; });
+    Object.defineProperty(this, "zvel", {
+        get: function () { return _zvel[0]; },
+        set: function (newValue) { _zvel[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
     
     // todo: a load of these are (short) so they might
     this.lotag = 0;
     this.hitag = 0;
     
     var _extra = new Int16Array(1);
-    this.__defineGetter__("extra", function () { return _extra[0]; });
-    this.__defineSetter__("extra", function (val) { _extra[0] = val; });
+    Object.defineProperty(this, "extra", {
+        get: function () { return _extra[0]; },
+        set: function (newValue) { _extra[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
 }
 
 Sprite.prototype.copyTo = function (obj) {
