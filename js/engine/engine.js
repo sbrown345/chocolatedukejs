@@ -7516,7 +7516,7 @@ function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1,
         //console.time("doRotateSprite")
         //console.profile("doRotateSprite")
         doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2);
-        appendCanvasImageToPage(new Error().stack)
+        //appendCanvasImageToPage(new Error().stack)
         //console.profileEnd("doRotateSprite")
         //console.timeEnd("doRotateSprite")
     }
@@ -7685,14 +7685,13 @@ function clearView(dacol) {
 /* MUST USE RESTOREFORDRAWROOMS AFTER DRAWING */
 var setviewcnt = 0;
 var bakvidoption = new Int32Array(4);
-var bakframeplace = new Uint8Array(4);
+var bakframeplace = new Array(4);
 var bakxsiz = new Int32Array(4), bakysiz = new Int32Array(4);
 var bakwindowx1 = new Int32Array(4), bakwindowy1 = new Int32Array(4);
 var bakwindowx2 = new Int32Array(4), bakwindowy2 = new Int32Array(4);
 
 function setviewback() {
     var i, j, k;
-
     if (setviewcnt <= 0) return;
     setviewcnt--;
 
@@ -7701,12 +7700,15 @@ function setviewback() {
     copybufbyte(bakumost, windowx1, startumost, windowx1, (windowx2 - windowx1 + 1) * 2);
     copybufbyte(bakdmost, windowx1, startdmost, windowx1, (windowx2 - windowx1 + 1) * 2);
     vidoption = bakvidoption[setviewcnt];
-    frameplace.position = bakframeplace[setviewcnt]; //todo check this line
+    frameplace = bakframeplace[setviewcnt]; //todo check this line
     if (setviewcnt == 0)
         k = bakxsiz[0];
     else
         k = Math.max(bakxsiz[setviewcnt-1],bakxsiz[setviewcnt]);
     j = 0;
+    
+    bytesperline = surface.width; //semi-workaround. todo: test setviewback, settileview, setview etc
+    
     for(i=0; i<=k; i++) ylookup[i] = j, j += bytesperline;
     setBytesPerLine(bytesperline);
 }

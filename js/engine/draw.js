@@ -208,6 +208,7 @@ function rmhlineasm4(i1, shade, colorIndex, i4, i5, dest) {
 
 var bytesperline = 0;
 function setBytesPerLine(_bytesPerLine) {
+    //console.log("_bytesPerLine: ", _bytesPerLine);
     bytesperline = _bytesPerLine;
 }
 

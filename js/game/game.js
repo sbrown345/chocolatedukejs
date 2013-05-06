@@ -5338,8 +5338,6 @@ function cheats() {
                         for(j = 0;j<cheatbuflen;j++)
                         {
                             if (cheatquotes[k] && (cheatbuf[j] == cheatquotes[k].charCodeAt(j) || (cheatquotes[k][j] == '#' && ch >= '0' && ch <= '9'))) {
-                                console.log("cheatquotes[k][j+1]", cheatquotes[k][j + 1])
-                                console.log("cheatquotes[k][j+1] == 0", cheatquotes[k][j + 1] == 0)
                                 if (!cheatquotes[k][j + 1] ) { break FOUNDCHEAT; /*goto FOUNDCHEAT;*/ }
                                 if (j == cheatbuflen - 1) return;
                             }
