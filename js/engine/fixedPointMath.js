@@ -11,9 +11,9 @@ for (var input3 = 1; input3 <= 32; input3++) {
 }
 
 function mulscale(input1, input2, input3) {
-    if ((input1 | 0) != input1) throw "input1 not an integer";
-    if ((input2 | 0) != input2) throw "input2 not an integer";
-    if ((input3 | 0) != input3) throw "input3 not an integer";
+    if ((input1 | 0) != input1) throw "input1 " + input1 + " not an integer";
+    if ((input2 | 0) != input2) throw "input2 " + input2 + " not an integer";
+    if ((input3 | 0) != input3) throw "input3 " + input3 + " not an integer";
 
     var output = Math.floor(input1 * input2 / Math.pow(2, input3));
     //printf("mulscale: %i, %i, %i = %i\n", input1, input2, input3, output);
