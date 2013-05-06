@@ -2972,31 +2972,27 @@ function parse() {
             }
             break;
         case 90:
-            throw "todo"
-            //    {
-        //        var s1;
+                {
+                    var s1 = new Ref(g_sp.sectnum);
 
-        //        s1 = g_sp.sectnum;
-
-        //        j = 0;
-
-        //            updatesector(g_sp.x+108,g_sp.y+108,&s1);
-        //            if( s1 == g_sp.sectnum )
-        //            {
-        //                updatesector(g_sp.x-108,g_sp.y-108,&s1);
-        //                if( s1 == g_sp.sectnum )
-        //                {
-        //                    updatesector(g_sp.x+108,g_sp.y-108,&s1);
-        //                    if( s1 == g_sp.sectnum )
-        //                    {
-        //                        updatesector(g_sp.x-108,g_sp.y+108,&s1);
-        //                        if( s1 == g_sp.sectnum )
-        //                            j = 1;
-        //                    }
-        //                }
-        //            }
-        //            parseifelse( j );
-            //}
+                    j = 0;
+                        updatesector(g_sp.x+108,g_sp.y+108,s1);
+                        if (s1.$ == g_sp.sectnum)
+                        {
+                            updatesector(g_sp.x-108,g_sp.y-108,s1);
+                            if (s1.$ == g_sp.sectnum)
+                            {
+                                updatesector(g_sp.x+108,g_sp.y-108,s1);
+                                if (s1.$ == g_sp.sectnum)
+                                {
+                                    updatesector(g_sp.x-108,g_sp.y+108,s1);
+                                    if( s1.$ == g_sp.sectnum )
+                                        j = 1;
+                                }
+                            }
+                        }
+                    parseifelse( j );
+            }
 
             break;
         case 80:
