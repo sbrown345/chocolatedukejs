@@ -4459,10 +4459,10 @@ function ceilspritehline(x2, y) {
     asm3 = new PointerHelper((palookup[globalpal]), (getpalookup(mulscale28(klabs(v), globvis), globalshade) << 8));
     
     if ((globalorientation&2) == 0)
-        mhline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1/*,frameoffset*/);
+        mhline(globalbufplc, bx, (x2 - x1) << 16, 0, by, ylookup[y] + x1, frameoffset/*,frameoffset*/);
     else
     {
-        thline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1/*,frameoffset*/);
+        thline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1, frameoffset/*,frameoffset*/);
         transarea += (x2-x1);
     }
 }

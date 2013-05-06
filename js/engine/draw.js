@@ -744,47 +744,49 @@ var  tmach_asm3;
 var tmach_asm1;
 var tmach_asm2;
 
-//void thline(uint8_t  * i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, uint8_t * i6)
-//{
-//    tmach_eax = i1;
-//    tmach_asm3 = asm3;
-//    tmach_asm1 = asm1;
-//    tmach_asm2 = asm2;
-//    thlineskipmodify(asm2,i2,i3,i4,i5,i6);
-//}
+
+//E4L5.map
+function thline( i1,  i2,  i3,  i4,  i5,  i6)
+{
+    tmach_eax = i1;
+    tmach_asm3 = asm3;
+    tmach_asm1 = asm1;
+    tmach_asm2 = asm2;
+    thlineskipmodify(asm2,i2,i3,i4,i5,i6);
+}
 
 var tshift_al = 26;
 var tshift_bl = 6;
-//void thlineskipmodify(int32_t i1, uint32_t i2, uint32_t i3, int32_t i4, int32_t i5, uint8_t * i6)
-//{
-//    uint32_t ebx;
-//    int counter = (i3>>16);
-//    printf("mhlineskipmodify\n");
-//    while (counter >= 0)
-//    {
-//        ebx = i2 >> tshift_al;
-//        ebx = shld (ebx, (uint32_t)i5, tshift_bl);
-//        i1 = tmach_eax[ebx];
-//        if ((i1&0xff) != 0xff)
-//        {
-//            uint16_t val = tmach_asm3[i1];
-//            val |= (*i6)<<8;
+function thlineskipmodify( i1, i2,  i3,  i4,  i5, i6)
+{
+    var ebx;
+    var counter = (i3>>>16);
+    printf("mhlineskipmodify\n");
+    while (counter >= 0)
+    {
+        ebx = i2 >>> tshift_al;
+        ebx = shld (ebx, i5 >>> 0, tshift_bl) >>> 0;
+        i1 = tmach_eax[ebx];
+        if ((i1&0xff) != 0xff)
+        {
+            var val = tmach_asm3[i1] >>> 0;
+            val |= (frameoffset.array[i6])<<8;
 
-//            if (transrev) 
-//                val = ((val>>8)|(val<<8));
+            if (transrev) 
+                val = ((val>>>8)|(val<<8));
 
-//            if (pixelsAllowed-- > 0)
-//                *i6 = transluc[val];
-//        }
+            if (pixelsAllowed-- > 0)
+                frameoffset.array[i6] = transluc[val];
+        }
 
-//        i2 += tmach_asm1;
-//        i5 += tmach_asm2;
-//        i6++;
-//        counter--;
+        i2 =  (i2 + tmach_asm1)>>>0;
+        i5 += tmach_asm2;
+        i6++;
+        counter--;
 
 		
-//    }
-//} 
+    }
+} 
 
 
 function tsethlineshift(i1, i2) {
