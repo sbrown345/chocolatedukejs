@@ -7848,3 +7848,41 @@ function getzsofslope(sectnum, dax, day, ceilz, florz) {
             florz.$ = (florz.$) + scale(sec.floorheinum, j, i);
     }
 }
+
+function alignceilslope(dasect, x, y, z)
+{
+    var i, dax, day;
+    var wal;
+
+    wal = wall[sector[dasect].wallptr];
+    dax = wall[wal.point2].x-wal.x;
+    day = wall[wal.point2].y-wal.y;
+
+    i = (y-wal.y)*dax - (x-wal.x)*day;
+    if (i == 0) return;
+    sector[dasect].ceilingheinum = scale((z-sector[dasect].ceilingz)<<8,
+                                         nsqrtasm(dax*dax+day*day),i);
+
+    if (sector[dasect].ceilingheinum == 0) sector[dasect].ceilingstat &= ~2;
+    else sector[dasect].ceilingstat |= 2;
+}
+
+
+//9467
+function alignflorslope(dasect, x, y, z)
+{
+    var i, dax, day;
+    var wal;
+
+    wal = wall[sector[dasect].wallptr];
+    dax = wall[wal.point2].x-wal.x;
+    day = wall[wal.point2].y-wal.y;
+
+    i = (y-wal.y)*dax - (x-wal.x)*day;
+    if (i == 0) return;
+    sector[dasect].floorheinum = scale((z-sector[dasect].floorz)<<8,
+                                       nsqrtasm(dax*dax+day*day),i);
+
+    if (sector[dasect].floorheinum == 0) sector[dasect].floorstat &= ~2;
+    else sector[dasect].floorstat |= 2;
+}
