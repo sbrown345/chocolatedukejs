@@ -32,6 +32,10 @@ FX.setReverb = function () {
     //todo
 };
 
+FX.setReverbDelay = function () {
+    //todo
+};
+
 function FX_VoiceAvailable() {
     //todo
 }

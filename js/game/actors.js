@@ -1179,13 +1179,13 @@ function movefx() {
                     x = ldist(sprite[ps[screenpeek].i],s);
                     if( x < ht && hittype[i].temp_data[0] == 0 )
                     {
-                        FX_SetReverb( s.lotag - 1000 );
+                        FX.setReverb( s.lotag - 1000 );
                         hittype[i].temp_data[0] = 1;
                     }
                     if( x >= ht && hittype[i].temp_data[0] == 1 )
                     {
-                        FX_SetReverb(0);
-                        FX_SetReverbDelay(0);
+                        FX.setReverb(0);
+                        FX.setReverbDelay(0);
                         hittype[i].temp_data[0] = 0;
                     }
                 }
