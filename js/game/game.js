@@ -91,7 +91,7 @@ function gametext(x, y, t, s, dabits) {
 
             if (ac < STARTALPHANUM || ac > ENDALPHANUM) break;
 
-            if (t.charCodeAt(tIdx) >= '0' && t.charCodeAt(tIdx) <= '9')
+            if (t.charCodeAt(tIdx) >= '0'.charCodeAt(0) && t.charCodeAt(tIdx) <= '9'.charCodeAt(0))
                 newx += 8;
             else newx += tiles[ac].dim.width;
             tIdx++;
