@@ -7794,7 +7794,7 @@ function completemirror() {
 
     transarea += (mirrorsx2-mirrorsx1)*(windowy2-windowy1);
 
-    p = new PointerHelper(frameplace, ylookup[windowy1 + mirrorsy1] + windowx1 + mirrorsx1);
+    p = new PointerHelper(frameplace.array, ylookup[windowy1 + mirrorsy1] + windowx1 + mirrorsx1);
     i = windowx2-windowx1-mirrorsx2-mirrorsx1;
     mirrorsx2 -= mirrorsx1;
     // FIX_00085: Optimized Video driver. FPS increases by +20%.
@@ -7802,7 +7802,7 @@ function completemirror() {
     {
         copybufbyte(p.array, p.position, tempbuf, 0, mirrorsx2 + 1);
         tempbuf[mirrorsx2] = tempbuf[mirrorsx2-1];
-        copybufreverse(tempbuf, mirrorsx2, p, p.position + i, mirrorsx2 + 1);
+        copybufreverse(tempbuf, mirrorsx2, p.array, p.position + i, mirrorsx2 + 1);
         p.position += ylookup[1];
         faketimerhandler();
     }
