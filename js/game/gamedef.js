@@ -1204,7 +1204,15 @@ function parseCommand(readFromGrp) {
             }
             return 1;
         case 76: // betaname
-            throw new Error("todo");
+            scriptPtr--;
+            j = 0;
+            while( textptr[textptrIdx] != 0x0a )
+            {
+                betaname[j] = textptr[textptrIdx];
+                j++; textptrIdx++;
+            }
+            betaname[j] = 0;
+            return 0;
         case 20: // "//"
             scriptPtr--;
             while (textptr.charCodeAt(textptrIdx) != 0x0a) {

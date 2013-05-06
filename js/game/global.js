@@ -112,7 +112,7 @@ var mirrorwall = new Int16Array(64), mirrorsector = new Int16Array(64), mirrorcn
 
 var current_menu = 0;
 
-//uint8_t  betaname[80];
+var betaname = new Uint32Array(80);
 
 var level_names = new Array(44);
 var level_file_names = new Array(44);
