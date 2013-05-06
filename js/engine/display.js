@@ -42,16 +42,16 @@ function _platform_init(argc, argv, title, iconName) {
     // todo: Setup_UnstableNetworking, command line args
 
     scancodes[27] = 0x01; // Esc
-    scancodes[48] = 0x02; // 0 
-    scancodes[49] = 0x03; // 1
-    scancodes[50] = 0x04; // 2
-    scancodes[51] = 0x05; // 3
-    scancodes[52] = 0x06; // 4
-    scancodes[53] = 0x07; // 5
-    scancodes[54] = 0x08; // 6
-    scancodes[55] = 0x09; // 7
-    scancodes[56] = 0x0A; // 8
-    scancodes[57] = 0x0B; // 9
+    scancodes[49] = 0x02; // 1 
+    scancodes[50] = 0x03; // 2
+    scancodes[51] = 0x04; // 3
+    scancodes[52] = 0x05; // 4
+    scancodes[53] = 0x06; // 5
+    scancodes[54] = 0x07; // 6
+    scancodes[55] = 0x08; // 7
+    scancodes[56] = 0x09; // 8
+    scancodes[57] = 0x0A; // 9
+    scancodes[48] = 0x0B; // 0
     scancodes[189] = 0x0C; /* was 0x4A */ // SDLK_MINUS
     scancodes[187] = 0x0D; /* was 0x4E */ // SDLK_EQUALS
     scancodes[8] = 0x0E; // SDLK_BACKSPACE
@@ -258,7 +258,7 @@ function sdl_key_filter(event) {
 //		return(0);					
 //    }								
 
-//    if (!handle_keypad_enter_hack(event))
+    //    if (!handle_keypad_enter_hack(event))
         lastkey = scancodes[event.key.keyCode];
 
 ////	printf("key.keysym.sym=%d\n", event.key.keysym.sym);

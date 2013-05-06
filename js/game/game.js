@@ -5323,7 +5323,6 @@ function cheats() {
                         //             FTA(46,ps[myconnectindex]);
                         return;
                     }
-
                     cheatbuf[cheatbuflen++] = ch.charCodeAt(0);
                     cheatbuf[cheatbuflen] = 0;
 
@@ -5350,7 +5349,7 @@ function cheats() {
                 }
 
             //FOUNDCHEAT:
-                {
+            {
                     switch(k)
                     {
                         case 0: // cornholio
@@ -5431,13 +5430,11 @@ function cheats() {
 
                         case 2:  // dnscotty###
                         case 10: // skill#
-
-                            if(k == 2)
-                            {
+                            if(k == 2) {
                                 var volnume,levnume;
-                                volnume = cheatbuf[6] - '0';
-                                levnume = (cheatbuf[7] - '0')*10+(cheatbuf[8]-'0');
-
+                                volnume = cheatbuf[6] - '0'.charCodeAt(0);
+                                levnume = (cheatbuf[7] - '0'.charCodeAt(0)) * 10 + (cheatbuf[8] - '0'.charCodeAt(0));
+                  
                                 volnume--;
                                 levnume--;
                                 if (VOLUMEONE)
@@ -5490,7 +5487,7 @@ function cheats() {
 
                             }
                             else ud.m_player_skill = ud.player_skill =
-                                cheatbuf[5] - '1';
+                                cheatbuf[5] - '1'.charCodeAt(0);
 
                             if(numplayers > 1 && myconnectindex == connecthead)
                             {
