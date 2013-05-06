@@ -332,6 +332,23 @@ function _readlastkeyhit() {
 } /* _readlastkeyhit */
 
 
+// Capture BMP of the current frame
+function screencapture(filename, inverseit) {
+//  FIX_00006: better naming system for screenshots + message when pic is taken. 
+//  Use ./screenshots folder. Screenshot code rerwritten. Faster and
+    //  makes smaller files. Doesn't freeze or lag the game anymore.
+
+    //var image = surface.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    //window.location.href = image;
+    
+    surface.toBlob(function (blob) {
+        saveAs(blob, filename);
+    });
+
+    return 0;
+} /* screencapture */
+
+
 //940
 Display.setGameMode = function (screenMode, screenWidth, screenHeight) {
     if (screenMode > MAXXDIM || screenHeight > MAXYDIM) {

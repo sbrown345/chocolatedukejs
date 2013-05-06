@@ -61,6 +61,19 @@ var FOURSLEIGHT = (1 << 8);
 //195
 var NUM_SOUNDS = 450;
 
+Object.defineProperty(window, 'ALT_IS_PRESSED', {
+    get: function() {
+        return KB.keyPressed(sc_RightAlt) || KB.keyPressed(sc_LeftAlt);
+    }
+});
+
+Object.defineProperty(window, 'SHIFTS_IS_PRESSED', {
+    get: function() {
+        return KB.keyPressed(sc_RightShift) || KB.keyPressed(sc_LeftShift);
+    }
+});
+
+
 //219
 var PHEIGHT = (38 << 8);
 
