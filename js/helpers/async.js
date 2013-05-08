@@ -55,6 +55,8 @@ Queue.prototype = {
     },
 
     addWhile: function (testFn, loopFn, notFirstTime) {
+        console.assert(testFn);
+        console.assert(loopFn);
         //console.info("() addWhile");
         
         var that = this;
@@ -76,6 +78,9 @@ Queue.prototype = {
 
     // create branch?
     addIf: function (testFn, fn) {
+        console.assert(testFn);
+        console.assert(fn);
+
         //console.log("() addIf");
         this._branches.unshift([]);
         var that = this;
@@ -94,6 +99,9 @@ Queue.prototype = {
     },
     
     addElseIf: function (testFn, fn) {
+        console.assert(testFn);
+        console.assert(fn);
+        
         var that = this;
         //console.log("() addElseIf");
         return this.add(function () {
@@ -112,6 +120,8 @@ Queue.prototype = {
 
     // if all results false of last branch
     addElse: function (fn) {
+        console.assert(fn);
+        
         //console.log("() addElse");
         var that = this;
         return this.add(function () {
