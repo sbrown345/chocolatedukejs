@@ -777,5 +777,5 @@ function getGameDir() {
 }
 
 function getGRPcrc32(grpId) {
-    return grpSet.archives[grpId].crc32;
+    return grpSet.archives[grpId].crc32 | 0;
 }

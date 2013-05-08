@@ -6355,12 +6355,74 @@ function logo() {
                         q.add(function () {
                             console.log("(60)");
                             clearView(0);
-                            // todo: finish start animation
+                            nextpage();
+                            ps[myconnectindex].palette = titlepal;
+                            flushperms();
+                            rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+                            KB.flushKeyboardQueue();
+                            nextpage();
+
+                            throw "todo: async all these loops";
+
+                            for (i = 63; i > 0; i -= 7)
+                                palto(0, 0, 0, i);
+
+                            totalclock = 0;
+
+                            //Animate screen (Duke picture wiht "DUKE" "NUKEM 3D" coming from far away and hitting the screen"
+                            while (totalclock < (860 + 120) && !KB.keyWaiting()) {
+                                rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+
+                                if (totalclock > 120 && totalclock < (120 + 60)) {
+                                    if (soundanm == 0) {
+                                        soundanm = 1;
+                                        sound(PIPEBOMB_EXPLODE);
+                                    }
+                                    rotateSprite(160 << 16, 104 << 16, (totalclock - 120) << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                }
+                                else if (totalclock >= (120 + 60))
+                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+
+                                if (totalclock > 220 && totalclock < (220 + 30)) {
+                                    if (soundanm == 1) {
+                                        soundanm = 2;
+                                        sound(PIPEBOMB_EXPLODE);
+                                    }
+
+                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                    rotateSprite(160 << 16, (129) << 16, (totalclock - 220) << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                }
+                                else if (totalclock >= (220 + 30))
+                                    rotateSprite(160 << 16, (129) << 16, 30 << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+
+                                if (PLUTOPAK) // FIX_00064: Cinematics explosions were not right for 1.3/1.3d grp.
+                                {
+
+                                    if (totalclock >= 280 && totalclock < 395) {
+                                        rotateSprite(160 << 16, (151) << 16, (410 - totalclock) << 12, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                        if (soundanm == 2) {
+                                            soundanm = 3;
+                                            sound(FLY_BY);
+                                        }
+                                    }
+                                    else if (totalclock >= 395) {
+                                        if (soundanm == 3) {
+                                            soundanm = 4;
+                                            sound(PIPEBOMB_EXPLODE);
+                                        }
+                                        rotateSprite(160 << 16, (151) << 16, 30 << 11, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                    }
+                                }
+
+                                getpackets();
+                                nextpage();
+                            }
+                            // FIX_00077: Menu goes directly to the "NEW GAME" sub-menu when starting new game (Turrican)
+                            KB.flushKeyboardQueue();
                         });
 
                     });
                 })
-                .addElse()
                 .endIf();
         }).addElseIf(function () { return numplayers > 1; }, function () {
             console.log("(10)  numplayers > 1");
@@ -6611,8 +6673,6 @@ function main(argc, argv) {
         //    Error(EXIT_SUCCESS,"");
     }
 
-    // todo: print some info about GRP
-
     // todo: checkcommandline
 
     _platform_init(argc, argv, "Duke Nukem 3D", "Duke3D");
@@ -6700,7 +6760,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    //logo();
+                    logo();
                 })
             .endIf();
 
