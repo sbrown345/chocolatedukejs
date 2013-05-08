@@ -613,10 +613,14 @@ function kfilelength(handle) {
 
 //449
 function kclose(handle) {
+    //This is a typical handle for a non existing file.
+    if (handle == -1)
+        return;
+    
     var openFile = openFiles[handle];
 
     if (!openFile.used) {
-        throw new Error("Invalide handle. Unrecoverable error.");
+        throw "Invalide handle. Unrecoverable error.";
     }
 
     openFiles[handle].clear();

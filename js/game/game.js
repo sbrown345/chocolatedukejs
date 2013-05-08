@@ -172,6 +172,36 @@ var quotebot = 0, quotebotgoal = 0;
 var user_quote_time = new Int16Array(MAXUSERQUOTES);
 var user_quote = new Array(MAXUSERQUOTES);
 
+function adduserquote(daquote) {
+    throw "todo";
+    //int32_t i;
+
+    //for(i=MAXUSERQUOTES-1;i>0;i--)
+    //{
+    //    strcpy(user_quote[i],user_quote[i-1]);
+    //    user_quote_time[i] = user_quote_time[i-1];
+    //}
+    //strcpy(user_quote[0],daquote);
+    //user_quote_time[0] = 180;
+    //pub = NUMPAGES;
+}
+
+function grpVersion2char_from_crc(crc32_grp_to_identify) {
+    crc32_grp_to_identify = crc32_grp_to_identify >>> 0;
+
+    var id;
+    var i = 0;
+
+    id = crc32lookup[MAX_KNOWN_GRP].name; // unknown version
+
+    for (i = 0; i < MAX_KNOWN_GRP; i++) {
+        if (crc32lookup[i].crc32 == crc32_grp_to_identify)
+            id = crc32lookup[i].name;
+    }
+
+    return (id);
+}
+
 //459
 function getpackets() {
     //int32_t i, j, k, l;
@@ -6507,10 +6537,79 @@ function main(argc, argv) {
             "or is corrupted");
     }
 
+
+    // FIX_00022: Automatically recognize the shareware grp (v1.3) + full version (1.3d) +
+    //            atomic (1.4/1.5 grp) and the con files version (either 1.3 or 1.4) (JonoF's idea)
+
     // Detecting grp version
     // We keep the old GRP scheme detection for 19.6 compliance. Will be obsolete.
-    // todo: get grpVersion
-    grpVersion = tempConstants.GRP_VERSION;
+    filehandle = kopen4load("DUKEDC9.MAP",1);
+    kclose(filehandle);
+
+    if (filehandle == -1) // not DC pack
+    {
+        filehandle = kopen4load("DUKESW.BIN",1);
+        kclose(filehandle);
+
+        if (filehandle == -1) // not Shareware version 1.3
+        {
+            filehandle = kopen4load("E4L11.MAP",1);
+            kclose(filehandle);
+
+            if (filehandle == -1) // not Atomic Edition 1.4/1.5
+            {
+                filehandle = kopen4load("E3L11.MAP",1);
+                kclose(filehandle);
+
+                if (filehandle == -1) // not Regular version 1.3d
+                {
+                    grpVersion = UNKNOWN_GRP;
+                }
+                else
+                {
+                    grpVersion = REGULAR_GRP13D;
+                }
+            }
+            else
+            {
+                grpVersion = ATOMIC_GRP14_15;
+            }
+        }
+        else
+        {
+            grpVersion = SHAREWARE_GRP13;
+        }
+    }
+    else
+    {
+        grpVersion = DUKEITOUTINDC_GRP;
+    }
+
+    // FIX_00062: Better support and identification for GRP and CON files for 1.3/1.3d/1.4/1.5
+    if (	groupefil_crc32[0]==CRC_BASE_GRP_SHAREWARE_13 ||
+				groupefil_crc32[0]==CRC_BASE_GRP_FULL_13 ||
+				groupefil_crc32[0]==CRC_BASE_GRP_PLUTONIUM_14 ||
+				groupefil_crc32[0]==CRC_BASE_GRP_ATOMIC_15 ) {
+        console.log("GRP identified as: %s", grpVersion2char_from_crc(groupefil_crc32[0]));
+    }
+    else {
+        throw "todo";
+        //printf(	"The content of your original BASE *.GRP is corrupted. CRC=%X\n" +
+        //	"You may run in troubles. Official GRP are:\n\n", groupefil_crc32[0]);
+
+        //for(i=0; i<MAX_KNOWN_GRP; i++)
+        //    console.llog("%s -> CRC32=%X  Size=%d bytes\n", crc32lookup[i].name, crc32lookup[i].crc32, crc32lookup[i].size);
+
+        //console.log(	"\nYou should try to get one of these GRP only as a base GRP\n" +
+        //		"Do you want to continue anyway? (Y/N): ");
+        //do
+        //    kbdKey = getch() | ' ';
+        //while(kbdKey != 'y' && kbdKey != 'n');
+        //printf("%c\n", kbdKey);
+
+        //if(kbdKey == 'n')
+        //    Error(EXIT_SUCCESS,"");
+    }
 
     // todo: print some info about GRP
 

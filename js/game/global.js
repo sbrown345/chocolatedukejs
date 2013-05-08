@@ -3,6 +3,16 @@
 var conVersion = 13;
 var grpVersion = 0;
 
+var crc32lookup = [
+    // good:
+    new crc32_t(CRC_BASE_GRP_SHAREWARE_13, "SHAREWARE 1.3D", 11035779),
+    new crc32_t(CRC_BASE_GRP_FULL_13, "FULL 1.3D     ", 26524524),
+    new crc32_t(CRC_BASE_GRP_PLUTONIUM_14, "PLUTONIUM 1.4 ", 44348015),
+    new crc32_t(CRC_BASE_GRP_ATOMIC_15, "ATOMIC 1.5    ", 44356548),
+    // unknown:
+    new crc32_t(0, "HACK/UNKNOWN  ", 0)
+];
+
 // FIX_00015: Backward compliance with older demos (down to demos v27, 28, 116 and 117 only)
 
 // For BYTEVERSION diff, 27/116 vs 28/117 see extras\duke3d.h vs source\duke3d.h

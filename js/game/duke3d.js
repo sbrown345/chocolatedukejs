@@ -18,10 +18,10 @@ var REGULAR_GRP13D = 2;
 var ATOMIC_GRP14_15 = 3;
 var DUKEITOUTINDC_GRP = 4;
 
-var CRC_BASE_GRP_SHAREWARE_13 = 0x983AD923;
-var CRC_BASE_GRP_FULL_13 = 0xBBC9CE44;
-var CRC_BASE_GRP_PLUTONIUM_14 = 0xF514A6AC;
-var CRC_BASE_GRP_ATOMIC_15 = 0xFD3DCFF1;
+var CRC_BASE_GRP_SHAREWARE_13 = 0x983AD923 | 0;
+var CRC_BASE_GRP_FULL_13 = 0xBBC9CE44 | 0;
+var CRC_BASE_GRP_PLUTONIUM_14 = 0xF514A6AC | 0;
+var CRC_BASE_GRP_ATOMIC_15 = 0xFD3DCFF1 | 0;
 
 
 Object.defineProperty(window, 'PLUTOPAK', { get: function () { return !VOLUMEONE && !VOLUMEALL; } });
@@ -183,6 +183,13 @@ function AnimWall() {
 //373
 var mymembuf;
 
+function crc32_t(crc32, name, size) {
+    this.crc32 = crc32 >>> 0;
+    this.name = name;
+    this.size = size >>> 0;
+}
+
+//extern int32_t fricxv,fricyv;
 
 //451
 function PlayerType() {
