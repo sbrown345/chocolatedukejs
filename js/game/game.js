@@ -5937,19 +5937,17 @@ function logo() {
     nextpage();
 
     Music.stopSong();
-    debugger
+    
     q.setPositionAtStart()
         .addIf(function() { return ud.showcinematics && numplayers < 2; }, function() {
             console.log("(10) play logo anm");
 
             // This plays the explosion from the nuclear sign at the beginning.
-            debugger
             q.setPositionAtStart()
                 .addIf(function() {
                     return !VOLUMEONE;
                 }, function() {
                     // todo: it skips a frame here, how to fix this? addIfExecNow()? or rewrite into one if
-                    debugger
                     q.setPositionAtStart()
                         .addIf(function() { return !KB.keyWaiting() && nomorelogohack == 0; },
                             function() {
@@ -5964,14 +5962,13 @@ function logo() {
                             })
                         .endIf(/*return !KB.keyWaiting() && nomorelogohack == 0;*/)
                         .add(function() {
-                            debugger
                             clearView(0);
                             nextpage();
                         });
                 })
                 .endIf(/*!VOLUMEONE*/)
                 .add(function() {
-                    debugger
+                    
 
                     //MIDI start here
                     playmusic(env_music_fn[0]);
@@ -6027,61 +6024,75 @@ function logo() {
                         rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
                         KB.flushKeyboardQueue();
                         nextpage();
+                        
+                        q.setInsertPosition(0);
+                        
+                        for (i = 63; i > 0; i -= 7) {
+                            q.add(i, function (cb, i) {
+                                console.log("(62)");
+                                palto(0, 0, 0, i);
+                            });
+                        }
 
-                        throw "todo: async all these loops";
+                        q.add(function() {
+                            totalclock = 0;
 
-                        for (i = 63; i > 0; i -= 7)
-                            palto(0, 0, 0, i);
+                            //Animate screen (Duke picture wiht "DUKE" "NUKEM 3D" coming from far away and hitting the screen"
+                            q.setPositionAtStart().addWhile(function () {
+                                console.log("test", totalclock, totalclock < (860 + 120) && !KB.keyWaiting())
+                                return totalclock < (860 + 120) && !KB.keyWaiting();
+                            }, function () {
+                                console.info("(65) Animate screen (Duke picture wiht 'DUKE NUKEM 3D' coming from far away and hitting the screen, totalclock: %i", totalclock);
+                                rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
 
-                        totalclock = 0;
-
-                        //Animate screen (Duke picture wiht "DUKE" "NUKEM 3D" coming from far away and hitting the screen"
-                        while (totalclock < (860 + 120) && !KB.keyWaiting()) {
-                            rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
-
-                            if (totalclock > 120 && totalclock < (120 + 60)) {
-                                if (soundanm == 0) {
-                                    soundanm = 1;
-                                    sound(PIPEBOMB_EXPLODE);
-                                }
-                                rotateSprite(160 << 16, 104 << 16, (totalclock - 120) << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                            } else if (totalclock >= (120 + 60))
-                                rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-
-                            if (totalclock > 220 && totalclock < (220 + 30)) {
-                                if (soundanm == 1) {
-                                    soundanm = 2;
-                                    sound(PIPEBOMB_EXPLODE);
-                                }
-
-                                rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                rotateSprite(160 << 16, (129) << 16, (totalclock - 220) << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                            } else if (totalclock >= (220 + 30))
-                                rotateSprite(160 << 16, (129) << 16, 30 << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-
-                            if (PLUTOPAK) // FIX_00064: Cinematics explosions were not right for 1.3/1.3d grp.
-                            {
-
-                                if (totalclock >= 280 && totalclock < 395) {
-                                    rotateSprite(160 << 16, (151) << 16, (410 - totalclock) << 12, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                    if (soundanm == 2) {
-                                        soundanm = 3;
-                                        sound(FLY_BY);
-                                    }
-                                } else if (totalclock >= 395) {
-                                    if (soundanm == 3) {
-                                        soundanm = 4;
+                                if (totalclock > 120 && totalclock < (120 + 60)) {
+                                    if (soundanm == 0) {
+                                        soundanm = 1;
                                         sound(PIPEBOMB_EXPLODE);
                                     }
-                                    rotateSprite(160 << 16, (151) << 16, 30 << 11, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                }
-                            }
+                                    rotateSprite(160 << 16, 104 << 16, (totalclock - 120) << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                } else if (totalclock >= (120 + 60))
+                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
 
-                            getpackets();
-                            nextpage();
-                        }
+                                if (totalclock > 220 && totalclock < (220 + 30)) {
+                                    if (soundanm == 1) {
+                                        soundanm = 2;
+                                        sound(PIPEBOMB_EXPLODE);
+                                    }
+
+                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                    rotateSprite(160 << 16, (129) << 16, (totalclock - 220) << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                } else if (totalclock >= (220 + 30))
+                                    rotateSprite(160 << 16, (129) << 16, 30 << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+
+                                if (PLUTOPAK) // FIX_00064: Cinematics explosions were not right for 1.3/1.3d grp.
+                                {
+                                    if (totalclock >= 280 && totalclock < 395) {
+                                        rotateSprite(160 << 16, (151) << 16, (410 - totalclock) << 12, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                        if (soundanm == 2) {
+                                            soundanm = 3;
+                                            sound(FLY_BY);
+                                        }
+                                    } else if (totalclock >= 395) {
+                                        if (soundanm == 3) {
+                                            soundanm = 4;
+                                            sound(PIPEBOMB_EXPLODE);
+                                        }
+                                        rotateSprite(160 << 16, (151) << 16, 30 << 11, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                    }
+                                }
+
+                                getpackets();
+                                nextpage();
+                                console.info("nextpage, totalclock: %i", totalclock);
+
+                            } /*while totalclock < (860 + 120) && !KB.keyWaiting()*/);
+
+                        });
+
+
                         // FIX_00077: Menu goes directly to the "NEW GAME" sub-menu when starting new game (Turrican)
-                        KB.flushKeyboardQueue();
+                        q.add(KB.flushKeyboardQueue);
                     });
 
                 });
@@ -6396,7 +6407,7 @@ function main(argc, argv) {
 
     // if game is loaded without /V or /L cmd arguments.{
     //if (ud.warp_on === 0) {
-    //    if (numplayers > 1 && boardfilename[0] != 0) //check if a user map is loaded and in multiplayer.
+    //    if (numplayers > 1 && boardfilename) //check if a user map is loaded and in multiplayer.
     //    {
     //        throw new Error("todo");
     //    } else {

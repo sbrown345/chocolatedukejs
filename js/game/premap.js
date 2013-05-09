@@ -332,9 +332,9 @@ PreMap.preLevel = function (g) {
     var i, nexti, j, startwall, endwall, lotaglist;
     var lotags = new Int16Array(65);
 
-    show2dsector = new Uint8Array((MAXSECTORS + 7) >> 3);
-    show2dwall = new Uint8Array((MAXWALLS + 7) >> 3);
-    show2dsprite = new Uint8Array((MAXSPRITES + 7) >> 3);
+    clearbufbyte(show2dsector, 0, show2dsector.length, 0);
+    clearbufbyte(show2dwall, 0, show2dwall.length, 0);
+    clearbufbyte(show2dsprite, 0, show2dsprite.length, 0);
 
     PreMap.resetPreStat(0, g);
     numclouds = 0;
@@ -1005,7 +1005,7 @@ PreMap.doFrontScreens = function () {
 
         rotateSprite(320<<15,200<<15,65536,0,LOADSCREEN,0,0,2+8+64,0,0,xdim-1,ydim-1);
 
-        if( boardfilename[0] != 0 && ud.level_number == 7 && ud.volume_number == 0 )
+        if( boardfilename && ud.level_number == 7 && ud.volume_number == 0 )
         {
             menutext(160,90,0,0,"ENTERING USER MAP");
             gametextpal(160,90+10,boardfilename,14,2);
@@ -1113,18 +1113,29 @@ function enterlevel(g) {
     if (!VOLUMEONE) {
         if (boardfilename && ud.m_level_number == 7 && ud.m_volume_number == 0) {
             throw new Error("todo");
+            //sprintf(fulllevelfilename, "%s\\%s",  getGameDir(), boardfilename);
+            //if(!SafeFileExists(fulllevelfilename))
+            //{
+            //    sprintf(fulllevelfilename, "%s", boardfilename);
+            //}
+
+            //if ( loadboard( fulllevelfilename,&ps[0].posx, &ps[0].posy, &ps[0].posz, &ps[0].ang,&ps[0].cursectnum ) == -1 )
+            //{
+            //    sprintf(text,"User Map %s not found!\n",fulllevelfilename);
+            //    gameexit(text);
+            //}
         } else {
             //fulllevelfilename = getGameDir() + "\\" + level_file_names[(ud.volume_number * 11) + ud.level_number];
             // todo SafeFileExists??? - it checks in game dir first??
 
             fulllevelfilename = level_file_names[(ud.volume_number * 11) + ud.level_number];
-
+            console.log("filename=%s", fulllevelfilename);
+            
             var posxRef = new Ref(ps[0].posx);
             var posyRef = new Ref(ps[0].posy);
             var poszRef = new Ref(ps[0].posz);
             var angRef = new Ref(ps[0].ang);
             var cursectnumRef = new Ref(ps[0].cursectnum);
-            console.log("filename=%s", fulllevelfilename);
             var loadBoardResult = Engine.loadBoard(fulllevelfilename, posxRef, posyRef, poszRef, angRef, cursectnumRef);
             ps[0].posx = posxRef.$;
             ps[0].posy = posyRef.$;
@@ -1137,8 +1148,26 @@ function enterlevel(g) {
             }
         }
     } else {
-        throw new Error("todo: test with shareware grp?");
+        levname = level_file_names[(ud.volume_number * 11) + ud.level_number];
+        console.log("levname=%s\n", levname);
+        
+        var posxRef = new Ref(ps[0].posx);
+        var posyRef = new Ref(ps[0].posy);
+        var poszRef = new Ref(ps[0].posz);
+        var angRef = new Ref(ps[0].ang);
+        var cursectnumRef = new Ref(ps[0].cursectnum);
+        var loadBoardResult = Engine.loadBoard(levname, posxRef, posyRef, poszRef, angRef, cursectnumRef);
+        ps[0].posx = posxRef.$;
+        ps[0].posy = posyRef.$;
+        ps[0].posz = poszRef.$;
+        ps[0].ang = angRef.$;
+        ps[0].cursectnum = cursectnumRef.$;
+        if ((ud.volume_number > 1) || loadBoardResult == -1) {
+            throw "Internal Map " + level_file_names[(ud.volume_number * 11) + ud.level_number] + " not found in Shareware grp pack!";
+        }
     }
+
+    clearbufbyte(gotpic, 0, gotpic.length, 0);
 
     PreMap.preLevel(g);
 

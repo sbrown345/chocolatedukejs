@@ -3153,6 +3153,9 @@ function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
 
     Engine.initSpriteLists();
 
+    clearbuf(show2dsector, 0, ((MAXSECTORS + 3) >> 5), 0);
+    clearbuf(show2dsprite, 0, ((MAXSPRITES + 3) >> 5), 0);
+    clearbuf(show2dwall, 0, ((MAXWALLS + 3) >> 5), 0);
 
     daposx.$ = kread32(fil);
     daposy.$ = kread32(fil);
@@ -3314,6 +3317,7 @@ function loadboard(filename, daposx, daposy, daposz, daang, dacursectnum) {
     // FIX_00009: Show map CRC and GRP file version of each player in case of Out Of Synch
 
     // todo:
+    if (numplayers > 1) throw "crc todo";
     //mapCRC = crc16(sector, numsectors * 40);
     //mapCRC += crc16(sector, numsectors * 32);
     //mapCRC += crc16(sector, numsectors * 44);

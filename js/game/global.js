@@ -166,7 +166,7 @@ var inputfifo;//[MOVEFIFOSIZ][MAXPLAYERS];
 var movefifosendplc;
 
 //Multiplayer syncing variables
-var screenpeek;
+var screenpeek = 0;
 var movefifoend = new Int32Array(MAXPLAYERS);
 
 //Game recording variables

@@ -1234,7 +1234,7 @@ function menus() {
             rotateSprite(160<<16,19<<16,65536,0,MENUBAR,16,0,10,0,0,xdim-1,ydim-1);
             menutext(160,24,0,0,"SELECT AN EPISODE");
             if(PLUTOPAK)
-            {            //////if(boardfilename[0])
+            {            //////if(boardfilename)
                 //
                 // uncomment this for user map
                 //x = probe(160,60,20,5);
@@ -1244,7 +1244,7 @@ function menus() {
             }
             else
             {
-                if(boardfilename[0])
+                if(boardfilename)
                     x = probe(160,60,20,4);
                 else x = probe(160,60,20,3);
             }
@@ -1266,7 +1266,7 @@ function menus() {
                 else
                 {
 
-                    if((x == 3 && boardfilename[0])&&!PLUTOPAK)
+                    if((x == 3 && boardfilename)&&!PLUTOPAK)
                     {
                         ud.m_volume_number = 0;
                         ud.m_level_number = 7;
@@ -1274,7 +1274,7 @@ function menus() {
                     else
 
                         /*
-                        if(x == 4 && boardfilename[0])
+                        if(x == 4 && boardfilename)
                         {
                             ud.m_volume_number = 0;
                             ud.m_level_number = 7;
@@ -1322,7 +1322,7 @@ function menus() {
                 if(PLUTOPAK)
                 {            
                     menutext(160,60+20+20+20,SHX(-5),PHX(-5),volume_names[3]);
-                    //if(boardfilename[0])
+                    //if(boardfilename)
                     //{
 
                     // uncomment this for usermap
@@ -1333,7 +1333,7 @@ function menus() {
                 }
                 else
                 {	/*
-		            if(boardfilename[0])
+		            if(boardfilename)
 				    {
 						menutext(160,60+20+20+20,SHX(-6),PHX(-6),"USER MAP");
 						gametext(160,60+20+20+20+6,boardfilename,2,2+8+16);
@@ -3028,7 +3028,7 @@ function menus() {
 
 //                case 6: // select user map
 //                    if(!VOLUMEONE)
-//                    {                    if(boardfilename[0] == 0) break;
+//                    {                    if(!boardfilename) break;
 
 //                        tempbuf[0] = 5;
 //                        tempbuf[1] = ud.m_level_number = 7;
@@ -3171,8 +3171,8 @@ function menus() {
 //            else menutext(c,57+16+16+16+16+16-9,SHX(-6),1,"FR. FIRE");
 
 //            if(!VOLUMEONE)
-//            {            menutext(c,57+16+16+16+16+16+16-9,SHX(-7),boardfilename[0] == 0,"USER MAP");
-//                if( boardfilename[0] != 0 )
+//            {            menutext(c,57+16+16+16+16+16+16-9,SHX(-7),!boardfilename,"USER MAP");
+//                if( boardfilename )
 //                    gametext(c+70+44,57+16+16+16+16+16,boardfilename,0,2+8+16);
 //            }
 //            else
