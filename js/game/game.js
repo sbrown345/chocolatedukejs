@@ -6003,6 +6003,7 @@ function logo() {
                         q.setPositionAtStart().addWhile(function () {
                             return totalclock < (120 * 7);
                         }, function () {
+                            q.setPositionAtStart();
                             console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
                             getpackets();
                         });
@@ -6448,6 +6449,7 @@ function main(argc, argv) {
         .addWhile(function () {
             return ud.warp_on == 0 && isPlayingBack;
         }, function () {
+            q.setPositionAtStart();
             Game.playBack();
             console.log("Demo loop");
         })
