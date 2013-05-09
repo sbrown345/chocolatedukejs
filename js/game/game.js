@@ -6,7 +6,7 @@ var appendImageDebug = false;
 function appendCanvasImageToPage(text) {
     // could log into console (https://github.com/escusado/console.meme)
     if (!appendImageDebug) return;
-    
+
     updateCanvas();
     if (text) {
         var span = document.createElement("span");
@@ -34,11 +34,11 @@ var IDFILENAME = "DUKE3D.IDF";
 var TIMERUPDATESIZ = 32;
 
 var cameradist = 0, cameraclock = 0;
-var  eightytwofifty = 0;
-var  playerswhenstarted;
-var  qe,cp;
+var eightytwofifty = 0;
+var playerswhenstarted;
+var qe, cp;
 
-var  nHostForceDisableAutoaim = 0;
+var nHostForceDisableAutoaim = 0;
 
 // Game play speed
 var g_iTickRate = 120;
@@ -61,7 +61,7 @@ function patchstatusbar(x1, y1, x2, y2) {
 }
 
 var recfilep, totalreccnt;
-var debug_on = 0,actor_tog = 0,memorycheckoveride=0;
+var debug_on = 0, actor_tog = 0, memorycheckoveride = 0;
 //uint8_t *rtsptr;
 
 //extern uint8_t  syncstate;
@@ -250,12 +250,12 @@ function faketimerhandler() {
         return;
 
 
-    for(i=connecthead;i>=0;i=connectpoint2[i])
+    for (i = connecthead; i >= 0; i = connectpoint2[i])
         if (i != myconnectindex)
-            if (movefifoend[i] < movefifoend[myconnectindex]-200)
+            if (movefifoend[i] < movefifoend[myconnectindex] - 200)
                 return;
 
-    if( !Console.isActive()) {
+    if (!Console.isActive()) {
         getinput(myconnectindex);
     }
 
@@ -264,280 +264,248 @@ function faketimerhandler() {
     avgavel += loc.avel;
     avghorz += loc.horz;
     avgbits |= loc.bits;
-    if (movefifoend[myconnectindex]&(movesperpacket-1))
-    {
+    if (movefifoend[myconnectindex] & (movesperpacket - 1)) {
         throw "todo"
         //copybufbyte(&inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex],
-		//	&inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex],sizeof(input));
+        //	&inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex],sizeof(input));
         //movefifoend[myconnectindex]++;
         return;
     }
 
-    nsyn = [inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex]]; // wrap in array to keep syntax
-    nsyn[0].fvel = avgfvel/movesperpacket|0;
-    nsyn[0].svel = avgsvel/movesperpacket|0;
-    nsyn[0].avel = avgavel/movesperpacket|0;
-    nsyn[0].horz = avghorz/movesperpacket|0;
+    nsyn = [inputfifo[movefifoend[myconnectindex] & (MOVEFIFOSIZ - 1)][myconnectindex]]; // wrap in array to keep syntax
+    nsyn[0].fvel = avgfvel / movesperpacket | 0;
+    nsyn[0].svel = avgsvel / movesperpacket | 0;
+    nsyn[0].avel = avgavel / movesperpacket | 0;
+    nsyn[0].horz = avghorz / movesperpacket | 0;
     nsyn[0].bits = avgbits;
     avgfvel = avgsvel = avgavel = avghorz = avgbits = 0;
     movefifoend[myconnectindex]++;
 
-    if (numplayers < 2)
-    {
-        if (ud.multimode > 1) for(i=connecthead;i>=0;i=connectpoint2[i])
-            if(i != myconnectindex)
-            {
+    if (numplayers < 2) {
+        if (ud.multimode > 1) for (i = connecthead; i >= 0; i = connectpoint2[i])
+            if (i != myconnectindex) {
                 //clearbufbyte(&inputfifo[movefifoend[i]&(MOVEFIFOSIZ-1)][i],sizeof(input),0L);
-                if(ud.playerai)
-                    computergetinput(i,inputfifo[movefifoend[i]&(MOVEFIFOSIZ-1)][i]);
+                if (ud.playerai)
+                    computergetinput(i, inputfifo[movefifoend[i] & (MOVEFIFOSIZ - 1)][i]);
                 movefifoend[i]++;
             }
         return;
     }
 
-    for(i=connecthead;i>=0;i=connectpoint2[i])
-        if (i != myconnectindex)
-        {
-            k = (movefifoend[myconnectindex]-1)-movefifoend[i];
+    for (i = connecthead; i >= 0; i = connectpoint2[i])
+        if (i != myconnectindex) {
+            k = (movefifoend[myconnectindex] - 1) - movefifoend[i];
             myminlag[i] = Math.min(myminlag[i], k);
-            mymaxlag = Math.max(mymaxlag,k);
+            mymaxlag = Math.max(mymaxlag, k);
         }
 
-    if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
-    {
-        i = mymaxlag-bufferjitter; mymaxlag = 0;
-        if (i > 0) bufferjitter += ((3+i)>>2);
-        else if (i < 0) bufferjitter -= ((1-i)>>2);
+    if (((movefifoend[myconnectindex] - 1) & (TIMERUPDATESIZ - 1)) == 0) {
+        i = mymaxlag - bufferjitter; mymaxlag = 0;
+        if (i > 0) bufferjitter += ((3 + i) >> 2);
+        else if (i < 0) bufferjitter -= ((1 - i) >> 2);
     }
 
-    if (networkmode == 1)
-    {
+    if (networkmode == 1) {
         packbuf[0] = 17;
 
-        if ((movefifoend[myconnectindex]-1) == 0) 
-        {
+        if ((movefifoend[myconnectindex] - 1) == 0) {
             packbuf[0] = 16;
         }
 
         j = 1;
 
         //Fix timers and buffer/jitter value
-        if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
-        {
-            if (myconnectindex != connecthead)
-            {
-                i = myminlag[connecthead]-otherminlag;
-                if (klabs(i) > 8)
-                {
+        if (((movefifoend[myconnectindex] - 1) & (TIMERUPDATESIZ - 1)) == 0) {
+            if (myconnectindex != connecthead) {
+                i = myminlag[connecthead] - otherminlag;
+                if (klabs(i) > 8) {
                     i >>= 1;
                 }
-                else 
-                    if (klabs(i) > 2) 
-                    {
+                else
+                    if (klabs(i) > 2) {
                         i = ksgn(i);
                     }
-                    else 
-                    {
+                    else {
                         i = 0;
                     }
 
-                totalclock -= TICSPERFRAME*i;
+                totalclock -= TICSPERFRAME * i;
                 myminlag[connecthead] -= i; otherminlag += i;
             }
 
             if (myconnectindex == connecthead)
-                for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+                for (i = connectpoint2[connecthead]; i >= 0; i = connectpoint2[i])
                     packbuf[j++] = Math.min(Math.max(myminlag[i], -128), 127);
 
-            for(i=connecthead;i>=0;i=connectpoint2[i])
+            for (i = connecthead; i >= 0; i = connectpoint2[i])
                 myminlag[i] = 0x7fffffff;
         }
 
-        osyn = inputfifo[(movefifoend[myconnectindex]-2)&(MOVEFIFOSIZ-1)][myconnectindex];
-        nsyn = inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex];
+        osyn = inputfifo[(movefifoend[myconnectindex] - 2) & (MOVEFIFOSIZ - 1)][myconnectindex];
+        nsyn = inputfifo[(movefifoend[myconnectindex] - 1) & (MOVEFIFOSIZ - 1)][myconnectindex];
 
         k = j;
         packbuf[j++] = 0;
 
-        if (nsyn[0].fvel != osyn[0].fvel)
-        {
+        if (nsyn[0].fvel != osyn[0].fvel) {
             packbuf[j++] = nsyn[0].fvel;
-            packbuf[j++] = (nsyn[0].fvel>>8);
+            packbuf[j++] = (nsyn[0].fvel >> 8);
             packbuf[k] |= 1;
         }
-        if (nsyn[0].svel != osyn[0].svel)
-        {
+        if (nsyn[0].svel != osyn[0].svel) {
             packbuf[j++] = nsyn[0].svel;
-            packbuf[j++] = (nsyn[0].svel>>8);
+            packbuf[j++] = (nsyn[0].svel >> 8);
             packbuf[k] |= 2;
         }
-        if (nsyn[0].avel != osyn[0].avel)
-        {
+        if (nsyn[0].avel != osyn[0].avel) {
             packbuf[j++] = nsyn[0].avel;
             packbuf[k] |= 4;
         }
         if (((nsyn[0].bits ^ osyn[0].bits) & 0x000000ff) >>> 0) packbuf[j++] = (nsyn[0].bits & 255), packbuf[k] |= 8;
         if (((nsyn[0].bits ^ osyn[0].bits) & 0x0000ff00) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 8) & 255), packbuf[k] |= 16;
         if (((nsyn[0].bits ^ osyn[0].bits) & 0x00ff0000) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 16) & 255), packbuf[k] |= 32;
-        if (((nsyn[0].bits^osyn[0].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[k] |= 64;
-        if (nsyn[0].horz != osyn[0].horz)
-        {
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0xff000000) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 24) & 255), packbuf[k] |= 64;
+        if (nsyn[0].horz != osyn[0].horz) {
             packbuf[j++] = nsyn[0].horz;
             packbuf[k] |= 128;
         }
 
-        while (syncvalhead[myconnectindex] != syncvaltail)
-        {
-            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+        while (syncvalhead[myconnectindex] != syncvaltail) {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail & (MOVEFIFOSIZ - 1)];
             syncvaltail++;
         }
 
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             if (i != myconnectindex)
-                sendpacket(i,packbuf,j);
+                sendpacket(i, packbuf, j);
 
         return;
     }
     if (myconnectindex != connecthead)   //Slave
     {
         //Fix timers and buffer/jitter value
-        if (((movefifoend[myconnectindex]-1)&(TIMERUPDATESIZ-1)) == 0)
-        {
-            i = myminlag[connecthead]-otherminlag;
+        if (((movefifoend[myconnectindex] - 1) & (TIMERUPDATESIZ - 1)) == 0) {
+            i = myminlag[connecthead] - otherminlag;
             if (klabs(i) > 8) i >>= 1;
             else if (klabs(i) > 2) i = ksgn(i);
             else i = 0;
 
-            totalclock -= TICSPERFRAME*i;
+            totalclock -= TICSPERFRAME * i;
             myminlag[connecthead] -= i; otherminlag += i;
 
-            for(i=connecthead;i>=0;i=connectpoint2[i])
+            for (i = connecthead; i >= 0; i = connectpoint2[i])
                 myminlag[i] = 0x7fffffff;
         }
 
         packbuf[0] = 1; packbuf[1] = 0; j = 2;
 
-        osyn = inputfifo[(movefifoend[myconnectindex]-2)&(MOVEFIFOSIZ-1)][myconnectindex];
-        nsyn = inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex];
+        osyn = inputfifo[(movefifoend[myconnectindex] - 2) & (MOVEFIFOSIZ - 1)][myconnectindex];
+        nsyn = inputfifo[(movefifoend[myconnectindex] - 1) & (MOVEFIFOSIZ - 1)][myconnectindex];
 
-        if (nsyn[0].fvel != osyn[0].fvel)
-        {
+        if (nsyn[0].fvel != osyn[0].fvel) {
             packbuf[j++] = nsyn[0].fvel;
-            packbuf[j++] = (nsyn[0].fvel>>8);
+            packbuf[j++] = (nsyn[0].fvel >> 8);
             packbuf[1] |= 1;
         }
-        if (nsyn[0].svel != osyn[0].svel)
-        {
+        if (nsyn[0].svel != osyn[0].svel) {
             packbuf[j++] = nsyn[0].svel;
-            packbuf[j++] = (nsyn[0].svel>>8);
+            packbuf[j++] = (nsyn[0].svel >> 8);
             packbuf[1] |= 2;
         }
-        if (nsyn[0].avel != osyn[0].avel)
-        {
+        if (nsyn[0].avel != osyn[0].avel) {
             packbuf[j++] = nsyn[0].avel;
             packbuf[1] |= 4;
         }
-        if (((nsyn[0].bits^osyn[0].bits)&0x000000ff)>>>0) packbuf[j++] = (nsyn[0].bits&255), packbuf[1] |= 8;
-        if (((nsyn[0].bits^osyn[0].bits)&0x0000ff00)>>>0) packbuf[j++] = ((nsyn[0].bits>>8)&255), packbuf[1] |= 16;
-        if (((nsyn[0].bits^osyn[0].bits)&0x00ff0000)>>>0) packbuf[j++] = ((nsyn[0].bits>>16)&255), packbuf[1] |= 32;
-        if (((nsyn[0].bits^osyn[0].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[0].bits>>24)&255), packbuf[1] |= 64;
-        if (nsyn[0].horz != osyn[0].horz)
-        {
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x000000ff) >>> 0) packbuf[j++] = (nsyn[0].bits & 255), packbuf[1] |= 8;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x0000ff00) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 8) & 255), packbuf[1] |= 16;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0x00ff0000) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 16) & 255), packbuf[1] |= 32;
+        if (((nsyn[0].bits ^ osyn[0].bits) & 0xff000000) >>> 0) packbuf[j++] = ((nsyn[0].bits >> 24) & 255), packbuf[1] |= 64;
+        if (nsyn[0].horz != osyn[0].horz) {
             packbuf[j++] = nsyn[0].horz;
             packbuf[1] |= 128;
         }
 
-        while (syncvalhead[myconnectindex] != syncvaltail)
-        {
-            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+        while (syncvalhead[myconnectindex] != syncvaltail) {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail & (MOVEFIFOSIZ - 1)];
             syncvaltail++;
         }
 
-        sendpacket(connecthead,packbuf,j);
+        sendpacket(connecthead, packbuf, j);
         return;
     }
 
     //This allows allow packet-resends
-    for(i=connecthead;i>=0;i=connectpoint2[i])
-        if (movefifoend[i] <= movefifosendplc)
-        {
+    for (i = connecthead; i >= 0; i = connectpoint2[i])
+        if (movefifoend[i] <= movefifosendplc) {
             packbuf[0] = 127;
-            for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-                sendpacket(i,packbuf,1);
+            for (i = connectpoint2[connecthead]; i >= 0; i = connectpoint2[i])
+                sendpacket(i, packbuf, 1);
             return;
         }
 
     throw "todo, watch out for osyn and nsyn references"
     while (1)  //Master
     {
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             if (playerquitflag[i] && (movefifoend[i] <= movefifosendplc)) return;
 
-        osyn = inputfifo[(movefifosendplc-1)&(MOVEFIFOSIZ-1)][0];
-        nsyn = inputfifo[(movefifosendplc  )&(MOVEFIFOSIZ-1)][0];
+        osyn = inputfifo[(movefifosendplc - 1) & (MOVEFIFOSIZ - 1)][0];
+        nsyn = inputfifo[(movefifosendplc) & (MOVEFIFOSIZ - 1)][0];
 
         //MASTER -> SLAVE packet
         packbuf[0] = 0; j = 1;
 
         //Fix timers and buffer/jitter value
-        if ((movefifosendplc&(TIMERUPDATESIZ-1)) == 0)
-        {
-            for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+        if ((movefifosendplc & (TIMERUPDATESIZ - 1)) == 0) {
+            for (i = connectpoint2[connecthead]; i >= 0; i = connectpoint2[i])
                 if (playerquitflag[i])
                     packbuf[j++] = Math.min(Math.max(myminlag[i], -128), 127);
 
-            for(i=connecthead;i>=0;i=connectpoint2[i])
+            for (i = connecthead; i >= 0; i = connectpoint2[i])
                 myminlag[i] = 0x7fffffff;
         }
 
         k = j;
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             j += playerquitflag[i];
-        for(i=connecthead;i>=0;i=connectpoint2[i])
-        {
+        for (i = connecthead; i >= 0; i = connectpoint2[i]) {
             if (playerquitflag[i] == 0) continue;
 
             packbuf[k] = 0;
-            if (nsyn[i].fvel != osyn[i].fvel)
-            {
+            if (nsyn[i].fvel != osyn[i].fvel) {
                 packbuf[j++] = nsyn[i].fvel;
-                packbuf[j++] = (nsyn[i].fvel>>8);
+                packbuf[j++] = (nsyn[i].fvel >> 8);
                 packbuf[k] |= 1;
             }
-            if (nsyn[i].svel != osyn[i].svel)
-            {
+            if (nsyn[i].svel != osyn[i].svel) {
                 packbuf[j++] = nsyn[i].svel;
-                packbuf[j++] = (nsyn[i].svel>>8);
+                packbuf[j++] = (nsyn[i].svel >> 8);
                 packbuf[k] |= 2;
             }
-            if (nsyn[i].avel != osyn[i].avel)
-            {
+            if (nsyn[i].avel != osyn[i].avel) {
                 packbuf[j++] = nsyn[i].avel;
                 packbuf[k] |= 4;
             }
-            if ((nsyn[i].bits^osyn[i].bits)&0x000000ff) packbuf[j++] = (nsyn[i].bits&255), packbuf[k] |= 8;
-            if ((nsyn[i].bits^osyn[i].bits)&0x0000ff00) packbuf[j++] = ((nsyn[i].bits>>8)&255), packbuf[k] |= 16;
-            if ((nsyn[i].bits^osyn[i].bits)&0x00ff0000) packbuf[j++] = ((nsyn[i].bits>>16)&255), packbuf[k] |= 32;
-            if (((nsyn[i].bits^osyn[i].bits)&0xff000000)>>>0) packbuf[j++] = ((nsyn[i].bits>>24)&255), packbuf[k] |= 64;
-            if (nsyn[i].horz != osyn[i].horz)
-            {
+            if ((nsyn[i].bits ^ osyn[i].bits) & 0x000000ff) packbuf[j++] = (nsyn[i].bits & 255), packbuf[k] |= 8;
+            if ((nsyn[i].bits ^ osyn[i].bits) & 0x0000ff00) packbuf[j++] = ((nsyn[i].bits >> 8) & 255), packbuf[k] |= 16;
+            if ((nsyn[i].bits ^ osyn[i].bits) & 0x00ff0000) packbuf[j++] = ((nsyn[i].bits >> 16) & 255), packbuf[k] |= 32;
+            if (((nsyn[i].bits ^ osyn[i].bits) & 0xff000000) >>> 0) packbuf[j++] = ((nsyn[i].bits >> 24) & 255), packbuf[k] |= 64;
+            if (nsyn[i].horz != osyn[i].horz) {
                 packbuf[j++] = nsyn[i].horz;
                 packbuf[k] |= 128;
             }
             k++;
         }
 
-        while (syncvalhead[myconnectindex] != syncvaltail)
-        {
-            packbuf[j++] = syncval[myconnectindex][syncvaltail&(MOVEFIFOSIZ-1)];
+        while (syncvalhead[myconnectindex] != syncvaltail) {
+            packbuf[j++] = syncval[myconnectindex][syncvaltail & (MOVEFIFOSIZ - 1)];
             syncvaltail++;
         }
 
-        for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-            if (playerquitflag[i])
-            {
-                sendpacket(i,packbuf,j);
-                if (nsyn[i].bits&(1<<26))
+        for (i = connectpoint2[connecthead]; i >= 0; i = connectpoint2[i])
+            if (playerquitflag[i]) {
+                sendpacket(i, packbuf, j);
+                if (nsyn[i].bits & (1 << 26))
                     playerquitflag[i] = 0;
             }
 
@@ -554,8 +522,7 @@ var cacnum;
 //cactype;
 var cactype = [];
 
-function caches()
-{
+function caches() {
     // todo
     console.log("todo caches")
     //var i,k;
@@ -582,62 +549,51 @@ function caches()
 
 //1173
 function checksync() {
-	var i;
+    var i;
 
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-		if (syncvalhead[i] == syncvaltottail) break;
-	if (i < 0)
-	{
-		syncstat = 0;
-		do
-		{
-			for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-			{
-				if (syncval[i][syncvaltottail&(MOVEFIFOSIZ-1)] != syncval[connecthead][syncvaltottail&(MOVEFIFOSIZ-1)])
-				{
-					syncstat = 1;
-				}
-			}
+    for (i = connecthead; i >= 0; i = connectpoint2[i])
+        if (syncvalhead[i] == syncvaltottail) break;
+    if (i < 0) {
+        syncstat = 0;
+        do {
+            for (i = connectpoint2[connecthead]; i >= 0; i = connectpoint2[i]) {
+                if (syncval[i][syncvaltottail & (MOVEFIFOSIZ - 1)] != syncval[connecthead][syncvaltottail & (MOVEFIFOSIZ - 1)]) {
+                    syncstat = 1;
+                }
+            }
 
-			syncvaltottail++;
-			for(i=connecthead;i>=0;i=connectpoint2[i])
-			{
-				if (syncvalhead[i] == syncvaltottail) 
-				{
-					break;
-				}
-			}
-		} while (i < 0);
-	}
+            syncvaltottail++;
+            for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+                if (syncvalhead[i] == syncvaltottail) {
+                    break;
+                }
+            }
+        } while (i < 0);
+    }
 
-	if (connectpoint2[connecthead] < 0) 
-	{
-		syncstat = 0;
-	}
+    if (connectpoint2[connecthead] < 0) {
+        syncstat = 0;
+    }
 
-	if (syncstat)
-	{
-		minitext(21,30+35+30, "Out Of Sync - Please restart game", COLOR_ON,2+8+16);
-		// FIX_00090: Removed info key. FPS were shown after CRC msg. CRC not always removed. (Turrican)
-		for(i=connecthead;i>=0;i=connectpoint2[i])
-		{	
-			if (ud.mapCRC[connecthead]!=ud.mapCRC[i])
-			{
-				minitext(21,30+42+30, "Map CRC mismatching. Please use exactly the same map.", COLOR_ON,2+8+16);
-				dispVersion();
-			}
-			else
-				minitext(21,30+42+30, "Verify the con files. Close your P2P if any", COLOR_ON,2+8+16);
+    if (syncstat) {
+        minitext(21, 30 + 35 + 30, "Out Of Sync - Please restart game", COLOR_ON, 2 + 8 + 16);
+        // FIX_00090: Removed info key. FPS were shown after CRC msg. CRC not always removed. (Turrican)
+        for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+            if (ud.mapCRC[connecthead] != ud.mapCRC[i]) {
+                minitext(21, 30 + 42 + 30, "Map CRC mismatching. Please use exactly the same map.", COLOR_ON, 2 + 8 + 16);
+                dispVersion();
+            }
+            else
+                minitext(21, 30 + 42 + 30, "Verify the con files. Close your P2P if any", COLOR_ON, 2 + 8 + 16);
 
-		}
-	}
+        }
+    }
 
-	if (syncstate)
-	{
-		//printext256(4L,160L,31,0,"Missed Network packet!",0);
-		//printext256(4L,138L,31,0,"RUN DN3DHELP.EXE for information.",0);
-		minitext(21,30+35+30, "Missed Network packet!", COLOR_ON,2+8+16);
-	}
+    if (syncstate) {
+        //printext256(4L,160L,31,0,"Missed Network packet!",0);
+        //printext256(4L,138L,31,0,"RUN DN3DHELP.EXE for information.",0);
+        minitext(21, 30 + 35 + 30, "Missed Network packet!", COLOR_ON, 2 + 8 + 16);
+    }
 }
 
 //1234
@@ -709,8 +665,7 @@ function check_fta_sounds(i) {
 
 //1300
 function inventory(s) {
-    switch(s.picnum)
-    {
+    switch (s.picnum) {
         case FIRSTAID:
         case STEROIDS:
         case HEATSENSOR:
@@ -780,44 +735,44 @@ function badguy(s) {
 function badguypic(pn) {
 
     switch (pn) {
-    case SHARK:
-    case RECON:
-    case DRONE:
-    case LIZTROOPONTOILET:
-    case LIZTROOPJUSTSIT:
-    case LIZTROOPSTAYPUT:
-    case LIZTROOPSHOOT:
-    case LIZTROOPJETPACK:
-    case LIZTROOPDUCKING:
-    case LIZTROOPRUNNING:
-    case LIZTROOP:
-    case OCTABRAIN:
-    case COMMANDER:
-    case COMMANDERSTAYPUT:
-    case PIGCOP:
-    case EGG:
-    case PIGCOPSTAYPUT:
-    case PIGCOPDIVE:
-    case LIZMAN:
-    case LIZMANSPITTING:
-    case LIZMANFEEDING:
-    case LIZMANJUMP:
-    case ORGANTIC:
-    case BOSS1:
-    case BOSS2:
-    case BOSS3:
-    case BOSS4:
-    case GREENSLIME:
-    case GREENSLIME + 1:
-    case GREENSLIME + 2:
-    case GREENSLIME + 3:
-    case GREENSLIME + 4:
-    case GREENSLIME + 5:
-    case GREENSLIME + 6:
-    case GREENSLIME + 7:
-    case RAT:
-    case ROTATEGUN:
-        return 1;
+        case SHARK:
+        case RECON:
+        case DRONE:
+        case LIZTROOPONTOILET:
+        case LIZTROOPJUSTSIT:
+        case LIZTROOPSTAYPUT:
+        case LIZTROOPSHOOT:
+        case LIZTROOPJETPACK:
+        case LIZTROOPDUCKING:
+        case LIZTROOPRUNNING:
+        case LIZTROOP:
+        case OCTABRAIN:
+        case COMMANDER:
+        case COMMANDERSTAYPUT:
+        case PIGCOP:
+        case EGG:
+        case PIGCOPSTAYPUT:
+        case PIGCOPDIVE:
+        case LIZMAN:
+        case LIZMANSPITTING:
+        case LIZMANFEEDING:
+        case LIZMANJUMP:
+        case ORGANTIC:
+        case BOSS1:
+        case BOSS2:
+        case BOSS3:
+        case BOSS4:
+        case GREENSLIME:
+        case GREENSLIME + 1:
+        case GREENSLIME + 2:
+        case GREENSLIME + 3:
+        case GREENSLIME + 4:
+        case GREENSLIME + 5:
+        case GREENSLIME + 6:
+        case GREENSLIME + 7:
+        case RAT:
+        case ROTATEGUN:
+            return 1;
     }
 
     if (actortype[pn]) return 1;
@@ -852,31 +807,28 @@ function myospal(x, y, tilenum, shade, orientation, p) {
 }
 
 
-function invennum( x, y,  num1,  ha,  sbits)
-{
+function invennum(x, y, num1, ha, sbits) {
     ha = toUint8(ha);
-    var  dabuf = num1.toString();
-	if(num1 > 99)
-	{
-	    rotateSprite((x-4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
-	    rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(1)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
-	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(2)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
-	}
-	else if(num1 > 9)
-	{
-	    rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
-	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(1)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
-	}
-	else
-	    rotateSprite((x+4)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,sbits,0,0,xdim-1,ydim-1);
+    var dabuf = num1.toString();
+    if (num1 > 99) {
+        rotateSprite((x - 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
+    }
+    else if (num1 > 9) {
+        rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
+    }
+    else
+        rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
 }
 
 
-function orderweaponnum(ind,x,y, num1,  num2,  ha) {
+function orderweaponnum(ind, x, y, num1, num2, ha) {
     ha = toUint8(ha);
     rotateSprite((x - 7) << 16, y << 16, 65536, 0, THREEBYFIVE + ind + 1, ha - 10, 7, 10 + 128, 0, 0, xdim - 1, ydim - 1);
-	rotateSprite((x-3)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
-	minitextshade(x+1,y-4,"ORDER",26,6,2+8+16+128);
+    rotateSprite((x - 3) << 16, y << 16, 65536, 0, THREEBYFIVE + 10, ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    minitextshade(x + 1, y - 4, "ORDER", 26, 6, 2 + 8 + 16 + 128);
 }
 
 //1473
@@ -885,24 +837,22 @@ function weaponnum(ind, x, y, num1, num2, ha) {
     ha = toUint8(ha);
     var dabuf = "";
 
-    rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
-    rotateSprite((x-3)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
-    rotateSprite((x+9)<<16,y<<16,65536,0,THREEBYFIVE+11,ha,0,10+128,0,0,xdim-1,ydim-1);
+    rotateSprite((x - 7) << 16, y << 16, 65536, 0, THREEBYFIVE + ind + 1, ha - 10, 7, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    rotateSprite((x - 3) << 16, y << 16, 65536, 0, THREEBYFIVE + 10, ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    rotateSprite((x + 9) << 16, y << 16, 65536, 0, THREEBYFIVE + 11, ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
 
-    if(num1 > 99) num1 = 99;
-    if(num2 > 99) num2 = 99;
+    if (num1 > 99) num1 = 99;
+    if (num2 > 99) num2 = 99;
 
     dabuf = String(num1);
-    if (num1 > 9)
-    {
+    if (num1 > 9) {
         rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
     else rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
 
     dabuf = String(num2);
-    if (num2 > 9)
-    {
+    if (num2 > 9) {
         rotateSprite((x + 13) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[0].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf[1].charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
@@ -914,33 +864,29 @@ function weaponnum(ind, x, y, num1, num2, ha) {
 function weaponnum999(ind, x, y, num1, num2, ha) {
     ha = toUint8(ha);
     var dabuf = "";
-    rotateSprite((x-4)<<16,y<<16,65536,0,THREEBYFIVE+10,ha,0,10+128,0,0,xdim-1,ydim-1);
-    rotateSprite((x-7)<<16,y<<16,65536,0,THREEBYFIVE+ind+1,ha-10,7,10+128,0,0,xdim-1,ydim-1);
-    rotateSprite((x+13)<<16,y<<16,65536,0,THREEBYFIVE+11,ha,0,10+128,0,0,xdim-1,ydim-1);
+    rotateSprite((x - 4) << 16, y << 16, 65536, 0, THREEBYFIVE + 10, ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    rotateSprite((x - 7) << 16, y << 16, 65536, 0, THREEBYFIVE + ind + 1, ha - 10, 7, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+    rotateSprite((x + 13) << 16, y << 16, 65536, 0, THREEBYFIVE + 11, ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
 
     dabuf = String(num1);
-    if (num1 > 99)
-    {
-        rotateSprite((x)<<16,y<<16,65536,0,THREEBYFIVE+dabuf.charCodeAt(0)-'0'.charCodeAt(0),ha,0,10+128,0,0,xdim-1,ydim-1);
+    if (num1 > 99) {
+        rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
-    else if(num1 > 9)
-    {
+    else if (num1 > 9) {
         rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
     else rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
 
     dabuf = String(num2);
-    if (num2 > 99)
-    {
+    if (num2 > 99) {
         rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 25) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
-    else if(num2 > 9)
-    {
+    else if (num2 > 9) {
         rotateSprite((x + 17) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 21) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
@@ -957,124 +903,107 @@ function weapon_amounts(p, x, y, u) {
 
     cw = p.curr_weapon;
 
-    if (u&4)
-    {
-        if (u != (0xffffffff | 0)) patchstatusbar(96,178,96+12,178+6);
-        weaponnum999(PISTOL_WEAPON,x,y,
-			p.ammo_amount[PISTOL_WEAPON],max_ammo_amount[PISTOL_WEAPON],
-			12-20*(cw == PISTOL_WEAPON) );
+    if (u & 4) {
+        if (u != (0xffffffff | 0)) patchstatusbar(96, 178, 96 + 12, 178 + 6);
+        weaponnum999(PISTOL_WEAPON, x, y,
+			p.ammo_amount[PISTOL_WEAPON], max_ammo_amount[PISTOL_WEAPON],
+			12 - 20 * (cw == PISTOL_WEAPON));
     }
-    if (u&8)
-    {
+    if (u & 8) {
         if (u != (0xffffffff | 0)) patchstatusbar(96, 184, 96 + 12, 184 + 6);
-        weaponnum999(SHOTGUN_WEAPON,x,y+6,
-			p.ammo_amount[SHOTGUN_WEAPON],max_ammo_amount[SHOTGUN_WEAPON],
-			(!p.gotweapon[SHOTGUN_WEAPON]*9)+12-18*
-			(cw == SHOTGUN_WEAPON) );
+        weaponnum999(SHOTGUN_WEAPON, x, y + 6,
+			p.ammo_amount[SHOTGUN_WEAPON], max_ammo_amount[SHOTGUN_WEAPON],
+			(!p.gotweapon[SHOTGUN_WEAPON] * 9) + 12 - 18 *
+			(cw == SHOTGUN_WEAPON));
     }
-    if (u&16)
-    {
+    if (u & 16) {
         if (u != (0xffffffff | 0)) patchstatusbar(96, 190, 96 + 12, 190 + 6);
-        weaponnum999(CHAINGUN_WEAPON,x,y+12,
-			p.ammo_amount[CHAINGUN_WEAPON],max_ammo_amount[CHAINGUN_WEAPON],
-			(!p.gotweapon[CHAINGUN_WEAPON]*9)+12-18*
-			(cw == CHAINGUN_WEAPON) );
+        weaponnum999(CHAINGUN_WEAPON, x, y + 12,
+			p.ammo_amount[CHAINGUN_WEAPON], max_ammo_amount[CHAINGUN_WEAPON],
+			(!p.gotweapon[CHAINGUN_WEAPON] * 9) + 12 - 18 *
+			(cw == CHAINGUN_WEAPON));
     }
-    if (u&32)
-    {
+    if (u & 32) {
         if (u != (0xffffffff | 0)) patchstatusbar(135, 178, 135 + 8, 178 + 6);
-        weaponnum(RPG_WEAPON,x+39,y,
-			p.ammo_amount[RPG_WEAPON],max_ammo_amount[RPG_WEAPON],
-			(!p.gotweapon[RPG_WEAPON]*9)+12-19*
-			(cw == RPG_WEAPON) );
+        weaponnum(RPG_WEAPON, x + 39, y,
+			p.ammo_amount[RPG_WEAPON], max_ammo_amount[RPG_WEAPON],
+			(!p.gotweapon[RPG_WEAPON] * 9) + 12 - 19 *
+			(cw == RPG_WEAPON));
     }
-    if (u&64)
-    {
+    if (u & 64) {
         if (u != (0xffffffff | 0)) patchstatusbar(135, 184, 135 + 8, 184 + 6);
-        weaponnum(HANDBOMB_WEAPON,x+39,y+6,
-			p.ammo_amount[HANDBOMB_WEAPON],max_ammo_amount[HANDBOMB_WEAPON],
-			(((!p.ammo_amount[HANDBOMB_WEAPON])|(!p.gotweapon[HANDBOMB_WEAPON]))*9)+12-19*
+        weaponnum(HANDBOMB_WEAPON, x + 39, y + 6,
+			p.ammo_amount[HANDBOMB_WEAPON], max_ammo_amount[HANDBOMB_WEAPON],
+			(((!p.ammo_amount[HANDBOMB_WEAPON]) | (!p.gotweapon[HANDBOMB_WEAPON])) * 9) + 12 - 19 *
 			((cw == HANDBOMB_WEAPON) || (cw == HANDREMOTE_WEAPON)));
     }
-    if (u&128)
-    {
+    if (u & 128) {
         if (u != (0xffffffff | 0)) patchstatusbar(135, 190, 135 + 8, 190 + 6);
 
-        if(VOLUMEONE)
-        {
-            orderweaponnum(SHRINKER_WEAPON,x+39,y+12,
-				p.ammo_amount[SHRINKER_WEAPON],max_ammo_amount[SHRINKER_WEAPON],
-				(!p.gotweapon[SHRINKER_WEAPON]*9)+12-18*
-				(cw == SHRINKER_WEAPON) );
+        if (VOLUMEONE) {
+            orderweaponnum(SHRINKER_WEAPON, x + 39, y + 12,
+				p.ammo_amount[SHRINKER_WEAPON], max_ammo_amount[SHRINKER_WEAPON],
+				(!p.gotweapon[SHRINKER_WEAPON] * 9) + 12 - 18 *
+				(cw == SHRINKER_WEAPON));
         }
-        else
-        {
-            if(p.subweapon&(1<<GROW_WEAPON))
-                weaponnum(SHRINKER_WEAPON,x+39,y+12,
-				p.ammo_amount[GROW_WEAPON],max_ammo_amount[GROW_WEAPON],
-				(!p.gotweapon[GROW_WEAPON]*9)+12-18*
-				(cw == GROW_WEAPON) );
+        else {
+            if (p.subweapon & (1 << GROW_WEAPON))
+                weaponnum(SHRINKER_WEAPON, x + 39, y + 12,
+				p.ammo_amount[GROW_WEAPON], max_ammo_amount[GROW_WEAPON],
+				(!p.gotweapon[GROW_WEAPON] * 9) + 12 - 18 *
+				(cw == GROW_WEAPON));
             else
-                weaponnum(SHRINKER_WEAPON,x+39,y+12,
-				p.ammo_amount[SHRINKER_WEAPON],max_ammo_amount[SHRINKER_WEAPON],
-				(!p.gotweapon[SHRINKER_WEAPON]*9)+12-18*
-				(cw == SHRINKER_WEAPON) );
+                weaponnum(SHRINKER_WEAPON, x + 39, y + 12,
+				p.ammo_amount[SHRINKER_WEAPON], max_ammo_amount[SHRINKER_WEAPON],
+				(!p.gotweapon[SHRINKER_WEAPON] * 9) + 12 - 18 *
+				(cw == SHRINKER_WEAPON));
         }
     }
-    if (u&256)
-    {
+    if (u & 256) {
         if (u != (0xffffffff | 0)) patchstatusbar(166, 178, 166 + 8, 178 + 6);
 
-        if(VOLUMEONE)
-        {
-            orderweaponnum(DEVISTATOR_WEAPON,x+70,y,
-				p.ammo_amount[DEVISTATOR_WEAPON],max_ammo_amount[DEVISTATOR_WEAPON],
-				(!p.gotweapon[DEVISTATOR_WEAPON]*9)+12-18*
-				(cw == DEVISTATOR_WEAPON) );
+        if (VOLUMEONE) {
+            orderweaponnum(DEVISTATOR_WEAPON, x + 70, y,
+				p.ammo_amount[DEVISTATOR_WEAPON], max_ammo_amount[DEVISTATOR_WEAPON],
+				(!p.gotweapon[DEVISTATOR_WEAPON] * 9) + 12 - 18 *
+				(cw == DEVISTATOR_WEAPON));
         }
-        else
-        {
-            weaponnum(DEVISTATOR_WEAPON,x+70,y,
-				p.ammo_amount[DEVISTATOR_WEAPON],max_ammo_amount[DEVISTATOR_WEAPON],
-				(!p.gotweapon[DEVISTATOR_WEAPON]*9)+12-18*
-				(cw == DEVISTATOR_WEAPON) );
+        else {
+            weaponnum(DEVISTATOR_WEAPON, x + 70, y,
+				p.ammo_amount[DEVISTATOR_WEAPON], max_ammo_amount[DEVISTATOR_WEAPON],
+				(!p.gotweapon[DEVISTATOR_WEAPON] * 9) + 12 - 18 *
+				(cw == DEVISTATOR_WEAPON));
         }
     }
-    if (u&512)
-    {
+    if (u & 512) {
         if (u != (0xffffffff | 0)) patchstatusbar(166, 184, 166 + 8, 184 + 6);
-        if(VOLUMEONE)
-        {
-            orderweaponnum(TRIPBOMB_WEAPON,x+70,y+6,
-				p.ammo_amount[TRIPBOMB_WEAPON],max_ammo_amount[TRIPBOMB_WEAPON],
-				(!p.gotweapon[TRIPBOMB_WEAPON]*9)+12-18*
-				(cw == TRIPBOMB_WEAPON) );
+        if (VOLUMEONE) {
+            orderweaponnum(TRIPBOMB_WEAPON, x + 70, y + 6,
+				p.ammo_amount[TRIPBOMB_WEAPON], max_ammo_amount[TRIPBOMB_WEAPON],
+				(!p.gotweapon[TRIPBOMB_WEAPON] * 9) + 12 - 18 *
+				(cw == TRIPBOMB_WEAPON));
         }
-        else
-        {
-            weaponnum(TRIPBOMB_WEAPON,x+70,y+6,
-				p.ammo_amount[TRIPBOMB_WEAPON],max_ammo_amount[TRIPBOMB_WEAPON],
-				(!p.gotweapon[TRIPBOMB_WEAPON]*9)+12-18*
-				(cw == TRIPBOMB_WEAPON) );
+        else {
+            weaponnum(TRIPBOMB_WEAPON, x + 70, y + 6,
+				p.ammo_amount[TRIPBOMB_WEAPON], max_ammo_amount[TRIPBOMB_WEAPON],
+				(!p.gotweapon[TRIPBOMB_WEAPON] * 9) + 12 - 18 *
+				(cw == TRIPBOMB_WEAPON));
         }
     }
 
-    if (u&65536)
-    {
+    if (u & 65536) {
         if (u != (0xffffffff | 0)) patchstatusbar(166, 190, 166 + 8, 190 + 6);
-        if(VOLUMEONE)
-        {
-            orderweaponnum(-1,x+70,y+12,
-				p.ammo_amount[FREEZE_WEAPON],max_ammo_amount[FREEZE_WEAPON],
-				(!p.gotweapon[FREEZE_WEAPON]*9)+12-18*
-				(cw == FREEZE_WEAPON) );
+        if (VOLUMEONE) {
+            orderweaponnum(-1, x + 70, y + 12,
+				p.ammo_amount[FREEZE_WEAPON], max_ammo_amount[FREEZE_WEAPON],
+				(!p.gotweapon[FREEZE_WEAPON] * 9) + 12 - 18 *
+				(cw == FREEZE_WEAPON));
         }
-        else
-        {
-            weaponnum(-1,x+70,y+12,
-				p.ammo_amount[FREEZE_WEAPON],max_ammo_amount[FREEZE_WEAPON],
-				(!p.gotweapon[FREEZE_WEAPON]*9)+12-18*
-				(cw == FREEZE_WEAPON) );
+        else {
+            weaponnum(-1, x + 70, y + 12,
+				p.ammo_amount[FREEZE_WEAPON], max_ammo_amount[FREEZE_WEAPON],
+				(!p.gotweapon[FREEZE_WEAPON] * 9) + 12 - 18 *
+				(cw == FREEZE_WEAPON));
         }
     }
 }
@@ -1110,25 +1039,23 @@ function digitalnumber(x, y, n, s, cs) {
 }
 
 //1802
-function display_boardfilename_FPS_weapon(offx, offy, stepx, stepy)
-{
+function display_boardfilename_FPS_weapon(offx, offy, stepx, stepy) {
     var i;
 
     // FIX_00025: Can toggle FPS and map name during a game (use dnrate OR toggle
     //            from menu when in deathmatch). 
 
     // Display boardfilename and FPS
-    if(ud.tickrate&1)
-    {
+    if (ud.tickrate & 1) {
         tics(offx.$, offy.$, COLOR_ON);
         offy.$ += stepy.$;
     }
-    if(ud.tickrate&2)
+    if (ud.tickrate & 2)
         dispVersion();
 
     // We display the weapons here instead of changing the function
     // displayweapon() because the display will be much faster
-    for(i=connecthead;i>=0;i=connectpoint2[i]) {
+    for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         if (ud.hideweapon && i == screenpeek)
             drawsmallweapon(ps[i].curr_weapon, 1, 130, (ud.screen_size <= 4) ? 170 : 140);
     }
@@ -1137,80 +1064,78 @@ function display_boardfilename_FPS_weapon(offx, offy, stepx, stepy)
 //1830
 
 // FIX_00026: Weapon can now be hidden (on your screen only).
-function drawsmallweapon( weapon,  scale,  x,  y)
-{
-	var t = 60000.0;
-	var s=0;
-	var offsetx=0, offsety=0;
+function drawsmallweapon(weapon, scale, x, y) {
+    var t = 60000.0;
+    var s = 0;
+    var offsetx = 0, offsety = 0;
 
 
-	switch(weapon)
-	{	
-	case  KNEE_WEAPON			: s=0;					break;
-	case  PISTOL_WEAPON			: s=FIRSTGUNSPRITE;
-		offsetx = 8;
-		offsety = 7;
-		break;
-	case  SHOTGUN_WEAPON		: s=SHOTGUNSPRITE;
-		t = 45000;
-		offsetx = -1;
-		offsety = 9;
-		break;
-	case  CHAINGUN_WEAPON		: s=CHAINGUNSPRITE;  	
-		t = 45000;
-		offsetx = -1;
-		offsety = 9;
-		break;
-	case  RPG_WEAPON			: s=RPGSPRITE;
-		t = 45000;
-		offsetx = 4;
-		offsety = 9;
-		break;
-	case  HANDBOMB_WEAPON		: s=HEAVYHBOMB;	
-		t=20000;
-		offsetx = 16;
-		offsety = 13;
-		break;
-	case  SHRINKER_WEAPON		: s=SHRINKERSPRITE;		
-		t = 30000;
-		offsetx = 6;
-		offsety = 14;
-		break;
-	case  DEVISTATOR_WEAPON		: s=DEVISTATORSPRITE;
-		t = 45000;
-		offsetx = 3;
-		offsety = 9;
-		break;
-	case  TRIPBOMB_WEAPON		: s=TRIPBOMBSPRITE;		
-		t = 75000;			
-		offsetx = 10;
-		offsety = 12;
-		break;
-	case  FREEZE_WEAPON			:	s=FREEZESPRITE;	
-		t = 45000;
-		offsetx = 1;
-		offsety = 6;
-		break;
-	case  HANDREMOTE_WEAPON		: s=0;					
-		break;
-	case  GROW_WEAPON			: s=GROWSPRITEICON;		
-		t = 30000;
-		offsetx = 6;
-		offsety = 4;
-		break;
-	default						: s=0;
-	}
+    switch (weapon) {
+        case KNEE_WEAPON: s = 0; break;
+        case PISTOL_WEAPON: s = FIRSTGUNSPRITE;
+            offsetx = 8;
+            offsety = 7;
+            break;
+        case SHOTGUN_WEAPON: s = SHOTGUNSPRITE;
+            t = 45000;
+            offsetx = -1;
+            offsety = 9;
+            break;
+        case CHAINGUN_WEAPON: s = CHAINGUNSPRITE;
+            t = 45000;
+            offsetx = -1;
+            offsety = 9;
+            break;
+        case RPG_WEAPON: s = RPGSPRITE;
+            t = 45000;
+            offsetx = 4;
+            offsety = 9;
+            break;
+        case HANDBOMB_WEAPON: s = HEAVYHBOMB;
+            t = 20000;
+            offsetx = 16;
+            offsety = 13;
+            break;
+        case SHRINKER_WEAPON: s = SHRINKERSPRITE;
+            t = 30000;
+            offsetx = 6;
+            offsety = 14;
+            break;
+        case DEVISTATOR_WEAPON: s = DEVISTATORSPRITE;
+            t = 45000;
+            offsetx = 3;
+            offsety = 9;
+            break;
+        case TRIPBOMB_WEAPON: s = TRIPBOMBSPRITE;
+            t = 75000;
+            offsetx = 10;
+            offsety = 12;
+            break;
+        case FREEZE_WEAPON: s = FREEZESPRITE;
+            t = 45000;
+            offsetx = 1;
+            offsety = 6;
+            break;
+        case HANDREMOTE_WEAPON: s = 0;
+            break;
+        case GROW_WEAPON: s = GROWSPRITEICON;
+            t = 30000;
+            offsetx = 6;
+            offsety = 4;
+            break;
+        default: s = 0;
+    }
 
-	if(s)
-	    rotateSprite((x + toInt16(offsetx * scale)) << 16, (y + toInt16(offsety * scale)) << 16, (t * scale), 0, s, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+    if (s)
+        rotateSprite((x + toInt16(offsetx * scale)) << 16, (y + toInt16(offsety * scale)) << 16, (t * scale), 0, s, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
 
-	return;
+    return;
 }
 
 //1900
 
 function coolgaugetext(snum) {
-	var p;
+    var p;
     var i, j, o, ss, u;
     var permbit;
     var offx = 3, offy = 3, stepx = 60, stepy = 6;
@@ -1218,14 +1143,13 @@ function coolgaugetext(snum) {
 
     p = ps[snum];
 
-    if (p.invdisptime > 0) 
-    {
+    if (p.invdisptime > 0) {
         displayinventory(p);
     }
 
 
-    if(ps[snum].gm&MODE_MENU)
-        if( (current_menu >= 400  && current_menu <= 405) )
+    if (ps[snum].gm & MODE_MENU)
+        if ((current_menu >= 400 && current_menu <= 405))
             return;
 
     offy += PreMap.countFragBars(); //add fragbars
@@ -1242,25 +1166,20 @@ function coolgaugetext(snum) {
     ss = ud.screen_size; if (ss < 4) return;
 
     // Draw the multi player frag status bar
-    if ( ud.multimode > 1 && ud.coop != 1 )
-    {
+    if (ud.multimode > 1 && ud.coop != 1) {
         throw 'todo'
-        if (pus)
-        { 
-            displayfragbar(); 
+        if (pus) {
+            displayfragbar();
         }
-        else
-        {
-            for(i=connecthead;i>=0;i=connectpoint2[i])
-            {
-                if (ps[i].frag != sbar.frag[i]) 
-                { 
-                    displayfragbar(); 
-                    break; 
+        else {
+            for (i = connecthead; i >= 0; i = connectpoint2[i]) {
+                if (ps[i].frag != sbar.frag[i]) {
+                    displayfragbar();
+                    break;
                 }
             }
         }
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             if (i != myconnectindex)
                 sbar.frag[i] = ps[i].frag;
     }
@@ -1269,74 +1188,74 @@ function coolgaugetext(snum) {
     {
         throw 'todo'
         //    // FIX_00027: Added an extra small statusbar (HUD)
-    //    if(ud.extended_screen_size>0)
-    //    {
-    //        offx = 5; offy = 160;
+        //    if(ud.extended_screen_size>0)
+        //    {
+        //        offx = 5; offy = 160;
 
-    //        sprintf(text,"%d", ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
-    //        minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
-    //        sprintf(text,"%d", ps[screenpeek].last_extra); 
-    //        gametext(offx,offy+20,text,ps[screenpeek].last_extra<=50?15:0,2+8+16); //minitext: 2 red light, 23 yellow
-    //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,20000,0,SHIELD,ps[screenpeek].shield_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].shield_amount)*20000/10,0,SHIELD,0,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,35000,0,JETPACK_ICON,ps[screenpeek].jetpack_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].jetpack_amount)*35000/40,0,JETPACK_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,35000,0,STEROIDS_ICON,ps[screenpeek].steroids_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].steroids_amount)*35000/20,0,STEROIDS_ICON,5,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,40000,0,FIRSTAID_ICON,ps[screenpeek].firstaid_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].firstaid_amount)*40000/10,0,FIRSTAID_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
-    //    }
-    //    else
-    //    {
-    //        if (p.inven_icon)
-    //            rotateSprite(69<<16,(200-30)<<16,65536,0,INVENTORYBOX,0,21,10+16,0,0,xdim-1,ydim-1);
-    //        rotateSprite(5<<16,(200-28)<<16,65536,0,HEALTHBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+        //        sprintf(text,"%d", ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
+        //        minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
+        //        sprintf(text,"%d", ps[screenpeek].last_extra); 
+        //        gametext(offx,offy+20,text,ps[screenpeek].last_extra<=50?15:0,2+8+16); //minitext: 2 red light, 23 yellow
+        //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,20000,0,SHIELD,ps[screenpeek].shield_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].shield_amount)*20000/10,0,SHIELD,0,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,35000,0,JETPACK_ICON,ps[screenpeek].jetpack_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].jetpack_amount)*35000/40,0,JETPACK_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,35000,0,STEROIDS_ICON,ps[screenpeek].steroids_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].steroids_amount)*35000/20,0,STEROIDS_ICON,5,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,40000,0,FIRSTAID_ICON,ps[screenpeek].firstaid_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].firstaid_amount)*40000/10,0,FIRSTAID_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
+        //    }
+        //    else
+        //    {
+        //        if (p.inven_icon)
+        //            rotateSprite(69<<16,(200-30)<<16,65536,0,INVENTORYBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite(5<<16,(200-28)<<16,65536,0,HEALTHBOX,0,21,10+16,0,0,xdim-1,ydim-1);
 
-    //        if(sprite[p.i].pal == 1 && p.last_extra < 2)
-    //            digitalnumber(20,200-17,1,-16,10+16);
-    //        else digitalnumber(20,200-17,p.last_extra,-16,10+16);
+        //        if(sprite[p.i].pal == 1 && p.last_extra < 2)
+        //            digitalnumber(20,200-17,1,-16,10+16);
+        //        else digitalnumber(20,200-17,p.last_extra,-16,10+16);
 
-    //        rotateSprite(37<<16,(200-28)<<16,65536,0,AMMOBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+        //        rotateSprite(37<<16,(200-28)<<16,65536,0,AMMOBOX,0,21,10+16,0,0,xdim-1,ydim-1);
 
-    //        if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
-    //        digitalnumber(53,200-17,p.ammo_amount[i],-16,10+16);
+        //        if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
+        //        digitalnumber(53,200-17,p.ammo_amount[i],-16,10+16);
 
-    //        o = 158; permbit = 0;
-    //        if (p.inven_icon)
-    //        {
-    //            switch(p.inven_icon)
-    //            {
-    //                case 1: i = FIRSTAID_ICON; break;
-    //                case 2: i = STEROIDS_ICON; break;
-    //                case 3: i = HOLODUKE_ICON; break;
-    //                case 4: i = JETPACK_ICON; break;
-    //                case 5: i = HEAT_ICON; break;
-    //                case 6: i = AIRTANK_ICON; break;
-    //                case 7: i = BOOT_ICON; break;
-    //                default: i = -1;
-    //            }
-    //            if (i >= 0) rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
+        //        o = 158; permbit = 0;
+        //        if (p.inven_icon)
+        //        {
+        //            switch(p.inven_icon)
+        //            {
+        //                case 1: i = FIRSTAID_ICON; break;
+        //                case 2: i = STEROIDS_ICON; break;
+        //                case 3: i = HOLODUKE_ICON; break;
+        //                case 4: i = JETPACK_ICON; break;
+        //                case 5: i = HEAT_ICON; break;
+        //                case 6: i = AIRTANK_ICON; break;
+        //                case 7: i = BOOT_ICON; break;
+        //                default: i = -1;
+        //            }
+        //            if (i >= 0) rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
 
-    //            minitext(292-30-o,190,"%",6,10+16+permbit);
+        //            minitext(292-30-o,190,"%",6,10+16+permbit);
 
-    //            j = 0x80000000 | 0;
-    //            switch(p.inven_icon)
-    //            {
-    //                case 1: i = p.firstaid_amount; break;
-    //                case 2: i = ((p.steroids_amount+3)>>2); break;
-    //                case 3: i = ((p.holoduke_amount+15)/24); j = p.holoduke_on; break;
-    //                case 4: i = ((p.jetpack_amount+15)>>4); j = p.jetpack_on; break;
-    //                case 5: i = p.heat_amount/12; j = p.heat_on; break;
-    //                case 6: i = ((p.scuba_amount+63)>>6); break;
-    //                case 7: i = (p.boot_amount>>1); break;
-    //            }
-    //            invennum(284-30-o,200-6,(uint8_t )i,0,10+permbit);
-    //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-    //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
-    //            if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
-    //        }
-    //    }
-    //    return;
+        //            j = 0x80000000 | 0;
+        //            switch(p.inven_icon)
+        //            {
+        //                case 1: i = p.firstaid_amount; break;
+        //                case 2: i = ((p.steroids_amount+3)>>2); break;
+        //                case 3: i = ((p.holoduke_amount+15)/24); j = p.holoduke_on; break;
+        //                case 4: i = ((p.jetpack_amount+15)>>4); j = p.jetpack_on; break;
+        //                case 5: i = p.heat_amount/12; j = p.heat_on; break;
+        //                case 6: i = ((p.scuba_amount+63)>>6); break;
+        //                case 7: i = (p.boot_amount>>1); break;
+        //            }
+        //            invennum(284-30-o,200-6,(uint8_t )i,0,10+permbit);
+        //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
+        //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+        //            if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
+        //        }
+        //    }
+        //    return;
     }
 
     //DRAW/UPDATE FULL STATUS BAR:
@@ -1347,18 +1266,20 @@ function coolgaugetext(snum) {
     if (sbar.got_access != p.got_access) { sbar.got_access = p.got_access; u |= 16384; }
     if (sbar.last_extra != p.last_extra) { sbar.last_extra = p.last_extra; u |= 1; }
     if (sbar.shield_amount != p.shield_amount) { sbar.shield_amount = p.shield_amount; u |= 2; }
-    if (sbar.curr_weapon != p.curr_weapon) { sbar.curr_weapon = p.curr_weapon; u |= (4+8+16+32+64+128+256+512+1024+65536); }
-    for(i=1;i < 10;i++)
-    {
+    if (sbar.curr_weapon != p.curr_weapon) { sbar.curr_weapon = p.curr_weapon; u |= (4 + 8 + 16 + 32 + 64 + 128 + 256 + 512 + 1024 + 65536); }
+    for (i = 1; i < 10; i++) {
         if (sbar.ammo_amount[i] != p.ammo_amount[i]) {
-            sbar.ammo_amount[i] = p.ammo_amount[i]; if(i < 9) u |= ((2<<i)+1024); else u |= 65536+1024; }
-        if (sbar.gotweapon[i] != p.gotweapon[i]) { sbar.gotweapon[i] =
-            p.gotweapon[i]; if(i < 9 ) u |= ((2<<i)+1024); else u |= 65536+1024; }
+            sbar.ammo_amount[i] = p.ammo_amount[i]; if (i < 9) u |= ((2 << i) + 1024); else u |= 65536 + 1024;
+        }
+        if (sbar.gotweapon[i] != p.gotweapon[i]) {
+            sbar.gotweapon[i] =
+                p.gotweapon[i]; if (i < 9) u |= ((2 << i) + 1024); else u |= 65536 + 1024;
+        }
     }
-    if (sbar.inven_icon != p.inven_icon) { sbar.inven_icon = p.inven_icon; u |= (2048+4096+8192); }
-    if (sbar.holoduke_on != p.holoduke_on) { sbar.holoduke_on = p.holoduke_on; u |= (4096+8192); }
-    if (sbar.jetpack_on != p.jetpack_on) { sbar.jetpack_on = p.jetpack_on; u |= (4096+8192); }
-    if (sbar.heat_on != p.heat_on) { sbar.heat_on = p.heat_on; u |= (4096+8192); }
+    if (sbar.inven_icon != p.inven_icon) { sbar.inven_icon = p.inven_icon; u |= (2048 + 4096 + 8192); }
+    if (sbar.holoduke_on != p.holoduke_on) { sbar.holoduke_on = p.holoduke_on; u |= (4096 + 8192); }
+    if (sbar.jetpack_on != p.jetpack_on) { sbar.jetpack_on = p.jetpack_on; u |= (4096 + 8192); }
+    if (sbar.heat_on != p.heat_on) { sbar.heat_on = p.heat_on; u |= (4096 + 8192); }
     if (sbar.firstaid_amount != p.firstaid_amount) { sbar.firstaid_amount = p.firstaid_amount; u |= 8192; }
     if (sbar.steroids_amount != p.steroids_amount) { sbar.steroids_amount = p.steroids_amount; u |= 8192; }
     if (sbar.holoduke_amount != p.holoduke_amount) { sbar.holoduke_amount = p.holoduke_amount; u |= 8192; }
@@ -1386,69 +1307,55 @@ function coolgaugetext(snum) {
     //15 - update kills
     //16 - update FREEZE_WEAPON ammo
 
-    if (u == (0xffffffff | 0))
-    {
-        patchstatusbar(0,0,320,200);
+    if (u == (0xffffffff | 0)) {
+        patchstatusbar(0, 0, 320, 200);
         if (ud.multimode > 1 && ud.coop != 1)
-            rotateSprite(277<<16,(200-27)<<16,65536,0,KILLSICON,0,0,10+16+128,0,0,xdim-1,ydim-1);
+            rotateSprite(277 << 16, (200 - 27) << 16, 65536, 0, KILLSICON, 0, 0, 10 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
     }
-    if (ud.multimode > 1 && ud.coop != 1)
-    {
-        if (u&32768)
-        {
+    if (ud.multimode > 1 && ud.coop != 1) {
+        if (u & 32768) {
             if (u != (0xffffffff | 0)) patchstatusbar(276, 183, 299, 193);
             digitalnumber(287, 200 - 17, Math.max(p.frag - p.fraggedself, 0), -16, 10 + 16 + 128);
         }
     }
-    else
-    {
-        if (u&16384)
-        {
+    else {
+        if (u & 16384) {
             if (u != (0xffffffff | 0)) patchstatusbar(275, 182, 299, 194);
-            if (p.got_access&4) rotateSprite(275<<16,182<<16,65536,0,ACCESS_ICON,0,23,10+16+128,0,0,xdim-1,ydim-1);
-            if (p.got_access&2) rotateSprite(288<<16,182<<16,65536,0,ACCESS_ICON,0,21,10+16+128,0,0,xdim-1,ydim-1);
-            if (p.got_access&1) rotateSprite(281<<16,189<<16,65536,0,ACCESS_ICON,0,0,10+16+128,0,0,xdim-1,ydim-1);
+            if (p.got_access & 4) rotateSprite(275 << 16, 182 << 16, 65536, 0, ACCESS_ICON, 0, 23, 10 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
+            if (p.got_access & 2) rotateSprite(288 << 16, 182 << 16, 65536, 0, ACCESS_ICON, 0, 21, 10 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
+            if (p.got_access & 1) rotateSprite(281 << 16, 189 << 16, 65536, 0, ACCESS_ICON, 0, 0, 10 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
         }
     }
-    if (u&(4+8+16+32+64+128+256+512+65536)) weapon_amounts(p,96,182,u);
+    if (u & (4 + 8 + 16 + 32 + 64 + 128 + 256 + 512 + 65536)) weapon_amounts(p, 96, 182, u);
 
-    if (u&1)
-    {
+    if (u & 1) {
         if (u != (0xffffffff | 0)) patchstatusbar(20, 183, 43, 193);
-        if(sprite[p.i].pal == 1 && p.last_extra < 2)
-            digitalnumber(32,200-17,1,-16,10+16+128);
-        else digitalnumber(32,200-17,p.last_extra,-16,10+16+128);
+        if (sprite[p.i].pal == 1 && p.last_extra < 2)
+            digitalnumber(32, 200 - 17, 1, -16, 10 + 16 + 128);
+        else digitalnumber(32, 200 - 17, p.last_extra, -16, 10 + 16 + 128);
     }
-    if (u&2)
-    {
+    if (u & 2) {
         if (u != (0xffffffff | 0)) patchstatusbar(52, 183, 75, 193);
-        digitalnumber(64,200-17,p.shield_amount,-16,10+16+128);
+        digitalnumber(64, 200 - 17, p.shield_amount, -16, 10 + 16 + 128);
     }
 
-    if (u&1024)
-    {
+    if (u & 1024) {
         if (u != (0xffffffff | 0)) patchstatusbar(196, 183, 219, 193);
-        if (p.curr_weapon != KNEE_WEAPON)
-        {
+        if (p.curr_weapon != KNEE_WEAPON) {
             if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
-            digitalnumber(230-22,200-17,p.ammo_amount[i],-16,10+16+128);
+            digitalnumber(230 - 22, 200 - 17, p.ammo_amount[i], -16, 10 + 16 + 128);
         }
     }
-    if (u&(2048+4096+8192))
-    {
-        if (u != (0xffffffff | 0))
-        {
-            if (u&(2048+4096)) { patchstatusbar(231,179,265,197); }
-            else { patchstatusbar(250,190,261,195); }
+    if (u & (2048 + 4096 + 8192)) {
+        if (u != (0xffffffff | 0)) {
+            if (u & (2048 + 4096)) { patchstatusbar(231, 179, 265, 197); }
+            else { patchstatusbar(250, 190, 261, 195); }
         }
-        if (p.inven_icon)
-        {
+        if (p.inven_icon) {
             o = 0; permbit = 128;
 
-            if (u&(2048+4096))
-            {
-                switch(p.inven_icon)
-                {
+            if (u & (2048 + 4096)) {
+                switch (p.inven_icon) {
                     case 1: i = FIRSTAID_ICON; break;
                     case 2: i = STEROIDS_ICON; break;
                     case 3: i = HOLODUKE_ICON; break;
@@ -1457,35 +1364,31 @@ function coolgaugetext(snum) {
                     case 6: i = AIRTANK_ICON; break;
                     case 7: i = BOOT_ICON; break;
                 }
-                rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
-                minitext(292-30-o,190,"%",6,10+16+permbit);
-                if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
+                rotateSprite((231 - o) << 16, (200 - 21) << 16, 65536, 0, i, 0, 0, 10 + 16 + permbit, 0, 0, xdim - 1, ydim - 1);
+                minitext(292 - 30 - o, 190, "%", 6, 10 + 16 + permbit);
+                if (p.inven_icon >= 6) minitext(284 - 35 - o, 180, "AUTO", 2, 10 + 16 + permbit);
             }
-            if (u&(2048+4096))
-            {
-                switch(p.inven_icon)
-                {
+            if (u & (2048 + 4096)) {
+                switch (p.inven_icon) {
                     case 3: j = p.holoduke_on; break;
                     case 4: j = p.jetpack_on; break;
                     case 5: j = p.heat_on; break;
                     default: j = 0x80000000 | 0;
                 }
-                if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-                else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+                if (j > 0) minitext(288 - 30 - o, 180, "ON", 0, 10 + 16 + permbit);
+                else if (j != (0x80000000 | 0)) minitext(284 - 30 - o, 180, "OFF", 2, 10 + 16 + permbit);
             }
-            if (u&8192)
-            {
-                switch(p.inven_icon)
-                {
+            if (u & 8192) {
+                switch (p.inven_icon) {
                     case 1: i = p.firstaid_amount; break;
-                    case 2: i = ((p.steroids_amount+3)>>2); break;
-                    case 3: i = ((p.holoduke_amount+15)/24); break;
-                    case 4: i = ((p.jetpack_amount+15)>>4); break;
-                    case 5: i = p.heat_amount/12; break;
-                    case 6: i = ((p.scuba_amount+63)>>6); break;
-                    case 7: i = (p.boot_amount>>1); break;
+                    case 2: i = ((p.steroids_amount + 3) >> 2); break;
+                    case 3: i = ((p.holoduke_amount + 15) / 24); break;
+                    case 4: i = ((p.jetpack_amount + 15) >> 4); break;
+                    case 5: i = p.heat_amount / 12; break;
+                    case 6: i = ((p.scuba_amount + 63) >> 6); break;
+                    case 7: i = (p.boot_amount >> 1); break;
                 }
-                invennum(284-30-o,200-6,i,0,10+permbit);
+                invennum(284 - 30 - o, 200 - 6, i, 0, 10 + permbit);
             }
         }
     }
@@ -1494,133 +1397,128 @@ function coolgaugetext(snum) {
 //var AVERAGEFRAMES = 16;
 //static int32_t frameval[AVERAGEFRAMES], framecnt = 0;
 
-function tics(offx, offy, color)
-{
+function tics(offx, offy, color) {
     console.warn("todo!")
-	//int32_t i;
-	//char  fps[512], mapname[512];
-	//int32_t currentFps;
-	//static int32_t fpsAvg = 0, savedFps = 0;
-	//static boolean toggle = true;
-	//char text[512];
+    //int32_t i;
+    //char  fps[512], mapname[512];
+    //int32_t currentFps;
+    //static int32_t fpsAvg = 0, savedFps = 0;
+    //static boolean toggle = true;
+    //char text[512];
 
-	//strcpy(mapname,boardfilename);
-	//for(i=0;i<512;i++)
-	//	if(mapname[i]=='.')
-	//		mapname[i]=0;
+    //strcpy(mapname,boardfilename);
+    //for(i=0;i<512;i++)
+    //	if(mapname[i]=='.')
+    //		mapname[i]=0;
 
-	//if( mapname[0] != 0 && ud.m_level_number == 7 && ud.m_volume_number == 0 )
-	//	sprintf(text, "%s", mapname);
-	//else
-	//	//sprintf(tempbuf, "%s", level_names[ud.volume_number*11 + ud.level_number]);
-	//	sprintf(text, "e%dl%d", ud.volume_number+1, ud.level_number+1);
+    //if( mapname[0] != 0 && ud.m_level_number == 7 && ud.m_volume_number == 0 )
+    //	sprintf(text, "%s", mapname);
+    //else
+    //	//sprintf(tempbuf, "%s", level_names[ud.volume_number*11 + ud.level_number]);
+    //	sprintf(text, "e%dl%d", ud.volume_number+1, ud.level_number+1);
 
 
-	//i = totalclock;
+    //i = totalclock;
 
-	//if (i != frameval[framecnt])
-	//{
-	//	currentFps = (TICRATE*AVERAGEFRAMES)/(i-frameval[framecnt]);
-	//	fpsAvg = ((fpsAvg<<3)+(fpsAvg<<2) + (currentFps<<2))>>4;
+    //if (i != frameval[framecnt])
+    //{
+    //	currentFps = (TICRATE*AVERAGEFRAMES)/(i-frameval[framecnt]);
+    //	fpsAvg = ((fpsAvg<<3)+(fpsAvg<<2) + (currentFps<<2))>>4;
 
-	//	frameval[framecnt] = i;
-	//}
+    //	frameval[framecnt] = i;
+    //}
 
-	//framecnt = ((framecnt+1)&(AVERAGEFRAMES-1));
+    //framecnt = ((framecnt+1)&(AVERAGEFRAMES-1));
 
-	//// refresh screen and update visible FPS. This is to allow a refresh
-	//// of the screen when the screensize > 4 w/o compromising the FPS.
-	//if(ud.screen_size>8)
-	//	if ((totalclock%64) < 32)
-	//	{
-	//		if(toggle)
-	//		{
-	//			vscrn();
-	//			savedFps = fpsAvg;
-	//		}
-	//		toggle = false;
-	//	}
-	//	else
-	//	{
-	//		toggle = true;
-	//	}
-	//else
-	//	savedFps = fpsAvg;
+    //// refresh screen and update visible FPS. This is to allow a refresh
+    //// of the screen when the screensize > 4 w/o compromising the FPS.
+    //if(ud.screen_size>8)
+    //	if ((totalclock%64) < 32)
+    //	{
+    //		if(toggle)
+    //		{
+    //			vscrn();
+    //			savedFps = fpsAvg;
+    //		}
+    //		toggle = false;
+    //	}
+    //	else
+    //	{
+    //		toggle = true;
+    //	}
+    //else
+    //	savedFps = fpsAvg;
 
-	//sprintf(fps," %d", savedFps);
-	//strcat(text, fps);
+    //sprintf(fps," %d", savedFps);
+    //strcat(text, fps);
 
-	//minitext(offx,offy,text,color,2+8+16+128);
+    //minitext(offx,offy,text,color,2+8+16+128);
 }
 //2238
 
-function coords( snum)
-{
-	var x = 200, y = 0;
+function coords(snum) {
+    var x = 200, y = 0;
     var text;
-	// x = 250 is too much on the right and
-	// will make the text going out of the screen 
-	// if screen <= (320x200)
-	// This will also *write beyond the video 
-	// buffer limit* and will crash the game.
+    // x = 250 is too much on the right and
+    // will make the text going out of the screen 
+    // if screen <= (320x200)
+    // This will also *write beyond the video 
+    // buffer limit* and will crash the game.
 
-	if(ud.coop != 1)
-	{
-		if(ud.multimode > 1 && ud.multimode < 5)
-			y = 8;
-		else if(ud.multimode > 4)
-			y = 16;
-	}
+    if (ud.coop != 1) {
+        if (ud.multimode > 1 && ud.multimode < 5)
+            y = 8;
+        else if (ud.multimode > 4)
+            y = 16;
+    }
 
     text = "X= " + ps[snum].posx;
-	printext256(x,y,31,-1,text,1);
-	text = "Y= " + ps[snum].posy;
-	printext256(x,y+7,31,-1,text,1);
-	text = "Z= " + ps[snum].posz;
-	printext256(x,y+14,31,-1,text,1);
-	text = "A= " + ps[snum].ang;
-	printext256(x,y+21,31,-1,text,1);
-	text = "ZV= " + ps[snum].poszv;
-	printext256(x,y+28,31,-1,text,1);
-	text = "OG= " + ps[snum].on_ground;
-	printext256(x,y+35,31,-1,text,1);
-	text = "AM= " + ps[snum].ammo_amount[GROW_WEAPON];
-	printext256(x,y+43,31,-1,text,1);
-	text = "LFW= " + ps[snum].last_full_weapon;
-	printext256(x,y+50,31,-1,text,1);
-	text = "SECTL= " + sector[ps[snum].cursectnum].lotag;
-	printext256(x,y+57,31,-1,text,1);
-	text = "SEED= " + randomseed;
-	printext256(x,y+64,31,-1,text,1);
-	text = "THOLD= " + ps[snum].transporter_hold;
-	printext256(x,y+64+7,31,-1,text,1);
+    printext256(x, y, 31, -1, text, 1);
+    text = "Y= " + ps[snum].posy;
+    printext256(x, y + 7, 31, -1, text, 1);
+    text = "Z= " + ps[snum].posz;
+    printext256(x, y + 14, 31, -1, text, 1);
+    text = "A= " + ps[snum].ang;
+    printext256(x, y + 21, 31, -1, text, 1);
+    text = "ZV= " + ps[snum].poszv;
+    printext256(x, y + 28, 31, -1, text, 1);
+    text = "OG= " + ps[snum].on_ground;
+    printext256(x, y + 35, 31, -1, text, 1);
+    text = "AM= " + ps[snum].ammo_amount[GROW_WEAPON];
+    printext256(x, y + 43, 31, -1, text, 1);
+    text = "LFW= " + ps[snum].last_full_weapon;
+    printext256(x, y + 50, 31, -1, text, 1);
+    text = "SECTL= " + sector[ps[snum].cursectnum].lotag;
+    printext256(x, y + 57, 31, -1, text, 1);
+    text = "SEED= " + randomseed;
+    printext256(x, y + 64, 31, -1, text, 1);
+    text = "THOLD= " + ps[snum].transporter_hold;
+    printext256(x, y + 64 + 7, 31, -1, text, 1);
 }
 
 //2279
 function operatefta() {
     var i, j, k;
-    if(ud.screen_size > 0) j = 200-45; else j = 200-8;
-    quotebot = Math.min(quotebot,j);
+    if (ud.screen_size > 0) j = 200 - 45; else j = 200 - 8;
+    quotebot = Math.min(quotebot, j);
     quotebotgoal = Math.min(quotebotgoal, j);
-    if(ps[myconnectindex].gm&MODE_TYPE) j -= 8;
+    if (ps[myconnectindex].gm & MODE_TYPE) j -= 8;
     quotebotgoal = j; j = quotebot;
-    for(i=0;i<MAXUSERQUOTES;i++)
-    {
+    for (i = 0; i < MAXUSERQUOTES; i++) {
         k = user_quote_time[i]; if (k <= 0) break;
 
         if (k > 4)
-            gametext(320>>1,j,user_quote[i],0,2+8+16);
-        else if (k > 2) gametext(320>>1,j,user_quote[i],0,2+8+16+1);
-        else gametext(320>>1,j,user_quote[i],0,2+8+16+1+32);
+            gametext(320 >> 1, j, user_quote[i], 0, 2 + 8 + 16);
+        else if (k > 2) gametext(320 >> 1, j, user_quote[i], 0, 2 + 8 + 16 + 1);
+        else gametext(320 >> 1, j, user_quote[i], 0, 2 + 8 + 16 + 1 + 32);
         j -= 8;
     }
 
     if (ps[screenpeek].fta <= 1) return;
 
-    if (ud.coop != 1 && ud.screen_size > 0 && ud.multimode > 1)
-    {
+    if (ud.coop != 1 && ud.screen_size > 0 && ud.multimode > 1) {
         j = 0; k = 8;
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             if (i > j) j = i;
 
         if (j >= 4 && j <= 8) k += 8;
@@ -1629,11 +1527,9 @@ function operatefta() {
     }
     else k = 0;
 
-    if (ps[screenpeek].ftq == 115 || ps[screenpeek].ftq == 116)
-    {
+    if (ps[screenpeek].ftq == 115 || ps[screenpeek].ftq == 116) {
         k = quotebot;
-        for(i=0;i<MAXUSERQUOTES;i++)
-        {
+        for (i = 0; i < MAXUSERQUOTES; i++) {
             if (user_quote_time[i] <= 0) break;
             k -= 8;
         }
@@ -1642,11 +1538,11 @@ function operatefta() {
 
     j = ps[screenpeek].fta;
     if (j > 4)
-        gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16);
+        gametext(320 >> 1, k, fta_quotes[ps[screenpeek].ftq], 0, 2 + 8 + 16);
     else
-        if (j > 2) gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16+1);
+        if (j > 2) gametext(320 >> 1, k, fta_quotes[ps[screenpeek].ftq], 0, 2 + 8 + 16 + 1);
         else
-            gametext(320>>1,k,fta_quotes[ps[screenpeek].ftq],0,2+8+16+1+32);
+            gametext(320 >> 1, k, fta_quotes[ps[screenpeek].ftq], 0, 2 + 8 + 16 + 1 + 32);
 }
 
 //2333
@@ -1678,244 +1574,220 @@ Game.cheatKeys = function (snum) {
     sb_snum = sync[snum].bits;
     p = ps[snum];
 
-    if(p.cheat_phase == 1) return;
+    if (p.cheat_phase == 1) return;
 
     i = p.aim_mode;
-    p.aim_mode = (sb_snum>>23)&1;
-    if(p.aim_mode < i)
+    p.aim_mode = (sb_snum >> 23) & 1;
+    if (p.aim_mode < i)
         p.return_to_center = 9;
 
-    if( (sb_snum&(1<<22)) && p.quick_kick == 0)
-        if( !PLUTOPAK || p.curr_weapon != KNEE_WEAPON || p.kickback_pic == 0 )
+    if ((sb_snum & (1 << 22)) && p.quick_kick == 0)
+        if (!PLUTOPAK || p.curr_weapon != KNEE_WEAPON || p.kickback_pic == 0)
             // FIX_00066: Removed the QuickKick restrictions for 1.3/1.3d (like 1.3d dos version behavior)
         {
             p.quick_kick = 14;
-            FTA(80,p,0);
+            FTA(80, p, 0);
         }
-		
+
     // FIX_00040: Preventing multi keypress locks
-    playing_old_demo =	ud.playing_demo_rev == BYTEVERSION_27     ||
-						ud.playing_demo_rev == BYTEVERSION_28     || 
-						ud.playing_demo_rev == BYTEVERSION_116    || 
+    playing_old_demo = ud.playing_demo_rev == BYTEVERSION_27 ||
+						ud.playing_demo_rev == BYTEVERSION_28 ||
+						ud.playing_demo_rev == BYTEVERSION_116 ||
 						ud.playing_demo_rev == BYTEVERSION_117;
 
-    if(!playing_old_demo)
-    {
+    if (!playing_old_demo) {
         // A more efficient toggle (make old demos going oos):
-        j = sb_snum & ((15<<8)|(1<<12)|(1<<15)|(1<<16)|(1<<22)|(1<<19)|(1<<20)|(1<<21)|(1<<24)|
-						(1<<25)|(1<<27)|(1<<28)|(1<<29)|(1<<30)|(1<<31));
+        j = sb_snum & ((15 << 8) | (1 << 12) | (1 << 15) | (1 << 16) | (1 << 22) | (1 << 19) | (1 << 20) | (1 << 21) | (1 << 24) |
+						(1 << 25) | (1 << 27) | (1 << 28) | (1 << 29) | (1 << 30) | (1 << 31));
         sb_snum = j & ~p.interface_toggle_flag;
         p.interface_toggle_flag = j;
     }
 
-    if( playing_old_demo && !(sb_snum&((15<<8)|(1<<12)|(1<<15)|(1<<16)|(1<<22)|(1<<19)|(1<<20)|(1<<21)|(1<<24)|(1<<25)|(1<<27)|(1<<28)|(1<<29)|(1<<30)|(1<<31))) )
+    if (playing_old_demo && !(sb_snum & ((15 << 8) | (1 << 12) | (1 << 15) | (1 << 16) | (1 << 22) | (1 << 19) | (1 << 20) | (1 << 21) | (1 << 24) | (1 << 25) | (1 << 27) | (1 << 28) | (1 << 29) | (1 << 30) | (1 << 31))))
         p.interface_toggle_flag = 0;
-    else if(((p.interface_toggle_flag == 0 && ( sb_snum&(1<<17) ) == 0) && playing_old_demo) ||
-		((sb_snum && ( sync[snum].bits&(1<<17) ) == 0) && !playing_old_demo))
-    {
-        if(playing_old_demo)
+    else if (((p.interface_toggle_flag == 0 && (sb_snum & (1 << 17)) == 0) && playing_old_demo) ||
+		((sb_snum && (sync[snum].bits & (1 << 17)) == 0) && !playing_old_demo)) {
+        if (playing_old_demo)
             p.interface_toggle_flag = 1;
 
-        if( sb_snum&(1<<21) )
-        {
-            KB.clearKeyDown( sc_Pause );
+        if (sb_snum & (1 << 21)) {
+            KB.clearKeyDown(sc_Pause);
             ud.pause_on = !ud.pause_on;
-            if( ud.pause_on == 1 && sb_snum&(1<<5) ) ud.pause_on = 2;
-            if(ud.pause_on)
-            {
+            if (ud.pause_on == 1 && sb_snum & (1 << 5)) ud.pause_on = 2;
+            if (ud.pause_on) {
                 MUSIC_Pause();
                 FX.stopAllSounds();
                 clearsoundlocks();
             }
-            else
-            {
-                if(MusicToggle) MUSIC_Continue();
+            else {
+                if (MusicToggle) MUSIC_Continue();
                 pub = NUMPAGES;
                 pus = NUMPAGES;
             }
         }
 
-        if(ud.pause_on) return;
-        
-        if(sprite[p.i].extra <= 0) return;
+        if (ud.pause_on) return;
 
-        if( sb_snum&(1<<30) && p.newowner == -1 )
-        {
-            switch(p.inven_icon)
-            {
-                case 4: sb_snum |= (1<<25);break;
-                case 3: sb_snum |= (1<<24);break;
-                case 5: sb_snum |= (1<<15);break;
-                case 1: sb_snum |= (1<<16);break;
-                case 2: sb_snum |= (1<<12);break;
+        if (sprite[p.i].extra <= 0) return;
+
+        if (sb_snum & (1 << 30) && p.newowner == -1) {
+            switch (p.inven_icon) {
+                case 4: sb_snum |= (1 << 25); break;
+                case 3: sb_snum |= (1 << 24); break;
+                case 5: sb_snum |= (1 << 15); break;
+                case 1: sb_snum |= (1 << 16); break;
+                case 2: sb_snum |= (1 << 12); break;
             }
         }
 
-        if( sb_snum&(1<<15) && p.heat_amount > 0 )
-        {
+        if (sb_snum & (1 << 15) && p.heat_amount > 0) {
             p.heat_on = !p.heat_on;
             setpal(p);
             p.inven_icon = 5;
-            spritesound(NITEVISION_ONOFF,p.i);
-            FTA(106+(!p.heat_on),p,0);
+            spritesound(NITEVISION_ONOFF, p.i);
+            FTA(106 + (!p.heat_on), p, 0);
         }
 
-        if( (sb_snum&(1<<12)) )
-        {
-            if(p.steroids_amount == 400 )
-            {
+        if ((sb_snum & (1 << 12))) {
+            if (p.steroids_amount == 400) {
                 p.steroids_amount--;
-                spritesound(DUKE_TAKEPILLS,p.i);
+                spritesound(DUKE_TAKEPILLS, p.i);
                 p.inven_icon = 2;
-                FTA(12,p,0);
+                FTA(12, p, 0);
             }
             return;
         }
 
-        if(p.newowner == -1)
-            if( sb_snum&(1<<20) || sb_snum&(1<<27) || p.refresh_inventory)
-            {
-                p.invdisptime = 26*2;
+        if (p.newowner == -1)
+            if (sb_snum & (1 << 20) || sb_snum & (1 << 27) || p.refresh_inventory) {
+                p.invdisptime = 26 * 2;
 
-                if( sb_snum&(1<<27) ) k = 1;
+                if (sb_snum & (1 << 27)) k = 1;
                 else k = 0;
 
-                if(p.refresh_inventory) p.refresh_inventory = 0;
+                if (p.refresh_inventory) p.refresh_inventory = 0;
                 dainv = p.inven_icon;
 
                 i = 0;
                 CHECKINV1:
-                    while(true) {
+                    while (true) {
 
-                        if(i < 9)
-                        {
+                        if (i < 9) {
                             i++;
 
-                            switch(dainv)
-                            {
+                            switch (dainv) {
                                 case 4:
-                                    if(p.jetpack_amount > 0 && i > 1)
+                                    if (p.jetpack_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 5;
+                                    if (k) dainv = 5;
                                     else dainv = 3;
                                     continue CHECKINV1;
                                 case 6:
-                                    if(p.scuba_amount > 0 && i > 1)
+                                    if (p.scuba_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 7;
+                                    if (k) dainv = 7;
                                     else dainv = 5;
                                     continue CHECKINV1;
                                 case 2:
-                                    if(p.steroids_amount > 0 && i > 1)
+                                    if (p.steroids_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 3;
+                                    if (k) dainv = 3;
                                     else dainv = 1;
                                     continue CHECKINV1;
                                 case 3:
-                                    if(p.holoduke_amount > 0 && i > 1)
+                                    if (p.holoduke_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 4;
+                                    if (k) dainv = 4;
                                     else dainv = 2;
                                     continue CHECKINV1;
                                 case 0:
                                 case 1:
-                                    if(p.firstaid_amount > 0 && i > 1)
+                                    if (p.firstaid_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 2;
+                                    if (k) dainv = 2;
                                     else dainv = 7;
                                     continue CHECKINV1;
                                 case 5:
-                                    if(p.heat_amount > 0 && i > 1)
+                                    if (p.heat_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 6;
+                                    if (k) dainv = 6;
                                     else dainv = 4;
                                     continue CHECKINV1;
                                 case 7:
-                                    if(p.boot_amount > 0 && i > 1)
+                                    if (p.boot_amount > 0 && i > 1)
                                         break;
-                                    if(k) dainv = 1;
+                                    if (k) dainv = 1;
                                     else dainv = 6;
                                     continue CHECKINV1;
                             }
                         }
                         else dainv = 0;
-                        
+
                         break;
                     }
                 p.inven_icon = dainv;
 
-                switch(dainv)
-                {
-                    case 1: FTA(3,p,0);break;
-                    case 2: FTA(90,p,0);break;
-                    case 3: FTA(91,p,0);break;
-                    case 4: FTA(88,p,0);break;
-                    case 5: FTA(101,p,0);break;
-                    case 6: FTA(89,p,0);break;
-                    case 7: FTA(6,p,0);break;
+                switch (dainv) {
+                    case 1: FTA(3, p, 0); break;
+                    case 2: FTA(90, p, 0); break;
+                    case 3: FTA(91, p, 0); break;
+                    case 4: FTA(88, p, 0); break;
+                    case 5: FTA(101, p, 0); break;
+                    case 6: FTA(89, p, 0); break;
+                    case 7: FTA(6, p, 0); break;
                 }
             }
 
-        j = ( (sb_snum&(15<<8))>>8 ) - 1;
+        j = ((sb_snum & (15 << 8)) >> 8) - 1;
 
-        if( j > 0 && p.kickback_pic > 0)
+        if (j > 0 && p.kickback_pic > 0)
             p.wantweaponfire = j;
 
-        if(p.last_pissed_time <= (26*218) && p.show_empty_weapon == 0 && p.kickback_pic == 0 && p.quick_kick == 0 && sprite[p.i].xrepeat > 32 && p.access_incs == 0 && p.knee_incs == 0 )
-        {
-            if(  ( p.weapon_pos == 0 || ( p.holster_weapon && p.weapon_pos == -9 ) ) )
-            {
-                if(j == 10 || j == 11)
-                {
+        if (p.last_pissed_time <= (26 * 218) && p.show_empty_weapon == 0 && p.kickback_pic == 0 && p.quick_kick == 0 && sprite[p.i].xrepeat > 32 && p.access_incs == 0 && p.knee_incs == 0) {
+            if ((p.weapon_pos == 0 || (p.holster_weapon && p.weapon_pos == -9))) {
+                if (j == 10 || j == 11) {
                     k = p.curr_weapon;
-                    j = ( j == 10 ? -1 : 1 );
+                    j = (j == 10 ? -1 : 1);
                     i = 0;
 
-                    while( ( k >= 0 && k < 10 ) || ( k == GROW_WEAPON && (p.subweapon&(1<<GROW_WEAPON) ) ) )
-                    {
-                        if(k == GROW_WEAPON)
-                        {
-                            if(j == -1)
+                    while ((k >= 0 && k < 10) || (k == GROW_WEAPON && (p.subweapon & (1 << GROW_WEAPON)))) {
+                        if (k == GROW_WEAPON) {
+                            if (j == -1)
                                 k = 5;
                             else k = 7;
 
                         }
-                        else
-                        {
+                        else {
                             k += j;
-                            if( k == 6 && p.subweapon&(1<<GROW_WEAPON) )
+                            if (k == 6 && p.subweapon & (1 << GROW_WEAPON))
                                 k = GROW_WEAPON;
                         }
 
-                        if(k == -1) k = 9;
-                        else if(k == 10) k = 0;
+                        if (k == -1) k = 9;
+                        else if (k == 10) k = 0;
 
-                        if( p.gotweapon[k] && p.ammo_amount[k] > 0 )
-                        {
-                            if( k == SHRINKER_WEAPON && p.subweapon&(1<<GROW_WEAPON) )
+                        if (p.gotweapon[k] && p.ammo_amount[k] > 0) {
+                            if (k == SHRINKER_WEAPON && p.subweapon & (1 << GROW_WEAPON))
                                 k = GROW_WEAPON;
                             j = k;
                             break;
                         }
                         else
-                            if(k == GROW_WEAPON && p.ammo_amount[GROW_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[SHRINKER_WEAPON] > 0)
-                            {
+                            if (k == GROW_WEAPON && p.ammo_amount[GROW_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[SHRINKER_WEAPON] > 0) {
                                 j = SHRINKER_WEAPON;
-                                p.subweapon &= ~(1<<GROW_WEAPON);
+                                p.subweapon &= ~(1 << GROW_WEAPON);
                                 break;
                             }
                             else
-                                if(k == SHRINKER_WEAPON && p.ammo_amount[SHRINKER_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[GROW_WEAPON] > 0)
-                                {
+                                if (k == SHRINKER_WEAPON && p.ammo_amount[SHRINKER_WEAPON] == 0 && p.gotweapon[SHRINKER_WEAPON] && p.ammo_amount[GROW_WEAPON] > 0) {
                                     j = GROW_WEAPON;
-                                    p.subweapon |= (1<<GROW_WEAPON);
+                                    p.subweapon |= (1 << GROW_WEAPON);
                                     break;
                                 }
 
                         i++;
-                        if(i == 10)
-                        {
-                            addweapon( p, KNEE_WEAPON );
+                        if (i == 10) {
+                            addweapon(p, KNEE_WEAPON);
                             break;
                         }
                     }
@@ -1924,13 +1796,10 @@ Game.cheatKeys = function (snum) {
                 k = -1;
 
 
-                if( j == HANDBOMB_WEAPON && p.ammo_amount[HANDBOMB_WEAPON] == 0 )
-                {
+                if (j == HANDBOMB_WEAPON && p.ammo_amount[HANDBOMB_WEAPON] == 0) {
                     k = headspritestat[1];
-                    while(k >= 0)
-                    {
-                        if( sprite[k].picnum == HEAVYHBOMB && sprite[k].owner == p.i )
-                        {
+                    while (k >= 0) {
+                        if (sprite[k].picnum == HEAVYHBOMB && sprite[k].owner == p.i) {
                             p.gotweapon[HANDBOMB_WEAPON] = 1;
                             j = HANDREMOTE_WEAPON;
                             break;
@@ -1939,99 +1808,85 @@ Game.cheatKeys = function (snum) {
                     }
                 }
 
-                if(j == SHRINKER_WEAPON)
-                {
-                    if(screenpeek == snum) pus = NUMPAGES;
+                if (j == SHRINKER_WEAPON) {
+                    if (screenpeek == snum) pus = NUMPAGES;
 
-                    if( p.curr_weapon != GROW_WEAPON && p.curr_weapon != SHRINKER_WEAPON )
-                    {
-                        if( p.ammo_amount[GROW_WEAPON] > 0 )
-                        {
-                            if( (p.subweapon&(1<<GROW_WEAPON)) == (1<<GROW_WEAPON) )
+                    if (p.curr_weapon != GROW_WEAPON && p.curr_weapon != SHRINKER_WEAPON) {
+                        if (p.ammo_amount[GROW_WEAPON] > 0) {
+                            if ((p.subweapon & (1 << GROW_WEAPON)) == (1 << GROW_WEAPON))
                                 j = GROW_WEAPON;
-                            else if(p.ammo_amount[SHRINKER_WEAPON] == 0)
-                            {
+                            else if (p.ammo_amount[SHRINKER_WEAPON] == 0) {
                                 j = GROW_WEAPON;
-                                p.subweapon |= (1<<GROW_WEAPON);
+                                p.subweapon |= (1 << GROW_WEAPON);
                             }
                         }
-                        else if( p.ammo_amount[SHRINKER_WEAPON] > 0 )
-                            p.subweapon &= ~(1<<GROW_WEAPON);
+                        else if (p.ammo_amount[SHRINKER_WEAPON] > 0)
+                            p.subweapon &= ~(1 << GROW_WEAPON);
                     }
-                    else if( p.curr_weapon == SHRINKER_WEAPON )
-                    {
-                        p.subweapon |= (1<<GROW_WEAPON);
+                    else if (p.curr_weapon == SHRINKER_WEAPON) {
+                        p.subweapon |= (1 << GROW_WEAPON);
                         j = GROW_WEAPON;
                     }
                     else
-                        p.subweapon &= ~(1<<GROW_WEAPON);
+                        p.subweapon &= ~(1 << GROW_WEAPON);
                 }
 
-                if(p.holster_weapon)
-                {
-                    sb_snum |= 1<<19;
+                if (p.holster_weapon) {
+                    sb_snum |= 1 << 19;
                     p.weapon_pos = -9;
                 }
-                else if( p.gotweapon[j] && p.curr_weapon != j ) switch(j)
-                {
+                else if (p.gotweapon[j] && p.curr_weapon != j) switch (j) {
                     case KNEE_WEAPON:
-                        addweapon( p, KNEE_WEAPON );
+                        addweapon(p, KNEE_WEAPON);
                         break;
                     case PISTOL_WEAPON:
-                        if ( p.ammo_amount[PISTOL_WEAPON] == 0 )
-                            if(p.show_empty_weapon == 0)
-                            {
+                        if (p.ammo_amount[PISTOL_WEAPON] == 0)
+                            if (p.show_empty_weapon == 0) {
                                 p.last_full_weapon = p.curr_weapon;
                                 p.show_empty_weapon = 32;
                             }
-                        addweapon( p, PISTOL_WEAPON );
+                        addweapon(p, PISTOL_WEAPON);
                         break;
                     case SHOTGUN_WEAPON:
-                        if( p.ammo_amount[SHOTGUN_WEAPON] == 0 && p.show_empty_weapon == 0)
-                        {
+                        if (p.ammo_amount[SHOTGUN_WEAPON] == 0 && p.show_empty_weapon == 0) {
                             p.last_full_weapon = p.curr_weapon;
                             p.show_empty_weapon = 32;
                         }
-                        addweapon( p, SHOTGUN_WEAPON);
+                        addweapon(p, SHOTGUN_WEAPON);
                         break;
                     case CHAINGUN_WEAPON:
-                        if( p.ammo_amount[CHAINGUN_WEAPON] == 0 && p.show_empty_weapon == 0)
-                        {
+                        if (p.ammo_amount[CHAINGUN_WEAPON] == 0 && p.show_empty_weapon == 0) {
                             p.last_full_weapon = p.curr_weapon;
                             p.show_empty_weapon = 32;
                         }
-                        addweapon( p, CHAINGUN_WEAPON);
+                        addweapon(p, CHAINGUN_WEAPON);
                         break;
                     case RPG_WEAPON:
-                        if( p.ammo_amount[RPG_WEAPON] == 0 )
-                            if(p.show_empty_weapon == 0)
-                            {
+                        if (p.ammo_amount[RPG_WEAPON] == 0)
+                            if (p.show_empty_weapon == 0) {
                                 p.last_full_weapon = p.curr_weapon;
                                 p.show_empty_weapon = 32;
                             }
-                        addweapon( p, RPG_WEAPON );
+                        addweapon(p, RPG_WEAPON);
                         break;
                     case DEVISTATOR_WEAPON:
-                        if( p.ammo_amount[DEVISTATOR_WEAPON] == 0 && p.show_empty_weapon == 0 )
-                        {
+                        if (p.ammo_amount[DEVISTATOR_WEAPON] == 0 && p.show_empty_weapon == 0) {
                             p.last_full_weapon = p.curr_weapon;
                             p.show_empty_weapon = 32;
                         }
-                        addweapon( p, DEVISTATOR_WEAPON );
+                        addweapon(p, DEVISTATOR_WEAPON);
                         break;
                     case FREEZE_WEAPON:
-                        if( p.ammo_amount[FREEZE_WEAPON] == 0 && p.show_empty_weapon == 0)
-                        {
+                        if (p.ammo_amount[FREEZE_WEAPON] == 0 && p.show_empty_weapon == 0) {
                             p.last_full_weapon = p.curr_weapon;
                             p.show_empty_weapon = 32;
                         }
-                        addweapon( p, FREEZE_WEAPON );
+                        addweapon(p, FREEZE_WEAPON);
                         break;
                     case GROW_WEAPON:
                     case SHRINKER_WEAPON:
 
-                        if( p.ammo_amount[j] == 0 && p.show_empty_weapon == 0)
-                        {
+                        if (p.ammo_amount[j] == 0 && p.show_empty_weapon == 0) {
                             p.show_empty_weapon = 32;
                             p.last_full_weapon = p.curr_weapon;
                         }
@@ -2039,7 +1894,7 @@ Game.cheatKeys = function (snum) {
                         addweapon(p, j);
                         break;
                     case HANDREMOTE_WEAPON:
-                        if(k >= 0) // Found in list of [1]'s
+                        if (k >= 0) // Found in list of [1]'s
                         {
                             p.curr_weapon = HANDREMOTE_WEAPON;
                             p.last_weapon = -1;
@@ -2047,122 +1902,105 @@ Game.cheatKeys = function (snum) {
                         }
                         break;
                     case HANDBOMB_WEAPON:
-                        if( p.ammo_amount[HANDBOMB_WEAPON] > 0 && p.gotweapon[HANDBOMB_WEAPON] )
-                            addweapon( p, HANDBOMB_WEAPON );
+                        if (p.ammo_amount[HANDBOMB_WEAPON] > 0 && p.gotweapon[HANDBOMB_WEAPON])
+                            addweapon(p, HANDBOMB_WEAPON);
                         break;
                     case TRIPBOMB_WEAPON:
-                        if( p.ammo_amount[TRIPBOMB_WEAPON] > 0 && p.gotweapon[TRIPBOMB_WEAPON] )
-                            addweapon( p, TRIPBOMB_WEAPON );
+                        if (p.ammo_amount[TRIPBOMB_WEAPON] > 0 && p.gotweapon[TRIPBOMB_WEAPON])
+                            addweapon(p, TRIPBOMB_WEAPON);
                         break;
                 }
             }
 
-            if( sb_snum&(1<<19) )
-            {
-                if( p.curr_weapon > KNEE_WEAPON )
-                {
-                    if(p.holster_weapon == 0 && p.weapon_pos == 0)
-                    {
+            if (sb_snum & (1 << 19)) {
+                if (p.curr_weapon > KNEE_WEAPON) {
+                    if (p.holster_weapon == 0 && p.weapon_pos == 0) {
                         p.holster_weapon = 1;
                         p.weapon_pos = -1;
-                        FTA(73,p,1);
+                        FTA(73, p, 1);
                     }
-                    else if(p.holster_weapon == 1 && p.weapon_pos == -9)
-                    {
+                    else if (p.holster_weapon == 1 && p.weapon_pos == -9) {
                         p.holster_weapon = 0;
                         p.weapon_pos = 10;
-                        FTA(74,p,1);
+                        FTA(74, p, 1);
                     }
                 }
             }
         }
 
-        if( sb_snum&(1<<24) && p.newowner == -1 )
-        {
-            if( p.holoduke_on == -1 )
-            {
+        if (sb_snum & (1 << 24) && p.newowner == -1) {
+            if (p.holoduke_on == -1) {
 
-                if( p.holoduke_amount > 0 )
-                {
+                if (p.holoduke_amount > 0) {
                     p.inven_icon = 3;
 
                     p.holoduke_on = i =
                         EGS(p.cursectnum,
                         p.posx,
                         p.posy,
-                        p.posz+(30<<8),APLAYER,-64,0,0,p.ang,0,0,-1,10);
+                        p.posz + (30 << 8), APLAYER, -64, 0, 0, p.ang, 0, 0, -1, 10);
                     hittype[i].temp_data[3] = hittype[i].temp_data[4] = 0;
                     sprite[i].yvel = snum;
                     sprite[i].extra = 0;
-                    FTA(47,p,0);
+                    FTA(47, p, 0);
                 }
-                else FTA(49,p,0);
-                spritesound(TELEPORTER,p.holoduke_on);
+                else FTA(49, p, 0);
+                spritesound(TELEPORTER, p.holoduke_on);
 
             }
-            else
-            {
-                spritesound(TELEPORTER,p.holoduke_on);
+            else {
+                spritesound(TELEPORTER, p.holoduke_on);
                 p.holoduke_on = -1;
-                FTA(48,p,0);
+                FTA(48, p, 0);
             }
         }
 
-        if( sb_snum&(1<<16) )
-        {
-            if( p.firstaid_amount > 0 && sprite[p.i].extra < max_player_health )
-            {
-                j = max_player_health-sprite[p.i].extra;
+        if (sb_snum & (1 << 16)) {
+            if (p.firstaid_amount > 0 && sprite[p.i].extra < max_player_health) {
+                j = max_player_health - sprite[p.i].extra;
 
-                if(p.firstaid_amount > j)
-                {
+                if (p.firstaid_amount > j) {
                     p.firstaid_amount -= j;
                     sprite[p.i].extra = max_player_health;
                     p.inven_icon = 1;
                 }
-                else
-                {
+                else {
                     sprite[p.i].extra += p.firstaid_amount;
                     p.firstaid_amount = 0;
                     checkavailinven(p);
                 }
-                spritesound(DUKE_USEMEDKIT,p.i);
+                spritesound(DUKE_USEMEDKIT, p.i);
             }
         }
 
-        if( sb_snum&(1<<25) && p.newowner == -1)
-        {
-            if( p.jetpack_amount > 0 )
-            {
+        if (sb_snum & (1 << 25) && p.newowner == -1) {
+            if (p.jetpack_amount > 0) {
                 p.jetpack_on = !p.jetpack_on;
-                if(p.jetpack_on)
-                {
+                if (p.jetpack_on) {
                     p.inven_icon = 4;
-                    if(p.scream_voice > FX_Ok)
-                    {
+                    if (p.scream_voice > FX_Ok) {
                         FX.stopSound(p.scream_voice);
                         testcallback(DUKE_SCREAM);
                         p.scream_voice = FX_Ok;
                     }
 
-                    spritesound(DUKE_JETPACK_ON,p.i);
+                    spritesound(DUKE_JETPACK_ON, p.i);
 
-                    FTA(52,p,0);
+                    FTA(52, p, 0);
                 }
-                else
-                {
+                else {
                     p.hard_landing = 0;
                     p.poszv = 0;
-                    spritesound(DUKE_JETPACK_OFF,p.i);
+                    spritesound(DUKE_JETPACK_OFF, p.i);
                     stopsound(DUKE_JETPACK_IDLE);
                     stopsound(DUKE_JETPACK_ON);
-                    FTA(53,p,0);
+                    FTA(53, p, 0);
                 }
             }
-            else FTA(50,p,0);
+            else FTA(50, p, 0);
         }
 
-        if(sb_snum&(1<<28) && p.one_eighty_count == 0)
+        if (sb_snum & (1 << 28) && p.one_eighty_count == 0)
             p.one_eighty_count = -1024;
     }
 };
@@ -2190,29 +2028,25 @@ function displayrest(smoothratio) {
 
     var pp;
     var wal;
-    var cposx,cposy,cang;
+    var cposx, cposy, cang;
 
     pp = ps[screenpeek];
 
 
-    if(ud.show_help)
-    {
-        switch(ud.show_help)
-        {
+    if (ud.show_help) {
+        switch (ud.show_help) {
             case 1:
-                rotateSprite(0,0,65536,0,TEXTSTORY,0,0,10+16+64, 0,0,xdim-1,ydim-1);
+                rotateSprite(0, 0, 65536, 0, TEXTSTORY, 0, 0, 10 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
                 break;
             case 2:
-                rotateSprite(0,0,65536,0,F1HELP,0,0,10+16+64, 0,0,xdim-1,ydim-1);
+                rotateSprite(0, 0, 65536, 0, F1HELP, 0, 0, 10 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
                 break;
         }
 
-        if ( KB.keyPressed(sc_Escape ) )
-        {
+        if (KB.keyPressed(sc_Escape)) {
             KB.clearKeyDown(sc_Escape);
             ud.show_help = 0;
-            if(ud.multimode < 2 && ud.recstat != 2)
-            {
+            if (ud.multimode < 2 && ud.recstat != 2) {
                 ready2send = 1;
                 totalclock = ototalclock;
             }
@@ -2223,90 +2057,78 @@ function displayrest(smoothratio) {
 
     i = pp.cursectnum;
 
-    show2dsector[i>>3] |= (1<<(i&7));
+    show2dsector[i >> 3] |= (1 << (i & 7));
     var walIdx = sector[i].wallptr;
     wal = wall[walIdx];
-    for(j=sector[i].wallnum;j>0;j--,wal = wall[++walIdx]) {
+    for (j = sector[i].wallnum; j > 0; j--, wal = wall[++walIdx]) {
         i = wal.nextsector;
         if (i < 0) continue;
-        if (wal.cstat&0x0071) continue;
-        if (wall[wal.nextwall].cstat&0x0071) continue;
+        if (wal.cstat & 0x0071) continue;
+        if (wall[wal.nextwall].cstat & 0x0071) continue;
         if (sector[i].lotag == 32767) continue;
         if (sector[i].ceilingz >= sector[i].floorz) continue;
-        show2dsector[i>>3] |= (1<<(i&7));
+        show2dsector[i >> 3] |= (1 << (i & 7));
     }
 
-    if(ud.camerasprite == -1)
-    {
-        if( ud.overhead_on != 2 )
-        {
-            if(pp.newowner >= 0)
+    if (ud.camerasprite == -1) {
+        if (ud.overhead_on != 2) {
+            if (pp.newowner >= 0)
                 cameratext(pp.newowner);
-            else
-            {
+            else {
                 displayweapon(screenpeek);
-                if(pp.over_shoulder_on == 0 )
+                if (pp.over_shoulder_on == 0)
                     displaymasks(screenpeek);
             }
             moveclouds();
         }
 
-        if( ud.overhead_on > 0 )
-        {
-            smoothratio = Math.min(Math.max(smoothratio,0),65536);
+        if (ud.overhead_on > 0) {
+            smoothratio = Math.min(Math.max(smoothratio, 0), 65536);
             dointerpolations(smoothratio);
-            if( ud.scrollmode == 0 )
-            {
-                if(pp.newowner == -1)
-                {
-                    if (screenpeek == myconnectindex && numplayers > 1)
-                    {
-                        cposx = omyx+mulscale16((int32_t)(myx-omyx),smoothratio);
-                        cposy = omyy+mulscale16((int32_t)(myy-omyy),smoothratio);
-                        cang = omyang+mulscale16((int32_t)(((myang+1024-omyang)&2047)-1024),smoothratio);
+            if (ud.scrollmode == 0) {
+                if (pp.newowner == -1) {
+                    if (screenpeek == myconnectindex && numplayers > 1) {
+                        cposx = omyx + mulscale16((int32_t)(myx - omyx), smoothratio);
+                        cposy = omyy + mulscale16((int32_t)(myy - omyy), smoothratio);
+                        cang = omyang + mulscale16((int32_t)(((myang + 1024 - omyang) & 2047) - 1024), smoothratio);
                     }
-                    else
-                    {
-                        cposx = pp.oposx+mulscale16((int32_t)(pp.posx-pp.oposx),smoothratio);
-                        cposy = pp.oposy+mulscale16((int32_t)(pp.posy-pp.oposy),smoothratio);
-                        cang = pp.oang+mulscale16((int32_t)(((pp.ang+1024-pp.oang)&2047)-1024),smoothratio);
+                    else {
+                        cposx = pp.oposx + mulscale16((int32_t)(pp.posx - pp.oposx), smoothratio);
+                        cposy = pp.oposy + mulscale16((int32_t)(pp.posy - pp.oposy), smoothratio);
+                        cang = pp.oang + mulscale16((int32_t)(((pp.ang + 1024 - pp.oang) & 2047) - 1024), smoothratio);
                     }
                 }
-                else
-                {
+                else {
                     cposx = pp.oposx;
                     cposy = pp.oposy;
                     cang = pp.oang;
                 }
             }
-            else
-            {
+            else {
 
-                ud.fola += ud.folavel>>3;
-                ud.folx += (ud.folfvel*sintable[(512+2048-ud.fola)&2047])>>14;
-                ud.foly += (ud.folfvel*sintable[(512+1024-512-ud.fola)&2047])>>14;
+                ud.fola += ud.folavel >> 3;
+                ud.folx += (ud.folfvel * sintable[(512 + 2048 - ud.fola) & 2047]) >> 14;
+                ud.foly += (ud.folfvel * sintable[(512 + 1024 - 512 - ud.fola) & 2047]) >> 14;
 
                 cposx = ud.folx;
                 cposy = ud.foly;
                 cang = ud.fola;
             }
 
-            if(ud.overhead_on == 2)
-            {
+            if (ud.overhead_on == 2) {
                 clearview(0);
-                drawmapview(cposx,cposy,pp.zoom,cang);
+                drawmapview(cposx, cposy, pp.zoom, cang);
             }
-            drawoverheadmap( cposx,cposy,pp.zoom,cang);
+            drawoverheadmap(cposx, cposy, pp.zoom, cang);
 
             restoreinterpolations();
 
-            if(ud.overhead_on == 2)
-            {
-                if(ud.screen_size > 0) a = 147;
+            if (ud.overhead_on == 2) {
+                if (ud.screen_size > 0) a = 147;
                 else a = 182;
 
-                minitext(1,a+6,volume_names[ud.volume_number],0,2+8+16);
-                minitext(1,a+12,level_names[ud.volume_number*11 + ud.level_number],0,2+8+16);
+                minitext(1, a + 6, volume_names[ud.volume_number], 0, 2 + 8 + 16);
+                minitext(1, a + 12, level_names[ud.volume_number * 11 + ud.level_number], 0, 2 + 8 + 16);
             }
         }
     }
@@ -2314,14 +2136,12 @@ function displayrest(smoothratio) {
     coolgaugetext(screenpeek);
     operatefta();
 
-    if( KB.keyPressed(sc_Escape) && ud.overhead_on == 0
+    if (KB.keyPressed(sc_Escape) && ud.overhead_on == 0
 		&& ud.show_help == 0
-		&& ps[myconnectindex].newowner == -1)
-    {
-        if( (ps[myconnectindex].gm&MODE_MENU) != MODE_MENU &&
+		&& ps[myconnectindex].newowner == -1) {
+        if ((ps[myconnectindex].gm & MODE_MENU) != MODE_MENU &&
 			ps[myconnectindex].newowner == -1 &&
-			(ps[myconnectindex].gm&MODE_TYPE) != MODE_TYPE)
-        {
+			(ps[myconnectindex].gm & MODE_TYPE) != MODE_TYPE) {
             KB.clearKeyDown(sc_Escape);
             FX.stopAllSounds();
             clearsoundlocks();
@@ -2330,60 +2150,54 @@ function displayrest(smoothratio) {
 
             ps[myconnectindex].gm |= MODE_MENU;
 
-            if(ud.multimode < 2 && ud.recstat != 2) ready2send = 0;
+            if (ud.multimode < 2 && ud.recstat != 2) ready2send = 0;
 
-            if(ps[myconnectindex].gm&MODE_GAME) cmenu(50);
+            if (ps[myconnectindex].gm & MODE_GAME) cmenu(50);
             else cmenu(0);
             screenpeek = myconnectindex;
         }
     }
 
-    if(ps[myconnectindex].newowner == -1 && ud.overhead_on == 0 && ud.crosshair && ud.camerasprite == -1)
-        rotateSprite((160-(ps[myconnectindex].look_ang>>1))<<16,100<<16,65536,0,CROSSHAIR,0,0,2+1,windowx1,windowy1,windowx2,windowy2);
+    if (ps[myconnectindex].newowner == -1 && ud.overhead_on == 0 && ud.crosshair && ud.camerasprite == -1)
+        rotateSprite((160 - (ps[myconnectindex].look_ang >> 1)) << 16, 100 << 16, 65536, 0, CROSSHAIR, 0, 0, 2 + 1, windowx1, windowy1, windowx2, windowy2);
 
-    if(ps[myconnectindex].gm&MODE_TYPE)
+    if (ps[myconnectindex].gm & MODE_TYPE)
         typemode();
-    else
-    {
+    else {
         Console.handleInput();
-        if( !Console.isActive())
-        {
+        if (!Console.isActive()) {
             menus();
         }
         Console.render();
     }
 
-    if( ud.pause_on==1 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
-    {
+    if (ud.pause_on == 1 && (ps[myconnectindex].gm & MODE_MENU) == 0) {
         if (!Console.isActive()) //Addfaz Console Pause Game line addition 
         {
-            menutext(160,100,0,0,"GAME PAUSED");
+            menutext(160, 100, 0, 0, "GAME PAUSED");
         }
-        else
-        {
-            menutext(160,120,0,0,"GAME PAUSED");
+        else {
+            menutext(160, 120, 0, 0, "GAME PAUSED");
         }
     }
 
-    if(ud.coords)
+    if (ud.coords)
         coords(screenpeek);
 
     // FIX_00085: Optimized Video driver. FPS increases by +20%.
-    if( pp.pals_time > 0 && pp.loogcnt == 0)
-    {
-        palto( pp.pals[0],
+    if (pp.pals_time > 0 && pp.loogcnt == 0) {
+        palto(pp.pals[0],
 			pp.pals[1],
 			pp.pals[2],
-			pp.pals_time|128);
+			pp.pals_time | 128);
 
         restorepalette = 1;
     }
-    else if( restorepalette )
-    {
+    else if (restorepalette) {
         setBrightness(ud.brightness >> 2, pp.palette);
         restorepalette = 0;
     }
-    else if(pp.loogcnt > 0) palto(0,64,0,(pp.loogcnt>>1)+128);
+    else if (pp.loogcnt > 0) palto(0, 64, 0, (pp.loogcnt >> 1) + 128);
 }
 
 //3001
@@ -2445,21 +2259,21 @@ Game.drawBackground = function drawbackground() {
 };
 
 //3205
-Game.se40code = function(x, y, z, a, h, smoothratio) {
+Game.se40code = function (x, y, z, a, h, smoothratio) {
     var i = headspritestat[15];
     while (i >= 0) {
         switch (sprite[i].lotag) {
-        //            case 40:
-        //            case 41:
-        //                SE40_Draw(i,x,y,a,smoothratio);
-        //                break;
-        case 42:
-        case 43:
-        case 44:
-        case 45:
-            if (ps[screenpeek].cursectnum === sprite[i].sectnum)
-                SE40_Draw(i, x, y, z, a, h, smoothratio);
-            break;
+            //            case 40:
+            //            case 41:
+            //                SE40_Draw(i,x,y,a,smoothratio);
+            //                break;
+            case 42:
+            case 43:
+            case 44:
+            case 45:
+                if (ps[screenpeek].cursectnum === sprite[i].sectnum)
+                    SE40_Draw(i, x, y, z, a, h, smoothratio);
+                break;
         }
         i = nextspritestat[i];
     }
@@ -2476,7 +2290,7 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
 
     p = ps[snum];
     printf("displayrooms snum: %i, p.posx: %i, p.posy: %i, p.posz: %i\n", snum, p.posx, p.posy, p.posz);
-    
+
     if (pub > 0) {
         if (ud.screen_size > 8) {
             Game.drawBackground();
@@ -2518,42 +2332,40 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
         }
 
         if (screencapt) {
-            tiles[MAXTILES-1].lock = 254;
-            if (!tiles[MAXTILES-1].data)
-                allocache(tiles[MAXTILES-1].data,100*160,tiles[MAXTILES-1].lock);
+            tiles[MAXTILES - 1].lock = 254;
+            if (!tiles[MAXTILES - 1].data)
+                allocache(tiles[MAXTILES - 1].data, 100 * 160, tiles[MAXTILES - 1].lock);
 
-            setviewtotile(MAXTILES-1,100,160);
+            setviewtotile(MAXTILES - 1, 100, 160);
         }
         else if ((ud.screen_tilting && p.rotscrnang) || ud.detail == 0) {
-                if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
+            if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
 
-                tiles[MAXTILES-2].lock = 255;
-                if (!tiles[MAXTILES-2].data)
-                    allocache(tiles[MAXTILES-2].data,320*320,tiles[MAXTILES-2].lock);
-                if ((tang&1023) == 0)
-                    setviewtotile(MAXTILES-2,200>>(1-ud.detail),320>>(1-ud.detail));
+            tiles[MAXTILES - 2].lock = 255;
+            if (!tiles[MAXTILES - 2].data)
+                allocache(tiles[MAXTILES - 2].data, 320 * 320, tiles[MAXTILES - 2].lock);
+            if ((tang & 1023) == 0)
+                setviewtotile(MAXTILES - 2, 200 >> (1 - ud.detail), 320 >> (1 - ud.detail));
             else
-            		setviewtotile(MAXTILES-2,320>>(1-ud.detail),320>>(1-ud.detail));
-                if ((tang&1023) == 512)
-                {     //Block off unscreen section of 90ø tilted screen
-                    j = ((320-60)>>(1-ud.detail));
-                    for(i=(60>>(1-ud.detail))-1;i>=0;i--)
-                    {
-                        startumost[i] = 1; startumost[i+j] = 1;
-                        startdmost[i] = 0; startdmost[i+j] = 0;
-                    }
+                setviewtotile(MAXTILES - 2, 320 >> (1 - ud.detail), 320 >> (1 - ud.detail));
+            if ((tang & 1023) == 512) {     //Block off unscreen section of 90ø tilted screen
+                j = ((320 - 60) >> (1 - ud.detail));
+                for (i = (60 >> (1 - ud.detail)) - 1; i >= 0; i--) {
+                    startumost[i] = 1; startumost[i + j] = 1;
+                    startdmost[i] = 0; startdmost[i + j] = 0;
                 }
+            }
 
-                i = (tang&511); if (i > 256) i = 512-i;
-                i = sintable[i+512]*8 + sintable[i]*5;
-                setAspect(i>>1,yxaspect);
+            i = (tang & 511); if (i > 256) i = 512 - i;
+            i = sintable[i + 512] * 8 + sintable[i] * 5;
+            setAspect(i >> 1, yxaspect);
         }
         if ((snum == myconnectindex) && (numplayers > 1)) {
-            cposx = omyx+mulscale16((myx-omyx),smoothratio);
-            cposy = omyy+mulscale16((myy-omyy),smoothratio);
-            cposz = omyz+mulscale16((myz-omyz),smoothratio);
-            cang = omyang+mulscale16((((myang+1024-omyang)&2047)-1024),smoothratio);
-            choriz = omyhoriz+omyhorizoff+mulscale16((myhoriz+myhorizoff-omyhoriz-omyhorizoff),smoothratio);
+            cposx = omyx + mulscale16((myx - omyx), smoothratio);
+            cposy = omyy + mulscale16((myy - omyy), smoothratio);
+            cposz = omyz + mulscale16((myz - omyz), smoothratio);
+            cang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024), smoothratio);
+            choriz = omyhoriz + omyhorizoff + mulscale16((myhoriz + myhorizoff - omyhoriz - omyhorizoff), smoothratio);
             sect = mycursectnum;
         } else {
             cposx = p.oposx + mulscale16((p.posx - p.oposx), smoothratio);
@@ -2581,24 +2393,22 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
         }
 
         printf("snum: %i, cposx: %i, cposy: %i, cposz: %i\n", snum, cposx, cposy, cposz);
-        
+
         cz = hittype[p.i].ceilingz;
         fz = hittype[p.i].floorz;
 
-        if(earthquaketime > 0 && p.on_ground == 1)
-        {
-            cposz += 256-(((earthquaketime)&1)<<9);
-            cang += (2-((earthquaketime)&2))<<2;
+        if (earthquaketime > 0 && p.on_ground == 1) {
+            cposz += 256 - (((earthquaketime) & 1) << 9);
+            cang += (2 - ((earthquaketime) & 2)) << 2;
         }
 
-        if(sprite[p.i].pal == 1) cposz -= (18<<8);
+        if (sprite[p.i].pal == 1) cposz -= (18 << 8);
 
-        if(p.newowner >= 0)
-            choriz = 100+sprite[p.newowner].shade;
-        else if(p.spritebridge == 0)
-        {
-            if( cposz < ( p.truecz + (4<<8) ) ) cposz = cz + (4<<8);
-            else if( cposz > ( p.truefz - (4<<8) ) ) cposz = fz - (4<<8);
+        if (p.newowner >= 0)
+            choriz = 100 + sprite[p.newowner].shade;
+        else if (p.spritebridge == 0) {
+            if (cposz < (p.truecz + (4 << 8))) cposz = cz + (4 << 8);
+            else if (cposz > (p.truefz - (4 << 8))) cposz = fz - (4 << 8);
         }
 
         if (sect >= 0) {
@@ -2607,13 +2417,13 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
             getzsofslope(sect, cposx, cposy, czRef, fzRef);
             cz = czRef.$;
             fz = fzRef.$;
-            if (cposz < cz+(4<<8)) cposz = cz+(4<<8);
-            if (cposz > fz-(4<<8)) cposz = fz-(4<<8);
+            if (cposz < cz + (4 << 8)) cposz = cz + (4 << 8);
+            if (cposz > fz - (4 << 8)) cposz = fz - (4 << 8);
         }
 
-        if(choriz > 299) choriz = 299;
+        if (choriz > 299) choriz = 299;
         else if (choriz < -99) choriz = -99;
-        
+
         Game.se40code(cposx, cposy, cposz, cang, choriz, smoothratio);
 
         if ((gotpic[MIRROR >> 3] & (1 << (MIRROR & 7))) > 0) {
@@ -2656,49 +2466,44 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
         printf("after animatesprites tsprite[1].picnum: %i\n", tsprite[1].picnum);
         drawmasks();
 
-        if(screencapt === 1)
-        {
+        if (screencapt === 1) {
             setviewback();
-            tiles[MAXTILES-1].lock = 1;
+            tiles[MAXTILES - 1].lock = 1;
             screencapt = 0;
         }
-        else if( ( ud.screen_tilting && p.rotscrnang) || ud.detail==0 )
-        {
+        else if ((ud.screen_tilting && p.rotscrnang) || ud.detail == 0) {
             if (ud.screen_tilting) tang = p.rotscrnang; else tang = 0;
             setviewback();
-            tiles[MAXTILES-2].animFlags &= 0xff0000ff;
-            i = (tang&511); if (i > 256) i = 512-i;
+            tiles[MAXTILES - 2].animFlags &= 0xff0000ff;
+            i = (tang & 511); if (i > 256) i = 512 - i;
             i = sintable[i + 512] * 8 + sintable[i] * 5;
-            if ((1-ud.detail) == 0) i >>= 1;
-            rotateSprite(160<<16,100<<16,i,tang+512,MAXTILES-2,0,0,4+2+64,windowx1,windowy1,windowx2,windowy2);
-            tiles[MAXTILES-2].lock = 199;
+            if ((1 - ud.detail) == 0) i >>= 1;
+            rotateSprite(160 << 16, 100 << 16, i, tang + 512, MAXTILES - 2, 0, 0, 4 + 2 + 64, windowx1, windowy1, windowx2, windowy2);
+            tiles[MAXTILES - 2].lock = 199;
         }
-    } 
+    }
 
     // 
     restoreinterpolations();
 
-    if (totalclock < lastvisinc)
-    {
-        if (klabs(p.visibility-ud.const_visibility) > 8)
-            p.visibility += (ud.const_visibility-p.visibility)>>2;
+    if (totalclock < lastvisinc) {
+        if (klabs(p.visibility - ud.const_visibility) > 8)
+            p.visibility += (ud.const_visibility - p.visibility) >> 2;
     }
     else p.visibility = ud.const_visibility;
 };
 
 //3464
-function LocateTheLocator(n,sn)
-{
-	var i;
+function LocateTheLocator(n, sn) {
+    var i;
 
-	i = headspritestat[7];
-	while(i >= 0)
-	{
-		if( (sn == -1 || sn == sprite[i].sectnum) && n == sprite[i].lotag )
-			return i;
-		i = nextspritestat[i];
-	}
-	return -1;
+    i = headspritestat[7];
+    while (i >= 0) {
+        if ((sn == -1 || sn == sprite[i].sectnum) && n == sprite[i].lotag)
+            return i;
+        i = nextspritestat[i];
+    }
+    return -1;
 }
 
 //3472
@@ -2708,7 +2513,7 @@ function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_
 
     printf("EGS whatsect: %i, s_x: %i, s_y: %i, s_z: %i, s_pn: %i,  s_s: %i, s_xr: %i, s_yr: %i, s_a: %i, s_ve: %i, s_zv: %i, ,s_ow: %i, s_ss: %i\n",
 		 whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
-    
+
     i = Engine.insertSprite(whatsect, s_ss);
 
     if (i < 0)
@@ -2759,7 +2564,7 @@ function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_
 
     hittype[i].temp_data[0] = hittype[i].temp_data[2] = hittype[i].temp_data[3] = hittype[i].temp_data[5] = 0;
     if (actorscrptr[s_pn]) {
-        s.extra =   script[actorscrptr[s_pn]];
+        s.extra = script[actorscrptr[s_pn]];
         hittype[i].temp_data[4] = script[actorscrptr[s_pn] + 1];
         hittype[i].temp_data[1] = script[actorscrptr[s_pn] + 2];
         s.hitag = script[actorscrptr[s_pn] + 3];
@@ -2837,47 +2642,47 @@ Game.wallSwitchCheck = function (i) {
 
 function wallswitchcheck(i) {
     switch (sprite[i].picnum) {
-    case HANDPRINTSWITCH:
-    case HANDPRINTSWITCH + 1:
-    case ALIENSWITCH:
-    case ALIENSWITCH + 1:
-    case MULTISWITCH:
-    case MULTISWITCH + 1:
-    case MULTISWITCH + 2:
-    case MULTISWITCH + 3:
-    case ACCESSSWITCH:
-    case ACCESSSWITCH2:
-    case PULLSWITCH:
-    case PULLSWITCH + 1:
-    case HANDSWITCH:
-    case HANDSWITCH + 1:
-    case SLOTDOOR:
-    case SLOTDOOR + 1:
-    case LIGHTSWITCH:
-    case LIGHTSWITCH + 1:
-    case SPACELIGHTSWITCH:
-    case SPACELIGHTSWITCH + 1:
-    case SPACEDOORSWITCH:
-    case SPACEDOORSWITCH + 1:
-    case FRANKENSTINESWITCH:
-    case FRANKENSTINESWITCH + 1:
-    case LIGHTSWITCH2:
-    case LIGHTSWITCH2 + 1:
-    case POWERSWITCH1:
-    case POWERSWITCH1 + 1:
-    case LOCKSWITCH1:
-    case LOCKSWITCH1 + 1:
-    case POWERSWITCH2:
-    case POWERSWITCH2 + 1:
-    case DIPSWITCH:
-    case DIPSWITCH + 1:
-    case DIPSWITCH2:
-    case DIPSWITCH2 + 1:
-    case TECHSWITCH:
-    case TECHSWITCH + 1:
-    case DIPSWITCH3:
-    case DIPSWITCH3 + 1:
-        return 1;
+        case HANDPRINTSWITCH:
+        case HANDPRINTSWITCH + 1:
+        case ALIENSWITCH:
+        case ALIENSWITCH + 1:
+        case MULTISWITCH:
+        case MULTISWITCH + 1:
+        case MULTISWITCH + 2:
+        case MULTISWITCH + 3:
+        case ACCESSSWITCH:
+        case ACCESSSWITCH2:
+        case PULLSWITCH:
+        case PULLSWITCH + 1:
+        case HANDSWITCH:
+        case HANDSWITCH + 1:
+        case SLOTDOOR:
+        case SLOTDOOR + 1:
+        case LIGHTSWITCH:
+        case LIGHTSWITCH + 1:
+        case SPACELIGHTSWITCH:
+        case SPACELIGHTSWITCH + 1:
+        case SPACEDOORSWITCH:
+        case SPACEDOORSWITCH + 1:
+        case FRANKENSTINESWITCH:
+        case FRANKENSTINESWITCH + 1:
+        case LIGHTSWITCH2:
+        case LIGHTSWITCH2 + 1:
+        case POWERSWITCH1:
+        case POWERSWITCH1 + 1:
+        case LOCKSWITCH1:
+        case LOCKSWITCH1 + 1:
+        case POWERSWITCH2:
+        case POWERSWITCH2 + 1:
+        case DIPSWITCH:
+        case DIPSWITCH + 1:
+        case DIPSWITCH2:
+        case DIPSWITCH2 + 1:
+        case TECHSWITCH:
+        case TECHSWITCH + 1:
+        case DIPSWITCH3:
+        case DIPSWITCH3 + 1:
+            return 1;
     }
     return 0;
 }
@@ -2894,8 +2699,8 @@ function spawn(j, pn) {
 
     //printf("spawn j: %i, pn: %i\n", j, pn);
     if (j >= 0) {
-        i = EGS(sprite[j].sectnum,sprite[j].x,sprite[j].y,sprite[j].z
-            ,pn,0,0,0,0,0,0,j,0);
+        i = EGS(sprite[j].sectnum, sprite[j].x, sprite[j].y, sprite[j].z
+            , pn, 0, 0, 0, 0, 0, 0, j, 0);
         hittype[i].picnum = sprite[j].picnum;
     } else {
         i = pn;
@@ -3018,7 +2823,7 @@ function spawn(j, pn) {
             break;
         case FOF:
             sp.xrepeat = sp.yrepeat = 0;
-            changespritestat(i,5);
+            changespritestat(i, 5);
             break;
         case WATERSPLASH2:
             if (j >= 0) {
@@ -3084,37 +2889,33 @@ function spawn(j, pn) {
             break;
         case TRANSPORTERSTAR:
         case TRANSPORTERBEAM:
-            if(j == -1) break;
-            if(sp.picnum == TRANSPORTERBEAM)
-            {
+            if (j == -1) break;
+            if (sp.picnum == TRANSPORTERBEAM) {
                 sp.xrepeat = 31;
                 sp.yrepeat = 1;
-                sp.z = sector[sprite[j].sectnum].floorz-(40<<8);
+                sp.z = sector[sprite[j].sectnum].floorz - (40 << 8);
             }
-            else
-            {
-                if(sprite[j].statnum == 4)
-                {
+            else {
+                if (sprite[j].statnum == 4) {
                     sp.xrepeat = 8;
                     sp.yrepeat = 8;
                 }
-                else
-                {
+                else {
                     sp.xrepeat = 48;
                     sp.yrepeat = 64;
-                    if(sprite[j].statnum == 10 || badguy(sprite[j]) )
-                        sp.z -= (32<<8);
+                    if (sprite[j].statnum == 10 || badguy(sprite[j]))
+                        sp.z -= (32 << 8);
                 }
             }
 
             sp.shade = -127;
-            sp.cstat = 128|2;
+            sp.cstat = 128 | 2;
             sp.ang = sprite[j].ang;
 
             sp.xvel = 128;
-            changespritestat(i,5);
-            ssp(i,CLIPMASK0);
-            setsprite(i,sp.x,sp.y,sp.z);
+            changespritestat(i, 5);
+            ssp(i, CLIPMASK0);
+            setsprite(i, sp.x, sp.y, sp.z);
             break;
 
         case FRAMEEFFECT1:
@@ -3170,45 +2971,39 @@ function spawn(j, pn) {
             {
                 var s1 = new Ref(sp.sectnum);
 
-                updatesector(sp.x+108,sp.y+108,s1);
-                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                {
-                    updatesector(sp.x-108,sp.y-108,s1);
-                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                    {
-                        updatesector(sp.x+108,sp.y-108,s1);
-                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                        {
-                            updatesector(sp.x-108,sp.y+108,s1);
+                updatesector(sp.x + 108, sp.y + 108, s1);
+                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                    updatesector(sp.x - 108, sp.y - 108, s1);
+                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                        updatesector(sp.x + 108, sp.y - 108, s1);
+                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                            updatesector(sp.x - 108, sp.y + 108, s1);
                             if (s1.$ >= 0 && sector[s1.$].floorz != sector[sp.sectnum].floorz)
-                            { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                            { sp.xrepeat = sp.yrepeat = 0; changespritestat(i, 5); break; }
                         }
-                        else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                        else { sp.xrepeat = sp.yrepeat = 0; changespritestat(i, 5); break; }
                     }
-                    else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                    else { sp.xrepeat = sp.yrepeat = 0; changespritestat(i, 5); break; }
                 }
-                else { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                else { sp.xrepeat = sp.yrepeat = 0; changespritestat(i, 5); break; }
             }
 
-            if( sector[sprite[i].sectnum].lotag == 1 )
-            {
-                changespritestat(i,5);
+            if (sector[sprite[i].sectnum].lotag == 1) {
+                changespritestat(i, 5);
                 break;
             }
 
-            if(j >= 0 && sp.picnum != PUKE)
-            {
-                if( sprite[j].pal == 1)
+            if (j >= 0 && sp.picnum != PUKE) {
+                if (sprite[j].pal == 1)
                     sp.pal = 1;
-                else if( sprite[j].pal != 6 && sprite[j].picnum != NUKEBARREL && sprite[j].picnum != TIRE )
-                {
-                    if(sprite[j].picnum == FECES)
+                else if (sprite[j].pal != 6 && sprite[j].picnum != NUKEBARREL && sprite[j].picnum != TIRE) {
+                    if (sprite[j].picnum == FECES)
                         sp.pal = 7; // Brown
                     else sp.pal = 2; // Red
                 }
                 else sp.pal = 0;  // green
 
-                if(sprite[j].picnum == TIRE)
+                if (sprite[j].picnum == TIRE)
                     sp.shade = 127;
             }
             sp.cstat |= 32;
@@ -3366,39 +3161,35 @@ function spawn(j, pn) {
         case FOOTPRINTS2:
         case FOOTPRINTS3:
         case FOOTPRINTS4:
-            if(j >= 0)
-            {
+            if (j >= 0) {
                 var s1 = new Ref(sp.sectnum);
 
-                updatesector(sp.x+84,sp.y+84,s1);
-                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                {
-                    updatesector(sp.x-84,sp.y-84,s1);
-                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                    {
-                        updatesector(sp.x+84,sp.y-84,s1);
-                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz)
-                        {
-                            updatesector(sp.x-84,sp.y+84,s1);
+                updatesector(sp.x + 84, sp.y + 84, s1);
+                if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                    updatesector(sp.x - 84, sp.y - 84, s1);
+                    if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                        updatesector(sp.x + 84, sp.y - 84, s1);
+                        if (s1.$ >= 0 && sector[s1.$].floorz == sector[sp.sectnum].floorz) {
+                            updatesector(sp.x - 84, sp.y + 84, s1);
                             if (s1.$ >= 0 && sector[s1.$].floorz != sector[sp.sectnum].floorz)
-                            { sp.xrepeat = sp.yrepeat = 0;changespritestat(i,5);break;}
+                            { sp.xrepeat = sp.yrepeat = 0; changespritestat(i, 5); break; }
                         }
-                        else { sp.xrepeat = sp.yrepeat = 0;break;}
+                        else { sp.xrepeat = sp.yrepeat = 0; break; }
                     }
-                    else { sp.xrepeat = sp.yrepeat = 0;break;}
+                    else { sp.xrepeat = sp.yrepeat = 0; break; }
                 }
-                else { sp.xrepeat = sp.yrepeat = 0;break;}
+                else { sp.xrepeat = sp.yrepeat = 0; break; }
 
-                sp.cstat = 32+((ps[sprite[j].yvel].footprintcount&1)<<2);
+                sp.cstat = 32 + ((ps[sprite[j].yvel].footprintcount & 1) << 2);
                 sp.ang = sprite[j].ang;
             }
 
             sp.z = sector[sect].floorz;
-            if(sector[sect].lotag != 1 && sector[sect].lotag != 2)
+            if (sector[sect].lotag != 1 && sector[sect].lotag != 2)
                 sp.xrepeat = sp.yrepeat = 32;
 
             insertspriteq(i);
-            changespritestat(i,5);
+            changespritestat(i, 5);
             break;
 
         case FEM1:
@@ -3664,7 +3455,7 @@ function spawn(j, pn) {
         case WATERDRIP:
             // fix: j can be -1 - so i guess this is correct. 
             if (j >= 0 && (sprite[j].statnum == 10 || sprite[j].statnum == 1)) {
-            //if ((j >= 0 && sprite[j].statnum == 10) || sprite[j].statnum == 1) {
+                //if ((j >= 0 && sprite[j].statnum == 10) || sprite[j].statnum == 1) {
                 sp.shade = 32;
                 if (sprite[j].pal != 1) {
                     sp.pal = 2;
@@ -4190,14 +3981,13 @@ function spawn(j, pn) {
                 case 17:
                     hittype[i].temp_data[2] = sector[sect].floorz; //Stopping loc
 
-                    j = nextsectorneighborz(sect,sector[sect].floorz,-1,-1);
+                    j = nextsectorneighborz(sect, sector[sect].floorz, -1, -1);
                     hittype[i].temp_data[3] = sector[j].ceilingz;
 
-                    j = nextsectorneighborz(sect,sector[sect].ceilingz,1,1);
+                    j = nextsectorneighborz(sect, sector[sect].ceilingz, 1, 1);
                     hittype[i].temp_data[4] = sector[j].floorz;
 
-                    if(numplayers < 2)
-                    {
+                    if (numplayers < 2) {
                         setinterpolation(sector[sect].floorz);
                         setinterpolation(sector[sect].ceilingz);
                     }
@@ -4213,19 +4003,17 @@ function spawn(j, pn) {
                         var q;
 
                         startwall = sector[sect].wallptr;
-                        endwall = startwall+sector[sect].wallnum;
+                        endwall = startwall + sector[sect].wallnum;
 
                         //find the two most clostest wall x's and y's
                         q = 0x7fffffff;
 
-                        for(s=startwall;s<endwall;s++)
-                        {
+                        for (s = startwall; s < endwall; s++) {
                             x = wall[s].x;
                             y = wall[s].y;
 
-                            d = FindDistance2D(sp.x-x,sp.y-y);
-                            if( d < q )
-                            {
+                            d = FindDistance2D(sp.x - x, sp.y - y);
+                            if (d < q) {
                                 q = d;
                                 clostest = s;
                             }
@@ -4235,14 +4023,12 @@ function spawn(j, pn) {
 
                         q = 0x7fffffff;
 
-                        for(s=startwall;s<endwall;s++)
-                        {
+                        for (s = startwall; s < endwall; s++) {
                             x = wall[s].x;
                             y = wall[s].y;
 
-                            d = FindDistance2D(sp.x-x,sp.y-y);
-                            if(d < q && s != hittype[i].temp_data[1])
-                            {
+                            d = FindDistance2D(sp.x - x, sp.y - y);
+                            if (d < q && s != hittype[i].temp_data[1]) {
                                 q = d;
                                 clostest = s;
                             }
@@ -4343,7 +4129,7 @@ function spawn(j, pn) {
                     break;
 
                 case 11://Pivitor rotater
-                    if(sp.ang>1024) hittype[i].temp_data[3] = 2;
+                    if (sp.ang > 1024) hittype[i].temp_data[3] = 2;
                     else hittype[i].temp_data[3] = -2;
                 case 0:
                 case 2://Earthquakemakers
@@ -4580,51 +4366,47 @@ function spawn(j, pn) {
 
 //5413
 
-function animatesprites( x, y, a, smoothratio) {
+function animatesprites(x, y, a, smoothratio) {
 
-	var i, j, k, p, sect;
-    var l, t1,t3,t4;
-    var s,t;
-    for(j=0;j < spritesortcnt; j++)
-    {
+    var i, j, k, p, sect;
+    var l, t1, t3, t4;
+    var s, t;
+    for (j = 0; j < spritesortcnt; j++) {
         t = tsprite[j];
         i = t.owner;
         s = sprite[t.owner];
 
-        switch(t.picnum)
-        {
+        switch (t.picnum) {
             case BLOODPOOL:
             case PUKE:
             case FOOTPRINTS:
             case FOOTPRINTS2:
             case FOOTPRINTS3:
             case FOOTPRINTS4:
-                if(t.shade == 127) continue;
+                if (t.shade == 127) continue;
                 break;
             case RESPAWNMARKERRED:
             case RESPAWNMARKERYELLOW:
             case RESPAWNMARKERGREEN:
-                if(ud.marker == 0)
+                if (ud.marker == 0)
                     t.xrepeat = t.yrepeat = 0;
                 continue;
             case CHAIR3:
 
-                k = (((t.ang+3072+128-a)&2047)>>8)&7;
-                if(k>4)
-                {
-                    k = 8-k;
+                k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                if (k > 4) {
+                    k = 8 - k;
                     t.cstat |= 4;
                 }
                 else t.cstat &= ~4;
-                t.picnum = s.picnum+k;
+                t.picnum = s.picnum + k;
                 break;
             case BLOODSPLAT1:
             case BLOODSPLAT2:
             case BLOODSPLAT3:
             case BLOODSPLAT4:
-                if(ud.lockout) t.xrepeat = t.yrepeat = 0;
-                else if(t.pal == 6)
-                {
+                if (ud.lockout) t.xrepeat = t.yrepeat = 0;
+                else if (t.pal == 6) {
                     t.shade = -127;
                     continue;
                 }
@@ -4643,42 +4425,40 @@ function animatesprites( x, y, a, smoothratio) {
             case NEON6:
                 continue;
             case GREENSLIME:
-            case GREENSLIME+1:
-            case GREENSLIME+2:
-            case GREENSLIME+3:
-            case GREENSLIME+4:
-            case GREENSLIME+5:
-            case GREENSLIME+6:
-            case GREENSLIME+7:
+            case GREENSLIME + 1:
+            case GREENSLIME + 2:
+            case GREENSLIME + 3:
+            case GREENSLIME + 4:
+            case GREENSLIME + 5:
+            case GREENSLIME + 6:
+            case GREENSLIME + 7:
                 break;
             default:
-                if( ( (t.cstat&16) ) || ( badguy(t) && t.extra > 0) || t.statnum == 10)
+                if (((t.cstat & 16)) || (badguy(t) && t.extra > 0) || t.statnum == 10)
                     continue;
         }
 
-        if (sector[t.sectnum].ceilingstat&1)
+        if (sector[t.sectnum].ceilingstat & 1)
             l = sector[t.sectnum].ceilingshade;
         else
             l = sector[t.sectnum].floorshade;
 
-        if(l < -127) l = -127;
-        if(l > 128) l =  127;
+        if (l < -127) l = -127;
+        if (l > 128) l = 127;
         t.shade = l;
     }
 
 
-    for(j=0;j < spritesortcnt; j++ )  //Between drawrooms() and drawmasks()
+    for (j = 0; j < spritesortcnt; j++)  //Between drawrooms() and drawmasks()
     {                             //is the perfect time to animate sprites
         t = tsprite[j];
         i = t.owner;
         s = sprite[i];
 
-        switch(s.picnum)
-        {
+        switch (s.picnum) {
             case SECTOREFFECTOR:
-                if(t.lotag == 27 && ud.recstat == 1)
-                {
-                    t.picnum = 11+((totalclock>>3)&1);
+                if (t.lotag == 27 && ud.recstat == 1) {
+                    t.picnum = 11 + ((totalclock >> 3) & 1);
                     t.cstat |= 128;
                 }
                 else
@@ -4747,52 +4527,47 @@ function animatesprites( x, y, a, smoothratio) {
             case 4562:
             case 4498:
             case 4957:
-                if(ud.lockout)
-                {
+                if (ud.lockout) {
                     t.xrepeat = t.yrepeat = 0;
                     continue;
                 }
         }
 
-        if( t.statnum == 99 ) continue;
-        if( s.statnum != 1 && s.picnum == APLAYER && ps[s.yvel].newowner == -1 && s.owner >= 0 )
-        {
-            t.x -= mulscale16(65536-smoothratio,ps[s.yvel].posx-ps[s.yvel].oposx);
-            t.y -= mulscale16(65536-smoothratio,ps[s.yvel].posy-ps[s.yvel].oposy);
-            t.z = ps[s.yvel].oposz + mulscale16(smoothratio,ps[s.yvel].posz-ps[s.yvel].oposz);
-            t.z += (40<<8);
+        if (t.statnum == 99) continue;
+        if (s.statnum != 1 && s.picnum == APLAYER && ps[s.yvel].newowner == -1 && s.owner >= 0) {
+            t.x -= mulscale16(65536 - smoothratio, ps[s.yvel].posx - ps[s.yvel].oposx);
+            t.y -= mulscale16(65536 - smoothratio, ps[s.yvel].posy - ps[s.yvel].oposy);
+            t.z = ps[s.yvel].oposz + mulscale16(smoothratio, ps[s.yvel].posz - ps[s.yvel].oposz);
+            t.z += (40 << 8);
         }
-        else if( ( s.statnum == 0 && s.picnum != CRANEPOLE) || s.statnum == 10 || s.statnum == 6 || s.statnum == 4 || s.statnum == 5 || s.statnum == 1 )
-        {
-            t.x -= mulscale16(65536-smoothratio,s.x-hittype[i].bposx);
-            t.y -= mulscale16(65536-smoothratio,s.y-hittype[i].bposy);
-            t.z -= mulscale16(65536-smoothratio,s.z-hittype[i].bposz);
+        else if ((s.statnum == 0 && s.picnum != CRANEPOLE) || s.statnum == 10 || s.statnum == 6 || s.statnum == 4 || s.statnum == 5 || s.statnum == 1) {
+            t.x -= mulscale16(65536 - smoothratio, s.x - hittype[i].bposx);
+            t.y -= mulscale16(65536 - smoothratio, s.y - hittype[i].bposy);
+            t.z -= mulscale16(65536 - smoothratio, s.z - hittype[i].bposz);
         }
 
         sect = s.sectnum;
-        t1 = hittype[i].temp_data[1];t3 = hittype[i].temp_data[3];t4 = hittype[i].temp_data[4];
+        t1 = hittype[i].temp_data[1]; t3 = hittype[i].temp_data[3]; t4 = hittype[i].temp_data[4];
 
-        switch(s.picnum)
-        {
+        switch (s.picnum) {
             case DUKELYINGDEAD:
-                t.z += (24<<8);
+                t.z += (24 << 8);
                 break;
             case BLOODPOOL:
             case FOOTPRINTS:
             case FOOTPRINTS2:
             case FOOTPRINTS3:
             case FOOTPRINTS4:
-                if(t.pal == 6)
+                if (t.pal == 6)
                     t.shade = -127;
             case PUKE:
             case MONEY:
-            case MONEY+1:
+            case MONEY + 1:
             case MAIL:
-            case MAIL+1:
+            case MAIL + 1:
             case PAPER:
-            case PAPER+1:
-                if(ud.lockout && s.pal == 2)
-                {
+            case PAPER + 1:
+                if (ud.lockout && s.pal == 2) {
                     t.xrepeat = t.yrepeat = 0;
                     continue;
                 }
@@ -4800,92 +4575,86 @@ function animatesprites( x, y, a, smoothratio) {
             case TRIPBOMB:
                 continue;
             case FORCESPHERE:
-                if(t.statnum == 5)
-                {
-                    var sqa,sqb;
+                if (t.statnum == 5) {
+                    var sqa, sqb;
 
                     sqa =
 					    getangle(
-					    sprite[s.owner].x-ps[screenpeek].posx,
-					    sprite[s.owner].y-ps[screenpeek].posy);
+					    sprite[s.owner].x - ps[screenpeek].posx,
+					    sprite[s.owner].y - ps[screenpeek].posy);
                     sqb =
 					    getangle(
-					    sprite[s.owner].x-t.x,
-					    sprite[s.owner].y-t.y);
+					    sprite[s.owner].x - t.x,
+					    sprite[s.owner].y - t.y);
 
-                    if( klabs(getincangle(sqa,sqb)) > 512 )
-                        if( ldist(sprite[s.owner],t) < ldist(sprite[ps[screenpeek].i],sprite[s.owner]) )
+                    if (klabs(getincangle(sqa, sqb)) > 512)
+                        if (ldist(sprite[s.owner], t) < ldist(sprite[ps[screenpeek].i], sprite[s.owner]))
                             t.xrepeat = t.yrepeat = 0;
                 }
                 continue;
             case BURNING:
             case BURNING2:
-                if( sprite[s.owner].statnum == 10 )
-                {
-                    if( display_mirror == 0 && sprite[s.owner].yvel == screenpeek && ps[sprite[s.owner].yvel].over_shoulder_on == 0 )
+                if (sprite[s.owner].statnum == 10) {
+                    if (display_mirror == 0 && sprite[s.owner].yvel == screenpeek && ps[sprite[s.owner].yvel].over_shoulder_on == 0)
                         t.xrepeat = 0;
-                    else
-                    {
-                        t.ang = getangle(x-t.x,y-t.y);
+                    else {
+                        t.ang = getangle(x - t.x, y - t.y);
                         t.x = sprite[s.owner].x;
                         t.y = sprite[s.owner].y;
-                        t.x += sintable[(t.ang+512)&2047]>>10;
-                        t.y += sintable[t.ang&2047]>>10;
+                        t.x += sintable[(t.ang + 512) & 2047] >> 10;
+                        t.y += sintable[t.ang & 2047] >> 10;
                     }
                 }
                 break;
 
             case ATOMICHEALTH:
-                t.z -= (4<<8);
+                t.z -= (4 << 8);
                 break;
             case CRYSTALAMMO:
-                t.shade = (sintable[(totalclock<<4)&2047]>>10);
+                t.shade = (sintable[(totalclock << 4) & 2047] >> 10);
                 continue;
             case VIEWSCREEN:
             case VIEWSCREEN2:
-                if(camsprite >= 0 && hittype[sprite[i].owner].temp_data[0] == 1)
-                {
+                if (camsprite >= 0 && hittype[sprite[i].owner].temp_data[0] == 1) {
                     t.picnum = STATIC;
-                    t.cstat |= (rand()&12);
+                    t.cstat |= (rand() & 12);
                     t.xrepeat += 8;
                     t.yrepeat += 8;
                 }
                 break;
 
             case SHRINKSPARK:
-                t.picnum = SHRINKSPARK+( (totalclock>>4)&3 );
+                t.picnum = SHRINKSPARK + ((totalclock >> 4) & 3);
                 break;
             case GROWSPARK:
-                t.picnum = GROWSPARK+( (totalclock>>4)&3 );
+                t.picnum = GROWSPARK + ((totalclock >> 4) & 3);
                 break;
             case RPG:
-                k = getangle(s.x-x,s.y-y);
-                k = (((s.ang+3072+128-k)&2047)/170) | 0;
-                if(k > 6)
-                {
-                    k = 12-k;
+                k = getangle(s.x - x, s.y - y);
+                k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
+                if (k > 6) {
+                    k = 12 - k;
                     t.cstat |= 4;
                 }
                 else t.cstat &= ~4;
-                t.picnum = RPG+k;
+                t.picnum = RPG + k;
                 break;
 
             case RECON:
 
-                k = getangle(s.x-x,s.y-y);
-                if( hittype[i].temp_data[0] < 4 )
-                    k = (((s.ang+3072+128-k)&2047)/170)| 0;
-                else k = (((s.ang+3072+128-k)&2047)/170)| 0;
+                k = getangle(s.x - x, s.y - y);
+                if (hittype[i].temp_data[0] < 4)
+                    k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
+                else k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
 
-                if(k>6)
-                {
-                    k = 12-k;
+                if (k > 6) {
+                    k = 12 - k;
                     t.cstat |= 4;
                 }
                 else t.cstat &= ~4;
 
-                if( klabs(t3) > 64 ) k += 7;
-                t.picnum = RECON+k;
+                if (klabs(t3) > 64) k += 7;
+                t.picnum = RECON + k;
 
                 break;
 
@@ -4893,58 +4662,52 @@ function animatesprites( x, y, a, smoothratio) {
 
                 p = s.yvel;
 
-                if(t.pal == 1) t.z -= (18<<8);
+                if (t.pal == 1) t.z -= (18 << 8);
 
-                if(ps[p].over_shoulder_on > 0 && ps[p].newowner < 0 )
-                {
+                if (ps[p].over_shoulder_on > 0 && ps[p].newowner < 0) {
                     t.cstat |= 2;
-                    if ( screenpeek == myconnectindex && numplayers >= 2 )
-                    {
-                        t.x = omyx+mulscale16((int32_t)(myx-omyx),smoothratio);
-                        t.y = omyy+mulscale16((int32_t)(myy-omyy),smoothratio);
-                        t.z = omyz+mulscale16((int32_t)(myz-omyz),smoothratio)+(40<<8);
-                        t.ang = omyang+mulscale16((int32_t)(((myang+1024-omyang)&2047)-1024),smoothratio);
+                    if (screenpeek == myconnectindex && numplayers >= 2) {
+                        t.x = omyx + mulscale16((int32_t)(myx - omyx), smoothratio);
+                        t.y = omyy + mulscale16((int32_t)(myy - omyy), smoothratio);
+                        t.z = omyz + mulscale16((int32_t)(myz - omyz), smoothratio) + (40 << 8);
+                        t.ang = omyang + mulscale16((int32_t)(((myang + 1024 - omyang) & 2047) - 1024), smoothratio);
                         t.sectnum = mycursectnum;
                     }
                 }
 
-                if( ( display_mirror == 1 || screenpeek != p || s.owner == -1 ) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0 )
-                {
+                if ((display_mirror == 1 || screenpeek != p || s.owner == -1) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0) {
                     t.copyTo(tsprite[spritesortcnt]);
 
                     tsprite[spritesortcnt].statnum = 99;
 
-                    tsprite[spritesortcnt].yrepeat = ( t.yrepeat>>3 );
-                    if(t.yrepeat < 4) t.yrepeat = 4;
+                    tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
+                    if (t.yrepeat < 4) t.yrepeat = 4;
 
                     tsprite[spritesortcnt].shade = t.shade;
                     tsprite[spritesortcnt].cstat = 0;
 
-                    switch(ps[p].curr_weapon)
-                    {
-                        case PISTOL_WEAPON:      tsprite[spritesortcnt].picnum = FIRSTGUNSPRITE;       break;
-                        case SHOTGUN_WEAPON:     tsprite[spritesortcnt].picnum = SHOTGUNSPRITE;        break;
-                        case CHAINGUN_WEAPON:    tsprite[spritesortcnt].picnum = CHAINGUNSPRITE;       break;
-                        case RPG_WEAPON:         tsprite[spritesortcnt].picnum = RPGSPRITE;            break;
+                    switch (ps[p].curr_weapon) {
+                        case PISTOL_WEAPON: tsprite[spritesortcnt].picnum = FIRSTGUNSPRITE; break;
+                        case SHOTGUN_WEAPON: tsprite[spritesortcnt].picnum = SHOTGUNSPRITE; break;
+                        case CHAINGUN_WEAPON: tsprite[spritesortcnt].picnum = CHAINGUNSPRITE; break;
+                        case RPG_WEAPON: tsprite[spritesortcnt].picnum = RPGSPRITE; break;
                         case HANDREMOTE_WEAPON:
-                        case HANDBOMB_WEAPON:    tsprite[spritesortcnt].picnum = HEAVYHBOMB;           break;
-                        case TRIPBOMB_WEAPON:    tsprite[spritesortcnt].picnum = TRIPBOMBSPRITE;       break;
-                        case GROW_WEAPON:        tsprite[spritesortcnt].picnum = GROWSPRITEICON;       break;
-                        case SHRINKER_WEAPON:    tsprite[spritesortcnt].picnum = SHRINKERSPRITE;       break;
-                        case FREEZE_WEAPON:      tsprite[spritesortcnt].picnum = FREEZESPRITE;         break;
-                        case DEVISTATOR_WEAPON:  tsprite[spritesortcnt].picnum = DEVISTATORSPRITE;     break;
+                        case HANDBOMB_WEAPON: tsprite[spritesortcnt].picnum = HEAVYHBOMB; break;
+                        case TRIPBOMB_WEAPON: tsprite[spritesortcnt].picnum = TRIPBOMBSPRITE; break;
+                        case GROW_WEAPON: tsprite[spritesortcnt].picnum = GROWSPRITEICON; break;
+                        case SHRINKER_WEAPON: tsprite[spritesortcnt].picnum = SHRINKERSPRITE; break;
+                        case FREEZE_WEAPON: tsprite[spritesortcnt].picnum = FREEZESPRITE; break;
+                        case DEVISTATOR_WEAPON: tsprite[spritesortcnt].picnum = DEVISTATORSPRITE; break;
                     }
 
-                    if(s.owner >= 0)
-                        tsprite[spritesortcnt].z = ps[p].posz-(12<<8);
-                    else tsprite[spritesortcnt].z = s.z-(51<<8);
-                    if(ps[p].curr_weapon == HANDBOMB_WEAPON)
-                    {
+                    if (s.owner >= 0)
+                        tsprite[spritesortcnt].z = ps[p].posz - (12 << 8);
+                    else tsprite[spritesortcnt].z = s.z - (51 << 8);
+                    if (ps[p].curr_weapon == HANDBOMB_WEAPON) {
                         tsprite[spritesortcnt].xrepeat = 10;
                         tsprite[spritesortcnt].yrepeat = 10;
                     }
-                    else
-                    {
+                    else {
                         tsprite[spritesortcnt].xrepeat = 16;
                         tsprite[spritesortcnt].yrepeat = 16;
                     }
@@ -4952,18 +4715,16 @@ function animatesprites( x, y, a, smoothratio) {
                     spritesortcnt++;
                 }
 
-                if(s.owner == -1)
-                {
-                    k = (((s.ang+3072+128-a)&2047)>>8)&7;
-                    if(k>4)
-                    {
-                        k = 8-k;
+                if (s.owner == -1) {
+                    k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                    if (k > 4) {
+                        k = 8 - k;
                         t.cstat |= 4;
                     }
                     else t.cstat &= ~4;
 
-                    if(sector[t.sectnum].lotag == 2) k += 1795-1405;
-                    else if( (hittype[i].floorz-s.z) > (64<<8) ) k += 60;
+                    if (sector[t.sectnum].lotag == 2) k += 1795 - 1405;
+                    else if ((hittype[i].floorz - s.z) > (64 << 8)) k += 60;
 
                     t.picnum += k;
                     t.pal = ps[p].palookup;
@@ -4971,25 +4732,22 @@ function animatesprites( x, y, a, smoothratio) {
                     throw "goto PALONLY;";
                 }
 
-                if( ps[p].on_crane == -1 && (sector[s.sectnum].lotag&0x7ff) != 1 )
-                {
-                    l = s.z-hittype[ps[p].i].floorz+(3<<8);
-                    if( l > 1024 && s.yrepeat > 32 && s.extra > 0 )
-                        s.yoffset = toInt8(l/(s.yrepeat<<2));
-                    else s.yoffset=0;
-                }
-              
-                if(ps[p].newowner > -1)
-                {
-                    t4 = script[actorscrptr[APLAYER]+1];
-                    t3 = 0;
-                    t1 = script[actorscrptr[APLAYER]+2];
+                if (ps[p].on_crane == -1 && (sector[s.sectnum].lotag & 0x7ff) != 1) {
+                    l = s.z - hittype[ps[p].i].floorz + (3 << 8);
+                    if (l > 1024 && s.yrepeat > 32 && s.extra > 0)
+                        s.yoffset = toInt8(l / (s.yrepeat << 2));
+                    else s.yoffset = 0;
                 }
 
-                if(ud.camerasprite == -1 && ps[p].newowner == -1)
-                    if(s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0 )
-                        if( ud.multimode < 2 || ( ud.multimode > 1 && p == screenpeek ) )
-                        {
+                if (ps[p].newowner > -1) {
+                    t4 = script[actorscrptr[APLAYER] + 1];
+                    t3 = 0;
+                    t1 = script[actorscrptr[APLAYER] + 2];
+                }
+
+                if (ud.camerasprite == -1 && ps[p].newowner == -1)
+                    if (s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0)
+                        if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
                             t.owner = -1;
                             t.xrepeat = t.yrepeat = 0;
                             continue;
@@ -4997,12 +4755,12 @@ function animatesprites( x, y, a, smoothratio) {
 
                 //PALONLY:
 
-                    if( sector[sect].floorpal )
-                        t.pal = sector[sect].floorpal;
+                if (sector[sect].floorpal)
+                    t.pal = sector[sect].floorpal;
 
-                if(s.owner == -1) continue;
+                if (s.owner == -1) continue;
 
-                if( t.z > hittype[i].floorz && t.xrepeat < 32 )
+                if (t.z > hittype[i].floorz && t.xrepeat < 32)
                     t.z = hittype[i].floorz;
 
                 break;
@@ -5022,12 +4780,11 @@ function animatesprites( x, y, a, smoothratio) {
             case DUKELEG:
             case DUKEGUN:
             case DUKETORSO:
-                if(ud.lockout)
-                {
+                if (ud.lockout) {
                     t.xrepeat = t.yrepeat = 0;
                     continue;
                 }
-                if(t.pal == 6) t.shade = -120;
+                if (t.pal == 6) t.shade = -120;
 
             case SCRAP1:
             case SCRAP2:
@@ -5035,39 +4792,38 @@ function animatesprites( x, y, a, smoothratio) {
             case SCRAP4:
             case SCRAP5:
             case SCRAP6:
-            case SCRAP6+1:
-            case SCRAP6+2:
-            case SCRAP6+3:
-            case SCRAP6+4:
-            case SCRAP6+5:
-            case SCRAP6+6:
-            case SCRAP6+7:
+            case SCRAP6 + 1:
+            case SCRAP6 + 2:
+            case SCRAP6 + 3:
+            case SCRAP6 + 4:
+            case SCRAP6 + 5:
+            case SCRAP6 + 6:
+            case SCRAP6 + 7:
 
-                if(hittype[i].picnum == BLIMP && t.picnum == SCRAP1 && s.yvel >= 0)
+                if (hittype[i].picnum == BLIMP && t.picnum == SCRAP1 && s.yvel >= 0)
                     t.picnum = s.yvel;
                 else t.picnum += hittype[i].temp_data[0];
                 t.shade -= 6;
 
-                if( sector[sect].floorpal )
+                if (sector[sect].floorpal)
                     t.pal = sector[sect].floorpal;
                 break;
 
             case WATERBUBBLE:
-                if(sector[t.sectnum].floorpicnum == FLOORSLIME)
-                {
+                if (sector[t.sectnum].floorpicnum == FLOORSLIME) {
                     t.pal = 7;
                     break;
                 }
             default:
 
-                if( sector[sect].floorpal )
+                if (sector[sect].floorpal)
                     t.pal = sector[sect].floorpal;
                 break;
         }
 
-        if( actorscrptr[s.picnum] ) {
+        if (actorscrptr[s.picnum]) {
             printf("todo FIX_00093 in game.c\n");
-           if(t4>10000)
+            if (t4 > 10000)
                 // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
                 // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
                 // close to blimp bug (search for BLIMP)
@@ -5081,47 +4837,43 @@ function animatesprites( x, y, a, smoothratio) {
                 // Lame fix. ok for w32. Doesn't work for other plateform.
                 // How to make a differene between a timer and an address??
             {
-               l = script[t4+8];// *(int32_t *)(t4+8);
+                l = script[t4 + 8];// *(int32_t *)(t4+8);
 
-                switch( l )
-                {
+                switch (l) {
                     case 2:
-                        k = (((s.ang+3072+128-a)&2047)>>8)&1;
+                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 1;
                         break;
 
                     case 3:
                     case 4:
-                        k = (((s.ang+3072+128-a)&2047)>>7)&7;
-                        if(k > 3)
-                        {
+                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 7) & 7;
+                        if (k > 3) {
                             t.cstat |= 4;
-                            k = 7-k;
+                            k = 7 - k;
                         }
                         else t.cstat &= ~4;
                         break;
 
                     case 5:
-                        k = getangle(s.x-x,s.y-y);
-                        k = (((s.ang+3072+128-k)&2047)>>8)&7;
-                        if(k>4)
-                        {
-                            k = 8-k;
+                        k = getangle(s.x - x, s.y - y);
+                        k = (((s.ang + 3072 + 128 - k) & 2047) >> 8) & 7;
+                        if (k > 4) {
+                            k = 8 - k;
                             t.cstat |= 4;
                         }
                         else t.cstat &= ~4;
                         break;
                     case 7:
-                        k = getangle(s.x-x,s.y-y);
-                        k = (((s.ang+3072+128-k)&2047)/170)|0;
-                        if(k>6)
-                        {
-                            k = 12-k;
+                        k = getangle(s.x - x, s.y - y);
+                        k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
+                        if (k > 6) {
+                            k = 12 - k;
                             t.cstat |= 4;
                         }
                         else t.cstat &= ~4;
                         break;
                     case 8:
-                        k = (((s.ang+3072+128-a)&2047)>>8)&7;
+                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
                         t.cstat &= ~4;
                         break;
                     default:
@@ -5129,46 +4881,43 @@ function animatesprites( x, y, a, smoothratio) {
                         break;
                 }
 
-               t.picnum += k + script[t4] + l + t3; //( *(int32_t *)t4 ) + l * t3;
-               printf("FIX_00093 picnum %i\n", t.picnum);
+                t.picnum += k + script[t4] + l + t3; //( *(int32_t *)t4 ) + l * t3;
+                printf("FIX_00093 picnum %i\n", t.picnum);
 
-                if(l > 0)
-                    while(tiles[t.picnum].dim.width == 0 && t.picnum > 0 )
+                if (l > 0)
+                    while (tiles[t.picnum].dim.width == 0 && t.picnum > 0)
                         t.picnum -= l;       //Hack, for actors
 
-                if( hittype[i].dispicnum >= 0)
+                if (hittype[i].dispicnum >= 0)
                     hittype[i].dispicnum = t.picnum;
             }
-            else if(display_mirror == 1)
+            else if (display_mirror == 1)
                 t.cstat |= 4;
         }
 
-        if( s.statnum == 13 || badguy(s) || (s.picnum == APLAYER && s.owner >= 0) )
-            if(t.statnum != 99 && s.picnum != EXPLOSION2 && s.picnum != HANGLIGHT && s.picnum != DOMELITE)
-                if(s.picnum != HOTMEAT)
-                {
-                    if( hittype[i].dispicnum < 0 )
-                    {
+        if (s.statnum == 13 || badguy(s) || (s.picnum == APLAYER && s.owner >= 0))
+            if (t.statnum != 99 && s.picnum != EXPLOSION2 && s.picnum != HANGLIGHT && s.picnum != DOMELITE)
+                if (s.picnum != HOTMEAT) {
+                    if (hittype[i].dispicnum < 0) {
                         hittype[i].dispicnum++;
                         continue;
                     }
-                    else if( ud.shadows && spritesortcnt < (MAXSPRITESONSCREEN-2))
-                    {
-                        var daz,xrep,yrep;
+                    else if (ud.shadows && spritesortcnt < (MAXSPRITESONSCREEN - 2)) {
+                        var daz, xrep, yrep;
 
-                        if( (sector[sect].lotag&0xff) > 2 || s.statnum == 4 || s.statnum == 5 || s.picnum == DRONE || s.picnum == COMMANDER )
+                        if ((sector[sect].lotag & 0xff) > 2 || s.statnum == 4 || s.statnum == 5 || s.picnum == DRONE || s.picnum == COMMANDER)
                             daz = sector[sect].floorz;
                         else
                             daz = hittype[i].floorz;
 
-                        if( (s.z-daz) < (8<<8) )
-                            if( ps[screenpeek].posz < daz ) {
+                        if ((s.z - daz) < (8 << 8))
+                            if (ps[screenpeek].posz < daz) {
                                 t.copyTo(tsprite[spritesortcnt]);
 
                                 tsprite[spritesortcnt].statnum = 99;
 
-                                tsprite[spritesortcnt].yrepeat = ( t.yrepeat>>3 );
-                                if(t.yrepeat < 4) t.yrepeat = 4;
+                                tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
+                                if (t.yrepeat < 4) t.yrepeat = 4;
 
                                 tsprite[spritesortcnt].shade = 127;
                                 tsprite[spritesortcnt].cstat |= 2;
@@ -5184,20 +4933,18 @@ function animatesprites( x, y, a, smoothratio) {
                             }
                     }
 
-                    if( ps[screenpeek].heat_amount > 0 && ps[screenpeek].heat_on )
-                    {
+                    if (ps[screenpeek].heat_amount > 0 && ps[screenpeek].heat_on) {
                         t.pal = 6;
                         t.shade = 0;
                     }
                 }
 
 
-        switch(s.picnum)
-        {
+        switch (s.picnum) {
             case LASERLINE:
-                if(sector[t.sectnum].lotag == 2) t.pal = 8;
-                t.z = sprite[s.owner].z-(3<<8);
-                if(lasermode == 2 && ps[screenpeek].heat_on == 0 )
+                if (sector[t.sectnum].lotag == 2) t.pal = 8;
+                t.z = sprite[s.owner].z - (3 << 8);
+                if (lasermode == 2 && ps[screenpeek].heat_on == 0)
                     t.yrepeat = 0;
             case EXPLOSION2:
             case EXPLOSION2BOT:
@@ -5210,10 +4957,9 @@ function animatesprites( x, y, a, smoothratio) {
             case SHRINKEREXPLOSION:
             case RPG:
             case FLOORFLAME:
-                if(t.picnum == EXPLOSION2)
-                {
+                if (t.picnum == EXPLOSION2) {
                     ps[screenpeek].visibility = -127;
-                    lastvisinc = totalclock+32;
+                    lastvisinc = totalclock + 32;
                     restorepalette = 1;
                 }
                 t.shade = -127;
@@ -5222,79 +4968,74 @@ function animatesprites( x, y, a, smoothratio) {
             case FIRE2:
             case BURNING:
             case BURNING2:
-                if( sprite[s.owner].picnum != TREE1 && sprite[s.owner].picnum != TREE2 )
+                if (sprite[s.owner].picnum != TREE1 && sprite[s.owner].picnum != TREE2)
                     t.z = sector[t.sectnum].floorz;
                 t.shade = -127;
                 break;
             case COOLEXPLOSION1:
                 t.shade = -127;
-                t.picnum += (s.shade>>1);
+                t.picnum += (s.shade >> 1);
                 break;
             case PLAYERONWATER:
 
-                k = (((t.ang+3072+128-a)&2047)>>8)&7;
-                if(k>4)
-                {
-                    k = 8-k;
+                k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                if (k > 4) {
+                    k = 8 - k;
                     t.cstat |= 4;
                 }
                 else t.cstat &= ~4;
 
-                t.picnum = s.picnum+k+((hittype[i].temp_data[0]<4)*5);
+                t.picnum = s.picnum + k + ((hittype[i].temp_data[0] < 4) * 5);
                 t.shade = sprite[s.owner].shade;
 
                 break;
 
             case WATERSPLASH2:
-                t.picnum = WATERSPLASH2+t1;
+                t.picnum = WATERSPLASH2 + t1;
                 break;
             case REACTOR2:
                 t.picnum = s.picnum + hittype[i].temp_data[2];
                 break;
             case SHELL:
-                t.picnum = s.picnum+(hittype[i].temp_data[0]&1);
+                t.picnum = s.picnum + (hittype[i].temp_data[0] & 1);
             case SHOTGUNSHELL:
                 t.cstat |= 12;
-                if(hittype[i].temp_data[0] > 1) t.cstat &= ~4;
-                if(hittype[i].temp_data[0] > 2) t.cstat &= ~12;
+                if (hittype[i].temp_data[0] > 1) t.cstat &= ~4;
+                if (hittype[i].temp_data[0] > 2) t.cstat &= ~12;
                 break;
             case FRAMEEFFECT1:
             case FRAMEEFFECT1_13CON:
-                if(s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS)
-                {
-                    if(sprite[s.owner].picnum == APLAYER)
-                        if(ud.camerasprite == -1)
-                            if(screenpeek == sprite[s.owner].yvel && display_mirror == 0)
-                            {
+                if (s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS) {
+                    if (sprite[s.owner].picnum == APLAYER)
+                        if (ud.camerasprite == -1)
+                            if (screenpeek == sprite[s.owner].yvel && display_mirror == 0) {
                                 t.owner = -1;
                                 break;
                             }
-                    if( (sprite[s.owner].cstat&32768) == 0 )
-                    {
+                    if ((sprite[s.owner].cstat & 32768) == 0) {
                         t.picnum = hittype[s.owner].dispicnum;
                         t.pal = sprite[s.owner].pal;
                         t.shade = sprite[s.owner].shade;
                         t.ang = sprite[s.owner].ang;
-                        t.cstat = 2|sprite[s.owner].cstat;
+                        t.cstat = 2 | sprite[s.owner].cstat;
                     }
                 }
                 break;
 
             case CAMERA1:
             case RAT:
-                k = (((t.ang+3072+128-a)&2047)>>8)&7;
-                if(k>4)
-                {
-                    k = 8-k;
+                k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                if (k > 4) {
+                    k = 8 - k;
                     t.cstat |= 4;
                 }
                 else t.cstat &= ~4;
-                t.picnum = s.picnum+k;
+                t.picnum = s.picnum + k;
                 break;
         }
 
         hittype[i].dispicnum = t.picnum;
-        if(sector[t.sectnum].floorpicnum == MIRROR)
+        if (sector[t.sectnum].floorpicnum == MIRROR)
             t.xrepeat = t.yrepeat = 0;
     }
 }
@@ -5329,26 +5070,23 @@ var cheatquotes = [
     //    {"ending"}
 ];
 
-var cheatbuf = new Uint8Array(10),cheatbuflen=0;
+var cheatbuf = new Uint8Array(10), cheatbuflen = 0;
 function cheats() {
     var ch, i, j, k, weapon;
 
-    if( (ps[myconnectindex].gm&MODE_TYPE) || (ps[myconnectindex].gm&MODE_MENU))
+    if ((ps[myconnectindex].gm & MODE_TYPE) || (ps[myconnectindex].gm & MODE_MENU))
         return;
 
-    if ( ps[myconnectindex].cheat_phase == 1)
-    {
-        while (KB.keyWaiting())
-        {
+    if (ps[myconnectindex].cheat_phase == 1) {
+        while (KB.keyWaiting()) {
             FOUNDCHEAT:
                 while (true) {
-                    
+
                     ch = String.fromCharCode(KB_Getch());
                     ch = ch.toLowerCase();
-                    console.log("char: %s",ch)
+                    console.log("char: %s", ch)
 
-                    if( !( (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') ) )
-                    {
+                    if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))) {
                         ps[myconnectindex].cheat_phase = 0;
                         //             FTA(46,ps[myconnectindex]);
                         return;
@@ -5356,18 +5094,15 @@ function cheats() {
                     cheatbuf[cheatbuflen++] = ch.charCodeAt(0);
                     cheatbuf[cheatbuflen] = 0;
 
-                    if(cheatbuflen > 11)
-                    {
+                    if (cheatbuflen > 11) {
                         ps[myconnectindex].cheat_phase = 0;
                         return;
                     }
 
-                    for(k = 0;k < NUMCHEATCODES;k++)
-                    {
-                        for(j = 0;j<cheatbuflen;j++)
-                        {
+                    for (k = 0; k < NUMCHEATCODES; k++) {
+                        for (j = 0; j < cheatbuflen; j++) {
                             if (cheatquotes[k] && (cheatbuf[j] == cheatquotes[k].charCodeAt(j) || (cheatquotes[k][j] == '#' && ch >= '0' && ch <= '9'))) {
-                                if (!cheatquotes[k][j + 1] ) { break FOUNDCHEAT; /*goto FOUNDCHEAT;*/ }
+                                if (!cheatquotes[k][j + 1]) { break FOUNDCHEAT; /*goto FOUNDCHEAT;*/ }
                                 if (j == cheatbuflen - 1) return;
                             }
                             else break;
@@ -5380,395 +5115,372 @@ function cheats() {
 
             //FOUNDCHEAT:
             {
-                    switch(k)
-                    {
-                        case 0: // cornholio
-                        case 18: // kroz
+                switch (k) {
+                    case 0: // cornholio
+                    case 18: // kroz
 
-                            ud.god = 1-ud.god;
+                        ud.god = 1 - ud.god;
 
-                            if(ud.god)
-                            { // set on
-                                pus = 1;
-                                pub = 1;
-                                sprite[ps[myconnectindex].i].cstat = 257;
+                        if (ud.god) { // set on
+                            pus = 1;
+                            pub = 1;
+                            sprite[ps[myconnectindex].i].cstat = 257;
 
-                                hittype[ps[myconnectindex].i].temp_data[0] = 0;
-                                hittype[ps[myconnectindex].i].temp_data[1] = 0;
-                                hittype[ps[myconnectindex].i].temp_data[2] = 0;
-                                hittype[ps[myconnectindex].i].temp_data[3] = 0;
-                                hittype[ps[myconnectindex].i].temp_data[4] = 0;
-                                hittype[ps[myconnectindex].i].temp_data[5] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[0] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[1] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[2] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[3] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[4] = 0;
+                            hittype[ps[myconnectindex].i].temp_data[5] = 0;
 
-                                sprite[ps[myconnectindex].i].hitag = 0;
-                                sprite[ps[myconnectindex].i].lotag = 0;
-                                sprite[ps[myconnectindex].i].pal =
-                                    ps[myconnectindex].palookup;
+                            sprite[ps[myconnectindex].i].hitag = 0;
+                            sprite[ps[myconnectindex].i].lotag = 0;
+                            sprite[ps[myconnectindex].i].pal =
+                                ps[myconnectindex].palookup;
 
-                                FTA(17,ps[myconnectindex],1);
-                            }
-                            else // set off
-                            {
-                                ud.god = 0;
-                                sprite[ps[myconnectindex].i].extra = max_player_health;
-                                hittype[ps[myconnectindex].i].extra = -1;
-                                ps[myconnectindex].last_extra = max_player_health;
-                                FTA(18,ps[myconnectindex],1);
-                            }
-
+                            FTA(17, ps[myconnectindex], 1);
+                        }
+                        else // set off
+                        {
+                            ud.god = 0;
                             sprite[ps[myconnectindex].i].extra = max_player_health;
-                            hittype[ps[myconnectindex].i].extra = 0;
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
+                            hittype[ps[myconnectindex].i].extra = -1;
+                            ps[myconnectindex].last_extra = max_player_health;
+                            FTA(18, ps[myconnectindex], 1);
+                        }
 
-                            return;
+                        sprite[ps[myconnectindex].i].extra = max_player_health;
+                        hittype[ps[myconnectindex].i].extra = 0;
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
 
-                        case 1: // stuff
+                        return;
 
-                            if(VOLUMEONE)
-                                j = 6;
-                            else
-                                j = 0;
+                    case 1: // stuff
 
-                            for ( weapon = PISTOL_WEAPON;weapon < MAX_WEAPONS-j;weapon++ )
-                                ps[myconnectindex].gotweapon[weapon]  = 1;
+                        if (VOLUMEONE)
+                            j = 6;
+                        else
+                            j = 0;
 
-                            for ( weapon = PISTOL_WEAPON;
-                                weapon < (MAX_WEAPONS-j);
-                                weapon++ )
-                                addammo( weapon, ps[myconnectindex], max_ammo_amount[weapon] );
+                        for (weapon = PISTOL_WEAPON; weapon < MAX_WEAPONS - j; weapon++)
+                            ps[myconnectindex].gotweapon[weapon] = 1;
 
-                            ps[myconnectindex].ammo_amount[GROW_WEAPON] = 50;
+                        for (weapon = PISTOL_WEAPON;
+                            weapon < (MAX_WEAPONS - j) ;
+                            weapon++)
+                            addammo(weapon, ps[myconnectindex], max_ammo_amount[weapon]);
 
-                            ps[myconnectindex].steroids_amount =         400;
-                            ps[myconnectindex].heat_amount     =        1200;
-                            ps[myconnectindex].boot_amount          =    200;
-                            ps[myconnectindex].shield_amount =           100;
-                            ps[myconnectindex].scuba_amount =            6400;
-                            ps[myconnectindex].holoduke_amount =         2400;
-                            ps[myconnectindex].jetpack_amount =          1600;
-                            ps[myconnectindex].firstaid_amount =         max_player_health;
+                        ps[myconnectindex].ammo_amount[GROW_WEAPON] = 50;
 
-                            ps[myconnectindex].got_access =              7;
-                            FTA(5,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
+                        ps[myconnectindex].steroids_amount = 400;
+                        ps[myconnectindex].heat_amount = 1200;
+                        ps[myconnectindex].boot_amount = 200;
+                        ps[myconnectindex].shield_amount = 100;
+                        ps[myconnectindex].scuba_amount = 6400;
+                        ps[myconnectindex].holoduke_amount = 2400;
+                        ps[myconnectindex].jetpack_amount = 1600;
+                        ps[myconnectindex].firstaid_amount = max_player_health;
 
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].inven_icon = 1;
-                            return;
+                        ps[myconnectindex].got_access = 7;
+                        FTA(5, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
 
-                        case 2:  // dnscotty###
-                        case 10: // skill#
-                            if(k == 2) {
-                                var volnume,levnume;
-                                volnume = cheatbuf[6] - '0'.charCodeAt(0);
-                                levnume = (cheatbuf[7] - '0'.charCodeAt(0)) * 10 + (cheatbuf[8] - '0'.charCodeAt(0));
-                  
-                                volnume--;
-                                levnume--;
-                                if (VOLUMEONE)
-                                {
-                                    if( volnume > 0 )
-                                    {
-                                        ps[myconnectindex].cheat_phase = 0;
-                                        KB.flushKeyboardQueue();
-                                        return;
-                                    }
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].inven_icon = 1;
+                        return;
+
+                    case 2:  // dnscotty###
+                    case 10: // skill#
+                        if (k == 2) {
+                            var volnume, levnume;
+                            volnume = cheatbuf[6] - '0'.charCodeAt(0);
+                            levnume = (cheatbuf[7] - '0'.charCodeAt(0)) * 10 + (cheatbuf[8] - '0'.charCodeAt(0));
+
+                            volnume--;
+                            levnume--;
+                            if (VOLUMEONE) {
+                                if (volnume > 0) {
+                                    ps[myconnectindex].cheat_phase = 0;
+                                    KB.flushKeyboardQueue();
+                                    return;
                                 }
+                            }
 
-                                if((volnume > 4)&&PLUTOPAK)
-                                {
+                            if ((volnume > 4) && PLUTOPAK) {
+                                ps[myconnectindex].cheat_phase = 0;
+                                KB.flushKeyboardQueue();
+                                return;
+                            }
+                            else
+
+                                if ((volnume > 3) && !PLUTOPAK) {
                                     ps[myconnectindex].cheat_phase = 0;
                                     KB.flushKeyboardQueue();
                                     return;
                                 }
                                 else
 
-                                    if((volnume > 3)&&!PLUTOPAK)
-                                    {
-                                        ps[myconnectindex].cheat_phase = 0;
-                                        KB.flushKeyboardQueue();
-                                        return;
+                                    if (volnume == 0) {
+                                        if (levnume > 5) {
+                                            ps[myconnectindex].cheat_phase = 0;
+                                            KB.flushKeyboardQueue();
+                                            return;
+                                        }
                                     }
-                                    else
-
-                                        if(volnume == 0)
-                                        {
-                                            if(levnume > 5)
-                                            {
-                                                ps[myconnectindex].cheat_phase = 0;
-                                                KB.flushKeyboardQueue();
-                                                return;
-                                            }
+                                    else {
+                                        if (levnume >= 11) {
+                                            ps[myconnectindex].cheat_phase = 0;
+                                            KB.flushKeyboardQueue();
+                                            return;
                                         }
-                                        else
-                                        {
-                                            if(levnume >= 11)
-                                            {
-                                                ps[myconnectindex].cheat_phase = 0;
-                                                KB.flushKeyboardQueue();
-                                                return;
-                                            }
-                                        }
+                                    }
 
-                                ud.m_volume_number = ud.volume_number = volnume;
-                                ud.m_level_number = ud.level_number = levnume;
+                            ud.m_volume_number = ud.volume_number = volnume;
+                            ud.m_level_number = ud.level_number = levnume;
 
+                        }
+                        else ud.m_player_skill = ud.player_skill =
+                            cheatbuf[5] - '1'.charCodeAt(0);
+
+                        if (numplayers > 1 && myconnectindex == connecthead) {
+                            tempbuf[0] = 5;
+                            tempbuf[1] = ud.m_level_number;
+                            tempbuf[2] = ud.m_volume_number;
+                            tempbuf[3] = ud.m_player_skill;
+                            tempbuf[4] = ud.m_monsters_off;
+                            tempbuf[5] = ud.m_respawn_monsters;
+                            tempbuf[6] = ud.m_respawn_items;
+                            tempbuf[7] = ud.m_respawn_inventory;
+                            tempbuf[8] = ud.m_coop;
+                            tempbuf[9] = ud.m_marker;
+                            tempbuf[10] = ud.m_ffire;
+
+                            throw "todo sendpacket stuff"
+                            //////for(i=connecthead;i>=0;i=connectpoint2[i])
+                            //////    sendpacket(i,(uint8_t*)tempbuf,11);
+                        }
+                        else ps[myconnectindex].gm |= MODE_RESTART;
+
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
+
+                    case 3: // coords
+                        ps[myconnectindex].cheat_phase = 0;
+                        ud.coords = 1 - ud.coords;
+                        KB.flushKeyboardQueue();
+                        return;
+
+                    case 4: // view
+                        if (ps[myconnectindex].over_shoulder_on)
+                            ps[myconnectindex].over_shoulder_on = 0;
+                        else {
+                            ps[myconnectindex].over_shoulder_on = 1;
+                            cameradist = 0;
+                            cameraclock = totalclock;
+                        }
+                        // FTA(22,ps[myconnectindex],1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
+
+                    case 5: // time
+                        // FTA(21,ps[myconnectindex]);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
+
+                    case 6: // unlock
+                        for (i = numsectors - 1; i >= 0; i--) //Unlock
+                        {
+                            j = sector[i].lotag;
+                            if (j == -1 || j == 32767) continue;
+                            if ((j & 0x7fff) > 2) {
+                                if (j & (0xffff - 16384))
+                                    sector[i].lotag &= (0xffff - 16384);
+                                operatesectors(i, ps[myconnectindex].i);
                             }
-                            else ud.m_player_skill = ud.player_skill =
-                                cheatbuf[5] - '1'.charCodeAt(0);
+                        }
+                        operateforcefields(ps[myconnectindex].i, -1);
 
-                            if(numplayers > 1 && myconnectindex == connecthead)
-                            {
-                                tempbuf[0] = 5;
-                                tempbuf[1] = ud.m_level_number;
-                                tempbuf[2] = ud.m_volume_number;
-                                tempbuf[3] = ud.m_player_skill;
-                                tempbuf[4] = ud.m_monsters_off;
-                                tempbuf[5] = ud.m_respawn_monsters;
-                                tempbuf[6] = ud.m_respawn_items;
-                                tempbuf[7] = ud.m_respawn_inventory;
-                                tempbuf[8] = ud.m_coop;
-                                tempbuf[9] = ud.m_marker;
-                                tempbuf[10] = ud.m_ffire;
+                        FTA(100, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                                throw "todo sendpacket stuff"
-                                //////for(i=connecthead;i>=0;i=connectpoint2[i])
-                                //////    sendpacket(i,(uint8_t*)tempbuf,11);
-                            }
-                            else ps[myconnectindex].gm |= MODE_RESTART;
+                    case 7: // cashman
+                        ud.cashman = 1 - ud.cashman;
+                        KB.clearKeyDown(sc_N);
+                        ps[myconnectindex].cheat_phase = 0;
+                        return;
 
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 8: // items
+                        ps[myconnectindex].steroids_amount = 400;
+                        ps[myconnectindex].heat_amount = 1200;
+                        ps[myconnectindex].boot_amount = 200;
+                        ps[myconnectindex].shield_amount = 100;
+                        ps[myconnectindex].scuba_amount = 6400;
+                        ps[myconnectindex].holoduke_amount = 2400;
+                        ps[myconnectindex].jetpack_amount = 1600;
 
-                        case 3: // coords
-                            ps[myconnectindex].cheat_phase = 0;
-                            ud.coords = 1-ud.coords;
-                            KB.flushKeyboardQueue();
-                            return;
+                        ps[myconnectindex].firstaid_amount = max_player_health;
+                        ps[myconnectindex].got_access = 7;
+                        FTA(5, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 4: // view
-                            if( ps[myconnectindex].over_shoulder_on )
-                                ps[myconnectindex].over_shoulder_on = 0;
-                            else
-                            {
-                                ps[myconnectindex].over_shoulder_on = 1;
-                                cameradist = 0;
-                                cameraclock = totalclock;
-                            }
-                            // FTA(22,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 9: // rate
+                        ud.tickrate ^= 1;
+                        vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 5: // time
-                            // FTA(21,ps[myconnectindex]);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 11: // beta
+                        FTA(105, ps[myconnectindex], 1);
+                        KB.clearKeyDown(sc_H);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 6: // unlock
-                            for(i=numsectors-1;i>=0;i--) //Unlock
-                            {
-                                j = sector[i].lotag;
-                                if(j == -1 || j == 32767) continue;
-                                if( (j & 0x7fff) > 2 )
-                                {
-                                    if( j&(0xffff-16384) )
-                                        sector[i].lotag &= (0xffff-16384);
-                                    operatesectors(i,ps[myconnectindex].i);
-                                }
-                            }
-                            operateforcefields(ps[myconnectindex].i,-1);
+                    case 12: // hyper
+                        ps[myconnectindex].steroids_amount = 399;
+                        ps[myconnectindex].heat_amount = 1200;
+                        ps[myconnectindex].cheat_phase = 0;
+                        FTA(37, ps[myconnectindex], 1);
+                        KB.flushKeyboardQueue();
+                        return;
 
-                            FTA(100,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 13: // monsters
+                        if (actor_tog == 3) actor_tog = 0;
+                        actor_tog++;
+                        ps[screenpeek].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 7: // cashman
-                            ud.cashman = 1-ud.cashman;
-                            KB.clearKeyDown(sc_N);
-                            ps[myconnectindex].cheat_phase = 0;
-                            return;
+                    case 14: // <RESERVED>
+                    case 25: // ??
+                        ud.eog = 1;
+                        ps[myconnectindex].gm |= MODE_EOL;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 8: // items
-                            ps[myconnectindex].steroids_amount =         400;
-                            ps[myconnectindex].heat_amount     =        1200;
-                            ps[myconnectindex].boot_amount          =    200;
-                            ps[myconnectindex].shield_amount =           100;
-                            ps[myconnectindex].scuba_amount =            6400;
-                            ps[myconnectindex].holoduke_amount =         2400;
-                            ps[myconnectindex].jetpack_amount =          1600;
+                    case 15: // <RESERVED>
+                        ps[myconnectindex].gm = MODE_EOL;
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                            ps[myconnectindex].firstaid_amount =         max_player_health;
-                            ps[myconnectindex].got_access =              7;
-                            FTA(5,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 16: // todd
+                        FTA(99, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 9: // rate
-                            ud.tickrate ^= 1;
-                            vscrn(); // FIX_00056: Refresh issue w/FPS, small Weapon and custom FTA, when screen resized down
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 17: // showmap
+                        ud.showallmap = 1 - ud.showallmap;
+                        if (ud.showallmap) {
+                            for (i = 0; i < (MAXSECTORS >> 3) ; i++)
+                                show2dsector[i] = 255;
+                            for (i = 0; i < (MAXWALLS >> 3) ; i++)
+                                show2dwall[i] = 255;
+                            FTA(111, ps[myconnectindex], 1);
+                        }
+                        else {
+                            for (i = 0; i < (MAXSECTORS >> 3) ; i++)
+                                show2dsector[i] = 0;
+                            for (i = 0; i < (MAXWALLS >> 3) ; i++)
+                                show2dwall[i] = 0;
+                            FTA(1, ps[myconnectindex], 1);
+                        }
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.flushKeyboardQueue();
+                        return;
 
-                        case 11: // beta
-                            FTA(105,ps[myconnectindex],1);
-                            KB.clearKeyDown(sc_H);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 19: // allen
+                        FTA(79, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        KB.clearKeyDown(sc_N);
+                        return;
 
-                        case 12: // hyper
-                            ps[myconnectindex].steroids_amount = 399;
-                            ps[myconnectindex].heat_amount = 1200;
-                            ps[myconnectindex].cheat_phase = 0;
-                            FTA(37,ps[myconnectindex],1);
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 20: // clip
+                        ud.clipping = 1 - ud.clipping;
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].cheat_phase = 0;
+                        FTA(112 + ud.clipping, ps[myconnectindex], 1);
+                        return;
 
-                        case 13: // monsters
-                            if(actor_tog == 3) actor_tog = 0;
-                            actor_tog++;
-                            ps[screenpeek].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 21: // weapons
+                        if (VOLUMEONE)
+                            j = 6;
+                        else
+                            j = 0;
 
-                        case 14: // <RESERVED>
-                        case 25: // ??
-                            ud.eog = 1;
-                            ps[myconnectindex].gm |= MODE_EOL;
-                            KB.flushKeyboardQueue();
-                            return;
+                        for (weapon = PISTOL_WEAPON; weapon < MAX_WEAPONS - j; weapon++) {
+                            addammo(weapon, ps[myconnectindex], max_ammo_amount[weapon]);
+                            ps[myconnectindex].gotweapon[weapon] = 1;
+                        }
 
-                        case 15: // <RESERVED>
-                            ps[myconnectindex].gm = MODE_EOL;
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].cheat_phase = 0;
+                        FTA(119, ps[myconnectindex], 1);
+                        return;
 
-                        case 16: // todd
-                            FTA(99,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 22: // inventory
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].cheat_phase = 0;
+                        ps[myconnectindex].steroids_amount = 400;
+                        ps[myconnectindex].heat_amount = 1200;
+                        ps[myconnectindex].boot_amount = 200;
+                        ps[myconnectindex].shield_amount = 100;
+                        ps[myconnectindex].scuba_amount = 6400;
+                        ps[myconnectindex].holoduke_amount = 2400;
+                        ps[myconnectindex].jetpack_amount = 1600;
+                        ps[myconnectindex].firstaid_amount = max_player_health;
+                        FTA(120, ps[myconnectindex], 1);
+                        ps[myconnectindex].cheat_phase = 0;
+                        return;
 
-                        case 17: // showmap
-                            ud.showallmap = 1-ud.showallmap;
-                            if(ud.showallmap)
-                            {
-                                for(i=0;i<(MAXSECTORS>>3);i++)
-                                    show2dsector[i] = 255;
-                                for(i=0;i<(MAXWALLS>>3);i++)
-                                    show2dwall[i] = 255;
-                                FTA(111,ps[myconnectindex],1);
-                            }
-                            else
-                            {
-                                for(i=0;i<(MAXSECTORS>>3);i++)
-                                    show2dsector[i] = 0;
-                                for(i=0;i<(MAXWALLS>>3);i++)
-                                    show2dwall[i] = 0;
-                                FTA(1,ps[myconnectindex],1);
-                            }
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.flushKeyboardQueue();
-                            return;
+                    case 23: // keys
+                        ps[myconnectindex].got_access = 7;
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].cheat_phase = 0;
+                        FTA(121, ps[myconnectindex], 1);
+                        return;
 
-                        case 19: // allen
-                            FTA(79,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            KB.clearKeyDown(sc_N);
-                            return;
-
-                        case 20: // clip
-                            ud.clipping = 1-ud.clipping;
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].cheat_phase = 0;
-                            FTA(112+ud.clipping,ps[myconnectindex],1);
-                            return;
-
-                        case 21: // weapons
-                            if(VOLUMEONE)
-                                j = 6;
-                            else
-                                j = 0;
-
-                            for ( weapon = PISTOL_WEAPON;weapon < MAX_WEAPONS-j;weapon++ )
-                            {
-                                addammo( weapon, ps[myconnectindex], max_ammo_amount[weapon] );
-                                ps[myconnectindex].gotweapon[weapon]  = 1;
-                            }
-
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].cheat_phase = 0;
-                            FTA(119,ps[myconnectindex],1);
-                            return;
-
-                        case 22: // inventory
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].cheat_phase = 0;
-                            ps[myconnectindex].steroids_amount =         400;
-                            ps[myconnectindex].heat_amount     =        1200;
-                            ps[myconnectindex].boot_amount          =    200;
-                            ps[myconnectindex].shield_amount =           100;
-                            ps[myconnectindex].scuba_amount =            6400;
-                            ps[myconnectindex].holoduke_amount =         2400;
-                            ps[myconnectindex].jetpack_amount =          1600;
-                            ps[myconnectindex].firstaid_amount =         max_player_health;
-                            FTA(120,ps[myconnectindex],1);
-                            ps[myconnectindex].cheat_phase = 0;
-                            return;
-
-                        case 23: // keys
-                            ps[myconnectindex].got_access =              7;
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].cheat_phase = 0;
-                            FTA(121,ps[myconnectindex],1);
-                            return;
-
-                        case 24: // debug
-                            debug_on = 1-debug_on;
-                            KB.flushKeyboardQueue();
-                            ps[myconnectindex].cheat_phase = 0;
-                            break;
-                    }
+                    case 24: // debug
+                        debug_on = 1 - debug_on;
+                        KB.flushKeyboardQueue();
+                        ps[myconnectindex].cheat_phase = 0;
+                        break;
                 }
+            }
         }
     }
 
-    else
-    {
-        if( KB.keyPressed(sc_D) )
-        {
-            if( ps[myconnectindex].cheat_phase >= 0 && numplayers < 2 && ud.recstat == 0)
+    else {
+        if (KB.keyPressed(sc_D)) {
+            if (ps[myconnectindex].cheat_phase >= 0 && numplayers < 2 && ud.recstat == 0)
                 ps[myconnectindex].cheat_phase = -1;
         }
 
-        if( KB.keyPressed(sc_N) )
-        {
-            if( ps[myconnectindex].cheat_phase == -1 )
-            {
-                if(ud.player_skill == 4)
-                {
-                    FTA(22,ps[myconnectindex],1);
+        if (KB.keyPressed(sc_N)) {
+            if (ps[myconnectindex].cheat_phase == -1) {
+                if (ud.player_skill == 4) {
+                    FTA(22, ps[myconnectindex], 1);
                     ps[myconnectindex].cheat_phase = 0;
                 }
-                else
-                {
+                else {
                     ps[myconnectindex].cheat_phase = 1;
                     //                    FTA(25,ps[myconnectindex]);
                     cheatbuflen = 0;
                 }
                 KB.flushKeyboardQueue();
             }
-            else if(ps[myconnectindex].cheat_phase != 0)
-            {
+            else if (ps[myconnectindex].cheat_phase != 0) {
                 ps[myconnectindex].cheat_phase = 0;
                 KB.clearKeyDown(sc_D);
                 KB.clearKeyDown(sc_N);
@@ -5779,60 +5491,50 @@ function cheats() {
 
 //6626
 var nonsharedtimer;
-function nonsharedkeys()
-{
-    var i,ch;
+function nonsharedkeys() {
+    var i, ch;
     var j;
     var text = "";
 
 
-    if(ud.recstat == 2)
-    {
+    if (ud.recstat == 2) {
         var noshareinfo = new ControlInfo();
-        Control.getInput( noshareinfo );
+        Control.getInput(noshareinfo);
     }
-    
-    if( KB.keyPressed( sc_F12 ) )
-    {
-        KB.clearKeyDown( sc_F12 );
+
+    if (KB.keyPressed(sc_F12)) {
+        KB.clearKeyDown(sc_F12);
         takescreenshot();
         // FTA(103,ps[myconnectindex]); done better in takescreenshot()
     }
 
-    if( !ALT_IS_PRESSED && ud.overhead_on == 0)
-    {
-        if( ACTION( gamefunc_Enlarge_Screen ) )
-        {
-            CONTROL_ClearAction( gamefunc_Enlarge_Screen );
-            if(ud.screen_size > 0)
+    if (!ALT_IS_PRESSED && ud.overhead_on == 0) {
+        if (ACTION(gamefunc_Enlarge_Screen)) {
+            CONTROL_ClearAction(gamefunc_Enlarge_Screen);
+            if (ud.screen_size > 0)
                 sound(THUD);
 
             // FIX_00027: Added an extra small statusbar (HUD)
-            if (ud.screen_size==4)
-            {
+            if (ud.screen_size == 4) {
                 ud.extended_screen_size++;
-                if(ud.extended_screen_size==2)
-                {
+                if (ud.extended_screen_size == 2) {
                     ud.extended_screen_size = 1;
                     ud.screen_size -= 4;
                 }
             }
             else
-                ud.screen_size -= 4;	
+                ud.screen_size -= 4;
             vscrn();
         }
-        if( ACTION( gamefunc_Shrink_Screen ) )
-        {
-            CONTROL_ClearAction( gamefunc_Shrink_Screen );
-            if(ud.screen_size < 64) sound(THUD);
+        if (ACTION(gamefunc_Shrink_Screen)) {
+            CONTROL_ClearAction(gamefunc_Shrink_Screen);
+            if (ud.screen_size < 64) sound(THUD);
 
             // FIX_00027: Added an extra small statusbar (HUD)
-            if (ud.screen_size==4)
-            {
+            if (ud.screen_size == 4) {
                 ud.extended_screen_size--;
-                if(ud.extended_screen_size<0)
-                {
-                    ud.extended_screen_size=0;
+                if (ud.extended_screen_size < 0) {
+                    ud.extended_screen_size = 0;
                     ud.screen_size += 4;
                 }
             }
@@ -5841,109 +5543,99 @@ function nonsharedkeys()
             vscrn();
         }
 
-        if(ud.screen_size < 4)
+        if (ud.screen_size < 4)
             ud.extended_screen_size = 1;
-        else if(ud.screen_size > 4)
+        else if (ud.screen_size > 4)
             ud.extended_screen_size = 0;
 
     }
 
-    if( ps[myconnectindex].cheat_phase == 1 || ps[myconnectindex].gm&(MODE_MENU|MODE_TYPE)) return;
+    if (ps[myconnectindex].cheat_phase == 1 || ps[myconnectindex].gm & (MODE_MENU | MODE_TYPE)) return;
 
-    if( ACTION(gamefunc_See_Coop_View) && ( ud.coop == 1 || ud.recstat == 2) )
-    {
-        CONTROL_ClearAction( gamefunc_See_Coop_View );
+    if (ACTION(gamefunc_See_Coop_View) && (ud.coop == 1 || ud.recstat == 2)) {
+        CONTROL_ClearAction(gamefunc_See_Coop_View);
         screenpeek = connectpoint2[screenpeek];
-        if(screenpeek == -1) screenpeek = connecthead;
+        if (screenpeek == -1) screenpeek = connecthead;
         restorepalette = 1;
     }
 
-    if( ud.multimode > 1 && ACTION(gamefunc_Show_Opponents_Weapon) )
-    {
+    if (ud.multimode > 1 && ACTION(gamefunc_Show_Opponents_Weapon)) {
         CONTROL_ClearAction(gamefunc_Show_Opponents_Weapon);
-        ud.showweapons = 1-ud.showweapons;
-        FTA(82-ud.showweapons,ps[screenpeek],1);
+        ud.showweapons = 1 - ud.showweapons;
+        FTA(82 - ud.showweapons, ps[screenpeek], 1);
     }
 
-    if( ACTION(gamefunc_Toggle_Crosshair) )
-    {
+    if (ACTION(gamefunc_Toggle_Crosshair)) {
         CONTROL_ClearAction(gamefunc_Toggle_Crosshair);
-        ud.crosshair = 1-ud.crosshair;
-        FTA(21-ud.crosshair,ps[screenpeek],1);
+        ud.crosshair = 1 - ud.crosshair;
+        FTA(21 - ud.crosshair, ps[screenpeek], 1);
     }
 
-    if(ud.overhead_on && ACTION(gamefunc_Map_Follow_Mode) )
-    {
+    if (ud.overhead_on && ACTION(gamefunc_Map_Follow_Mode)) {
         CONTROL_ClearAction(gamefunc_Map_Follow_Mode);
-        ud.scrollmode = 1-ud.scrollmode;
-        if(ud.scrollmode)
-        {
+        ud.scrollmode = 1 - ud.scrollmode;
+        if (ud.scrollmode) {
             ud.folx = ps[screenpeek].oposx;
             ud.foly = ps[screenpeek].oposy;
             ud.fola = ps[screenpeek].oang;
         }
-        FTA(83+ud.scrollmode,ps[myconnectindex],1);
+        FTA(83 + ud.scrollmode, ps[myconnectindex], 1);
     }
 
-    if( SHIFTS_IS_PRESSED || ALT_IS_PRESSED )
-    {
+    if (SHIFTS_IS_PRESSED || ALT_IS_PRESSED) {
         i = 0;
-        if( KB.keyPressed( sc_F1) ) { KB.clearKeyDown(sc_F1);i = 1; }
-        if( KB.keyPressed( sc_F2) ) { KB.clearKeyDown(sc_F2);i = 2; }
-        if( KB.keyPressed( sc_F3) ) { KB.clearKeyDown(sc_F3);i = 3; }
-        if( KB.keyPressed( sc_F4) ) { KB.clearKeyDown(sc_F4);i = 4; }
-        if( KB.keyPressed( sc_F5) ) { KB.clearKeyDown(sc_F5);i = 5; }
-        if( KB.keyPressed( sc_F6) ) { KB.clearKeyDown(sc_F6);i = 6; }
-        if( KB.keyPressed( sc_F7) ) { KB.clearKeyDown(sc_F7);i = 7; }
-        if( KB.keyPressed( sc_F8) ) { KB.clearKeyDown(sc_F8);i = 8; }
-        if( KB.keyPressed( sc_F9) ) { KB.clearKeyDown(sc_F9);i = 9; }
-        if( KB.keyPressed( sc_F10) ) {KB.clearKeyDown(sc_F10);i = 10; }
+        if (KB.keyPressed(sc_F1)) { KB.clearKeyDown(sc_F1); i = 1; }
+        if (KB.keyPressed(sc_F2)) { KB.clearKeyDown(sc_F2); i = 2; }
+        if (KB.keyPressed(sc_F3)) { KB.clearKeyDown(sc_F3); i = 3; }
+        if (KB.keyPressed(sc_F4)) { KB.clearKeyDown(sc_F4); i = 4; }
+        if (KB.keyPressed(sc_F5)) { KB.clearKeyDown(sc_F5); i = 5; }
+        if (KB.keyPressed(sc_F6)) { KB.clearKeyDown(sc_F6); i = 6; }
+        if (KB.keyPressed(sc_F7)) { KB.clearKeyDown(sc_F7); i = 7; }
+        if (KB.keyPressed(sc_F8)) { KB.clearKeyDown(sc_F8); i = 8; }
+        if (KB.keyPressed(sc_F9)) { KB.clearKeyDown(sc_F9); i = 9; }
+        if (KB.keyPressed(sc_F10)) { KB.clearKeyDown(sc_F10); i = 10; }
 
-        if(i)
-        {
-            if(SHIFTS_IS_PRESSED)
-            {
-                if(i == 5 && ps[myconnectindex].fta > 0 && ps[myconnectindex].ftq == 26)
-                {
+        if (i) {
+            if (SHIFTS_IS_PRESSED) {
+                if (i == 5 && ps[myconnectindex].fta > 0 && ps[myconnectindex].ftq == 26) {
                     music_select++;
 
                     // FIX_00065: Music cycling with F5 and SHIFT-F5 messed up
-                    if(VOLUMEALL) // Then its 1.3d reg
+                    if (VOLUMEALL) // Then its 1.3d reg
                     {
-                        if(music_select == 33) music_select = 0;
+                        if (music_select == 33) music_select = 0;
                     }
-                    else if (VOLUMEONE)
-                    {
-                        if(music_select == 6) music_select = 0;
+                    else if (VOLUMEONE) {
+                        if (music_select == 6) music_select = 0;
                     }
                     else // assume 1.5 or plutopak
                     {
-                        if(music_select == 44) music_select = 0;
+                        if (music_select == 44) music_select = 0;
                     }
 
                     text = "PLAYING " + music_fn[0][music_select];
                     Music.stopSong(); // FIX_00074: Shift f5 doesn't change hi-res tunes, but only midi tunes.
                     playmusic(music_fn[0][music_select]);
                     fta_quotes[26] = text;
-                    FTA(26,ps[myconnectindex],1);
+                    FTA(26, ps[myconnectindex], 1);
                     return;
                 }
 
-                adduserquote(ud.ridecule[i-1]);
+                adduserquote(ud.ridecule[i - 1]);
 
                 ch = 0;
 
                 tempbuf[ch] = 4;
-                tempbuf[ch+1] = 0;
+                tempbuf[ch + 1] = 0;
 
                 throw "todo: strcat((char*)tempbuf+1,ud.ridecule[i-1]);";
 
-                i = 1+ud.ridecule[i-1].length;
+                i = 1 + ud.ridecule[i - 1].length;
 
-                if(ud.multimode > 1)
-                    for(ch=connecthead;ch>=0;ch=connectpoint2[ch])
+                if (ud.multimode > 1)
+                    for (ch = connecthead; ch >= 0; ch = connectpoint2[ch])
                         if (ch != myconnectindex)
-                            sendpacket(ch,tempbuf,i);
+                            sendpacket(ch, tempbuf, i);
 
                 pus = NUMPAGES;
                 pub = NUMPAGES;
@@ -5952,9 +5644,8 @@ function nonsharedkeys()
 
             }
 
-            if(ud.lockout == 0)
-                if(SoundToggle && ALT_IS_PRESSED && ( RTS_NumSounds() > 0 ) && rtsplaying == 0 && VoiceToggle )
-                {
+            if (ud.lockout == 0)
+                if (SoundToggle && ALT_IS_PRESSED && (RTS_NumSounds() > 0) && rtsplaying == 0 && VoiceToggle) {
                     throw "todo"
                     //rtsptr = RTS_GetSound (i-1);
                     //if(*rtsptr == 'C')
@@ -5981,37 +5672,31 @@ function nonsharedkeys()
         }
     }
 
-    if(!ALT_IS_PRESSED && !SHIFTS_IS_PRESSED)
-    {
+    if (!ALT_IS_PRESSED && !SHIFTS_IS_PRESSED) {
 
-        if( ud.multimode > 1 && ACTION(gamefunc_SendMessage) )
-        {
+        if (ud.multimode > 1 && ACTION(gamefunc_SendMessage)) {
             KB.flushKeyboardQueue();
-            CONTROL_ClearAction( gamefunc_SendMessage );
+            CONTROL_ClearAction(gamefunc_SendMessage);
             ps[myconnectindex].gm |= MODE_TYPE;
             typebuf[0] = 0;
             inputloc = 0;
         }
 
-        if( KB.keyPressed(sc_F1) || ( ud.show_help && ( KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter) ) ) )
-        {
+        if (KB.keyPressed(sc_F1) || (ud.show_help && (KB.keyPressed(sc_Space) || KB.keyPressed(sc_Enter) || KB.keyPressed(sc_kpad_Enter)))) {
             KB.clearKeyDown(sc_F1);
             KB.clearKeyDown(sc_Space);
             KB.clearKeyDown(sc_kpad_Enter);
             KB.clearKeyDown(sc_Enter);
-            ud.show_help ++;
+            ud.show_help++;
 
-            if( ud.show_help > 2 )
-            {
+            if (ud.show_help > 2) {
                 ud.show_help = 0;
-                if(ud.multimode < 2 && ud.recstat != 2) ready2send = 1;
+                if (ud.multimode < 2 && ud.recstat != 2) ready2send = 1;
                 vscrn();
             }
-            else
-            {
-                setview(0,0,xdim-1,ydim-1);
-                if(ud.multimode < 2 && ud.recstat != 2)
-                {
+            else {
+                setview(0, 0, xdim - 1, ydim - 1);
+                if (ud.multimode < 2 && ud.recstat != 2) {
                     ready2send = 0;
                     totalclock = ototalclock;
                 }
@@ -6020,23 +5705,21 @@ function nonsharedkeys()
 
         //        if(ud.multimode < 2)
         {
-            if(ud.recstat != 2 && KB.keyPressed( sc_F2 ) )
-            {
-                KB.clearKeyDown( sc_F2 );
+            if (ud.recstat != 2 && KB.keyPressed(sc_F2)) {
+                KB.clearKeyDown(sc_F2);
 
-                if(movesperpacket == 4 && connecthead != myconnectindex)
+                if (movesperpacket == 4 && connecthead != myconnectindex)
                     return;
 
                 FAKE_F2:
-                    if(sprite[ps[myconnectindex].i].extra <= 0)
-                    {
-                        FTA(118,ps[myconnectindex],1);
+                    if (sprite[ps[myconnectindex].i].extra <= 0) {
+                        FTA(118, ps[myconnectindex], 1);
                         return;
                     }
                 cmenu(350);
                 screencapt = 1;
-                displayrooms(myconnectindex,65536);
-                savetemp("duke3d.tmp",tiles[MAXTILES-1].data,160*100);
+                displayrooms(myconnectindex, 65536);
+                savetemp("duke3d.tmp", tiles[MAXTILES - 1].data, 160 * 100);
                 screencapt = 0;
                 FX.stopAllSounds();
                 clearsoundlocks();
@@ -6044,19 +5727,17 @@ function nonsharedkeys()
                 //                setview(0,0,xdim-1,ydim-1);
                 ps[myconnectindex].gm |= MODE_MENU;
 
-                if(ud.multimode < 2)
-                {
+                if (ud.multimode < 2) {
                     ready2send = 0;
                     totalclock = ototalclock;
                     screenpeek = myconnectindex;
                 }
             }
 
-            if(KB.keyPressed( sc_F3 ))
-            {
-                KB.clearKeyDown( sc_F3 );
+            if (KB.keyPressed(sc_F3)) {
+                KB.clearKeyDown(sc_F3);
 
-                if(movesperpacket == 4 && connecthead != myconnectindex)
+                if (movesperpacket == 4 && connecthead != myconnectindex)
                     return;
 
                 cmenu(300);
@@ -6065,8 +5746,7 @@ function nonsharedkeys()
 
                 //                setview(0,0,xdim-1,ydim-1);
                 ps[myconnectindex].gm |= MODE_MENU;
-                if(ud.multimode < 2 && ud.recstat != 2)
-                {
+                if (ud.multimode < 2 && ud.recstat != 2) {
                     ready2send = 0;
                     totalclock = ototalclock;
                 }
@@ -6074,15 +5754,13 @@ function nonsharedkeys()
             }
         }
 
-        if(KB.keyPressed( sc_F4 ) && FXDevice != NumSoundCards )
-        {
-            KB.clearKeyDown( sc_F4 );
+        if (KB.keyPressed(sc_F4) && FXDevice != NumSoundCards) {
+            KB.clearKeyDown(sc_F4);
             FX.stopAllSounds();
             clearsoundlocks();
 
             ps[myconnectindex].gm |= MODE_MENU;
-            if(ud.multimode < 2 && ud.recstat != 2)
-            {
+            if (ud.multimode < 2 && ud.recstat != 2) {
                 ready2send = 0;
                 totalclock = ototalclock;
             }
@@ -6090,172 +5768,155 @@ function nonsharedkeys()
 
         }
 
-        if( KB.keyPressed( sc_F6 ) && (ps[myconnectindex].gm&MODE_GAME))
-        {
-            KB.clearKeyDown( sc_F6 );
+        if (KB.keyPressed(sc_F6) && (ps[myconnectindex].gm & MODE_GAME)) {
+            KB.clearKeyDown(sc_F6);
 
-            if(movesperpacket == 4 && connecthead != myconnectindex)
+            if (movesperpacket == 4 && connecthead != myconnectindex)
                 return;
 
-            if(lastsavedpos == -1) throw "goto FAKE_F2;"
+            if (lastsavedpos == -1) throw "goto FAKE_F2;"
 
             KB.flushKeyboardQueue();
 
-            if(sprite[ps[myconnectindex].i].extra <= 0)
-            {
-                FTA(118,ps[myconnectindex],1);
+            if (sprite[ps[myconnectindex].i].extra <= 0) {
+                FTA(118, ps[myconnectindex], 1);
                 return;
             }
             screencapt = 1;
-            displayrooms(myconnectindex,65536);
-            savetemp("duke3d.tmp",tiles[MAXTILES-1].data,160*100);
+            displayrooms(myconnectindex, 65536);
+            savetemp("duke3d.tmp", tiles[MAXTILES - 1].data, 160 * 100);
             screencapt = 0;
-            if( lastsavedpos >= 0 ) {
+            if (lastsavedpos >= 0) {
                 inputloc = ud.savegame[lastsavedpos].length;
-                current_menu = 360+lastsavedpos;
+                current_menu = 360 + lastsavedpos;
                 probey = lastsavedpos;
             }
             FX.stopAllSounds();
             clearsoundlocks();
 
-            setview(0,0,xdim-1,ydim-1);
+            setview(0, 0, xdim - 1, ydim - 1);
             ps[myconnectindex].gm |= MODE_MENU;
-            if(ud.multimode < 2 && ud.recstat != 2)
-            {
+            if (ud.multimode < 2 && ud.recstat != 2) {
                 ready2send = 0;
                 totalclock = ototalclock;
             }
         }
 
-        if(KB.keyPressed( sc_F7 ) )
-        {
+        if (KB.keyPressed(sc_F7)) {
             KB.clearKeyDown(sc_F7);
-            if( ps[myconnectindex].over_shoulder_on )
+            if (ps[myconnectindex].over_shoulder_on)
                 ps[myconnectindex].over_shoulder_on = 0;
-            else
-            {
+            else {
                 ps[myconnectindex].over_shoulder_on = 1;
                 cameradist = 0;
                 cameraclock = totalclock;
             }
-            FTA(109+ps[myconnectindex].over_shoulder_on,ps[myconnectindex],1);
+            FTA(109 + ps[myconnectindex].over_shoulder_on, ps[myconnectindex], 1);
         }
 
-        if( KB.keyPressed( sc_F5 ) && MusicDevice != NumSoundCards )
-        {
-            KB.clearKeyDown( sc_F5 );
+        if (KB.keyPressed(sc_F5) && MusicDevice != NumSoundCards) {
+            KB.clearKeyDown(sc_F5);
             text = music_fn[0][music_select] + ".  USE SHIFT-F5 TO CHANGE.";
             fta_quotes[26] = text;
-            FTA(26,ps[myconnectindex],1);
+            FTA(26, ps[myconnectindex], 1);
 
         }
 
-        if(KB.keyPressed( sc_F8 ))
-        {
-            KB.clearKeyDown( sc_F8 );
+        if (KB.keyPressed(sc_F8)) {
+            KB.clearKeyDown(sc_F8);
             ud.fta_on = !ud.fta_on;
-            FTA(24-ud.fta_on,ps[myconnectindex],1);
+            FTA(24 - ud.fta_on, ps[myconnectindex], 1);
         }
 
-        if(KB.keyPressed( sc_F9 ) && (ps[myconnectindex].gm&MODE_GAME) )
-        {
-            KB.clearKeyDown( sc_F9 );
+        if (KB.keyPressed(sc_F9) && (ps[myconnectindex].gm & MODE_GAME)) {
+            KB.clearKeyDown(sc_F9);
 
-            if(movesperpacket == 4 && myconnectindex != connecthead)
+            if (movesperpacket == 4 && myconnectindex != connecthead)
                 return;
 
-            if( lastsavedpos >= 0 ) cmenu(15001);
+            if (lastsavedpos >= 0) cmenu(15001);
             else cmenu(25000);
             FX.stopAllSounds();
             clearsoundlocks();
             ps[myconnectindex].gm |= MODE_MENU;
-            if(ud.multimode < 2 && ud.recstat != 2)
-            {
+            if (ud.multimode < 2 && ud.recstat != 2) {
                 ready2send = 0;
                 totalclock = ototalclock;
             }
         }
 
-        if(KB.keyPressed( sc_F10 ))
-        {
-            KB.clearKeyDown( sc_F10 );
+        if (KB.keyPressed(sc_F10)) {
+            KB.clearKeyDown(sc_F10);
             cmenu(500);
             FX.stopAllSounds();
             clearsoundlocks();
             ps[myconnectindex].gm |= MODE_MENU;
-            if(ud.multimode < 2 && ud.recstat != 2)
-            {
+            if (ud.multimode < 2 && ud.recstat != 2) {
                 ready2send = 0;
                 totalclock = ototalclock;
             }
         }
 
 
-        if( ud.overhead_on != 0)
-        {
+        if (ud.overhead_on != 0) {
 
-            j = totalclock-nonsharedtimer; nonsharedtimer += j;
-            if ( ACTION( gamefunc_Enlarge_Screen ) )
-                ps[myconnectindex].zoom += mulscale6(j,Math.max(ps[myconnectindex].zoom,256));
-            if ( ACTION( gamefunc_Shrink_Screen ) )
+            j = totalclock - nonsharedtimer; nonsharedtimer += j;
+            if (ACTION(gamefunc_Enlarge_Screen))
+                ps[myconnectindex].zoom += mulscale6(j, Math.max(ps[myconnectindex].zoom, 256));
+            if (ACTION(gamefunc_Shrink_Screen))
                 ps[myconnectindex].zoom -= mulscale6(j, Math.max(ps[myconnectindex].zoom, 256));
 
-            if( (ps[myconnectindex].zoom > 2048) )
+            if ((ps[myconnectindex].zoom > 2048))
                 ps[myconnectindex].zoom = 2048;
-            if( (ps[myconnectindex].zoom < 48) )
+            if ((ps[myconnectindex].zoom < 48))
                 ps[myconnectindex].zoom = 48;
 
         }
     }
 
-    if( KB.keyPressed(sc_Escape) && ud.overhead_on && ps[myconnectindex].newowner == -1 ) {
-        KB.clearKeyDown( sc_Escape );
+    if (KB.keyPressed(sc_Escape) && ud.overhead_on && ps[myconnectindex].newowner == -1) {
+        KB.clearKeyDown(sc_Escape);
         ud.last_overhead = ud.overhead_on;
         ud.overhead_on = 0;
         ud.scrollmode = 0;
         vscrn();
     }
 
-    if( ACTION(gamefunc_AutoRun) )
-    {
+    if (ACTION(gamefunc_AutoRun)) {
         CONTROL_ClearAction(gamefunc_AutoRun);
-        ud.auto_run = 1-ud.auto_run;
-        FTA(85+ud.auto_run,ps[myconnectindex],1);
+        ud.auto_run = 1 - ud.auto_run;
+        FTA(85 + ud.auto_run, ps[myconnectindex], 1);
     }
 
-    if( ACTION(gamefunc_Map) )
-    {
-        CONTROL_ClearAction( gamefunc_Map );
-        if( ud.last_overhead != ud.overhead_on && ud.last_overhead)
-        {
+    if (ACTION(gamefunc_Map)) {
+        CONTROL_ClearAction(gamefunc_Map);
+        if (ud.last_overhead != ud.overhead_on && ud.last_overhead) {
             ud.overhead_on = ud.last_overhead;
             ud.last_overhead = 0;
         }
-        else
-        {
+        else {
             ud.overhead_on++;
-            if(ud.overhead_on == 3 ) ud.overhead_on = 0;
+            if (ud.overhead_on == 3) ud.overhead_on = 0;
             ud.last_overhead = ud.overhead_on;
         }
         restorepalette = 1;
         vscrn();
     }
 
-    if(KB.keyPressed( sc_F11 ))
-    {
-        KB.clearKeyDown( sc_F11 );
+    if (KB.keyPressed(sc_F11)) {
+        KB.clearKeyDown(sc_F11);
         // FIX_00030: Brightness step was not the same from the keys vs menu 
-        if(SHIFTS_IS_PRESSED) ud.brightness-=8; // Keyboard step must be 8, as the brightness cursor step.
-        else ud.brightness+=8;
+        if (SHIFTS_IS_PRESSED) ud.brightness -= 8; // Keyboard step must be 8, as the brightness cursor step.
+        else ud.brightness += 8;
 
-        if (ud.brightness > 56 )
+        if (ud.brightness > 56)
             ud.brightness = 0;
-        else if(ud.brightness < 0)
+        else if (ud.brightness < 0)
             ud.brightness = 56;
 
-        setBrightness(ud.brightness>>2,ps[myconnectindex].palette[0]);
-        if(ud.brightness < 40) FTA( 29 + (ud.brightness>>3) ,ps[myconnectindex],1);
-        else if(ud.brightness < 80) FTA( 96 + (ud.brightness>>3) - 5,ps[myconnectindex],1);
+        setBrightness(ud.brightness >> 2, ps[myconnectindex].palette[0]);
+        if (ud.brightness < 40) FTA(29 + (ud.brightness >> 3), ps[myconnectindex], 1);
+        else if (ud.brightness < 80) FTA(96 + (ud.brightness >> 3) - 5, ps[myconnectindex], 1);
     }
 }
 
@@ -6276,163 +5937,164 @@ function logo() {
     nextpage();
 
     Music.stopSong();
-
+    debugger
     q.setPositionAtStart()
-        .addIf(function () { return ud.showcinematics && numplayers < 2; }, function () {
+        .addIf(function() { return ud.showcinematics && numplayers < 2; }, function() {
             console.log("(10) play logo anm");
 
             // This plays the explosion from the nuclear sign at the beginning.
+            debugger
             q.setPositionAtStart()
-                .addIf(function () {
+                .addIf(function() {
                     return !VOLUMEONE;
-                }, function () {
+                }, function() {
                     // todo: it skips a frame here, how to fix this? addIfExecNow()? or rewrite into one if
+                    debugger
                     q.setPositionAtStart()
-                        .addIf(function () { return !KB.keyWaiting() && nomorelogohack == 0; },
-                            function () {
+                        .addIf(function() { return !KB.keyWaiting() && nomorelogohack == 0; },
+                            function() {
                                 getpackets();
-
                                 q.setPositionAtStart()
-                                    .add(function () {
+                                    .add(function() {
                                         playanm("logo.anm", 5);
-                                    }).add(function () {
+                                    }).add(function() {
                                         palto(0, 0, 0, 63);
                                         KB.flushKeyboardQueue();
                                     });
                             })
-                        .endIf();
-                    q.add(function () {
-                        console.log("(20) REALITY IS OUR GAME Screen");
-                        clearView(0);
-                        nextpage();
-
-                        //MIDI start here
-                        var envMusRef = new Ref(env_music_fn[0]);
-                        playmusic(envMusRef);
-                        env_music_fn[0] = envMusRef.$;
-
-                        // "REALITY IS OUR GAME" Screen
-                        for (i = 0; i < 64; i += 7) {
-                            q.add(i, function (cb, i) {
-                                console.log("(22)");
-                                palto(0, 0, 0, i);
-                            });
-                        }
-                        q.add(function () {
-                            console.log("(25)");
-                            ps[myconnectindex].palette = drealms;
-                            palto(0, 0, 0, 63);
-                            rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
-                            nextpage();
-
-                            q.setInsertPosition(0);
-                            for (i = 63; i > 0; i -= 7) {
-                                q.add(i, function (cb, i) {
-                                    console.log("(30)");
-                                    palto(0, 0, 0, i);
-                                });
-                            }
-                        });
-
-                        q.add(i, function (cb, i) {
-                            totalclock = 0;
-
-                            q.setPositionAtStart().addWhile(function () {
-                                return totalclock < (120 * 7);
-                            }, function () {
-                                console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
-                                getpackets();
-                            });
-                        });
-
-                        for (i = 0; i < 64; i += 7) {
-                            q.add(i, function (cb, i) {
-                                console.log("(50)");
-                                palto(0, 0, 0, i);
-                            });
-                        }
-
-                        q.add(function () {
-                            console.log("(60)");
+                        .endIf(/*return !KB.keyWaiting() && nomorelogohack == 0;*/)
+                        .add(function() {
+                            debugger
                             clearView(0);
                             nextpage();
-                            ps[myconnectindex].palette = titlepal;
-                            flushperms();
-                            rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
-                            KB.flushKeyboardQueue();
-                            nextpage();
-
-                            throw "todo: async all these loops";
-
-                            for (i = 63; i > 0; i -= 7)
-                                palto(0, 0, 0, i);
-
-                            totalclock = 0;
-
-                            //Animate screen (Duke picture wiht "DUKE" "NUKEM 3D" coming from far away and hitting the screen"
-                            while (totalclock < (860 + 120) && !KB.keyWaiting()) {
-                                rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
-
-                                if (totalclock > 120 && totalclock < (120 + 60)) {
-                                    if (soundanm == 0) {
-                                        soundanm = 1;
-                                        sound(PIPEBOMB_EXPLODE);
-                                    }
-                                    rotateSprite(160 << 16, 104 << 16, (totalclock - 120) << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                }
-                                else if (totalclock >= (120 + 60))
-                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-
-                                if (totalclock > 220 && totalclock < (220 + 30)) {
-                                    if (soundanm == 1) {
-                                        soundanm = 2;
-                                        sound(PIPEBOMB_EXPLODE);
-                                    }
-
-                                    rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                    rotateSprite(160 << 16, (129) << 16, (totalclock - 220) << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                }
-                                else if (totalclock >= (220 + 30))
-                                    rotateSprite(160 << 16, (129) << 16, 30 << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-
-                                if (PLUTOPAK) // FIX_00064: Cinematics explosions were not right for 1.3/1.3d grp.
-                                {
-
-                                    if (totalclock >= 280 && totalclock < 395) {
-                                        rotateSprite(160 << 16, (151) << 16, (410 - totalclock) << 12, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                        if (soundanm == 2) {
-                                            soundanm = 3;
-                                            sound(FLY_BY);
-                                        }
-                                    }
-                                    else if (totalclock >= 395) {
-                                        if (soundanm == 3) {
-                                            soundanm = 4;
-                                            sound(PIPEBOMB_EXPLODE);
-                                        }
-                                        rotateSprite(160 << 16, (151) << 16, 30 << 11, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
-                                    }
-                                }
-
-                                getpackets();
-                                nextpage();
-                            }
-                            // FIX_00077: Menu goes directly to the "NEW GAME" sub-menu when starting new game (Turrican)
-                            KB.flushKeyboardQueue();
                         });
-
-                    });
                 })
-                .endIf();
-        }).addElseIf(function () { return numplayers > 1; }, function () {
+                .endIf(/*!VOLUMEONE*/)
+                .add(function() {
+                    debugger
+
+                    //MIDI start here
+                    playmusic(env_music_fn[0]);
+
+                    // "REALITY IS OUR GAME" Screen
+                    console.log("(20) REALITY IS OUR GAME Screen");
+                    for (i = 0; i < 64; i += 7) {
+                        q.add(i, function(cb, i) {
+                            console.log("(22)");
+                            palto(0, 0, 0, i);
+                        });
+                    }
+                    q.add(function() {
+                        console.log("(25)");
+                        ps[myconnectindex].palette = drealms;
+                        palto(0, 0, 0, 63);
+                        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                        nextpage();
+
+                        q.setInsertPosition(0);
+                        for (i = 63; i > 0; i -= 7) {
+                            q.add(i, function(cb, i) {
+                                console.log("(30)");
+                                palto(0, 0, 0, i);
+                            });
+                        }
+                    });
+
+                    q.add(i, function(cb, i) {
+                        totalclock = 0;
+
+                        q.setPositionAtStart().addWhile(function() {
+                            return totalclock < (120 * 7);
+                        }, function() {
+                            console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
+                            getpackets();
+                        });
+                    });
+
+                    for (i = 0; i < 64; i += 7) {
+                        q.add(i, function(cb, i) {
+                            console.log("(50)");
+                            palto(0, 0, 0, i);
+                        });
+                    }
+
+                    q.add(function() {
+                        console.log("(60)");
+                        clearView(0);
+                        nextpage();
+                        ps[myconnectindex].palette = titlepal;
+                        flushperms();
+                        rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+                        KB.flushKeyboardQueue();
+                        nextpage();
+
+                        throw "todo: async all these loops";
+
+                        for (i = 63; i > 0; i -= 7)
+                            palto(0, 0, 0, i);
+
+                        totalclock = 0;
+
+                        //Animate screen (Duke picture wiht "DUKE" "NUKEM 3D" coming from far away and hitting the screen"
+                        while (totalclock < (860 + 120) && !KB.keyWaiting()) {
+                            rotateSprite(0, 0, 65536, 0, BETASCREEN, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
+
+                            if (totalclock > 120 && totalclock < (120 + 60)) {
+                                if (soundanm == 0) {
+                                    soundanm = 1;
+                                    sound(PIPEBOMB_EXPLODE);
+                                }
+                                rotateSprite(160 << 16, 104 << 16, (totalclock - 120) << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                            } else if (totalclock >= (120 + 60))
+                                rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+
+                            if (totalclock > 220 && totalclock < (220 + 30)) {
+                                if (soundanm == 1) {
+                                    soundanm = 2;
+                                    sound(PIPEBOMB_EXPLODE);
+                                }
+
+                                rotateSprite(160 << 16, (104) << 16, 60 << 10, 0, DUKENUKEM, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                rotateSprite(160 << 16, (129) << 16, (totalclock - 220) << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                            } else if (totalclock >= (220 + 30))
+                                rotateSprite(160 << 16, (129) << 16, 30 << 11, 0, THREEDEE, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+
+                            if (PLUTOPAK) // FIX_00064: Cinematics explosions were not right for 1.3/1.3d grp.
+                            {
+
+                                if (totalclock >= 280 && totalclock < 395) {
+                                    rotateSprite(160 << 16, (151) << 16, (410 - totalclock) << 12, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                    if (soundanm == 2) {
+                                        soundanm = 3;
+                                        sound(FLY_BY);
+                                    }
+                                } else if (totalclock >= 395) {
+                                    if (soundanm == 3) {
+                                        soundanm = 4;
+                                        sound(PIPEBOMB_EXPLODE);
+                                    }
+                                    rotateSprite(160 << 16, (151) << 16, 30 << 11, 0, PLUTOPAKSPRITE + 1, 0, 0, 2 + 8, 0, 0, xdim - 1, ydim - 1);
+                                }
+                            }
+
+                            getpackets();
+                            nextpage();
+                        }
+                        // FIX_00077: Menu goes directly to the "NEW GAME" sub-menu when starting new game (Turrican)
+                        KB.flushKeyboardQueue();
+                    });
+
+                });
+        })
+        .addElseIf(function() { return numplayers > 1; }, function() {
             console.log("(10)  numplayers > 1");
             throw new Error("todo");
-        }).addElse(function () {
+        }).addElse(function() {
             console.log("(10)  else SP");
             throw new Error("todo");
         })
         .endIf()
-        .add(function () {
+        .add(function() {
             console.log("(70) todo"); // todo
             PreMap.waitForEverybody();
 
@@ -6584,9 +6246,9 @@ var q = new Queue();
 function main(argc, argv) {
     var i, j;
     var filehandle;
-    
+
     var kbdKey;
-    
+
     console.log("*** Chocolate DukeNukem3D JavaScript v" + CHOCOLATE_DUKE_REV_X + "." + CHOCOLATE_DUKE_REV_DOT_Y + " ***");
 
     ud.multimode = 1; // xduke: must be done before checkcommandline or that will prevent Fakeplayer and AI
@@ -6605,53 +6267,49 @@ function main(argc, argv) {
 
     // Detecting grp version
     // We keep the old GRP scheme detection for 19.6 compliance. Will be obsolete.
-    filehandle = kopen4load("DUKEDC9.MAP",1);
+    filehandle = kopen4load("DUKEDC9.MAP", 1);
     kclose(filehandle);
 
     if (filehandle == -1) // not DC pack
     {
-        filehandle = kopen4load("DUKESW.BIN",1);
+        filehandle = kopen4load("DUKESW.BIN", 1);
         kclose(filehandle);
 
         if (filehandle == -1) // not Shareware version 1.3
         {
-            filehandle = kopen4load("E4L11.MAP",1);
+            filehandle = kopen4load("E4L11.MAP", 1);
             kclose(filehandle);
 
             if (filehandle == -1) // not Atomic Edition 1.4/1.5
             {
-                filehandle = kopen4load("E3L11.MAP",1);
+                filehandle = kopen4load("E3L11.MAP", 1);
                 kclose(filehandle);
 
                 if (filehandle == -1) // not Regular version 1.3d
                 {
                     grpVersion = UNKNOWN_GRP;
                 }
-                else
-                {
+                else {
                     grpVersion = REGULAR_GRP13D;
                 }
             }
-            else
-            {
+            else {
                 grpVersion = ATOMIC_GRP14_15;
             }
         }
-        else
-        {
+        else {
             grpVersion = SHAREWARE_GRP13;
         }
     }
-    else
-    {
+    else {
         grpVersion = DUKEITOUTINDC_GRP;
     }
 
     // FIX_00062: Better support and identification for GRP and CON files for 1.3/1.3d/1.4/1.5
-    if (	groupefil_crc32[0]==CRC_BASE_GRP_SHAREWARE_13 ||
-				groupefil_crc32[0]==CRC_BASE_GRP_FULL_13 ||
-				groupefil_crc32[0]==CRC_BASE_GRP_PLUTONIUM_14 ||
-				groupefil_crc32[0]==CRC_BASE_GRP_ATOMIC_15 ) {
+    if (groupefil_crc32[0] == CRC_BASE_GRP_SHAREWARE_13 ||
+				groupefil_crc32[0] == CRC_BASE_GRP_FULL_13 ||
+				groupefil_crc32[0] == CRC_BASE_GRP_PLUTONIUM_14 ||
+				groupefil_crc32[0] == CRC_BASE_GRP_ATOMIC_15) {
         console.log("GRP identified as: %s", grpVersion2char_from_crc(groupefil_crc32[0]));
     }
     else {
@@ -6789,7 +6447,7 @@ function main(argc, argv) {
         })
         .add(function () {
             ud.warp_on = 0;
-            
+
             //The main game loop is here.
             console.log("Start game loop");
             q.setPositionAtStart()
@@ -6797,22 +6455,19 @@ function main(argc, argv) {
                     q.setPositionAtStart(); // important!
                     return !(ps[myconnectindex].gm & MODE_END);
                 }, function () {
-                    sampletimer();	
-                    if( ud.recstat == 2 || ud.multimode > 1 || ( ud.show_help == 0 && (ps[myconnectindex].gm&MODE_MENU) != MODE_MENU ) )
-                        if( ps[myconnectindex].gm&MODE_GAME )
-                        {
+                    sampletimer();
+                    if (ud.recstat == 2 || ud.multimode > 1 || (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) != MODE_MENU))
+                        if (ps[myconnectindex].gm & MODE_GAME) {
                             // (" It's stuck here ")
                             //printf("ps[myconnectindex].gm&MODE_GAME\n");
-                            if( moveloop() ) {
+                            if (moveloop()) {
                                 return;//continue;
                             }
                         }
 
-                    if( ps[myconnectindex].gm&MODE_EOL || ps[myconnectindex].gm&MODE_RESTART )
-                    {
+                    if (ps[myconnectindex].gm & MODE_EOL || ps[myconnectindex].gm & MODE_RESTART) {
 
-                        if( ps[myconnectindex].gm&MODE_EOL )
-                        {
+                        if (ps[myconnectindex].gm & MODE_EOL) {
                             closedemowrite();
 
                             ready2send = 0;
@@ -6823,12 +6478,10 @@ function main(argc, argv) {
                             ud.screen_size = i;
                             dobonus(0);
 
-                            if(ud.eog)
-                            {
+                            if (ud.eog) {
                                 ud.eog = 0;
-                                if(ud.multimode < 2)
-                                {
-                                    if(VOLUMEONE)
+                                if (ud.multimode < 2) {
+                                    if (VOLUMEONE)
                                         doorders();
 
                                     ps[myconnectindex].gm = MODE_MENU;
@@ -6836,8 +6489,7 @@ function main(argc, argv) {
                                     probey = 0;
                                     throw "goto MAIN_LOOP_RESTART";
                                 }
-                                else
-                                {
+                                else {
                                     ud.m_level_number = 0;
                                     ud.level_number = 0;
                                 }
@@ -6845,7 +6497,7 @@ function main(argc, argv) {
                         }
 
                         ready2send = 0;
-                        if(numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
+                        if (numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
 
                         enterlevel(ps[myconnectindex].gm);
                         return;//continue;
@@ -6853,29 +6505,29 @@ function main(argc, argv) {
 
                     cheats();
 
-                    if( !Console.isActive() )
+                    if (!Console.isActive())
                         nonsharedkeys();
 
 
-                    if( (ud.show_help == 0 && ud.multimode < 2 && !(ps[myconnectindex].gm&MODE_MENU) ) || ud.multimode > 1 || ud.recstat == 2)
-                        i = Math.min(Math.max((totalclock-ototalclock)*((65536/TICSPERFRAME)|0),0),65536);
-                else
-				i = 65536;
+                    if ((ud.show_help == 0 && ud.multimode < 2 && !(ps[myconnectindex].gm & MODE_MENU)) || ud.multimode > 1 || ud.recstat == 2)
+                        i = Math.min(Math.max((totalclock - ototalclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
+                    else
+                        i = 65536;
 
-                    displayrooms(screenpeek,i);
+                    displayrooms(screenpeek, i);
                     displayrest(i);
 
                     if (ps[myconnectindex].gm & MODE_DEMO)
                         throw "goto MAIN_LOOP_RESTART;";
 
-                    if(debug_on) 
+                    if (debug_on)
                         caches();
 
                     checksync();
 
                     if (VOLUMEONE)
-                        if(ud.show_help == 0 && show_shareware > 0 && (ps[myconnectindex].gm&MODE_MENU) == 0 )
-                            rotateSprite((320-50)<<16,9<<16,65536,0,BETAVERSION,0,0,2+8+16+128,0,0,xdim-1,ydim-1);
+                        if (ud.show_help == 0 && show_shareware > 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
+                            rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
 
                     nextpage();
 
@@ -6976,7 +6628,7 @@ Game.playBack = function () {
     }
 
     //RECHECK:
-        
+
     Game.inMenu = ps[myconnectindex].gm & MODE_MENU;
 
     pub = NUMPAGES;
@@ -6990,26 +6642,23 @@ Game.playBack = function () {
     }
 
     if (foundemo === 0) {
-        if (Game.whichDemo > 1)
-        {
+        if (Game.whichDemo > 1) {
             Game.whichDemo = 1;
             q.setPositionAtStart().add(Game.playBack);
             return; //goto RECHECK;
         }
-        for(t=0;t<63;t+=7) palto(0,0,0,t);
+        for (t = 0; t < 63; t += 7) palto(0, 0, 0, t);
         Game.drawBackground();
 
         Console.handleInput();
-        if( !Console.isActive())
-        {
+        if (!Console.isActive()) {
             menus();
         }
         Console.render();
         ps[myconnectindex].palette = palette;
         nextpage();
-        for(t=63;t>0;t-=7) 
-        {
-            palto(0,0,0,t);
+        for (t = 63; t > 0; t -= 7) {
+            palto(0, 0, 0, t);
         }
 
         ud.reccnt = 0;
@@ -7044,37 +6693,37 @@ Game.playBack = function () {
             q.setPositionAtStart();
             //console.log("demo loopframeCount: %i", frameCount++);
 
-            q.addIf(function() {
+            q.addIf(function () {
                 return foundemo;
-            }, function() {
+            }, function () {
                 q.setPositionAtStart();
-                        q.setPositionAtStart();
+                q.setPositionAtStart();
 
-                        if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
-                            i = 0;
-                            l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
-                            kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
-                        }
-                        var idx;
-                        for (j = connecthead; j >= 0; j = connectpoint2[j]) {
-                            idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
-                            recsync[i].copyTo(inputfifo[idx][j]);
+                if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
+                    i = 0;
+                    l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
+                    kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
+                }
+                var idx;
+                for (j = connecthead; j >= 0; j = connectpoint2[j]) {
+                    idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
+                    recsync[i].copyTo(inputfifo[idx][j]);
 
-                            movefifoend[j]++;
-                            i++;
-                            ud.reccnt--;
-                        }
-                        Game.doMoveThings();
+                    movefifoend[j]++;
+                    i++;
+                    ud.reccnt--;
+                }
+                Game.doMoveThings();
             }).endIf()
-                .addIf(function() {
+                .addIf(function () {
                     return foundemo === 0;
-                }, function() {
+                }, function () {
                     Game.drawBackground();
-                }).addElse(function() {
+                }).addElse(function () {
                     if (!Console.isActive()) {
                         nonsharedkeys();
                     }
-                    
+
                     j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
 
                     Game.displayRooms(screenpeek, j);
@@ -7086,30 +6735,28 @@ Game.playBack = function () {
                         getpackets();
                     }
                 }).endIf()
-                .addIf(function() {
+                .addIf(function () {
                     return (ps[myconnectindex].gm & MODE_MENU) && (ps[myconnectindex].gm & MODE_EOL);
-                }, function() {
+                }, function () {
                     console.log("playback(1) :: goto RECHECK:");
                     throw "todo: goto RECHECK";
                 })
                 .endIf()
-                .addIf(function() {
+                .addIf(function () {
                     return ps[myconnectindex].gm & MODE_TYPE;
-                }, function() {
+                }, function () {
                     typemode();
                     if ((ps[myconnectindex].gm & MODE_TYPE) != MODE_TYPE)
                         ps[myconnectindex].gm = MODE_MENU;
                 })
-                .addElse(function() {
+                .addElse(function () {
                     Console.handleInput();
-                    if( !Console.isActive())
-                    {
+                    if (!Console.isActive()) {
                         menus();
                     }
                     Console.render();
-                    if( ud.multimode > 1 )
-                    {
-                       throw "todo"
+                    if (ud.multimode > 1) {
+                        throw "todo"
                         //ControlInfo noshareinfo;
                         //if( !Console.isActive() )
                         //{
@@ -7126,7 +6773,7 @@ Game.playBack = function () {
                     }
                 })
                 .endIf()
-                .add(function() {
+                .add(function () {
                     operatefta();
 
                     if (ud.last_camsprite != ud.camerasprite) {
@@ -7152,7 +6799,7 @@ Game.playBack = function () {
                 });
         })
         .add(function () {
-            
+
             if (!isPlayingBack) {
                 // it's not playing back so ignore this code. todo: make asyncQ.js work better!
                 return;
@@ -7161,8 +6808,7 @@ Game.playBack = function () {
             console.log("bit after demo loop")
             kclose(recfilep);
             ud.playing_demo_rev = 0;
-            if(ps[myconnectindex].gm&MODE_MENU)
-            {
+            if (ps[myconnectindex].gm & MODE_MENU) {
                 throw "goto RECHECK;" //can do GOTO with async stuff?
             }
 
@@ -7179,7 +6825,7 @@ function fakedomovethingscorrect() {
 
     if (numplayers < 2) return;
 
-    i = ((movefifoplc-1)&(MOVEFIFOSIZ-1));
+    i = ((movefifoplc - 1) & (MOVEFIFOSIZ - 1));
     p = ps[myconnectindex];
 
     if (p.posx == myxbak[i] && p.posy == myybak[i] && p.posz == myzbak[i]
@@ -7643,13 +7289,11 @@ function fakedomovethings() {
 }
 
 //9011
-function  moveloop() {
+function moveloop() {
     var i;
 
-    if (numplayers > 1)
-    {
-        while (fakemovefifoplc < movefifoend[myconnectindex]) 
-        {
+    if (numplayers > 1) {
+        while (fakemovefifoplc < movefifoend[myconnectindex]) {
             fakedomovethings();
         }
     }
@@ -7658,9 +7302,8 @@ function  moveloop() {
     getpackets();
 
     if (numplayers < 2) bufferjitter = 0;
-    while (movefifoend[myconnectindex]-movefifoplc > bufferjitter)
-    {
-        for(i=connecthead;i>=0;i=connectpoint2[i])
+    while (movefifoend[myconnectindex] - movefifoplc > bufferjitter) {
+        for (i = connecthead; i >= 0; i = connectpoint2[i])
             if (movefifoplc == movefifoend[i]) break;
         if (i >= 0) break;
         if (Game.doMoveThings()) return 1;
@@ -7670,7 +7313,7 @@ function  moveloop() {
 
 
 //9495
-Game.doMoveThings = function() {
+Game.doMoveThings = function () {
     var i, j;
     var ch;
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
@@ -7858,147 +7501,133 @@ Game.doMoveThings = function() {
     return 0;
 };
 
-function vglass( x, y, a, wn, n)
-{
-	var z, zincs;
-	var sect;
+function vglass(x, y, a, wn, n) {
+    var z, zincs;
+    var sect;
 
-	sect = wall[wn].nextsector;
-	if(sect == -1) return;
-	zincs = (( sector[sect].floorz-sector[sect].ceilingz ) / n)|0;
+    sect = wall[wn].nextsector;
+    if (sect == -1) return;
+    zincs = ((sector[sect].floorz - sector[sect].ceilingz) / n) | 0;
 
-	for(z = sector[sect].ceilingz;z < sector[sect].floorz; z += zincs )
-		EGS(sect,x,y,z-(TRAND&8191),GLASSPIECES+(z&(TRAND%3)),-32,36,36,a+128-(TRAND&255),16+(TRAND&31),0,-1,5);
+    for (z = sector[sect].ceilingz; z < sector[sect].floorz; z += zincs)
+        EGS(sect, x, y, z - (TRAND & 8191), GLASSPIECES + (z & (TRAND % 3)), -32, 36, 36, a + 128 - (TRAND & 255), 16 + (TRAND & 31), 0, -1, 5);
 }
 
-function lotsofglass( i, wallnum, n)
-{
-	var j, xv, yv, z, x1, y1;
-	var sect, a;
+function lotsofglass(i, wallnum, n) {
+    var j, xv, yv, z, x1, y1;
+    var sect, a;
 
-	sect = -1;
+    sect = -1;
 
-	if(wallnum < 0)
-	{
-		for(j=n-1; j >= 0 ;j--)
-		{
-		    a = sprite[i].ang - 256 + (TRAND & 511) + 1024;
-			EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),1024-(TRAND&1023),i,5);
-		}
-		return;
-	}
+    if (wallnum < 0) {
+        for (j = n - 1; j >= 0 ; j--) {
+            a = sprite[i].ang - 256 + (TRAND & 511) + 1024;
+            EGS(sprite[i].sectnum, sprite[i].x, sprite[i].y, sprite[i].z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), 1024 - (TRAND & 1023), i, 5);
+        }
+        return;
+    }
 
-	j = n+1;
+    j = n + 1;
 
-	x1 = wall[wallnum].x;
-	y1 = wall[wallnum].y;
+    x1 = wall[wallnum].x;
+    y1 = wall[wallnum].y;
 
-	xv = wall[wall[wallnum].point2].x-x1;
-	yv = wall[wall[wallnum].point2].y-y1;
+    xv = wall[wall[wallnum].point2].x - x1;
+    yv = wall[wall[wallnum].point2].y - y1;
 
-	x1 -= ksgn(yv);
-	y1 += ksgn(xv);
+    x1 -= ksgn(yv);
+    y1 += ksgn(xv);
 
-	xv = (xv / j)|0;
-	yv = (yv / j)|0;
+    xv = (xv / j) | 0;
+    yv = (yv / j) | 0;
 
-	var sectRef = new Ref(sect);
-	for(j=n;j>0;j--)
-	{
-		x1 += xv;
-		y1 += yv;
+    var sectRef = new Ref(sect);
+    for (j = n; j > 0; j--) {
+        x1 += xv;
+        y1 += yv;
 
-	    sectRef.$ = sect;
-        updatesector(x1,y1,sectRef);
+        sectRef.$ = sect;
+        updatesector(x1, y1, sectRef);
         sect = sectRef.$;
-        if(sect >= 0)
-		{
-			z = sector[sect].floorz-(TRAND&(klabs(sector[sect].ceilingz-sector[sect].floorz)));
-			if( z < -(32<<8) || z > (32<<8) )
-				z = sprite[i].z-(32<<8)+(TRAND&((64<<8)-1));
-			a = sprite[i].ang-1024;
-			EGS(sprite[i].sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),-(TRAND&1023),i,5);
-		}
-	}
+        if (sect >= 0) {
+            z = sector[sect].floorz - (TRAND & (klabs(sector[sect].ceilingz - sector[sect].floorz)));
+            if (z < -(32 << 8) || z > (32 << 8))
+                z = sprite[i].z - (32 << 8) + (TRAND & ((64 << 8) - 1));
+            a = sprite[i].ang - 1024;
+            EGS(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 1023), i, 5);
+        }
+    }
 }
 
-function spriteglass( i, n)
-{
-	var j, k, a, z;
+function spriteglass(i, n) {
+    var j, k, a, z;
 
-	for(j=n;j>0;j--)
-	{
-		a = TRAND&2047;
-		z = sprite[i].z-((TRAND&16)<<8);
-		k = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,z,GLASSPIECES+(j%3),TRAND&15,36,36,a,32+(TRAND&63),-512-(TRAND&2047),i,5);
-		sprite[k].pal = sprite[i].pal;
-	}
+    for (j = n; j > 0; j--) {
+        a = TRAND & 2047;
+        z = sprite[i].z - ((TRAND & 16) << 8);
+        k = EGS(sprite[i].sectnum, sprite[i].x, sprite[i].y, z, GLASSPIECES + (j % 3), TRAND & 15, 36, 36, a, 32 + (TRAND & 63), -512 - (TRAND & 2047), i, 5);
+        sprite[k].pal = sprite[i].pal;
+    }
 }
 
 //10402
-function ceilingglass(i,sectnum,n) {
-	var j, xv, yv, z, x1, y1;
-	var a,s, startwall,endwall;
+function ceilingglass(i, sectnum, n) {
+    var j, xv, yv, z, x1, y1;
+    var a, s, startwall, endwall;
 
-	startwall = sector[sectnum].wallptr;
-	endwall = startwall+sector[sectnum].wallnum;
+    startwall = sector[sectnum].wallptr;
+    endwall = startwall + sector[sectnum].wallnum;
 
-	for(s=startwall;s<(endwall-1);s++)
-	{
-		x1 = wall[s].x;
-		y1 = wall[s].y;
+    for (s = startwall; s < (endwall - 1) ; s++) {
+        x1 = wall[s].x;
+        y1 = wall[s].y;
 
-		xv = ((wall[s+1].x-x1)/(n+1))|0;
-		yv = ((wall[s+1].y-y1)/(n+1))|0;
+        xv = ((wall[s + 1].x - x1) / (n + 1)) | 0;
+        yv = ((wall[s + 1].y - y1) / (n + 1)) | 0;
 
-		for(j=n;j>0;j--)
-		{
-			x1 += xv;
-			y1 += yv;
-			a = TRAND&2047;
-			z = sector[sectnum].ceilingz+((TRAND&15)<<8);
-			EGS(sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,(TRAND&31),0,i,5);
-		}
-	}
+        for (j = n; j > 0; j--) {
+            x1 += xv;
+            y1 += yv;
+            a = TRAND & 2047;
+            z = sector[sectnum].ceilingz + ((TRAND & 15) << 8);
+            EGS(sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, (TRAND & 31), 0, i, 5);
+        }
+    }
 }
 
 //10431
-function lotsofcolourglass( i, wallnum, n)
-{
-	var j, xv, yv, z, x1, y1;
-	var sect = new Ref(-1), a, k;
+function lotsofcolourglass(i, wallnum, n) {
+    var j, xv, yv, z, x1, y1;
+    var sect = new Ref(-1), a, k;
 
-	if(wallnum < 0)
-	{
-		for(j=n-1; j >= 0 ;j--)
-		{
-			a = TRAND&2047;
-			k = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(TRAND&(63<<8)),GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),1024-(TRAND&2047),i,5);
-			sprite[k].pal = TRAND&15;
-		}
-		return;
-	}
+    if (wallnum < 0) {
+        for (j = n - 1; j >= 0 ; j--) {
+            a = TRAND & 2047;
+            k = EGS(sprite[i].sectnum, sprite[i].x, sprite[i].y, sprite[i].z - (TRAND & (63 << 8)), GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), 1024 - (TRAND & 2047), i, 5);
+            sprite[k].pal = TRAND & 15;
+        }
+        return;
+    }
 
-	j = n+1;
-	x1 = wall[wallnum].x;
-	y1 = wall[wallnum].y;
+    j = n + 1;
+    x1 = wall[wallnum].x;
+    y1 = wall[wallnum].y;
 
-	xv = (wall[wall[wallnum].point2].x-wall[wallnum].x)/j;
-	yv = (wall[wall[wallnum].point2].y-wall[wallnum].y)/j;
+    xv = (wall[wall[wallnum].point2].x - wall[wallnum].x) / j;
+    yv = (wall[wall[wallnum].point2].y - wall[wallnum].y) / j;
 
-	for(j=n;j>0;j--)
-	{
-		x1 += xv;
-		y1 += yv;
+    for (j = n; j > 0; j--) {
+        x1 += xv;
+        y1 += yv;
 
-		updatesector(x1,y1,sect);
-		z = sector[sect.$].floorz - (TRAND & (klabs(sector[sect.$].ceilingz - sector[sect.$].floorz)));
-		if( z < -(32<<8) || z > (32<<8) )
-			z = sprite[i].z-(32<<8)+(TRAND&((64<<8)-1));
-		a = sprite[i].ang-1024;
-		k = EGS(sprite[i].sectnum,x1,y1,z,GLASSPIECES+(j%3),-32,36,36,a,32+(TRAND&63),-(TRAND&2047),i,5);
-		sprite[k].pal = TRAND&7;
-	}
+        updatesector(x1, y1, sect);
+        z = sector[sect.$].floorz - (TRAND & (klabs(sector[sect.$].ceilingz - sector[sect.$].floorz)));
+        if (z < -(32 << 8) || z > (32 << 8))
+            z = sprite[i].z - (32 << 8) + (TRAND & ((64 << 8) - 1));
+        a = sprite[i].ang - 1024;
+        k = EGS(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 2047), i, 5);
+        sprite[k].pal = TRAND & 7;
+    }
 }
 
 //10434
@@ -8013,7 +7642,7 @@ function setupGameButtons() {
 //            makes smaller files. Doesn't freeze or lag the game anymore.
 function takescreenshot() {
     return;
-    
+
     //todo: maybe change key from F12 or something?
 
     var szFilename = "";
@@ -8064,16 +7693,14 @@ function takescreenshot() {
 
 
     // If this is a TC save it to the TC's directory
-    if(getGameDir()[0] != '\0')
-    {
+    if (getGameDir()[0] != '\0') {
         //todo
         //sprintf(szFilename, "%s\\%s", getGameDir(), SCREENSHOTPATH);
         //mkdir(szFilename);
         //sprintf(szFilename, "%s\\%s\\%s", getGameDir(), SCREENSHOTPATH, tempbuf);
     }
         // otherwise let's save it to the root.
-    else
-    {
+    else {
         //todo
         //mkdir(SCREENSHOTPATH);
         //sprintf(szFilename, "%s\\%s", SCREENSHOTPATH, tempbuf);
@@ -8082,12 +7709,12 @@ function takescreenshot() {
     //if(SafeFileExists(szFilename) == 0)
     //{
     szFilename = text;
-        screencapture(szFilename,0);
+    screencapture(szFilename, 0);
     //    sprintf(fta_quotes[103],"SCREEN SAVED");  
     //    sound(EXITMENUSOUND);
     //}
     //else
     //    sprintf(fta_quotes[103],"CAN'T WRITE FILE!");
 
-    FTA(103,ps[screenpeek],1);
+    FTA(103, ps[screenpeek], 1);
 }
