@@ -1174,7 +1174,20 @@ function enterlevel(g) {
     Sector.allignWarpElevators();
     PreMap.resetpSpriteVars(g);
 
-
+    
+    //#ifdef CHECK_XDUKE_REV
+    if((g&MODE_DEMO) != MODE_DEMO ) // don't check for demo
+        for(i=connecthead;i>=0;i=connectpoint2[i])
+        {
+            // all the players must have been validated to have the same rev as we do
+            if (!ud.rev[i][0] && !ps[i].fakeplayer)
+                throw "Your opponent [" + ud.user_name[i] + "] is using an unknown version of xDuke." +
+                    "You are using v%d" +
+                    CHOCOLATE_DUKE_REV_X +
+                    "." + CHOCOLATE_DUKE_REV_DOT_Y;
+        }
+    //#endif
+    
     if (ud.recstat != 2)
         Music.stopSong();
 
