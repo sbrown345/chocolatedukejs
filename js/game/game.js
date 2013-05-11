@@ -1141,7 +1141,7 @@ function coolgaugetext(snum) {
     var permbit;
     var offx = 3, offy = 3, stepx = 60, stepy = 6;
     var text = "";
-
+    
     p = ps[snum];
 
     if (p.invdisptime > 0) {
@@ -1262,7 +1262,7 @@ function coolgaugetext(snum) {
     //DRAW/UPDATE FULL STATUS BAR:
 
     if (pus) { pus = 0; u = 0xffffffff | 0; } else u = 0;
-
+    
     if (sbar.frag[myconnectindex] != p.frag) { sbar.frag[myconnectindex] = p.frag; u |= 32768; }
     if (sbar.got_access != p.got_access) { sbar.got_access = p.got_access; u |= 16384; }
     if (sbar.last_extra != p.last_extra) { sbar.last_extra = p.last_extra; u |= 1; }
@@ -5558,6 +5558,26 @@ function nonsharedkeys() {
     }
 }
 
+//7146
+function checkcommandline(argc, argv) {
+    //short i, j;
+    //char  *c;
+    //char  kbdKey;
+
+    ud.fta_on = 1;
+    ud.god = 0;
+    ud.m_respawn_items = 0;
+    ud.m_respawn_monsters = 0;
+    ud.m_respawn_inventory = 0;
+    ud.warp_on = 0;
+    ud.cashman = 0;
+    ud.m_player_skill = ud.player_skill = 2;
+    ud.multimode_bot = 0;
+
+    console.log("todo checkcommandline");
+    //todo....
+}
+
 //7486
 function logo() {
     //console.log("(9) logo");
@@ -5984,7 +6004,7 @@ function main(argc, argv) {
         //    Error(EXIT_SUCCESS,"");
     }
 
-    // todo: checkcommandline
+    checkcommandline(argc, argv);
 
     _platform_init(argc, argv, "Duke Nukem 3D", "Duke3D");
 
