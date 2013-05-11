@@ -4474,7 +4474,8 @@ function animatesprites(x, y, a, smoothratio) {
                 // Lame fix. ok for w32. Doesn't work for other plateform.
                 // How to make a differene between a timer and an address??
             {
-                l = script[t4 + 8];// *(int32_t *)(t4+8);
+                l = script[t4 + 2/*8*/];// *(int32_t *)(t4+8);
+                printf("l: %i\n", l);
 
                 switch (l) {
                     case 2:
@@ -4518,7 +4519,7 @@ function animatesprites(x, y, a, smoothratio) {
                         break;
                 }
 
-                t.picnum += k + script[t4] + l + t3; //( *(int32_t *)t4 ) + l * t3;
+                t.picnum += k + script[t4] + l * t3; //( *(int32_t *)t4 ) + l * t3;
                 printf("FIX_00093 picnum %i\n", t.picnum);
 
                 if (l > 0)
