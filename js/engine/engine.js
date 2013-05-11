@@ -1651,7 +1651,7 @@ function parascan(dax1, dax2, sectnum,  dastat, bunch) {
 //1729
 var BITSOFPRECISION = 3; /* Don't forget to change this in A.ASM also! */
 function grouscan(dax1, dax2, sectnum, dastat) {
-    printf("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, ", dax1, dax2, sectnum, dastat);
+    printf("grouscan dax1: %i, dax2: %i, sectnum: %i, dastat: %i, \n", dax1, dax2, sectnum, dastat);
     var i, j, j_, l, x, y, dx, dy, wx, wy, y1, y2, daz;
     var daslope, dasqr;
     var shoffs, shinc, m1, m2, mptr1, mptr2, nptr1, nptr2;
