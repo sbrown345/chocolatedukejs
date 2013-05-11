@@ -7190,7 +7190,7 @@ function printext256( xpos,  ypos,  col,  backcol,  name,   fontsize)
 
 //7795
 function krand() {
-    //return 10 - breaks animation
+    return 10; //- breaks animation
     // c method arguments eval in the opposite direction to js
     //
     // todo: search for all methods that have multiple TRAND or krand etc - reverse argument order

@@ -2544,6 +2544,7 @@ Player.processInput = function(snum) {
     if(p.pals_time > 0)
         p.pals_time--;
 
+    printf("p->fta: %i\n", p.fta);
     if(p.fta > 0)
     {
         p.fta--;

@@ -758,21 +758,18 @@ function movefta() {
                 hittype[i].timetosleep++;
                 if( hittype[i].timetosleep >= (x>>8) )
                 {
-                    if(badguy(s))
-                    {
-                        px = ps[p].oposx+64-(krand()&127);
-                        py = ps[p].oposy+64-(krand()&127);
-                        updatesector(px,py,psect);
-                        if(psect.$ == -1)
-                        {
+                    if (badguy(s)) {
+                        px = ps[p].oposx + 64 - (krand() & 127);
+                        py = ps[p].oposy + 64 - (krand() & 127);
+                        updatesector(px, py, psect);
+                        if (psect.$ == -1) {
                             i = nexti;
                             continue;
                         }
-                        sx = s.x+64-(krand()&127);
-                        sy = s.y+64-(krand()&127);
-                        updatesector(px,py,ssect);
-                        if (ssect.$ == -1)
-                        {
+                        sx = s.x + 64 - (krand() & 127);
+                        sy = s.y + 64 - (krand() & 127);
+                        updatesector(px, py, ssect);
+                        if (ssect.$ == -1) {
                             i = nexti;
                             continue;
                         }
@@ -780,8 +777,11 @@ function movefta() {
                         var krand1 = krand(); // fixes C eval differences - it's the opposite way around!
                         j = cansee(sx, sy, s.z - (krand1 % (52 << 8)), s.sectnum, px, py, ps[p].oposz - (krand2 % (32 << 8)), ps[p].cursectnum);
                     }
-                    else
-                        j = cansee(s.x,s.y,s.z-((krand()&31)<<8),s.sectnum,ps[p].oposx,ps[p].oposy,ps[p].oposz-((krand()&31)<<8),ps[p].cursectnum);
+                    else {
+                        var krand2 = krand();
+                        var krand1 = krand(); // fixes C eval differences - it's the opposite way around!
+                        j = cansee(s.x, s.y, s.z - ((krand1 & 31) << 8), s.sectnum, ps[p].oposx, ps[p].oposy, ps[p].oposz - ((krand2 & 31) << 8), ps[p].cursectnum);
+                    }
 
                     //             j = 1;
                     printf("j:%i\n", j);
