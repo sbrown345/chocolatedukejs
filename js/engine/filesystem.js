@@ -713,12 +713,14 @@ function kdfread(buffer, dasizeof, count, fil) {
 
     ptr = new PointerHelper(new Uint8Array(buffer.length * dasizeof));
 
-    leng = kread16(fil, 2);
+    leng = kread16(fil);
     kread(fil, lzwbuf5, leng);
     k = 0;
     kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
 
+    copybufbyte(lzwbuf4, 0, ptr.array, 0, dasizeof);
     k += dasizeof;
+    
     for (i = 1; i < count; i++) {
         if (k >= kgoal) {
             leng = kread16(fil);
@@ -726,8 +728,10 @@ function kdfread(buffer, dasizeof, count, fil) {
             k = 0;
             kgoal = uncompress(lzwbuf5, leng, lzwbuf4);
         }
-        
+        printf("leng: %i, kgoal: %i\n", leng, kgoal);
         for (j = 0; j < dasizeof; j++) {
+            printf("i: %i, j: %i, k: %i, ptr[j]: %i, lzwbuf4[j+k]: %i all: %i\n",
+                        i,     j,    k,  ptr.array[ptr.position + j], lzwbuf4[j + k], ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255));
             ptr.array[ptr.position + j + dasizeof] = /*(uint8_t )*/ ((ptr.array[ptr.position + j] + lzwbuf4[j + k]) & 255);
         }
 
