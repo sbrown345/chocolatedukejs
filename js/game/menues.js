@@ -436,6 +436,38 @@ function dispnames ()
 }
 
 
+//1392
+var quittimer = 0;
+
+//1395
+function gameexitanycase()
+{
+    KB.flushKeyboardQueue();
+
+    if( gamequit == 0 && ( numplayers > 1 ) )
+    {
+        if(ps[myconnectindex].gm&MODE_GAME)
+        {
+            gamequit = 1;
+            quittimer = totalclock+120;
+            sound(SHORT_CIRCUIT);
+        }
+        else
+        {
+            sendlogoff();
+            gameexit(" ");
+            sound(NITEVISION_ONOFF);
+        }
+    }
+    else if( numplayers < 2 )
+        gameexit(" ");
+
+    if( ( totalclock > quittimer ) && ( gamequit == 1) )
+    {
+        gameexit("Timed out.");
+    }
+}
+
 //1424
 function menus() {
     var c,x;
@@ -509,25 +541,25 @@ function menus() {
         //            }
         //            break;
 
-        //        case 20000:
-        //            x = probe(326,190,0,0);
-        //            gametext(160,50-8,"YOU ARE PLAYING THE SHAREWARE",0,2+8+16);
-        //            gametext(160,59-8,"VERSION OF DUKE NUKEM 3D.  WHILE",0,2+8+16);
-        //            gametext(160,68-8,"THIS VERSION IS REALLY COOL, YOU",0,2+8+16);
-        //            gametext(160,77-8,"ARE MISSING OVER 75% OF THE TOTAL",0,2+8+16);
-        //            gametext(160,86-8,"GAME, ALONG WITH OTHER GREAT EXTRAS",0,2+8+16);
-        //            gametext(160,95-8,"AND GAMES, WHICH YOU'LL GET WHEN",0,2+8+16);
-        //            gametext(160,104-8,"YOU ORDER THE COMPLETE VERSION AND",0,2+8+16);
-        //            gametext(160,113-8,"GET THE FINAL TWO EPISODES.",0,2+8+16);
+        case 20000:
+            x = probe(326,190,0,0);
+            gametext(160,50-8,"YOU ARE PLAYING THE SHAREWARE",0,2+8+16);
+            gametext(160,59-8,"VERSION OF DUKE NUKEM 3D.  WHILE",0,2+8+16);
+            gametext(160,68-8,"THIS VERSION IS REALLY COOL, YOU",0,2+8+16);
+            gametext(160,77-8,"ARE MISSING OVER 75% OF THE TOTAL",0,2+8+16);
+            gametext(160,86-8,"GAME, ALONG WITH OTHER GREAT EXTRAS",0,2+8+16);
+            gametext(160,95-8,"AND GAMES, WHICH YOU'LL GET WHEN",0,2+8+16);
+            gametext(160,104-8,"YOU ORDER THE COMPLETE VERSION AND",0,2+8+16);
+            gametext(160,113-8,"GET THE FINAL TWO EPISODES.",0,2+8+16);
 
-        //            gametext(160,113+8,"PLEASE READ THE 'HOW TO ORDER' ITEM",0,2+8+16);
-        //            gametext(160,122+8,"ON THE MAIN MENU IF YOU WISH TO",0,2+8+16);
-        //            gametext(160,131+8,"UPGRADE TO THE FULL REGISTERED",0,2+8+16);
-        //            gametext(160,140+8,"VERSION OF DUKE NUKEM 3D.",0,2+8+16);
-        //            gametext(160,149+16,"PRESS ANY KEY...",0,2+8+16);
+            gametext(160,113+8,"PLEASE READ THE 'HOW TO ORDER' ITEM",0,2+8+16);
+            gametext(160,122+8,"ON THE MAIN MENU IF YOU WISH TO",0,2+8+16);
+            gametext(160,131+8,"UPGRADE TO THE FULL REGISTERED",0,2+8+16);
+            gametext(160,140+8,"VERSION OF DUKE NUKEM 3D.",0,2+8+16);
+            gametext(160,149+16,"PRESS ANY KEY...",0,2+8+16);
 
-        //            if( x >= -1 ) cmenu(100);
-        //            break;
+            if( x >= -1 ) cmenu(100);
+            break;
 
 
         //        case 15001:
