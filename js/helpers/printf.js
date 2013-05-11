@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var skipAllLogging = true;
+var skipAllLogging = false;
 
 var printf = skipAllLogging ? function() {
 } : function() {
@@ -29,16 +29,12 @@ printf.flush = function () {
     
 };
 
-function sendTextNew(txt) {
+function sendTextNew(string) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'log.aspx', false);
-    //xhr.responseType = 'text';
-    xhr.onload = function (e) {
-        if (this.status == 200) {
-            console.log(this.response);
-        }
-    };
-    xhr.send(txt);
+    var body = "string=" + encodeURIComponent(string);
+    xhr.open("POST", "log.aspx", false);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send(body);
 }
 
 var tokenize = function (/*String*/ str, /*RegExp*/ re, /*Function?*/ parseDelim, /*Object?*/ instance) {
