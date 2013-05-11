@@ -5985,7 +5985,7 @@ function logo() {
                         console.log("(25)");
                         ps[myconnectindex].palette = drealms;
                         palto(0, 0, 0, 63);
-                        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1); // this is possibly broken
+                        rotateSprite(0, 0, 65536, 0, DREALMS, 0, 0, 2 + 8 + 16 + 64, 0, 0, xdim - 1, ydim - 1);
                         nextpage();
 
                         q.setInsertPosition(0);
@@ -6001,7 +6001,7 @@ function logo() {
                         totalclock = 0;
 
                         q.setPositionAtStart().addWhile(function () {
-                            return totalclock < (120 * 7);
+                            return totalclock < (120 * 7) && !KB.keyWaiting();
                         }, function () {
                             q.setPositionAtStart();
                             console.info("(40) empty func to simuilate waiting, totalclock: %i", totalclock);
