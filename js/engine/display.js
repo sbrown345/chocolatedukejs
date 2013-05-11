@@ -186,7 +186,7 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     j = 0;
 
     // Build lookup table (X screespace -> frambuffer offset. 
-    for (i = 0; i < ydim; i++) {
+    for (i = 0; i <= ydim; i++) {
         ylookup[i] = j;
         j += bytesperline;
     }
