@@ -613,7 +613,10 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
  FCS: Draw a sprite vertical line of pixels.
  */
 //665
-function DrawSpriteVerticalLine(i2,  numPixels,  i4,  textureOffset, texture, dest) {
+function DrawSpriteVerticalLine(i2, numPixels, i4, textureOffset, texture, dest) {
+    i2 = i2 | 0;
+    i4 = i4 >>> 0;
+
     //printf("DrawSpriteVerticalLine\n");
     // todo
     var colorIndex;
@@ -674,10 +677,10 @@ var tsmach_eax3;
 var tsmach_ecx;
 function tsetupspritevline(palette, i2, i3, i4, i5) {
     tspal = palette;
-    tsmach_eax1 = i5 << 16;
-    adder = (i5 >> 16) + i2;
-    tsmach_eax3 = adder + i4;
-    tsmach_ecx = i3;
+    tsmach_eax1 = (i5 << 16) >>> 0;
+    adder = ((i5 >> 16) + i2) >>> 0;
+    tsmach_eax3 = (adder + i4) >>> 0;
+    tsmach_ecx = i3 >>> 0;
 }
 
 /* ---------------  FLOOR/CEILING RENDERING METHOD (USED TO BE HIGHLY OPTIMIZED ASSEMBLY) ----------------------------*/
@@ -691,12 +694,16 @@ var mmach_asm3;
 var mmach_asm1;
 var mmach_asm2;
 
-function mhline(texture, i2, numPixels, i4, i5, dest)
-{
+function mhline(texture, i2, numPixels, i4, i5, dest) {
+    i2 = i2 | 0;
+    i4 = i4 | 0;
+    i5 = i5 | 0;
     textureData = texture;
     mmach_asm3 = asm3;
     mmach_asm1 = asm1;
     mmach_asm2 = asm2;
+    printf("mmach_asm1: %u\n", mmach_asm1);
+    printf("mmach_asm2: %u\n", mmach_asm2);
     mhlineskipmodify(i2,numPixels>>16,i5,dest);
 }
 
@@ -706,24 +713,30 @@ function mhlineskipmodify(  i2, numPixels, i5, dest)
 {
     var ebx;
     var colorIndex;
-    
-    printf("mhlineskipmodify\n");
+    i2 = i2 >>> 0;
+
+    printf("mhlineskipmodify i2: %u, numPixels: %i, i5: %i \n", i2, numPixels, i5);
     for (; numPixels >= 0;)
     {
 	    ebx = i2 >>> mshift_al;
-	    ebx = shld (ebx, i5>>>0, mshift_bl) >>>0;
+	    printf("ebx: %u\n", ebx);
+	    ebx = shld(ebx, i5 >>> 0, mshift_bl) >>> 0;
+	    printf("ebx: %u\n", ebx);
 	    colorIndex = textureData[ebx];
+	    printf("colorIndex: %u\n", colorIndex);
 
         //Skip transparent color.
 		if ((colorIndex&0xff) != 0xff){
 		    //if (pixelsAllowed-- > 0) {
                 //todo: check
-		        printf("px:%i\n", mmach_asm3[colorIndex]);
-		        frameplace.array[dest] = mmach_asm3[colorIndex];
+		        printf("px:%i\n", mmach_asm3.getByte(colorIndex));
+		        frameplace.array[dest] = mmach_asm3.getByte(colorIndex);
 		    //}
 		}
-	    i2 += mmach_asm1;
-	    i5 += mmach_asm2;
+	    i2 = (i2 + mmach_asm1) >>> 0;
+        i5 = (i5 + mmach_asm2) | 0;
+	    printf("i2: %u\n", i2);
+	    printf("i5: %u\n", i5);
 	    dest++;
 	    numPixels--;
 
