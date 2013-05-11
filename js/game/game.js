@@ -810,7 +810,7 @@ function myospal(x, y, tilenum, shade, orientation, p) {
 
 function invennum(x, y, num1, ha, sbits) {
     ha = toUint8(ha);
-    var dabuf = num1.toString();
+    var dabuf = String.fromCharCode(num1, 0, 0); // string needs to be 3 long for "> 99"
     if (num1 > 99) {
         rotateSprite((x - 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, sbits, 0, 0, xdim - 1, ydim - 1);
@@ -871,7 +871,7 @@ function weaponnum999(ind, x, y, num1, num2, ha) {
 
     dabuf = String(num1);
     if (num1 > 99) {
-        rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x) << 16, y << 16, 65536,  0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
@@ -1383,9 +1383,9 @@ function coolgaugetext(snum) {
                 switch (p.inven_icon) {
                     case 1: i = p.firstaid_amount; break;
                     case 2: i = ((p.steroids_amount + 3) >> 2); break;
-                    case 3: i = ((p.holoduke_amount + 15) / 24); break;
+                    case 3: i = ((p.holoduke_amount + 15) / 24) | 0; break;
                     case 4: i = ((p.jetpack_amount + 15) >> 4); break;
-                    case 5: i = p.heat_amount / 12; break;
+                    case 5: i = (p.heat_amount / 12) | 0; break;
                     case 6: i = ((p.scuba_amount + 63) >> 6); break;
                     case 7: i = (p.boot_amount >> 1); break;
                 }
