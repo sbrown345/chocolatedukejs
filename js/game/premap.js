@@ -56,10 +56,18 @@ function cacheit() {
 //322
 
 function docacheit() {
-    console.log("todo docacheit");
-    // todo...
-    getpackets();
-    // todo...
+    var i, j;
+
+    j = 0;
+
+    for (i = 0; i < MAXTILES; i++)
+        if ((gotpic[i >> 3] & (1 << (i & 7))) && !tiles[i].data) {
+            loadTile(i);
+            j++;
+            if ((j & 7) == 0) getpackets();
+        }
+
+    clearbufbyte(gotpic, 0, gotpic.length, 0);
 }
 
 //357
