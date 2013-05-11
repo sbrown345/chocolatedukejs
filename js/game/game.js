@@ -6070,7 +6070,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    logo();
+                    //logo();
                 })
             .endIf();
 
@@ -6268,7 +6268,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 1;
+Game.whichDemo = 3;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
@@ -6350,23 +6350,30 @@ Game.playBack = function () {
                 return foundemo;
             }, function () {
                 q.setPositionAtStart();
-                q.setPositionAtStart();
 
-                if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
-                    i = 0;
-                    l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
-                    kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
-                }
-                var idx;
-                for (j = connecthead; j >= 0; j = connectpoint2[j]) {
-                    idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
-                    recsync[i].copyTo(inputfifo[idx][j]);
+                q.addWhile(function() {
+                    return totalclock >= (lockclock + TICSPERFRAME);
+                }, function() {
+                    q.setPositionAtStart();
 
-                    movefifoend[j]++;
-                    i++;
-                    ud.reccnt--;
-                }
-                Game.doMoveThings();
+                    if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
+                        i = 0;
+                        l = Math.min(ud.reccnt, RECSYNCBUFSIZ);
+                        kdfread(recsync, 10 * ud.multimode, (l / ud.multimode) >>> 0, recfilep);
+                        printf("recsync[0].fvel: %i, recsync[0].svel: %i\n", recsync[0].fvel, recsync[0].svel);
+                    }
+                    var idx;
+                    for (j = connecthead; j >= 0; j = connectpoint2[j]) {
+                        idx = movefifoend[j] & (MOVEFIFOSIZ - 1);
+                        recsync[i].copyTo(inputfifo[idx][j]);
+
+                        movefifoend[j]++;
+                        i++;
+                        ud.reccnt--;
+                    }
+                    Game.doMoveThings();
+                });
+
             }).endIf()
                 .addIf(function () {
                     return foundemo === 0;
@@ -6380,9 +6387,8 @@ Game.playBack = function () {
                     j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
 
                     Game.displayRooms(screenpeek, j);
-                    //appendImageDebug = true;
+                    
                     displayrest(j);
-                    //appendImageDebug = false;
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm) {
                         getpackets();
@@ -6969,6 +6975,8 @@ function moveloop() {
 Game.doMoveThings = function () {
     var i, j;
     var ch;
+    
+    printf("domovethings\n");
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         if (sync[i].bits & (1 << 17)) {
             multiflag = 2;
@@ -7045,6 +7053,12 @@ Game.doMoveThings = function () {
 
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         inputfifo[movefifoplc & (MOVEFIFOSIZ - 1)][i].copyTo(sync[i]);
+        printf("copy fifo i: %i\n", i);
+        printf("&sync[i].avel: %i\n",sync[i].avel);
+        printf("&sync[i].horz: %i\n",sync[i].horz);
+        printf("&sync[i].fvel: %i\n",sync[i].fvel);
+        printf("&sync[i].svel: %i\n",sync[i].svel);
+        printf("&sync[i].bits: %i\n",sync[i].bits);
     }
     movefifoplc++;
 

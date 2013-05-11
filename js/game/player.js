@@ -2816,6 +2816,7 @@ Player.processInput = function(snum) {
     i = 40;
 
     if( psectlotag == 2) {
+        printf("psectlotag == 2\n");
         p.jumping_counter = 0;
 
         p.pycount += 32;
@@ -2928,7 +2929,8 @@ Player.processInput = function(snum) {
     }
     else if( psectlotag != 2 )
     {
-        if(p.airleft != 15*26)
+        printf("psectlotag != 2\n");
+        if (p.airleft != 15 * 26)
             p.airleft = 15*26; //Aprox twenty seconds.
 
         if(p.scuba_on == 1)
@@ -2992,7 +2994,8 @@ Player.processInput = function(snum) {
 
         if(p.posz < (fz-(i<<8)) ) //falling
         {
-            if( (sb_snum&3) == 0 && p.on_ground && (sector[psect].floorstat&2) && p.posz >= (fz-(i<<8)-(16<<8) ) )
+            printf("falling\n");
+            if ((sb_snum & 3) == 0 && p.on_ground && (sector[psect].floorstat & 2) && p.posz >= (fz - (i << 8) - (16 << 8)))
                 p.posz = fz-(i<<8);
             else
             {
@@ -3041,6 +3044,7 @@ Player.processInput = function(snum) {
 
         else
         {
+            printf("else--\n");
             p.falling_counter = 0;
             if(p.scream_voice > FX_Ok)
             {
@@ -3139,7 +3143,8 @@ Player.processInput = function(snum) {
     //3106
     //Do the quick lefts and rights
 
-    if ( p.fist_incs ||
+    printf("o the quick lefts and rights\n");
+    if (p.fist_incs ||
             p.transporter_hold > 2 ||
             p.hard_landing ||
             p.access_incs > 0 ||
@@ -3254,6 +3259,7 @@ Player.processInput = function(snum) {
         }
     }
 
+    printf("snum: %i, p->posxv %i, sync[snum].fvel: %i\n, sync[snum].svel: %i\n", snum, p.posxv, sync[snum].fvel , sync[snum].svel );
     if ( p.posxv || p.posyv || sync[snum].fvel || sync[snum].svel )
     {
         p.crack_time = 777;

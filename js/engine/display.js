@@ -638,13 +638,13 @@ function getTicks() {
 
 var Timer = { initTime: Date.now(), ticksInOneSecond: 1000 };
 
-Timer.getPlatformTicks = function() {
-    return Date.now() - Timer.initTime;
-};
+//Timer.getPlatformTicks = function() {
+//    return Date.now() - Timer.initTime;
+//};
 
 var fakeTime = 0;
-//Timer.getPlatformTicks = function () {
-//    fakeTime += 50;
-//    printf("fakeTime: %i", fakeTime);
-//    return fakeTime;
-//};
+Timer.getPlatformTicks = function () {
+    fakeTime += 10;
+    printf("fakeTime: %i\n", fakeTime);
+    return fakeTime;
+};

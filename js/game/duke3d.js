@@ -159,7 +159,6 @@ Input.prototype.copyTo = function(obj) {
 };
 
 ///* !!! FIXME: "sync" is defined in unistd.h ... :(  --ryan. */
-// todo fix: this is work around for macro: possibly confusing sync/duke_sync
 Object.defineProperty(window, 'duke_sync', { get: function () { return sync; }, set: function (v) { sync = v; } });
 
 //extern input recsync[RECSYNCBUFSIZ];

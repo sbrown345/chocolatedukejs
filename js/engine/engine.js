@@ -283,14 +283,14 @@ function scansector(sectnum) {
         if ((wall[z].point2 < z) && (scanfirst < numscans)) {
             bunchWallsList[numscans - 1] = scanfirst;
             scanfirst = numscans;
-            printf("scanfirst: %i", scanfirst);
+            printf("scanfirst: %i\n", scanfirst);
         }
     };
 
     if (sectnum < 0)
         return;
 
-    printf("start scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
+    printf("start scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i\n", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
     if (automapping)
         show2dsector[sectnum >> 3] |= pow2char[sectnum & 7];
 
@@ -348,7 +348,7 @@ function scansector(sectnum) {
 
             x2 = wal2.x - globalposx;
             y2 = wal2.y - globalposy;
-            //printf("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
+            //printf("x1: %i, y1: %i, x2: %i, y2: %i\n", x1, y1, x2, y2);
 
             // If this is a portal...
             if ((nextsectnum >= 0) && ((wal.cstat & 32) == 0))
@@ -458,7 +458,7 @@ function scansector(sectnum) {
             pvWalls[numscans].cameraSpaceCoo[0][VEC_Y] = yp1;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_X] = xp2;
             pvWalls[numscans].cameraSpaceCoo[1][VEC_Y] = yp2;
-            //printf("xp1: %i, yp1: %i, xp2: %i, yp2: %i", xp1, yp1, xp2, yp2);
+            //printf("xp1: %i, yp1: %i, xp2: %i, yp2: %i\n", xp1, yp1, xp2, yp2);
 
             bunchWallsList[numscans] = numscans + 1;
             numscans++;
@@ -491,7 +491,7 @@ function scansector(sectnum) {
     } while (numSectorsToVisit > 0);
     // do this until the stack of sectors to visit if empty.
     
-    printf("end scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
+    printf("end scansector pvWalls[3].screenSpaceCoo[1][VEC_COL]: %i\n", pvWalls[3].screenSpaceCoo[1][VEC_COL]); // todo dax2 is wrong in grouscan
 }
 
 
@@ -1822,7 +1822,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             y1 = Math.max(umost[x],dplc[x]);
             y2 = dmost[x]-1;
         }
-        //printf("sectnum: %i, x: %i, y1: %i, y2: %i", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
+        //printf("sectnum: %i, x: %i, y1: %i, y2: %i\n", sectnum, x, y1, y2); //sectnum== 55 && x== 24 && y1== 0 && y2== -1     - breakpoint shows bug when compard with original
         //if (sectnum == 55 && x == 28 && y1 == 0 && y2 == 1)
         //    debugger;
         if (y1 <= y2) {
@@ -2557,7 +2557,7 @@ Engine.draWalls = function (bunch) {
             }
         }
     }
-    printf("eo drawals")
+    printf("eo drawals\n")
     appendCanvasImageToPage();
 };
 
@@ -2788,7 +2788,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     globalposx = daposx;
     globalposy = daposy;
     globalposz = daposz;
-    printf("drawrooms dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i", dacursectnum, globalposx, globalposy, globalposz);
+    printf("drawrooms dacursectnum: %i, globalposx: %i, globalposy: %i, globalposz: %i\n", dacursectnum, globalposx, globalposy, globalposz);
     globalang = (daang & 2047); //FCS: Mask and keep only 11 bits of angle value.
 
     globalhoriz = mulscale16(dahoriz - 100, xdimenscale) + (ydimen >> 1);
@@ -2921,7 +2921,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     // Due to rounding error, not all columns may be drawn so an additional stop condition is here:
     // When every bunches have been tested for rendition.
     while ((numbunches > 0) && (numhits > 0)) {
-        printf("drawrooms numbunches: %i", numbunches)
+        printf("drawrooms numbunches: %i\n", numbunches)
         // tempbuf is used to mark which bunches have been elected as "closest".
         // if tempbug[x] == 1 then it should be skipped.
         clearbuf(tempbuf,0,((numbunches+3)>>2),0);
@@ -2941,7 +2941,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
 
         /* Double-check */
         for (i = 0; i < numbunches; i++) {
-            printf("drawrooms  Double-check i: %i, tempbuf[i]: %i", i, tempbuf[i]);
+            printf("drawrooms  Double-check i: %i, tempbuf[i]: %i\n", i, tempbuf[i]);
             if (tempbuf[i])
                 continue;
             if ((j = bunchfront(i, closest)) < 0)
@@ -3744,14 +3744,14 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
     for (v = npoints - 1; v >= 0; v--) {
         x1 = pvWalls[v].cameraSpaceCoo[0][VEC_X];
         x2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_X];
-        //console.log("x1: %i, x2: %i", x1, x2);
+        //console.log("x1: %i, x2: %i\n", x1, x2);
         dax1 = (x1 >> 16);
         if (x1 < lx)
             lx = x1;
         dax2 = (x2 >> 16);
         if (x1 > rx)
             rx = x1;
-        //console.log("lx: %i, rx: %i", lx, rx);
+        //console.log("lx: %i, rx: %i\n", lx, rx);
         if (dax1 != dax2) {
             y1 = pvWalls[v].cameraSpaceCoo[0][VEC_Y];
             y2 = pvWalls[nextv].cameraSpaceCoo[0][VEC_Y];
