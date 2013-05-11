@@ -887,8 +887,8 @@ function shoot(i,atwith) {
                 }
                 else if(sprite[i].picnum == BOSS2)
                 {
-                    sprite[j].x -= (sintable[sa&2047]/56)|0;
-                    sprite[j].y -= (sintable[(sa+1024+512)&2047]/56)|0;
+                    sprite[j].x -= ((sintable[sa&2047]/56)|0);
+                    sprite[j].y -= ((sintable[(sa+1024+512)&2047]/56)|0);
                     sprite[j].ang -= 8+(TRAND&255)-128;
                     sprite[j].xrepeat = 24;
                     sprite[j].yrepeat = 24;
@@ -908,8 +908,8 @@ function shoot(i,atwith) {
 
                 if( ps[p].hbomb_hold_delay )
                 {
-                    sprite[j].x -= (sintable[sa&2047]/644)|0;
-                    sprite[j].y -= (sintable[(sa+1024+512)&2047]/644)|0;
+                    sprite[j].x -= ((sintable[sa&2047]/644)|0);
+                    sprite[j].y -= ((sintable[(sa+1024+512)&2047]/644)|0);
                 }
                 else
                 {
@@ -2127,7 +2127,7 @@ function  doincrements(p)
 
     snum = sprite[p.i].yvel;
     //    j = sync[snum].avel;
-    //    p.weapon_ang = -(j/5);
+    //    p.weapon_ang = (-(j/5)|0);
 
     p.player_par++;
 

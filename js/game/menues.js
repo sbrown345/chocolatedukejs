@@ -2729,8 +2729,8 @@ function menus() {
 //            for(x=0;x<menunamecnt;x++)
 //            {
 //                if(x == fileselect)
-//                    minitext(15 + (x/15)*54,32 + (x%15)*8,menuname[x],0,26);
-//                else minitext(15 + (x/15)*54,32 + (x%15)*8,menuname[x],16,26);
+//                    minitext(15 + ((x/15)|0)*54,32 + (x%15)*8,menuname[x],0,26);
+//                else minitext(15 + ((x/15)|0)*54,32 + (x%15)*8,menuname[x],16,26);
 //            }
 
 //            fileselect = probey;

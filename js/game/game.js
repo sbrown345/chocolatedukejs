@@ -1192,7 +1192,7 @@ function coolgaugetext(snum) {
         //    if(ud.extended_screen_size>0)
         //    {
         //        offx = 5; offy = 160;
-
+        throw 'notice all those divisions !!! e.g. 40000/10'
         //        sprintf(text,"%d", ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
         //        minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
         //        sprintf(text,"%d", ps[screenpeek].last_extra); 
@@ -2147,7 +2147,7 @@ function LocateTheLocator(n, sn) {
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
     var i;
     var s;
-
+    
     printf("EGS whatsect: %i, s_x: %i, s_y: %i, s_z: %i, s_pn: %i,  s_s: %i, s_xr: %i, s_yr: %i, s_a: %i, s_ve: %i, s_zv: %i, ,s_ow: %i, s_ss: %i\n",
 		 whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
 
@@ -6801,7 +6801,7 @@ function fakedomovethings() {
     //            }
     //            else
     //            {
-    //                myzvel -= (sintable[(2048-128+myjumpingcounter)&2047])/12;
+    //                myzvel -= (((sintable[(2048-128+myjumpingcounter)&2047])/12)|0);
     //                myjumpingcounter += 180;
 
     //                myonground = 0;
@@ -6929,7 +6929,7 @@ function fakedomovethings() {
     //    if ((sb_snum&(1<<13)) == 0 && (sb_snum&(1<<14)) == 0)
     //    {
     //        myreturntocenter--;
-    //        myhoriz += 33-(myhoriz/3);
+    //        myhoriz += 33-((myhoriz/3)|0);
     //    }
 
     //if(p.aim_mode)

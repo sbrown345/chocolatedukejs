@@ -2966,9 +2966,9 @@ function checksectors(snum) {
                             p.holster_weapon = 1;
                             p.weapon_pos = -1;
                         }
-                        if(sprite[p.i].extra <= (max_player_health-(max_player_health/10) ) )
+                        if(sprite[p.i].extra <= (max_player_health-((max_player_health/10)|0) ) )
                         {
-                            sprite[p.i].extra += max_player_health/10;
+                            sprite[p.i].extra += ((max_player_health/10)|0);
                             p.last_extra = sprite[p.i].extra;
                         }
                         else if(sprite[p.i].extra < max_player_health )

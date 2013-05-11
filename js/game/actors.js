@@ -3329,7 +3329,7 @@ function moveactors()
                         t[2] = 0;
                     }
                     else hittype[i].tempang +=
-                        getincangle(hittype[i].tempang,getangle(ps[p].posx-s.x,ps[p].posy-s.y))/3;
+                        ((getincangle(hittype[i].tempang,getangle(ps[p].posx-s.x,ps[p].posy-s.y))/3)|0);
                 }
                 else if(t[0] == 2 || t[0] == 3)
                 {

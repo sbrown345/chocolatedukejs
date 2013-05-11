@@ -1696,8 +1696,8 @@ function alterang(a) {
 
     aang = g_sp.ang;
 
-    g_sp.xvel += ((script[moveptr]-g_sp.xvel)/5)|0;
-    if(g_sp.zvel < 648) g_sp.zvel += ((((script[moveptr+1])<<4)-g_sp.zvel)/5)|0;
+    g_sp.xvel += (((script[moveptr]-g_sp.xvel)/5)|0);
+    if(g_sp.zvel < 648) g_sp.zvel += (((((script[moveptr+1])<<4)-g_sp.zvel)/5)|0);
 
     if(a&seekplayer)
     {
@@ -2284,7 +2284,7 @@ function parse() {
                 else
                 {
                     if( ceilingspace(g_sp.sectnum) || sector[g_sp.sectnum].lotag == 2)
-                        c = gc/6;
+                        c = (gc/6)|0;
                     else c = gc;
                 }
 
