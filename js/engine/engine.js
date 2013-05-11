@@ -6526,6 +6526,7 @@ function addclipline(dax1, day1, dax2, day2, daoval) {
     clipit[clipnum].y2 = day2;
     clipobjectval[clipnum] = daoval;
     clipnum++;
+    printf("addclipline dax1: %i, day1: %i, dax2: %i, day2: %i, daoval: %i, clipnum: %i\n", dax1, day1, dax2, day2, daoval, clipnum);
 }
 
 //6880
@@ -6557,7 +6558,7 @@ Engine.keepaway = function (x, y, w) {
 Engine.raytrace = function (x3, y3, x4, y4) {
     var x1, y1, x2, y2, bot, topu, nintx, ninty, cnt, z, hitwall;
     var x21, y21, x43, y43;
-
+    printf("raytrace, x3: %i\n", x3);
     hitwall = -1;
     for (z = clipnum - 1; z >= 0; z--) {
         x1 = clipit[z].x1;
@@ -6582,6 +6583,7 @@ Engine.raytrace = function (x3, y3, x4, y4) {
             cnt--;
             if (cnt < 0) {
                 x4.$ = x3;
+                printf("x4 a: %i\n", x4.$);
                 y4.$ = y3;
                 return (z);
             }
@@ -6590,8 +6592,10 @@ Engine.raytrace = function (x3, y3, x4, y4) {
             topu--;
         } while (x21 * (ninty - y1) <= (nintx - x1) * y21);
 
+        printf("x3: %i, nintx: %i, y3: %i, ninty: %i, x3: %i\n", x3, nintx, y3, ninty, x3);
         if (klabs(x3 - nintx) + klabs(y3 - ninty) < klabs(x3 - x4.$) + klabs(y3 - y4.$)) {
             x4.$ = nintx;
+            printf("x4 b: %i\n", x4.$);
             y4.$ = ninty;
             hitwall = z;
         }
@@ -6747,7 +6751,7 @@ function clipmove(x, y, z, sectnum,
                         else daz = spr.z;
 
                         if (tiles[spr.picnum].animFlags & 0x00ff0000)
-                            daz -= ((/*(int8_t )*/((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
+                            daz -= ((toInt8((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
 
                         if (((z.$) < daz + ceildist) && ((z.$) > daz - k - flordist)) {
                             bsz = (spr.clipdist << 2) + walldist;
@@ -6768,7 +6772,7 @@ function clipmove(x, y, z, sectnum,
                         daz = spr.z;
 
                     if (tiles[spr.picnum].animFlags & 0x00ff0000)
-                        daz -= ((/*(int8_t  )*/((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
+                        daz -= ((toInt8((tiles[spr.picnum].animFlags >> 16) & 255)) * spr.yrepeat << 2);
                     daz2 = daz - k;
                     daz += ceildist;
                     daz2 -= flordist;
@@ -6778,7 +6782,7 @@ function clipmove(x, y, z, sectnum,
                             * Given: (x1, y1) starts out as the center point
                             */
                         tilenum = spr.picnum;
-                        xoff =/* (int32_t)*/(/*(int8_t  )*/((tiles[tilenum].animFlags >> 8) & 255)) + (spr.xoffset);
+                        xoff =/* (int32_t)*/(toInt8((tiles[tilenum].animFlags >> 8) & 255)) + (spr.xoffset);
                         if ((cstat & 4) > 0) xoff = -xoff;
                         k = spr.ang;
                         l = spr.xrepeat;
@@ -6786,15 +6790,19 @@ function clipmove(x, y, z, sectnum,
                         day = sintable[(k + 1536) & 2047] * l;
                         l = tiles[tilenum].dim.width;
                         k = (l >> 1) + xoff;
+                        printf("dax: %i, k: %i, l: %i, xoff: %i\n", dax, k, l, xoff);
                         x1 -= mulscale16(dax, k);
                         x2 = x1 + mulscale16(dax, l);
                         y1 -= mulscale16(day, k);
                         y2 = y1 + mulscale16(day, l);
+                        printf("cx: %i, cy: %i, x1: %i, y1: %i, x2: %i, y2: %i, rad: %i\n", cx, cy, x1, y1, x2, y2, rad);
                         if (clipinsideboxline(cx, cy, x1, y1, x2, y2, rad) != 0) {
                             dax = mulscale14(sintable[(spr.ang + 256 + 512) & 2047], walldist);
                             day = mulscale14(sintable[(spr.ang + 256) & 2047], walldist);
 
+                            printf("x1: %i, x: %i, y2: %i, y: %i, x2: %i, x: %i, y1: %i, y: %i\n", x1, x.$, y2, y.$, x2, x.$, y1, y.$);
                             if ((x1 - (x.$)) * (y2 - (y.$)) >= (x2 - (x.$)) * (y1 - (y.$)))   /* Front */ {
+                                printf("clipmove front\n");
                                 addclipline(x1 + dax, y1 + day, x2 + day, y2 - dax, j + 49152);
                             }
                             else {
@@ -6882,6 +6890,7 @@ function clipmove(x, y, z, sectnum,
 
         var intxRef = new Ref(intx);
         var intyRef = new Ref(inty);
+        printf("intx: %i\n", intx);
         hitwall = Engine.raytrace(x.$, y.$, intxRef, intyRef);
         intx = intxRef.$;
         inty = intyRef.$;
@@ -7067,6 +7076,7 @@ function pushmove( x,  y,  z,  sectnum, walldist,  ceildist,  flordist, cliptype
         dir = -dir;
     } while (bad != 0);
 
+    printf("pushmove, x: %i\n", x.$)
     return(bad);
 }
 

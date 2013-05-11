@@ -2350,7 +2350,7 @@ Player.processInput = function(snum) {
         refSectnum = new Ref();
 
     p = ps[snum];
-    printf("start of processInput: p.posyv: %i\n", p.posyv);
+    printf("start of processInput: p.posyv: %i, p.posx: %i\n", p.posyv, p.posx);
     pi = p.i;
     s = sprite[pi];
 
@@ -2704,6 +2704,7 @@ Player.processInput = function(snum) {
     {
         i = p.newowner;
         p.posx = sprite[i].x;
+        printf("new owner p.posx: %i\n", p.posx);
         p.posy = sprite[i].y;
         p.posz = sprite[i].z;
         p.ang =  sprite[i].ang;
@@ -2799,6 +2800,7 @@ Player.processInput = function(snum) {
         p.oposy = p.posy;
     }
 
+    printf("b4 bob p.posx: %i\n", p.posx);
     p.bobposx = p.posx;
     p.bobposy = p.posy;
 
@@ -3356,6 +3358,7 @@ Player.processInput = function(snum) {
     if (ud.clipping) {
         j = 0;
         p.posx += p.posxv >> 14;
+        printf("p->posx: %i\n", p.posx);
         p.posy += p.posyv >> 14;
         var pcursectnumRef = new Ref(p.cursectnum);
         updatesector(p.posx,p.posy,pcursectnumRef);

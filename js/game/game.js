@@ -6289,7 +6289,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 3;
+Game.whichDemo = 2;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
