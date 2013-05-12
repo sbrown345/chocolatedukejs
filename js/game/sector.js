@@ -301,41 +301,70 @@ function getanimationgoal(animptr)
     return(j);
 }
 
+//function AnimatePtr(idx, get, set) {
+//    this.idx = idx;
+//    this.get = get;
+//    this.set = set;
+//    // how would this work with kdfread(&animateptr[0],4,MAXANIMATES,fil); ?????? on menues???
+//}
+function AnimatePtr(array, idx, key) {
+    this.obj = array[idx]; // another ref to test
+    this.array = array;
+    this.idx = idx;
+    this.key = key;
+    // how would this work with kdfread(&animateptr[0],4,MAXANIMATES,fil); ?????? on menues???
+}
+
+AnimatePtr.prototype.get = function() {
+    return this.array[idx][key];
+};
+
+AnimatePtr.prototype.set = function(v) {
+    this.array[idx][key] = v;
+};
+
 function setanimation( animsect,animptr,  thegoal,  thevel)
 {
+    //TODO setinterpolation (and uncomment from src)
+    //TODO stopinterpolation (and uncomment from src)
+    //TODO dointerpolations (and uncomment from src)
+
 	var i, j;
 
 	if (animatecnt >= MAXANIMATES-1)
-		return(-1);
-
-	console.warn("todo: how todo this pointer ????????")
-	return -1;
+	    return(-1);
     
+    /*how ?
+    string -> eval()   - would need right ctx..
+    a kind of getter/setter function
+    a reference and a key name - would the reference hold???
+
+    index, key name, array----------**
 
 
+    */
 
+    j = animatecnt;
+    for(i=0;i<animatecnt;i++)
+    	if (animptr == animateptr[i])
+    	{
+    		j = i;
+    		break;
+    	}
 
-    //j = animatecnt;
-    //for(i=0;i<animatecnt;i++)
-    //	if (animptr == animateptr[i])
-    //	{
-    //		j = i;
-    //		break;
-    //	}
+    animatesect[j] = animsect;
+    animateptr[j] = animptr;
+    animategoal[j] = thegoal;
+    if (thegoal >= animptr.get())
+       animatevel[j] = thevel;
+    else
+       animatevel[j] = -thevel;
 
-    //animatesect[j] = animsect;
-    //animateptr[j] = animptr;
-    //animategoal[j] = thegoal;
-    //if (thegoal >= *animptr)
-    //   animatevel[j] = thevel;
-    //else
-    //   animatevel[j] = -thevel;
+    if (j == animatecnt) animatecnt++;
 
-    //if (j == animatecnt) animatecnt++;
+    setinterpolation(animptr);
 
-    //setinterpolation(animptr);
-
-    //return(j);
+    return(j);
 }
 
 
@@ -492,7 +521,7 @@ function operatesectors(sn,ii)
             break;
 
         case 26: //The split doors
-            i = getanimationgoal(sptr.ceilingz);
+            i = getanimationgoal(new AnimatePtr(sector, sn, "ceilingz"));
             if(i == -1) //if the door has stopped
             {
                 haltsoundhack = 1;
@@ -552,18 +581,18 @@ function operatesectors(sn,ii)
                     {
                         dax2 = wall[wall[wall[wallfind[j]].point2].point2].x;
                         dax2 -= wall[wall[wallfind[j]].point2].x;
-                        setanimation(sn,wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,sp);
-                        setanimation(sn,wall[i].x,wall[i].x+dax2,sp);
-                        setanimation(sn,wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,sp);
+                        setanimation(sn, new AnimatePtr(wall, wallfind[j], "x"), wall[wallfind[j]].x + dax2, sp);
+                        setanimation(sn, new AnimatePtr(wall, i, "x"), wall[i].x + dax2, sp);
+                        setanimation(sn, new AnimatePtr(wall, wall[wallfind[j]].point2, "x"), wall[wall[wallfind[j]].point2].x + dax2, sp);
                         callsound(sn,ii);
                     }
                     else if (day2 != 0)
                     {
                         day2 = wall[wall[wall[wallfind[j]].point2].point2].y;
                         day2 -= wall[wall[wallfind[j]].point2].y;
-                        setanimation(sn,wall[wallfind[j]].y,wall[wallfind[j]].y+day2,sp);
-                        setanimation(sn,wall[i].y,wall[i].y+day2,sp);
-                        setanimation(sn,wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,sp);
+                        setanimation(sn, new AnimatePtr(wall, wallfind[j], "y"), wall[wallfind[j]].y + day2, sp);
+                        setanimation(sn, new AnimatePtr(wall, i, "y"), wall[i].y + day2, sp);
+                        setanimation(sn, new AnimatePtr(wall, wall[wallfind[j]].point2, "y"),wall[wall[wallfind[j]].point2].y+day2,sp);
                         callsound(sn,ii);
                     }
                 }
@@ -572,18 +601,17 @@ function operatesectors(sn,ii)
                     i = wallfind[j]-1; if (i < startwall) i = endwall;
                     dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
                     day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
-                    if (dax2 != 0)
-                    {
-                        setanimation(sn,wall[wallfind[j]].x,dax,sp);
-                        setanimation(sn,wall[i].x,dax+dax2,sp);
-                        setanimation(sn,wall[wall[wallfind[j]].point2].x,dax+dax2,sp);
+                    if (dax2 != 0) {
+                        setanimation(sn, new AnimatePtr(wall, wallfind[j], "x"), dax, sp);
+                        setanimation(sn, new AnimatePtr(wall, i, "x"), dax + dax2, sp);
+                        setanimation(sn, new AnimatePtr(wall, wall[wallfind[j]].point2, "x"), dax + dax2, sp);
                         callsound(sn,ii);
                     }
                     else if (day2 != 0)
                     {
-                        setanimation(sn,wall[wallfind[j]].y,day,sp);
-                        setanimation(sn,wall[i].y,day+day2,sp);
-                        setanimation(sn,wall[wall[wallfind[j]].point2].y,day+day2,sp);
+                        setanimation(sn,  new AnimatePtr(wall, wallfind[j], "y"),day,sp);
+                        setanimation(sn, new AnimatePtr(wall, i, "y"),day+day2,sp);
+                        setanimation(sn, new AnimatePtr(wall, wall[wallfind[j]].point2, "y"), day + day2, sp);
                         callsound(sn,ii);
                     }
                 }
@@ -625,7 +653,7 @@ function operatesectors(sn,ii)
         case 16:
         case 17:
 
-            i = getanimationgoal(sptr.floorz);
+            i = getanimationgoal(new AnimatePtr(sector, sn, "floorz"));
 
             if(i == -1)
             {
@@ -635,12 +663,12 @@ function operatesectors(sn,ii)
                     i = nextsectorneighborz(sn,sptr.floorz,1,-1);
                     if( i == -1 ) return;
                     j = sector[i].floorz;
-                    setanimation(sn,sptr.floorz,j,sptr.extra);
+                    setanimation(sn,new AnimatePtr(sector, sn, "floorz"),j,sptr.extra);
                 }
                 else
                 {
                     j = sector[i].floorz;
-                    setanimation(sn,sptr.floorz,j,sptr.extra);
+                    setanimation(sn, new AnimatePtr(sector, sn, "floorz"), j, sptr.extra);
                 }
                 callsound(sn,ii);
             }
@@ -650,7 +678,7 @@ function operatesectors(sn,ii)
         case 18:
         case 19:
 
-            i = getanimationgoal(sptr.floorz);
+            i = getanimationgoal(new AnimatePtr(sector, sn, "floorz"));
 
             if(i==-1)
             {
@@ -660,8 +688,8 @@ function operatesectors(sn,ii)
                 j = sector[i].floorz;
                 q = sptr.extra;
                 l = sptr.ceilingz-sptr.floorz;
-                setanimation(sn,sptr.floorz,j,q);
-                setanimation(sn,sptr.ceilingz,j+l,q);
+                setanimation(sn, new AnimatePtr(sector, sn, "floorz"), j, q);
+                setanimation(sn, new AnimatePtr(sector, sn, "ceilingz"), j + l, q);
                 callsound(sn,ii);
             }
             return;
@@ -689,7 +717,7 @@ function operatesectors(sn,ii)
 
             sptr.lotag ^= 0x8000;
 
-            setanimation(sn,sptr.ceilingz,j,sptr.extra);
+            setanimation(sn, new AnimatePtr(sector, sn, "ceilingz"), j, sptr.extra);
 
             callsound(sn,ii);
 
@@ -730,13 +758,13 @@ function operatesectors(sn,ii)
             }
             sptr.lotag ^= 0x8000;
 
-            setanimation(sn,sptr.ceilingz,j,sptr.extra);
+            setanimation(sn, new AnimatePtr(sector, sn, "ceilingz"), j, sptr.extra);
             callsound(sn,ii);
 
             return;
 
         case 21:
-            i = getanimationgoal(sptr.floorz);
+            i = getanimationgoal(new AnimatePtr(sector, sn, "floorz"));
             if (i >= 0)
             {
                 if (animategoal[sn] == sptr.ceilingz)
@@ -752,7 +780,7 @@ function operatesectors(sn,ii)
 
                 sptr.lotag ^= 0x8000;
 
-                if(setanimation(sn,sptr.floorz,j,sptr.extra) >= 0)
+                if (setanimation(sn, new AnimatePtr(sector, sn, "floorz"), j, sptr.extra) >= 0)
                     callsound(sn,ii);
             }
             return;
@@ -765,14 +793,14 @@ function operatesectors(sn,ii)
             {
                 q = (sptr.ceilingz+sptr.floorz)>>1;
                // j = setanimation(sn,&sptr.floorz,q,sptr.extra);
-                j = setanimation(sn,sptr.ceilingz,q,sptr.extra);
+                j = setanimation(sn, new AnimatePtr(sector, sn, "ceilingz"), q, sptr.extra);
             }
             else
             {
                 q = sector[nextsectorneighborz(sn,sptr.floorz,1,1)].floorz;
                // j = setanimation(sn,&sptr.floorz,q,sptr.extra);
                 q = sector[nextsectorneighborz(sn,sptr.ceilingz,-1,-1)].ceilingz;
-                j = setanimation(sn,sptr.ceilingz,q,sptr.extra);
+                j = setanimation(sn, new AnimatePtr(sector, sn, "ceilingz"), q, sptr.extra);
             }
 
             sptr.lotag ^= 0x8000;

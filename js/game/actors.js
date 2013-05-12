@@ -5699,7 +5699,7 @@ function moveeffectors()   //STATNUM 3
                     if( hittype[i].temp_data[4] > 8 ) {deletesprite(i);{i = nexti; continue BOLT;}}
                     j = 1;
                 }
-                else j = getanimationgoal(sc.ceilingz);
+                else j = getanimationgoal(new AnimatePtr(sector, s.sectnum, "ceilingz"));
 
                 if( j >= 0 )
                 {
@@ -5778,7 +5778,7 @@ function moveeffectors()   //STATNUM 3
                                 case 21:
                                 case 22:
                                 case 26:
-                                    if( getanimationgoal(sector[s.sectnum].ceilingz) >= 0 )
+                                    if( getanimationgoal(new AnimatePtr(sector,s.sectnum,"ceilingz")) >= 0 )
                                         break;
                                 default:
                                     activatebysector(s.sectnum,i);
@@ -6432,7 +6432,7 @@ function moveeffectors()   //STATNUM 3
 
                 if( t[1] )
                 {
-                    if(getanimationgoal(sector[t[0]].ceilingz) >= 0)
+                    if(getanimationgoal(new AnimatePtr(sector, t[0], "ceilingz")) >= 0)
                         sc.ceilingz += sc.extra*9;
                     else t[1] = 0;
                 }
