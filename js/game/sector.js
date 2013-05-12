@@ -1074,7 +1074,8 @@ function operateforcefields( s,  low)
 //1165
 function checkhitswitch(snum,w,switchtype)
 {
-    var  switchpal;
+    printf("checkhitswitch switchtype: %i, w: %i, snum: %i\n", switchtype, w, snum);
+    var switchpal;
     var i, x, lotag,hitag,picnum,correctdips,numdips;
     var sx,sy;
 
@@ -1183,13 +1184,14 @@ function checkhitswitch(snum,w,switchtype)
     }
 
     i = headspritestat[0];
-    while(i >= 0)
+    while (i >= 0)
     {
         if( lotag == sprite[i].lotag ) switch(sprite[i].picnum)
         {
             case DIPSWITCH:
             case TECHSWITCH:
             case ALIENSWITCH:
+                printf("ALIENSWITCH switchtype: %i, w: %i, i: %i\n", switchtype, w, i);
                 if( switchtype == 1 && w == i ) sprite[i].picnum++;
                 else if( sprite[i].hitag == 0 ) correctdips++;
                 numdips++;
@@ -1205,6 +1207,7 @@ function checkhitswitch(snum,w,switchtype)
             case MULTISWITCH+1:
             case MULTISWITCH+2:
             case MULTISWITCH+3:
+                printf("MULTISWITCH \n");
                 sprite[i].picnum++;
                 if( sprite[i].picnum > (MULTISWITCH+3) )
                     sprite[i].picnum = MULTISWITCH;
@@ -1224,6 +1227,7 @@ function checkhitswitch(snum,w,switchtype)
             case PULLSWITCH:
             case DIPSWITCH2:
             case DIPSWITCH3:
+                printf("DIPSWITCH3 \n");
                 sprite[i].picnum++;
                 break;
             case PULLSWITCH+1:
@@ -2892,7 +2896,7 @@ function checksectors(snum) {
         var getValuesFromNeartagRefs = function() {
             neartagsector = neartagsectorRef.$;
             neartagwall = neartagwallRef.$;
-            neartagwall = neartagwallRef.$;
+            neartagsprite = neartagspriteRef.$;
             neartaghitdist = neartaghitdistRef.$;
         };
 
@@ -2931,6 +2935,7 @@ function checksectors(snum) {
                 neartagsector = -1;
             }
         }
+        printf("neartagsector %i\n", neartagsector);
 
         if(p.newowner == -1 && neartagsprite == -1 && neartagsector == -1 && neartagwall == -1 )
             if( isanunderoperator(sector[sprite[p.i].sectnum].lotag) )
@@ -2947,9 +2952,10 @@ function checksectors(snum) {
                 if(oldz > 1280) neartagsprite = -1;
             }
 
-        if(neartagsprite >= 0)
-        {
+        printf("neartagsprite %i\n", neartagsprite);
+        if (neartagsprite >= 0) {
             if( checkhitswitch(snum,neartagsprite,1) ) return;
+            printf("neartagsprite OK \n");
 
             switch(sprite[neartagsprite].picnum)
             {
