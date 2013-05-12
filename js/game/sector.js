@@ -227,60 +227,60 @@ function doanimations() {
     printf("doanimations animatecnt: %i\n", animatecnt);
     for (i = animatecnt - 1; i >= 0; i--)
     {
-        throw "todo"
-        //a = *animateptr[i];
-        //v = animatevel[i]*TICSPERFRAME;
-        //dasect = animatesect[i];
+        a = animateptr[i].get();
+        v = animatevel[i]*TICSPERFRAME;
+        dasect = animatesect[i];
 
-        //if (a == animategoal[i])
-        //{
-        //    stopinterpolation(animateptr[i]);
+        if (a == animategoal[i])
+        {
+            stopinterpolation(animateptr[i]);
 
-        //    animatecnt--;
-        //    animateptr[i] = animateptr[animatecnt];
-        //    animategoal[i] = animategoal[animatecnt];
-        //    animatevel[i] = animatevel[animatecnt];
-        //    animatesect[i] = animatesect[animatecnt];
-        //    if( sector[animatesect[i]].lotag == 18 || sector[animatesect[i]].lotag == 19 )
-        //        if(animateptr[i] == sector[animatesect[i]].ceilingz)
-        //            continue;
+            animatecnt--;
+            animateptr[i] = animateptr[animatecnt];
+            animategoal[i] = animategoal[animatecnt];
+            animatevel[i] = animatevel[animatecnt];
+            animatesect[i] = animatesect[animatecnt];
+            if( sector[animatesect[i]].lotag == 18 || sector[animatesect[i]].lotag == 19 )
+                if(animateptr[i] == sector[animatesect[i]].ceilingz)
+                    continue;
 
-        //    if( (sector[dasect].lotag&0xff) != 22 )
-        //        callsound(dasect,-1);
+            if( (sector[dasect].lotag&0xff) != 22 )
+                callsound(dasect,-1);
 
-        //    continue;
-        //}
+            continue;
+        }
 
-        //if (v > 0) { a = Math.min(a+v,animategoal[i]); }
-        //else { a = Math.max(a+v,animategoal[i]); }
+        if (v > 0) { a = Math.min(a+v,animategoal[i]); }
+        else { a = Math.max(a+v,animategoal[i]); }
 
-        //if( animateptr[i] == sector[animatesect[i]].floorz)
-        //{
-        //    for(p=connecthead;p>=0;p=connectpoint2[p])
-        //        if (ps[p].cursectnum == dasect)
-        //            if ((sector[dasect].floorz-ps[p].posz) < (64<<8))
-        //                if (sprite[ps[p].i].owner >= 0)
-        //                {
-        //                    ps[p].posz += v;
-        //                    ps[p].poszv = 0;
-        //                    if (p == myconnectindex)
-        //                    {
-        //                        myz += v;
-        //                        myzvel = 0;
-        //                        myzbak[((movefifoplc-1)&(MOVEFIFOSIZ-1))] = ps[p].posz;
-        //                    }
-        //                }
+        if( animateptr[i] == sector[animatesect[i]].floorz)
+        {
+            for(p=connecthead;p>=0;p=connectpoint2[p])
+                if (ps[p].cursectnum == dasect)
+                    if ((sector[dasect].floorz-ps[p].posz) < (64<<8))
+                        if (sprite[ps[p].i].owner >= 0)
+                        {
+                            ps[p].posz += v;
+                            ps[p].poszv = 0;
+                            if (p == myconnectindex)
+                            {
+                                myz += v;
+                                printf("myz: %i\n", myz);
+                                myzvel = 0;
+                                myzbak[((movefifoplc-1)&(MOVEFIFOSIZ-1))] = ps[p].posz;
+                            }
+                        }
 
-        //    for(j=headspritesect[dasect];j>=0;j=nextspritesect[j])
-        //        if (sprite[j].statnum != 3)
-        //        {
-        //            hittype[j].bposz = sprite[j].z;
-        //            sprite[j].z += v;
-        //            hittype[j].floorz = sector[dasect].floorz+v;
-        //        }
-        //}
+            for(j=headspritesect[dasect];j>=0;j=nextspritesect[j])
+                if (sprite[j].statnum != 3)
+                {
+                    hittype[j].bposz = sprite[j].z;
+                    sprite[j].z += v;
+                    hittype[j].floorz = sector[dasect].floorz+v;
+                }
+        }
 
-        //*animateptr[i] = a;
+        animateptr[i].set(a);
     }
 }
 
@@ -291,12 +291,12 @@ function getanimationgoal(animptr)
 
     j = -1;
     for(i=animatecnt-1;i>=0;i--) {
-        throw "todo"
-        //if (animptr == (int32_t *)animateptr[i])
-        //{
-        //    j = i;
-        //    break;
-        //}
+        if (animptr.obj == /*(int32_t *)*/animateptr[i].obj)
+        {
+            j = i;
+            printf("getanimationgoal: j: %i\n", j);
+            break;
+        }
     }
     return(j);
 }
@@ -308,7 +308,7 @@ function getanimationgoal(animptr)
 //    // how would this work with kdfread(&animateptr[0],4,MAXANIMATES,fil); ?????? on menues???
 //}
 function AnimatePtr(array, idx, key) {
-    this.obj = array[idx]; // another ref to test
+    this.obj = array[idx]; // another ref to test  - maybe do this instead of the array/idx
     this.array = array;
     this.idx = idx;
     this.key = key;
@@ -316,11 +316,17 @@ function AnimatePtr(array, idx, key) {
 }
 
 AnimatePtr.prototype.get = function() {
-    return this.array[idx][key];
+    if (this.obj != this.array[this.idx]) debugger
+    return this.array[this.idx][this.key];
 };
 
-AnimatePtr.prototype.set = function(v) {
-    this.array[idx][key] = v;
+AnimatePtr.prototype.set = function (v) {
+    if (this.obj != this.array[this.idx]) debugger
+    this.array[this.idx][this.key] = v;
+};
+
+AnimatePtr.prototype.equals = function (ptr) {
+    return ptr.obj == this.obj && ptr.key == this.key;
 };
 
 function setanimation( animsect,animptr,  thegoal,  thevel)
@@ -333,20 +339,10 @@ function setanimation( animsect,animptr,  thegoal,  thevel)
 
 	if (animatecnt >= MAXANIMATES-1)
 	    return(-1);
-    
-    /*how ?
-    string -> eval()   - would need right ctx..
-    a kind of getter/setter function
-    a reference and a key name - would the reference hold???
-
-    index, key name, array----------**
-
-
-    */
 
     j = animatecnt;
     for(i=0;i<animatecnt;i++)
-    	if (animptr == animateptr[i])
+        if (animptr.obj == animateptr[i].obj)
     	{
     		j = i;
     		break;
@@ -355,6 +351,7 @@ function setanimation( animsect,animptr,  thegoal,  thevel)
     animatesect[j] = animsect;
     animateptr[j] = animptr;
     animategoal[j] = thegoal;
+    printf("setanimation animsect: %i, animptr val: %i, thegoal: %i, thevel: %i\n", animsect, animptr.get(), thegoal, thevel);
     if (thegoal >= animptr.get())
        animatevel[j] = thevel;
     else

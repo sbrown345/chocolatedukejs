@@ -104,7 +104,7 @@ var ud = {
 
 var animwall = structArray(AnimWall, MAXANIMWALLS);
 var numanimwalls;
-var animateptr = new Int32Array(MAXANIMATES), animategoal= new Int32Array(MAXANIMATES), animatevel= new Int32Array(MAXANIMATES), animatecnt;
+var animateptr = new Array(MAXANIMATES), animategoal= new Int32Array(MAXANIMATES), animatevel= new Int32Array(MAXANIMATES), animatecnt;
 var oanimateval = new Int32Array(MAXANIMATES);
 var animatesect = new Int16Array(MAXANIMATES);
 var msx = new Int32Array(2048), msy = new Int32Array(2048);
@@ -241,7 +241,7 @@ var cloudtotalclock = 0, totalmemory = 0;
 var numinterpolations = 0, startofdynamicinterpolations = 0;
 var oldipos = new Int32Array(MAXINTERPOLATIONS);
 var bakipos = new Int32Array(MAXINTERPOLATIONS);
-var curipos = new Int32Array(MAXINTERPOLATIONS);
+var curipos = new Array(MAXINTERPOLATIONS);
 
 function FindDistance2D(ix,  iy) {
   var   t;

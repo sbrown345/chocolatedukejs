@@ -3550,7 +3550,7 @@ function spawn(j, pn) {
                     hittype[i].temp_data[3] = sector[sect].ceilingz;
                     hittype[i].temp_data[4] = 1;
                     sector[sect].ceilingz = sp.z;
-                    setinterpolation(sector[sect].ceilingz);
+                    setinterpolation(new AnimatePtr(sector, sect, "ceilingz" /*sector[sect].ceilingz*/));
                     break;
                 case 35:
                     sector[sect].ceilingz = sp.z;
@@ -3626,8 +3626,8 @@ function spawn(j, pn) {
                     hittype[i].temp_data[4] = sector[j].floorz;
 
                     if (numplayers < 2) {
-                        setinterpolation(sector[sect].floorz);
-                        setinterpolation(sector[sect].ceilingz);
+                        setinterpolation(new AnimatePtr(sector,sect,"floorz"/*sector[sect].floorz*/));
+                        setinterpolation(new AnimatePtr(sector, sect, "ceilingz" /*sector[sect].ceilingz*/));
                     }
 
                     break;
@@ -3711,7 +3711,7 @@ function spawn(j, pn) {
                     for (s = startwall; s < endwall; s++)
                         if (wall[s].hitag === 0) wall[s].hitag = 9999;
 
-                    setinterpolation(sector[sect].floorz);
+                    setinterpolation(new AnimatePtr(sector, sect, "floorz"/*sector[sect].floorz*/));
 
                     break;
                 case 32:
@@ -3725,7 +3725,7 @@ function spawn(j, pn) {
                     for (s = startwall; s < endwall; s++)
                         if (wall[s].hitag == 0) wall[s].hitag = 9999;
 
-                    setinterpolation(sector[sect].ceilingz);
+                    setinterpolation(new AnimatePtr(sector, sect, "ceilingz" /*sector[sect].ceilingz*/));
 
                     break;
 

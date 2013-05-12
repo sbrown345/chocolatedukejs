@@ -1281,7 +1281,7 @@ function enterlevel(g) {
     PreMap.clearFifo();
 
     for (i = numinterpolations - 1; i >= 0; i--) {
-        bakipos[i] = curipos[i];
+        bakipos[i] = curipos[i].get();
     }
 
     restorepalette = 1;

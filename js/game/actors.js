@@ -3,49 +3,67 @@
 var actor_tog = 0;
 
 function updateinterpolations() {
-    //// todo
-    //for (var i = numinterpolations - 1; i >= 0; i--) {
-    //    oldipos[i] = curipos[i];
-    //}
+    for (var i = numinterpolations - 1; i >= 0; i--) {
+        oldipos[i] = curipos[i].get();
+        printf("oldipos[i] %i\n", oldipos[i]);
+    }
 }
 
 //40
 function setinterpolation(posptr) {
-    // seems to ref things like a wall[12].x
+    var i;
+    //todo: (btw, demo plays with this commented out)
+    printf("setinterpolation val%i\n", posptr.get());
 
-    //console.assert(posptr instanceof Ref);
+    if (numinterpolations >= MAXINTERPOLATIONS) return;
+    for (i = numinterpolations - 1; i >= 0; i--)
+        if (curipos[i].equals(posptr)) {
+            printf("setinterpolation return\n");
+            return;
+        }
+    curipos[numinterpolations] = posptr; 
+    oldipos[numinterpolations] = posptr.get(); 
+    numinterpolations++;
+    printf("setinterpolation numinterpolations %i\n", numinterpolations);
+}
 
-    //var i;
-    ////todo: (btw, demo plays with this commented out)
+function stopinterpolation( posptr)
+{
+    var i;
 
-    //if (numinterpolations >= MAXINTERPOLATIONS) return;
-    //for (i = numinterpolations - 1; i >= 0; i--)
-    //    if (curipos[i] == posptr) return;
-    //curipos[numinterpolations] = posptr; //todo: address of...?
-    //oldipos[numinterpolations] = posptr.$; //VALUE OF..?
-    //numinterpolations++;
+    printf("stopinterpolation val%i\n", posptr.get());
+    for (i = numinterpolations - 1; i >= startofdynamicinterpolations; i--)
+        if (curipos[i].equals(posptr))
+		{
+			numinterpolations--;
+			oldipos[i] = oldipos[numinterpolations];
+			bakipos[i] = bakipos[numinterpolations];
+			curipos[i] = curipos[numinterpolations];
+		}
 }
 
 //66
 function dointerpolations(smoothratio) {
-    //var i, j, odelta, ndelta;
+    var i, j, odelta, ndelta;
 
-    //ndelta = 0;
-    //j = 0;
-    //for (i = numinterpolations - 1; i >= 0; i--) {
-    //    bakipos[i] = curipos[i];
-    //    odelta = ndelta;
-    //    ndelta = curipos[i] - oldipos[i];
-    //    if (odelta != ndelta) j = mulscale16(ndelta, smoothratio);
-    //    curipos[i] = oldipos[i] + j;
-    //}
+    printf("dointerpolations val%i\n", smoothratio);
+    ndelta = 0;
+    j = 0;
+    for (i = numinterpolations - 1; i >= 0; i--) {
+        bakipos[i] = curipos[i].get();
+        odelta = ndelta;
+        ndelta = curipos[i].get() - oldipos[i];
+        if (odelta != ndelta) j = mulscale16(ndelta, smoothratio);
+        curipos[i].set(oldipos[i] + j);
+        printf("dointerpolations for %i\n", oldipos[i] + j);
+    }
 }
 
 //80
 function restoreinterpolations()  //Stick at end of drawscreen
 {
     var i;
-    for(i=numinterpolations-1;i>=0;i--) curipos[i] = bakipos[i];
+    for(i=numinterpolations-1;i>=0;i--) curipos[i].set(bakipos[i]);
 }
 
 //87
@@ -685,20 +703,20 @@ function guts(s,gtype, n, p) {
 //836
 function setsectinterpolate(i) {
     var j, k, startwall, endwall;
-
+    printf("setsectinterpolate %i\n", i);
     startwall = sector[sprite[i].sectnum].wallptr;
     endwall = startwall + sector[sprite[i].sectnum].wallnum;
 
     for (j = startwall; j < endwall; j++) {
-        setinterpolation(wall[j].x);
-        setinterpolation(wall[j].y);
+        setinterpolation(new AnimatePtr(wall, j, "x"));
+        setinterpolation(new AnimatePtr(wall, j, "y"));
         k = wall[j].nextwall;
         if (k >= 0) {
-            setinterpolation(wall[k].x);
-            setinterpolation(wall[k].y);
+            setinterpolation(new AnimatePtr(wall, k, "x"));
+            setinterpolation(new AnimatePtr(wall, k, "y"));
             k = wall[k].point2;
-            setinterpolation(wall[k].x);
-            setinterpolation(wall[k].y);
+            setinterpolation(new AnimatePtr(wall, k, "x"));
+            setinterpolation(new AnimatePtr(wall, k, "y"));
         }
     }
 }
