@@ -553,8 +553,8 @@ function operatesectors(sn,ii)
                 dax += wall[i].x;
                 day += wall[i].y;
             }
-            dax /= (endwall-startwall+1);
-            day /= (endwall-startwall+1);
+            dax = (dax / (endwall - startwall + 1) | 0);
+            day = (day / (endwall - startwall + 1) | 0);
 
             //find any points with either same x or same y coordinate
             //  as center (dax, day) - should be 2 points found.
