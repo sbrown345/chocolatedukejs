@@ -56,6 +56,7 @@ function sound() {
 
 //494
 function spritesound(num, i) {
+    //printf("spritesound num %i\n", num);
     return -1;
     // todo!
 }

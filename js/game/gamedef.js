@@ -2888,6 +2888,7 @@ function parse() {
         case 77:
             insptr++;
             g_sp.picnum = script[insptr];
+            printf(" g_sp.picnum %i\n", g_sp.picnum);
             insptr++;
             break;
 

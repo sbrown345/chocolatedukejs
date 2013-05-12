@@ -270,12 +270,14 @@ function krecipasm(i) { // Ken did this
  Scan through sectors using portals (a portal is wall with a nextsector attribute >= 0).
  Flood is prevented if a portal does not face the POV.
  */
+var scansectorCount = 0;
 function scansector(sectnum) {
     var wal, walIdx, wal2;
     var spr;
     var xs, ys, x1, y1, x2, y2, xp1, yp1, xp2 = 0, yp2 = 0, tempint;
     var z, zz, startwall, endwall, numscansbefore, scanfirst, bunchfrst;
     var nextsectnum;
+    scansectorCount++;
     ////The stack storing sectors to visit.
     var sectorsToVisit = new Int16Array(256), numSectorsToVisit;
     printf("scansector %i\n", sectnum);
@@ -298,7 +300,7 @@ function scansector(sectnum) {
     numSectorsToVisit = 1;
     do {
         sectnum = sectorsToVisit[--numSectorsToVisit];
-        printf("scansector do %i\n", sectnum);
+        printf("scansector do %i, scansectorCount: %i\n", sectnum, scansectorCount);
 
         //Add every script in the current sector as potentially visible.
         for (z = headspritesect[sectnum]; z >= 0; z = nextspritesect[z]) {
@@ -312,7 +314,6 @@ function scansector(sectnum) {
                 ys = spr.y - globalposy;
                 if ((spr.cstat & 48) || (xs * cosglobalang + ys * singlobalang > 0)) {
                     //copybufbyte(spr, 0, tsprite[spritesortcnt], 44);
-                    if (spritesortcnt == 1 && key == "picnum" && spr[key] == 2329) debugger;
                     for (var key in spr) {
                         if(spr.hasOwnProperty(key))
                             tsprite[spritesortcnt][key] = spr[key];

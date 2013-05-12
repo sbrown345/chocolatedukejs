@@ -193,25 +193,8 @@ function crc32_t(crc32, name, size) {
 //451
 function PlayerType() {
     
-   
-
-    var _posx = new Int16Array(1);
-    Object.defineProperty(this, "posx", {
-        get: function () { return _posx; },
-        set: function(newValue) {
-            if (newValue == -36391)
-                debugger 
-            _posx = newValue;
-        },
-        enumerable: true,
-        configurable: true
-    });
-
-
-
-
     this.zoom = 0; this.exitx = 0; this.exity = 0; this.loogiex = new Int32Array(64); this.loogiey = new Int32Array(64); this.numloogs = 0; this.loogcnt = 0;
-    /*this.posx = 0;*/ this.posy = 0; this.posz = 0; this.horiz = 0; this.ohoriz = 0; this.ohorizoff = 0; this.invdisptime = 0;
+    this.posx = 0; this.posy = 0; this.posz = 0; this.horiz = 0; this.ohoriz = 0; this.ohorizoff = 0; this.invdisptime = 0;
     this.bobposx = 0; this.bobposy = 0; this.oposx = 0; this.oposy = 0; this.oposz = 0; this.pyoff = 0; this.opyoff = 0;
     this.posxv = 0; this.posyv = 0; this.poszv = 0; this.last_pissed_time = 0; this.truefz = 0; this.truecz = 0;
     this.player_par = 0; this.visibility = 0;

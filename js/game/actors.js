@@ -1151,7 +1151,8 @@ function movefx() {
 
         nexti = nextspritestat[i];
 
-        switch(s.picnum)
+        printf("movefx picnum: %i\n", s.picnum);
+        switch (s.picnum)
         {
             case RESPAWN:
                 if(sprite[i].extra == 66)
@@ -1174,9 +1175,10 @@ function movefx() {
                     hittype[i].temp_data[0] = 0;
                 }
 
-                if(s.lotag >= 1000 && s.lotag < 2000)
+                printf("s.lotag: %i\n", s.lotag);
+                if (s.lotag >= 1000 && s.lotag < 2000)
                 {
-                    x = ldist(sprite[ps[screenpeek].i],s);
+                    x = ldist(sprite[ps[screenpeek].i], s);
                     if( x < ht && hittype[i].temp_data[0] == 0 )
                     {
                         FX.setReverb( s.lotag - 1000 );
@@ -1194,6 +1196,8 @@ function movefx() {
                     if( (soundm[s.lotag]&2) )
                     {
                         x = dist(sprite[ps[screenpeek].i],s);
+                        printf("x: %i\n", x);
+                        //printf("hittype[i].temp_data[0]: %i\n", hittype[i].temp_data[0]);    //todo: test this after enabling sound
                         if( x < ht && hittype[i].temp_data[0] == 0 && FX_VoiceAvailable(soundpr[s.lotag]-1) )
                         {
                             if(numenvsnds == NumVoices)
@@ -1208,7 +1212,8 @@ function movefx() {
                                     }
                                     j = nextspritestat[j];
                                 }
-                                if(j == -1) {i = nexti; continue BOLT;}
+                                printf("j: i%\n", j);
+                                if (j == -1) { i = nexti; continue BOLT; }
                             }
                             spritesound(s.lotag,i);
                             hittype[i].temp_data[0] = 1;
@@ -1438,6 +1443,7 @@ function movestandables()
             else if(t[0]==3)
             {
                 s.picnum++;
+                printf("picnum b4 crane %i", s.picnum);
                 if( s.picnum == (CRANE+2) )
                 {
                     p = checkcursectnums(t[1]);
@@ -1478,8 +1484,10 @@ function movestandables()
             else if(t[0]==5 || t[0] == 8)
             {
                 if(t[0]==8 && s.picnum < (CRANE+2))
-                    if( (sector[sect].floorz-s.z) > 8192)
+                    if ((sector[sect].floorz - s.z) > 8192) {
                         s.picnum++;
+                        printf("picnum after crane+2 %i", s.picnum);
+                    }
 
                 if(s.z < msx[t[4]+2])
                 {
@@ -1552,6 +1560,7 @@ function movestandables()
                     t[0]++;
 
                     s.picnum++;
+                    printf("picnum after WATERFOUNTAIN %i", s.picnum);
 
                     if( s.picnum == ( WATERFOUNTAIN+3 ) )
                         s.picnum = WATERFOUNTAIN+1;
@@ -2043,6 +2052,7 @@ function movestandables()
                    break;
                 }
                 s.picnum++;
+                printf("after CLEAR_THE_BOLT2 picnum %i\n", s.picnum);
 
                 if(l&1) s.cstat ^= 2; // l not defined here. Line is met in 2nd demo with l = 0.
 
@@ -2089,6 +2099,7 @@ function movestandables()
                     break;
                 }
                 s.picnum++;
+                printf("after CLEAR_THE_BOLT1 picnum %i\n", s.picnum);
 
                 l = global_random&7;
                 s.xrepeat=l+8;
@@ -4464,7 +4475,8 @@ function moveexplosions()  // STATNUM 5
                     s.z = l;
 
                     insertspriteq(i);
-                    sprite[i].picnum ++;
+                    sprite[i].picnum++;
+                    printf(" case PAPER: picnum: %i\n", sprite[i].picnum);
 
                     j = headspritestat[5];
                     while(j >= 0)
@@ -4476,6 +4488,7 @@ function moveexplosions()  // STATNUM 5
                                 break;
                             }
                         j = nextspritestat[j];
+                    printf(" case PAPER: picnum: %i\n", sprite[i].picnum);
                     }
                 }
 
