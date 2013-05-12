@@ -91,9 +91,30 @@ function Wall() {
     this.yrepeat = 0;
     this.xpanning = 0;
     this.ypanning = 0;
-    this.lotag = 0;
-    this.hitag = 0;
-    this.extra = 0;
+    
+    var _lotag = new Int16Array(1);
+    Object.defineProperty(this, "lotag", {
+        get: function () { return _lotag[0]; },
+        set: function (newValue) { _lotag[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
+
+    var _hitag = new Int16Array(1);
+    Object.defineProperty(this, "hitag", {
+        get: function () { return _hitag[0]; },
+        set: function (newValue) { _hitag[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
+
+    var _extra = new Int16Array(1);
+    Object.defineProperty(this, "extra", {
+        get: function () { return _extra[0]; },
+        set: function (newValue) { _extra[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
 }
 
 /*
@@ -164,25 +185,21 @@ function Sprite() {
         configurable: true
     });
     
-    // todo: a load of these are (short) so they might break
-    this.lotag = 0;
-    this.hitag = 0;
-    
-    //var _lotag = new Int16Array(1);
-    //Object.defineProperty(this, "lotag", {
-    //    get: function () { return _lotag[0]; },
-    //    set: function (newValue) { _lotag[0] = newValue; },
-    //    enumerable: true,
-    //    configurable: true
-    //});
+    var _lotag = new Int16Array(1);
+    Object.defineProperty(this, "lotag", {
+        get: function () { return _lotag[0]; },
+        set: function (newValue) { _lotag[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
 
-    //var _hitag = new Int16Array(1);
-    //Object.defineProperty(this, "hitag", {
-    //    get: function () { return _hitag[0]; },
-    //    set: function (newValue) { _hitag[0] = newValue; },
-    //    enumerable: true,
-    //    configurable: true
-    //});
+    var _hitag = new Int16Array(1);
+    Object.defineProperty(this, "hitag", {
+        get: function () { return _hitag[0]; },
+        set: function (newValue) { _hitag[0] = newValue; },
+        enumerable: true,
+        configurable: true
+    });
     
     var _extra = new Int16Array(1);
     Object.defineProperty(this, "extra", {

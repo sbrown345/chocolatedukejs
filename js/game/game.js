@@ -1927,6 +1927,7 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
 
     p = ps[snum];
     printf("displayrooms snum: %i, p.posx: %i, p.posy: %i, p.posz: %i\n", snum, p.posx, p.posy, p.posz);
+    printf("sector[305].ceilingz:% i\n", sector[305].ceilingz);
 
     if (pub > 0) {
         if (ud.screen_size > 8) {
@@ -6410,7 +6411,9 @@ Game.playBack = function () {
                         i++;
                         ud.reccnt--;
                     }
+                    printf("b4 doMoveThings sector[305].ceilingz:% i\n", sector[305].ceilingz);
                     Game.doMoveThings();
+                    printf("after doMoveThings sector[305].ceilingz:% i\n", sector[305].ceilingz);
                 });
 
             }).endIf()
@@ -7172,30 +7175,34 @@ Game.doMoveThings = function () {
     }
 
     if (ud.pause_on == 0) {
-        printf("b4 fta sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 fta sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137], sector[305].ceilingz);
         movefta(); //ST 2
-        printf("b4 moveweapons sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
+        printf("b4 moveweapons sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
         moveweapons(); //ST 5 (must be last)
-        printf("b4 movetransports sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 movetransports sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137], sector[305].ceilingz);
         movetransports(); //ST 9
 
-        printf("b4 moveplayers sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137]);
+        printf("b4 moveplayers sprite[69].ang: %i, headspritestat[10]: %i, headspritesect[137]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], headspritesect[137], sector[305].ceilingz);
         moveplayers(); //ST 10
-        printf("after moveplayers sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
+        printf("after moveplayers sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
         movefallers(); //ST 12
         moveexplosions(); //ST 4
 
         moveactors(); //ST 1
-        printf("after moveactors sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
+        printf("after moveactors sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
         moveeffectors(); //ST 3
-        printf("after moveeffectors sprite[69].ang: %i, headspritestat[10]: %i\n", sprite[69].ang, headspritestat[10]);
+        printf("after moveeffectors sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
 
         movestandables(); //ST 6
+        printf("after movestandables sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
         doanimations();
+        printf("after doanimations sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
         movefx(); //ST 11
+        printf("after movefx sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
     }
 
     fakedomovethingscorrect();
+    printf("after fakedomovethingscorrect sprite[69].ang: %i, headspritestat[10]: %i, sector[305].ceilingz: %i\n", sprite[69].ang, headspritestat[10], sector[305].ceilingz);
 
     if ((everyothertime & 1) == 0) {
         animatewalls();

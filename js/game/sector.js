@@ -224,7 +224,7 @@ function findplayer(s,d) {
 function doanimations() {
     var i, j, a, p, v, dasect;
 
-    printf("doanimations\n");
+    printf("doanimations animatecnt: %i\n", animatecnt);
     for (i = animatecnt - 1; i >= 0; i--)
     {
         throw "todo"

@@ -1182,7 +1182,8 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
     while ((umost[x] > dmost[x]) && (x <= x2))
         x++;
 
-    for (; (x <= x2) && ((x/*+ frameoffset.position*/) & 3); x++) {
+    printf("x %i x2\n", x, x2);
+    for (; (x <= x2) && ((x/*+ frameoffset.position*/) & 3) ; x++) {
         printf("x without frameoffset.position: %i, x2: %i\n", x, x2);
         y1ve[0] = Math.max(uwal[x],umost[x]);
         y2ve[0] = Math.min(dwal[x],dmost[x]);
@@ -2170,6 +2171,7 @@ Engine.draWalls = function (bunch) {
     /* DRAW WALLS SECTION! */
     for(z=bunchfirst[bunch]; z>=0; z=bunchWallsList[z]){
 
+        printf("RAW WALLS SECTION! z: %i\n", z);
         x1 = pvWalls[z].screenSpaceCoo[0][VEC_COL];
         x2 = pvWalls[z].screenSpaceCoo[1][VEC_COL];
         if (umost[x2] >= dmost[x2])
@@ -2179,6 +2181,7 @@ Engine.draWalls = function (bunch) {
                 if (umost[x] < dmost[x]) 
                     break;
 
+            printf("RAW WALLS SECTION! x: %i\n", x);
             if (x >= x2)
             {
                 smostwall[smostwallcnt] = z;
@@ -2214,6 +2217,7 @@ Engine.draWalls = function (bunch) {
             }
         }
 
+        printf("nextsectnum: %i\n", nextsectnum);
         if (nextsectnum >= 0) {
             var czRef = new Ref(cz[0]);
             var fzRef = new Ref(fz[0]);
@@ -2453,10 +2457,12 @@ Engine.draWalls = function (bunch) {
                 }
             }
             if (numhits < 0) {
-                printf("drawals numhits < 0 return");
+                printf("drawals numhits < 0 return\n");
                 return;
             }
-            if ((!(wal.cstat&32)) && ((visitedSectors[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0)){
+            printf("uwal.cstat: %i visitedSectors[nextsectnum >> 3]: %i\n",wal.cstat, visitedSectors[nextsectnum >> 3]);
+            if ((!(wal.cstat & 32)) && ((visitedSectors[nextsectnum >> 3] & pow2char[nextsectnum & 7]) == 0)) {
+                printf("umost[x2] < dmost[x2] : %i\n", umost[x2] < dmost[x2] ? 1: 0);
                 if (umost[x2] < dmost[x2])
                     scansector(nextsectnum);
                 else
@@ -7846,6 +7852,7 @@ function getzsofslope(sectnum, dax, day, ceilz, florz) {
     sec = sector[sectnum];
     ceilz.$ = sec.ceilingz;
     florz.$ = sec.floorz;
+    printf("sectnum %i, cz: %i, fz: %i\n", sectnum, ceilz.$, florz.$);
 
     //If the sector has a slopped ceiling or a slopped floor then it needs more calculation.
     if ((sec.ceilingstat | sec.floorstat) & 2) {
@@ -7862,6 +7869,8 @@ function getzsofslope(sectnum, dax, day, ceilz, florz) {
         if (sec.floorstat & 2)
             florz.$ = (florz.$) + scale(sec.floorheinum, j, i);
     }
+
+    printf("getzsofslope cz: %i, fz: %i\n", ceilz.$, florz.$);
 }
 
 function alignceilslope(dasect, x, y, z)
