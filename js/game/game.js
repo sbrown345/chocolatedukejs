@@ -6286,6 +6286,24 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
     return 1;
 };
 
+//8782
+function closedemowrite() {
+    if (ud.recstat == 1)
+    {
+        throw "todo"
+        //if (ud.reccnt > 0)
+        //{
+        //    dfwrite(recsync,sizeof(input)*ud.multimode,ud.reccnt/ud.multimode,frecfilep);
+
+        //    fseek(frecfilep,SEEK_SET,0);
+        //    fwrite(&totalreccnt,sizeof(int32_t),1,frecfilep);
+        //    ud.recstat = ud.m_recstat = 0;
+        //}
+        //fclose(frecfilep);
+        //frecfilep = null;
+    }
+}
+
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
