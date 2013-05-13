@@ -129,7 +129,7 @@ var GROW_WEAPON = 11;
 function AFLAMABLE(X) { (X === BOX || X === TREE1 || X === TREE2 || X === TIRE || X === CONE); }
 
 //317
-function rnd(X) { ((TRAND >> 8) >= (255 - (X))); }
+function rnd(X) { return ((TRAND >> 8) >= (255 - (X))) | 0; }
 
 function Input() {
     //var avel = new Int8Array(1);
