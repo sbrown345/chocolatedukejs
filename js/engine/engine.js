@@ -7298,12 +7298,11 @@ function printext256( xpos,  ypos,  col,  backcol,  name,   fontsize)
 
 //7795
 function krand() {
-    return 10; //- breaks animation
+    //return 10; //- breaks animation
     // c method arguments eval in the opposite direction to js
     //
-    // todo: search for all methods that have multiple TRAND or krand etc - reverse argument order
-    // and swap values around so they eval in the same order as the C version (regex: krand.+krand      and TRAND.+TRAND)
-
+    // todo: search for all methods that have multiple krand() or krand etc - reverse argument order
+    // and swap values around so they eval in the same order as the C version (regex: krand.+krand      and krand().+krand())
     randomseed = (mul32(randomseed, 27584621) + 1) | 0;
     printf("result: %i\n", randomseed >>> 16);
     return randomseed >>> 16;

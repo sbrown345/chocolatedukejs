@@ -2575,7 +2575,7 @@ function parse() {
                         s = 0;
                     else s = (TRAND%3);
 
-                    l = EGS(g_sp.sectnum,
+                    l = EGS_arg_swap(g_sp.sectnum,
                             g_sp.x+(TRAND&255)-128,g_sp.y+(TRAND&255)-128,g_sp.z-(8<<8)-(TRAND&8191),
                             dnum+s,g_sp.shade,32+(TRAND&15),32+(TRAND&15),
                             TRAND&2047,(TRAND&127)+32,

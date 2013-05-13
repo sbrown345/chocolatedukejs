@@ -1978,7 +1978,7 @@ function checkhitsprite( i, sn) {
                 case HEAVYHBOMB:
                     for(k=0;k<64;k++)
                     {
-                        j = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+                        j = EGS_arg_swap([sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5]);
                         sprite[j].pal = 8;
                     }
 
@@ -1993,7 +1993,7 @@ function checkhitsprite( i, sn) {
         case HANGLIGHT:
         case GENERICPOLE2:
             for(k=0;k<6;k++)
-                EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(8<<8),SCRAP1+(krand()&15),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+                EGS_arg_swap(sprite[i].sectnum, sprite[i].x, sprite[i].y, sprite[i].z - (8 << 8), SCRAP1 + (krand() & 15), -8, 48, 48, krand() & 2047, (krand() & 63) + 64, -(krand() & 4095) - (sprite[i].zvel >> 2), i, 5);
             spritesound(GLASS_HEAVYBREAK,i);
             deletesprite(i);
             break;
@@ -2007,7 +2007,7 @@ function checkhitsprite( i, sn) {
 
             spritesound(GLASS_HEAVYBREAK,i);
             s = sprite[i];
-            for(j=0;j<16;j++) EGS(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
+            for(j=0;j<16;j++) EGS_arg_swap(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
 
             break;
         case WATERFOUNTAIN:
@@ -2024,7 +2024,7 @@ function checkhitsprite( i, sn) {
             if(sprite[sn].extra != script[actorscrptr[SHOTSPARK1]] )
             {
                 for(j=0;j<15;j++)
-                    EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sector[sprite[i].sectnum].floorz-(12<<8)-(j<<9),SCRAP1+(krand()&15),-8,64,64,
+                    EGS_arg_swap(sprite[i].sectnum, sprite[i].x, sprite[i].y, sector[sprite[i].sectnum].floorz - (12 << 8) - (j << 9), SCRAP1 + (krand() & 15), -8, 64, 64,
                         krand()&2047,(krand()&127)+64,-(krand()&511)-256,i,5);
                 spawn(i,EXPLOSION2);
                 deletesprite(i);
@@ -2137,7 +2137,7 @@ function checkhitsprite( i, sn) {
 
             //            for(k=0;k<5;k++)
             //          {
-            //            j = EGS(sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5);
+            //            j = EGS_arg_swap([sprite[i].sectnum,sprite[i].x,sprite[i].y,sprite[i].z-(krand()%(48<<8)),SCRAP3+(krand()&3),-8,48,48,krand()&2047,(krand()&63)+64,-(krand()&4095)-(sprite[i].zvel>>2),i,5]);
             //          sprite[j].pal = 2;
             //    }
             spritesound(GLASS_HEAVYBREAK,i);
@@ -2236,7 +2236,7 @@ function checkhitsprite( i, sn) {
         case TRIPODCAMERA:
             spritesound(GLASS_HEAVYBREAK,i);
             s = sprite[i];
-            for(j=0;j<16;j++) EGS(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
+            for(j=0;j<16;j++) EGS_arg_swap(s.sectnum,s.x+(TRAND&255)-128,s.y+(TRAND&255)-128,s.z-(8<<8)-(TRAND&8191),SCRAP6+(TRAND&15),-8,48,48,TRAND&2047,(TRAND&63)+64,-512-(TRAND&2047),i,5);
             deletesprite(i);
             break;
         case PLAYERONWATER:

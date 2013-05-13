@@ -2145,6 +2145,12 @@ function LocateTheLocator(n, sn) {
 }
 
 //3472
+//.split(",").reverse().join()
+// c evaluates right to left, where as javascript is left to right. so multiple krand() breaks
+function EGS_arg_swap(s_ss, s_ow, s_zv, s_ve, s_a, s_yr, s_xr, s_s, s_pn, s_z, s_y, s_x, whatsect) {
+    EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
+}
+
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
     var i;
     var s;
@@ -7223,7 +7229,7 @@ function vglass(x, y, a, wn, n) {
     zincs = ((sector[sect].floorz - sector[sect].ceilingz) / n) | 0;
 
     for (z = sector[sect].ceilingz; z < sector[sect].floorz; z += zincs)
-        EGS(sect, x, y, z - (TRAND & 8191), GLASSPIECES + (z & (TRAND % 3)), -32, 36, 36, a + 128 - (TRAND & 255), 16 + (TRAND & 31), 0, -1, 5);
+        EGS_arg_swap(sect, x, y, z - (TRAND & 8191), GLASSPIECES + (z & (TRAND % 3)), -32, 36, 36, a + 128 - (TRAND & 255), 16 + (TRAND & 31), 0, -1, 5);
 }
 
 function lotsofglass(i, wallnum, n) {
@@ -7267,7 +7273,7 @@ function lotsofglass(i, wallnum, n) {
             if (z < -(32 << 8) || z > (32 << 8))
                 z = sprite[i].z - (32 << 8) + (TRAND & ((64 << 8) - 1));
             a = sprite[i].ang - 1024;
-            EGS(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 1023), i, 5);
+            EGS_arg_swap(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 1023), i, 5);
         }
     }
 }
@@ -7278,7 +7284,7 @@ function spriteglass(i, n) {
     for (j = n; j > 0; j--) {
         a = TRAND & 2047;
         z = sprite[i].z - ((TRAND & 16) << 8);
-        k = EGS(sprite[i].sectnum, sprite[i].x, sprite[i].y, z, GLASSPIECES + (j % 3), TRAND & 15, 36, 36, a, 32 + (TRAND & 63), -512 - (TRAND & 2047), i, 5);
+        k = EGS_arg_swap(sprite[i].sectnum, sprite[i].x, sprite[i].y, z, GLASSPIECES + (j % 3), TRAND & 15, 36, 36, a, 32 + (TRAND & 63), -512 - (TRAND & 2047), i, 5);
         sprite[k].pal = sprite[i].pal;
     }
 }
@@ -7316,7 +7322,7 @@ function lotsofcolourglass(i, wallnum, n) {
     if (wallnum < 0) {
         for (j = n - 1; j >= 0 ; j--) {
             a = TRAND & 2047;
-            k = EGS(sprite[i].sectnum, sprite[i].x, sprite[i].y, sprite[i].z - (TRAND & (63 << 8)), GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), 1024 - (TRAND & 2047), i, 5);
+            k = EGS_arg_swap(sprite[i].sectnum, sprite[i].x, sprite[i].y, sprite[i].z - (TRAND & (63 << 8)), GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), 1024 - (TRAND & 2047), i, 5);
             sprite[k].pal = TRAND & 15;
         }
         return;
@@ -7338,7 +7344,7 @@ function lotsofcolourglass(i, wallnum, n) {
         if (z < -(32 << 8) || z > (32 << 8))
             z = sprite[i].z - (32 << 8) + (TRAND & ((64 << 8) - 1));
         a = sprite[i].ang - 1024;
-        k = EGS(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 2047), i, 5);
+        k = EGS_arg_swap(sprite[i].sectnum, x1, y1, z, GLASSPIECES + (j % 3), -32, 36, 36, a, 32 + (TRAND & 63), -(TRAND & 2047), i, 5);
         sprite[k].pal = TRAND & 7;
     }
 }

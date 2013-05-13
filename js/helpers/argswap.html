@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>EGS/krand swap</title>
+    </head>
+    <body>
+        <div><textarea id="original" style="height: 100px; width: 100%;"></textarea></div>
+        <div><textarea id="output" style="height: 100px; width: 100%;"></textarea></div>
+        <script>
+            document.getElementById("original").onchange =
+                document.getElementById("original").onkeyup = function () {
+                    var split = document.getElementById("original").value.split(",");
+                    if (split.length != 13) {
+                        document.getElementById("output").value = "THERE SHOULD BE 13 ARGUMENTS";
+                    } else {
+                        document.getElementById("output").value = split.reverse().join();
+                    }
+                };
+        </script>
+    </body>
+</html>
