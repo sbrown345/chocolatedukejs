@@ -39,7 +39,8 @@ function stopinterpolation( posptr)
 			oldipos[i] = oldipos[numinterpolations];
 			bakipos[i] = bakipos[numinterpolations];
 			curipos[i] = curipos[numinterpolations];
-		}
+			printf("stopinterpolation %i\n", numinterpolations);
+        }
 }
 
 //66
@@ -63,7 +64,10 @@ function dointerpolations(smoothratio) {
 function restoreinterpolations()  //Stick at end of drawscreen
 {
     var i;
-    for(i=numinterpolations-1;i>=0;i--) curipos[i].set(bakipos[i]);
+    for (i = numinterpolations - 1; i >= 0; i--) {
+        curipos[i].set(bakipos[i]);
+        printf("restoreinterpolations %i %i\n", i, curipos[i].get());
+    }
 }
 
 //87

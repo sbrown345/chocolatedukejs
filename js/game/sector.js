@@ -241,8 +241,10 @@ function doanimations() {
             animatevel[i] = animatevel[animatecnt];
             animatesect[i] = animatesect[animatecnt];
             if( sector[animatesect[i]].lotag == 18 || sector[animatesect[i]].lotag == 19 )
-                if(animateptr[i] == sector[animatesect[i]].ceilingz)
+                if (animateptr[i].equals(new AnimatePtr(sector,animatesect[i], "ceilingz" /*sector[animatesect[i]].ceilingz*/))) {
+                    printf("doanimations contiue: %i\n", i);
                     continue;
+                }
 
             if( (sector[dasect].lotag&0xff) != 22 )
                 callsound(dasect,-1);
@@ -253,14 +255,16 @@ function doanimations() {
         if (v > 0) { a = Math.min(a+v,animategoal[i]); }
         else { a = Math.max(a+v,animategoal[i]); }
 
-        if( animateptr[i] == sector[animatesect[i]].floorz)
+        if (animateptr[i].equals(new AnimatePtr(sector, animatesect[i], "floorz" /*sector[animatesect[i]].floorz*/)))
         {
-            for(p=connecthead;p>=0;p=connectpoint2[p])
+            printf("animateptr[i] ==  &sector[animatesect[i]].floorz       i: %i \n", i);
+            for (p = connecthead; p >= 0; p = connectpoint2[p])
                 if (ps[p].cursectnum == dasect)
                     if ((sector[dasect].floorz-ps[p].posz) < (64<<8))
                         if (sprite[ps[p].i].owner >= 0)
                         {
                             ps[p].posz += v;
+                            printf("ps[p].posz %i \n", ps[p].posz);
                             ps[p].poszv = 0;
                             if (p == myconnectindex)
                             {
@@ -268,6 +272,7 @@ function doanimations() {
                                 printf("myz: %i\n", myz);
                                 myzvel = 0;
                                 myzbak[((movefifoplc-1)&(MOVEFIFOSIZ-1))] = ps[p].posz;
+                                printf("ps[p].posz: %i\n", ps[p].posz);
                             }
                         }
 
@@ -276,7 +281,9 @@ function doanimations() {
                 {
                     hittype[j].bposz = sprite[j].z;
                     sprite[j].z += v;
-                    hittype[j].floorz = sector[dasect].floorz+v;
+                    hittype[j].floorz = sector[dasect].floorz + v;
+                    printf("hittype[j].bposz %i \n", hittype[j].bposz);
+                    printf("hittype[j].floorz %i \n", hittype[j].floorz);
                 }
         }
 
