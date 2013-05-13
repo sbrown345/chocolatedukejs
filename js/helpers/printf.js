@@ -25,6 +25,8 @@ printf.flush = function () {
     var logText = printf.concat(printf.output);
     //console.log(logText);
     sendTextNew(logText);
+    if (printf.output.length > 100000)
+        debugger; // stop chrome crash
     printf.output = [];
     
 };
