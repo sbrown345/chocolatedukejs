@@ -3416,7 +3416,7 @@ function drawoverheadmap( cposx,  cposy,  czoom,  cang)
                         {
                             x1 = sprx; y1 = spry;
                             tilenum = spr.picnum;
-                            xoff = (int32_t)(toInt8((tiles[tilenum].animFlags>>8)&255))+(spr.xoffset);
+                            xoff = (toInt8((tiles[tilenum].animFlags>>8)&255))+(spr.xoffset);
                             if ((spr.cstat&4) > 0)
                                 xoff = -xoff;
                             k = spr.ang; l = spr.xrepeat;
