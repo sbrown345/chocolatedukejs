@@ -2575,11 +2575,11 @@ function parse() {
                         s = 0;
                     else s = (TRAND%3);
 
-                    l = EGS_arg_swap(g_sp.sectnum,
-                            g_sp.x+(TRAND&255)-128,g_sp.y+(TRAND&255)-128,g_sp.z-(8<<8)-(TRAND&8191),
-                            dnum+s,g_sp.shade,32+(TRAND&15),32+(TRAND&15),
-                            TRAND&2047,(TRAND&127)+32,
-                            -(TRAND&2047),g_i,5);
+                    l = EGS_arg_swap(5, g_i,
+                            -(TRAND & 2047), (TRAND & 127) + 32,
+                            TRAND & 2047, 32 + (TRAND & 15), 32 + (TRAND & 15), g_sp.shade,
+                            dnum + s, g_sp.z - (8 << 8) - (TRAND & 8191), g_sp.y + (TRAND & 255) - 128,
+                            g_sp.x + (TRAND & 255) - 128, g_sp.sectnum);
                     if(g_sp.picnum == BLIMP && dnum == SCRAP1)
                         sprite[l].yvel = weaponsandammosprites[j%14];
                     else sprite[l].yvel = -1;
