@@ -2148,7 +2148,7 @@ function LocateTheLocator(n, sn) {
 //.split(",").reverse().join()
 // c evaluates right to left, where as javascript is left to right. so multiple krand() breaks
 function EGS_arg_swap(s_ss, s_ow, s_zv, s_ve, s_a, s_yr, s_xr, s_s, s_pn, s_z, s_y, s_x, whatsect) {
-    EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
+    return EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
 }
 
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
