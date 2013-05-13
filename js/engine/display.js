@@ -539,6 +539,11 @@ function _nextpage() {
     total_rendered_frames++;
 }
 
+//inline...
+//function drawpixel(array, idx, pixel)
+//{
+    
+//}
 
 var imageData;
 //var buf = new ArrayBuffer(imageData.data.length);

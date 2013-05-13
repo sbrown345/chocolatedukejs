@@ -3313,6 +3313,263 @@ function palto(r, g, b, e) {
 }
 
 
+function drawoverheadmap( cposx,  cposy,  czoom,  cang)
+{
+    var i, j, k, l, x1, y1, x2, y2, x3, y3, x4, y4, ox, oy, xoff, yoff;
+    var dax, day, cosang, sinang, xspan, yspan, sprx, spry;
+    var xrepeat, yrepeat, z1, z2, startwall, endwall, tilenum, daang;
+    var xvect, yvect, xvect2, yvect2;
+    var p;
+    var  col;
+    var wal, walIdx, wal2;
+    var spr;
+
+    xvect = sintable[(-cang)&2047] * czoom;
+    yvect = sintable[(1536-cang)&2047] * czoom;
+    xvect2 = mulscale16(xvect,yxaspect);
+    yvect2 = mulscale16(yvect,yxaspect);
+
+    //Draw red lines
+        for(i=0;i<numsectors;i++)
+        {
+                if (!(show2dsector[i>>3]&(1<<(i&7)))) continue;
+
+                startwall = sector[i].wallptr;
+                endwall = sector[i].wallptr + sector[i].wallnum;
+
+                z1 = sector[i].ceilingz; z2 = sector[i].floorz;
+
+                for(j=startwall,wal=wall[walIdx = startwall];j<endwall;j++,wal = wall[++walIdx])
+                {
+                        k = wal.nextwall; if (k < 0) continue;
+
+                        //if ((show2dwall[j>>3]&(1<<(j&7))) == 0) continue;
+                        //if ((k > j) && ((show2dwall[k>>3]&(1<<(k&7))) > 0)) continue;
+
+                        if (sector[wal.nextsector].ceilingz == z1)
+                                if (sector[wal.nextsector].floorz == z2)
+                                        if (((wal.cstat|wall[wal.nextwall].cstat)&(16+32)) == 0) continue;
+
+                        col = 139; //red
+                        if ((wal.cstat|wall[wal.nextwall].cstat)&1) col = 234; //magenta
+
+                        if (!(show2dsector[wal.nextsector>>3]&(1<<(wal.nextsector&7))))
+                                col = 24;
+            else continue;
+
+                        ox = wal.x-cposx; oy = wal.y-cposy;
+                        x1 = dmulscale16(ox,xvect,-oy,yvect)+(xdim<<11);
+                        y1 = dmulscale16(oy,xvect2,ox,yvect2)+(ydim<<11);
+
+                        wal2 = wall[wal.point2];
+                        ox = wal2.x-cposx; oy = wal2.y-cposy;
+                        x2 = dmulscale16(ox,xvect,-oy,yvect)+(xdim<<11);
+                        y2 = dmulscale16(oy,xvect2,ox,yvect2)+(ydim<<11);
+
+                        drawline256(x1,y1,x2,y2,col);
+                }
+        }
+
+                //Draw sprites
+        k = ps[screenpeek].i;
+        for(i=0;i<numsectors;i++)
+        {
+                if (!(show2dsector[i>>3]&(1<<(i&7)))) continue;
+                for(j=headspritesect[i];j>=0;j=nextspritesect[j])
+                        //if ((show2dsprite[j>>3]&(1<<(j&7))) > 0)
+                        {
+                spr = sprite[j];
+
+                if (j == k || (spr.cstat&0x8000) || spr.cstat == 257 || spr.xrepeat == 0) continue;
+
+                                col = 71; //cyan
+                                if (spr.cstat&1) col = 234; //magenta
+
+                                sprx = spr.x;
+                                spry = spr.y;
+
+                if( (spr.cstat&257) != 0) switch (spr.cstat&48)
+                                {
+                    case 0: break;
+                                                ox = sprx-cposx; oy = spry-cposy;
+                                                x1 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y1 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                                                ox = (sintable[(spr.ang+512)&2047]>>7);
+                                                oy = (sintable[(spr.ang)&2047]>>7);
+                                                x2 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y2 = dmulscale16(oy,xvect,ox,yvect);
+
+                                                x3 = mulscale16(x2,yxaspect);
+                                                y3 = mulscale16(y2,yxaspect);
+
+                                                drawline256(x1-x2+(xdim<<11),y1-y3+(ydim<<11),
+                                                                                x1+x2+(xdim<<11),y1+y3+(ydim<<11),col);
+                                                drawline256(x1-y2+(xdim<<11),y1+x3+(ydim<<11),
+                                                                                x1+x2+(xdim<<11),y1+y3+(ydim<<11),col);
+                                                drawline256(x1+y2+(xdim<<11),y1-x3+(ydim<<11),
+                                                                                x1+x2+(xdim<<11),y1+y3+(ydim<<11),col);
+                        break;
+
+                                        case 16:
+                        if( spr.picnum == LASERLINE )
+                        {
+                            x1 = sprx; y1 = spry;
+                            tilenum = spr.picnum;
+                            xoff = (int32_t)(toInt8((tiles[tilenum].animFlags>>8)&255))+(spr.xoffset);
+                            if ((spr.cstat&4) > 0)
+                                xoff = -xoff;
+                            k = spr.ang; l = spr.xrepeat;
+                            dax = sintable[k&2047]*l; day = sintable[(k+1536)&2047]*l;
+                            l = tiles[tilenum].dim.width;
+                            k = (l>>1)+xoff;
+                            x1 -= mulscale16(dax,k);
+                            x2 = x1+mulscale16(dax,l);
+                            y1 -= mulscale16(day,k);
+                            y2 = y1+mulscale16(day,l);
+
+                            ox = x1-cposx; oy = y1-cposy;
+                            x1 = dmulscale16(ox,xvect,-oy,yvect);
+                            y1 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                            ox = x2-cposx; oy = y2-cposy;
+                            x2 = dmulscale16(ox,xvect,-oy,yvect);
+                            y2 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                            drawline256(x1+(xdim<<11),y1+(ydim<<11),
+                                                                                x2+(xdim<<11),y2+(ydim<<11),col);
+                        }
+
+                        break;
+
+                    case 32:
+
+                                                tilenum = spr.picnum;
+                                                xoff = ((toInt8((tiles[tilenum].animFlags>>8)&255))+(spr.xoffset))|0;
+                                                yoff = ((toInt8((tiles[tilenum].animFlags>>16)&255))+(spr.yoffset))|0;
+                                                if ((spr.cstat&4) > 0) xoff = -xoff;
+                                                if ((spr.cstat&8) > 0) yoff = -yoff;
+
+                                                k = spr.ang;
+                                                cosang = sintable[(k+512)&2047];
+                                        sinang = sintable[k];
+                                                xspan = tiles[tilenum].dim.width;
+                                        xrepeat = spr.xrepeat;
+                                                yspan = tiles[tilenum].dim.height;
+                                        yrepeat = spr.yrepeat;
+
+                                                dax = ((xspan>>1)+xoff)*xrepeat; day = ((yspan>>1)+yoff)*yrepeat;
+                                                x1 = sprx + dmulscale16(sinang,dax,cosang,day);
+                                                y1 = spry + dmulscale16(sinang,day,-cosang,dax);
+                                                l = xspan*xrepeat;
+                                                x2 = x1 - mulscale16(sinang,l);
+                                                y2 = y1 + mulscale16(cosang,l);
+                                                l = yspan*yrepeat;
+                                                k = -mulscale16(cosang,l); x3 = x2+k; x4 = x1+k;
+                                                k = -mulscale16(sinang,l); y3 = y2+k; y4 = y1+k;
+
+                                                ox = x1-cposx; oy = y1-cposy;
+                                                x1 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y1 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                                                ox = x2-cposx; oy = y2-cposy;
+                                                x2 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y2 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                                                ox = x3-cposx; oy = y3-cposy;
+                                                x3 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y3 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                                                ox = x4-cposx; oy = y4-cposy;
+                                                x4 = dmulscale16(ox,xvect,-oy,yvect);
+                                                y4 = dmulscale16(oy,xvect2,ox,yvect2);
+
+                                                drawline256(x1+(xdim<<11),y1+(ydim<<11),
+                                                                                x2+(xdim<<11),y2+(ydim<<11),col);
+
+                                                drawline256(x2+(xdim<<11),y2+(ydim<<11),
+                                                                                x3+(xdim<<11),y3+(ydim<<11),col);
+
+                                                drawline256(x3+(xdim<<11),y3+(ydim<<11),
+                                                                                x4+(xdim<<11),y4+(ydim<<11),col);
+
+                                                drawline256(x4+(xdim<<11),y4+(ydim<<11),
+                                                                                x1+(xdim<<11),y1+(ydim<<11),col);
+
+                                                break;
+                                }
+                        }
+        }
+
+                //Draw white lines
+        for(i=0;i<numsectors;i++)
+        {
+                if (!(show2dsector[i>>3]&(1<<(i&7)))) continue;
+
+                startwall = sector[i].wallptr;
+                endwall = sector[i].wallptr + sector[i].wallnum;
+
+                k = -1;
+                for(j=startwall,wal=wall[walIdx=startwall];j<endwall;j++,wal=wall[++walIdx])
+                {
+                        if (wal.nextwall >= 0) continue;
+
+                        //if ((show2dwall[j>>3]&(1<<(j&7))) == 0) continue;
+
+                        if (tiles[wal.picnum].dim.width == 0)
+                            continue;
+                        if (tiles[wal.picnum].dim.height== 0)
+                            continue;
+
+                        if (j == k)
+                                { x1 = x2; y1 = y2; }
+                        else
+                        {
+                                ox = wal.x-cposx; oy = wal.y-cposy;
+                                x1 = dmulscale16(ox,xvect,-oy,yvect)+(xdim<<11);
+                                y1 = dmulscale16(oy,xvect2,ox,yvect2)+(ydim<<11);
+                        }
+
+                        k = wal.point2; wal2 = wall[k];
+                        ox = wal2.x-cposx; oy = wal2.y-cposy;
+                        x2 = dmulscale16(ox,xvect,-oy,yvect)+(xdim<<11);
+                        y2 = dmulscale16(oy,xvect2,ox,yvect2)+(ydim<<11);
+
+                        drawline256(x1,y1,x2,y2,24);
+                }
+        }
+
+         for(p=connecthead;p >= 0;p=connectpoint2[p])
+         {
+            if(ud.scrollmode && p == screenpeek) continue;
+
+          ox = sprite[ps[p].i].x-cposx; oy = sprite[ps[p].i].y-cposy;
+                  daang = (sprite[ps[p].i].ang-cang)&2047;
+                  if (p == screenpeek) { ox = 0; oy = 0; daang = 0; }
+                  x1 = mulscale(ox,xvect,16) - mulscale(oy,yvect,16);
+                  y1 = mulscale(oy,xvect2,16) + mulscale(ox,yvect2,16);
+
+          if(p == screenpeek || ud.coop == 1 )
+          {
+                if(sprite[ps[p].i].xvel > 16 && ps[p].on_ground)
+                    i = APLAYERTOP+((totalclock>>4)&3);
+                else
+                    i = APLAYERTOP;
+
+                j = klabs(ps[p].truefz-ps[p].posz)>>8;
+                j = mulscale(czoom*(sprite[ps[p].i].yrepeat+j),yxaspect,16);
+
+                if(j < 22000) j = 22000;
+                else if(j > (65536<<1)) j = (65536<<1);
+
+                rotateSprite((x1<<4)+(xdim<<15),(y1<<4)+(ydim<<15),j,
+                    daang,i,sprite[ps[p].i].shade,sprite[ps[p].i].pal,
+                    (sprite[ps[p].i].cstat&2)>>1,windowx1,windowy1,windowx2,windowy2);
+          }
+    }	        
+}
+
+//4426
 function endanimsounds(fr)
 {
     switch(ud.volume_number)

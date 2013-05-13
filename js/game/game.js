@@ -1725,14 +1725,14 @@ function displayrest(smoothratio) {
             if (ud.scrollmode == 0) {
                 if (pp.newowner == -1) {
                     if (screenpeek == myconnectindex && numplayers > 1) {
-                        cposx = omyx + mulscale16((int32_t)(myx - omyx), smoothratio);
-                        cposy = omyy + mulscale16((int32_t)(myy - omyy), smoothratio);
-                        cang = omyang + mulscale16((int32_t)(((myang + 1024 - omyang) & 2047) - 1024), smoothratio);
+                        cposx = omyx + mulscale16((myx - omyx)|0, smoothratio);
+                        cposy = omyy + mulscale16((myy - omyy)|0, smoothratio);
+                        cang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024)|0, smoothratio);
                     }
                     else {
-                        cposx = pp.oposx + mulscale16((int32_t)(pp.posx - pp.oposx), smoothratio);
-                        cposy = pp.oposy + mulscale16((int32_t)(pp.posy - pp.oposy), smoothratio);
-                        cang = pp.oang + mulscale16((int32_t)(((pp.ang + 1024 - pp.oang) & 2047) - 1024), smoothratio);
+                        cposx = pp.oposx + mulscale16((pp.posx - pp.oposx)|0, smoothratio);
+                        cposy = pp.oposy + mulscale16((pp.posy - pp.oposy)|0, smoothratio);
+                        cang = pp.oang + mulscale16((((pp.ang + 1024 - pp.oang) & 2047) - 1024)|0, smoothratio);
                     }
                 }
                 else {
@@ -4305,10 +4305,10 @@ function animatesprites(x, y, a, smoothratio) {
                 if (ps[p].over_shoulder_on > 0 && ps[p].newowner < 0) {
                     t.cstat |= 2;
                     if (screenpeek == myconnectindex && numplayers >= 2) {
-                        t.x = omyx + mulscale16((int32_t)(myx - omyx), smoothratio);
-                        t.y = omyy + mulscale16((int32_t)(myy - omyy), smoothratio);
-                        t.z = omyz + mulscale16((int32_t)(myz - omyz), smoothratio) + (40 << 8);
-                        t.ang = omyang + mulscale16((int32_t)(((myang + 1024 - omyang) & 2047) - 1024), smoothratio);
+                        t.x = omyx + mulscale16((myx - omyx)|0, smoothratio);
+                        t.y = omyy + mulscale16((myy - omyy)|0, smoothratio);
+                        t.z = omyz + mulscale16((myz - omyz)|0, smoothratio) + (40 << 8);
+                        t.ang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024)|0, smoothratio);
                         t.sectnum = mycursectnum;
                     }
                 }
