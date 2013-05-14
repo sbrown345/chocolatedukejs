@@ -236,6 +236,7 @@ function doanimations() {
             stopinterpolation(animateptr[i]);
 
             animatecnt--;
+            printf("doanimations animatecnt --: %i\n", animatecnt);
             animateptr[i] = animateptr[animatecnt];
             animategoal[i] = animategoal[animatecnt];
             animatevel[i] = animatevel[animatecnt];
@@ -349,7 +350,7 @@ function setanimation( animsect,animptr,  thegoal,  thevel)
 
     j = animatecnt;
     for(i=0;i<animatecnt;i++)
-        if (animptr.obj == animateptr[i].obj)
+        if (animptr.equals(animateptr[i]))
     	{
     		j = i;
     		break;
@@ -364,7 +365,10 @@ function setanimation( animsect,animptr,  thegoal,  thevel)
     else
        animatevel[j] = -thevel;
 
-    if (j == animatecnt) animatecnt++;
+    if (j == animatecnt) {
+        animatecnt++;
+        printf("setanimation++ %i\n", animatecnt);
+    }
 
     setinterpolation(animptr);
 
