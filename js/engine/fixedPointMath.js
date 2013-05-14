@@ -15,7 +15,7 @@ function mulscale(input1, input2, input3) {
     if ((input2 | 0) != input2) throw "input2 " + input2 + " not an integer";
     if ((input3 | 0) != input3) throw "input3 " + input3 + " not an integer";
 
-    var output = Math.floor(input1 * input2 / Math.pow(2, input3));
+    var output = Math.floor(input1 * input2 / Math.pow(2, input3)) | 0;
     //printf("mulscale: %i, %i, %i = %i\n", input1, input2, input3, output);
     return output;
 }
@@ -42,11 +42,11 @@ function mulscale(input1, input2, input3) {
 for (var input5 = 1; input5 <= 32; input5++) {
     window["dmulscale" + input5] =
         new Function("input1", "input2", "input3", "input4", "return Math.floor(((input1 * input2) + (input3 * input4)) / Math.pow(2, " +
-            input5 + "))");
+            input5 + ")) | 0");
 }
 
 function dmulscale(input1, input2, input3, input4, input5) {
-    return Math.floor(((input1 * input2) + (input3 * input4)) / Math.pow(2, input5));
+    return Math.floor(((input1 * input2) + (input3 * input4)) / Math.pow(2, input5)) | 0;
 }
 
 for (var i3 = 1; i3 <= 32; i3++) {

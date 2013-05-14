@@ -703,8 +703,8 @@ function ceilscan ( x1,  x2,  sectnum)
         j = dmulscale14(ox,cosglobalang,oy,singlobalang);
         ox = i;
         oy = j;
-        globalxpanning = globalx1*ox - globaly1*oy;
-        globalypanning = globaly2*ox + globalx2*oy;
+        globalxpanning = (globalx1*ox - globaly1*oy)|0;
+        globalypanning = (globaly2*ox + globalx2*oy)|0;
     }
 
     globalx2 = mulscale16(globalx2,viewingrangerecip);
@@ -730,7 +730,7 @@ function ceilscan ( x1,  x2,  sectnum)
     if ((globalorientation&0x10) > 0){
         globalx1 = -globalx1;
         globaly1 = -globaly1;
-        globalxpanning = -globalxpanning;
+        globalxpanning = (-globalxpanning) | 0;
     }
     if ((globalorientation&0x20) > 0){
         globalx2 = -globalx2;
@@ -922,7 +922,7 @@ function florscan(x1, x2, sectnum) {
         globaly1 = cosglobalang;
         globaly2 = cosglobalang;
         globalxpanning = (globalposx<<20);
-        globalypanning = -(globalposy<<20);
+        globalypanning = (-(globalposy<<20))|0;
     }
     else
     {
@@ -945,8 +945,8 @@ function florscan(x1, x2, sectnum) {
         j = dmulscale14(ox,cosglobalang,oy,singlobalang);
         ox = i;
         oy = j;
-        globalxpanning = globalx1*ox - globaly1*oy;
-        globalypanning = globaly2*ox + globalx2*oy;
+        globalxpanning = (globalx1*ox - globaly1*oy)|0;
+        globalypanning = (globaly2*ox + globalx2*oy)|0;
     }
     
     
@@ -1228,7 +1228,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
             }
             //printf("y2ve[z]: %i\n", y2ve[z]);
 
-            i = lwal[x+z] + globalxpanning;
+            i = (lwal[x+z] + globalxpanning)|0;
             if (i >= tileWidth) {
                 if (xnice == 0) i %= tileWidth;
                 else i &= tileWidth;
@@ -4552,9 +4552,9 @@ function ceilspritehline(x2, y) {
     x1 = lastx[y];
     if (x2 < x1) return;
 
-    v = mulscale20(globalzd,horizlookup[y-globalhoriz+horizycent]);
-    bx = mulscale14(globalx2*x1+globalx1,v) + globalxpanning;
-    by = mulscale14(globaly2*x1+globaly1,v) + globalypanning;
+    v = (mulscale20(globalzd, horizlookup[y - globalhoriz + horizycent])) | 0;
+    bx = (mulscale14(globalx2 * x1 + globalx1, v) + globalxpanning) | 0;
+    by = (mulscale14(globaly2 * x1 + globaly1, v) + globalypanning) | 0;
     asm1 = mulscale14(globalx2,v);
     asm2 = mulscale14(globaly2,v);
 
@@ -5448,6 +5448,7 @@ function drawsprite (snum) {
         TILE_MakeAvailable(globalpicnum);
         
         setgotpic(globalpicnum);
+        printf("globalpicnum: %i, \n", globalpicnum);
         globalbufplc = tiles[globalpicnum].data;
 
         globvis = mulscale16(globalhisibility,viewingrange);
@@ -5465,8 +5466,8 @@ function drawsprite (snum) {
 
         dax = globalxpanning;
         day = globalypanning;
-        globalxpanning = -dmulscale6(globalx1,day,globalx2,dax);
-        globalypanning = -dmulscale6(globaly1,day,globaly2,dax);
+        globalxpanning = (-dmulscale6(globalx1,day,globalx2,dax))|0;
+        globalypanning = (-dmulscale6(globaly1,day,globaly2,dax))|0;
 
         globalx2 = mulscale16(globalx2,viewingrange);
         globaly2 = mulscale16(globaly2,viewingrange);

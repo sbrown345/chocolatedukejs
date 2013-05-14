@@ -34,7 +34,7 @@ var machxbits_al;
 var bitsSetup;
 var textureSetup;
 function sethlinesizes(i1, _bits, textureAddress) {
-    machxbits_al = i1;
+    machxbits_al = i1 | 0;
     bitsSetup = _bits;
     textureSetup = textureAddress;
 }
@@ -43,6 +43,11 @@ function sethlinesizes(i1, _bits, textureAddress) {
 //Draw a line from destination in the framebuffer to framebuffer-numPixels
 //var hlineasm4Count = 0;
 function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
+    numPixels = numPixels | 0;
+    shade = shade | 0;
+    i4 = i4 >>> 0;
+    i5 = i5 >>> 0;
+
     //if (arguments.length != 6) throw "bad args";
     //printf("hlineasm4\n");
     var shifter = ((256 - machxbits_al) & 0x1f);
@@ -51,8 +56,6 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     var texture = textureSetup;
     var bits = bitsSetup;
 
-    i4 = i4 >>> 0; // uint32
-    i5 = i5 >>> 0; // uint32
 
     shade = shade & 0xffffff00;
     numPixels++;
@@ -94,11 +97,11 @@ var rmach_ecx;
 var rmach_edx;
 var rmach_esi;
 function setuprhlineasm4(i1, i2, i3, i4, i5, i6) {
-    rmach_eax = i1;
-    rmach_ebx = i2;
-    rmach_ecx = i3; // palookupoffs
-    rmach_edx = i4;
-    rmach_esi = i5;
+    rmach_eax = i1|0;
+    rmach_ebx = i2|0;
+    rmach_ecx = i3|0; // palookupoffs
+    rmach_edx = i4|0;
+    rmach_esi = i5|0;
 }
 
 function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest) {
@@ -111,6 +114,8 @@ function rhlineasm4(i1, texturePosition, texture, i3, i4, i5, destPosition, dest
     }
 
     //printf("rhlineasm4\n");
+    i1 = i1 | 0;
+    i3 = i3 | 0;
     i4 = i4 >>> 0;
     i5 = i5 >>> 0;
 
@@ -158,16 +163,22 @@ var rmmach_edx;
 var setupTileHeight;
 function setuprmhlineasm4(i1, i2, i3, i4, tileHeight, i6)
 {
-    rmmach_eax = i1;
-    rmmach_ebx = i2;
-    rmmach_ecx = i3;
-    rmmach_edx = i4;
-    setupTileHeight = tileHeight;
+    rmmach_eax = i1|0;
+    rmmach_ebx = i2|0;
+    rmmach_ecx = i3|0;
+    rmmach_edx = i4|0;
+    setupTileHeight = tileHeight|0;
 }
 
 
 //FCS: ????
 function rmhlineasm4(i1, shade, colorIndex, i4, i5, dest) {
+    i1 = i1 | 0;
+    shade = shade | 0;
+    colorIndex = colorIndex | 0;
+    i4 = i4 | 0;
+    i5 = i5 | 0;
+
     var ebp = (dest - i1) >>> 0;
     var rmach6b = (ebp - 1) >>> 0;
     var numPixels;
@@ -290,7 +301,7 @@ function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
     numPixels++;
     for (; numPixels;)
     {
-        temp = i4;
+        temp = i4 >>> 0;
         temp >>>= shiftValue;
         temp = source[temp];
 
@@ -399,14 +410,16 @@ function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, d
     console.assert(arguments.length == 8);
     console.assert(dest instanceof PointerHelper);
     var temp;
-    //printf("mvlineasm1\n");
+    printf("mvlineasm1\n");
     var textureArray = texture.array;
     var destArray = dest.array;
 
     for (; i3 >= 0; i3--) {
         temp = vplce >>> machmv;
+        printf("temp1: %u\n", temp);
         temp = textureArray[texturePosition + temp];
-        
+        printf("temp2: %u\n", temp);
+
         if (temp != 255) {
             //if (pixelsAllowed-- > 0) {
                 destArray[destPosition + dest.position] = palookupoffse.getByte(temp);

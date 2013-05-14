@@ -82,6 +82,7 @@ function gametext(x, y, t, s, dabits) {
     centre = (x == (320 >> 1));
     newx = 0;
     var tIdx = 0;
+    //printf("gametext %s\n", t);
     if (centre) {
         while (t.charCodeAt(tIdx)) {
             if (t.charCodeAt(tIdx) == 32) {
@@ -112,6 +113,7 @@ function gametext(x, y, t, s, dabits) {
         if (ac < STARTALPHANUM || ac > ENDALPHANUM)
             break;
 
+        //printf("%c\n", t.charCodeAt(tIdx));
         rotateSprite(x << 16, y << 16, 65536, 0, ac, s, 0, dabits, 0, 0, xdim - 1, ydim - 1);
 
         if (t.charCodeAt(tIdx) >= '0'.charCodeAt(0) && t.charCodeAt(tIdx) <= '9'.charCodeAt(0))
