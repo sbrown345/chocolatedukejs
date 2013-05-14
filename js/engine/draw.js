@@ -35,7 +35,7 @@ var bitsSetup;
 var textureSetup;
 function sethlinesizes(i1, _bits, textureAddress) {
     machxbits_al = i1 | 0;
-    bitsSetup = _bits;
+    bitsSetup = _bits | 0;
     textureSetup = textureAddress;
 }
 
@@ -220,7 +220,7 @@ function rmhlineasm4(i1, shade, colorIndex, i4, i5, dest) {
 var bytesperline = 0;
 function setBytesPerLine(_bytesPerLine) {
     //console.log("_bytesPerLine: ", _bytesPerLine);
-    bytesperline = _bytesPerLine;
+    bytesperline = _bytesPerLine | 0;
 }
 
 
@@ -233,6 +233,10 @@ function prevlineasm1(i1, palette, i3, i4, source, sourceOffset, destOffset, des
     if (arguments.length != 8) {
         throw new Error("prevlineasm1 should have 8 arguments");
     }
+
+    i1 = i1 | 0;
+    i3 = i3 | 0;
+    i4 = i4 | 0;
 
     //printf("prevlineasm1\n");
     if (i3 == 0) {
@@ -266,6 +270,9 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
         throw new Error("dest should have a length e.g. be an array");
     }
 
+    vince = vince | 0;
+    numPixels = numPixels | 0;
+
     var temp;
 
     if (!RENDER_DRAW_WALL_BORDERS)
@@ -291,8 +298,10 @@ function vlineasm1(vince, palookupoffse, numPixels, vplce, texture, textureOffse
 }
 
 //279     (todo: more of the func should be setup like this one?)
-function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest)
-{
+function tvlineasm1(i1,  texture,  numPixels,  i4, source, dest) {
+    i1 = i1 | 0;
+    i4 = i4 | 0;
+
     //printf("tvlineasm1\n");
     var shiftValue = (globalshiftval & 0x1f);
     var temp;
@@ -409,6 +418,10 @@ var machmv;
 function mvlineasm1(vince, palookupoffse, i3, vplce, texture, texturePosition, destPosition, dest) {
     console.assert(arguments.length == 8);
     console.assert(dest instanceof PointerHelper);
+
+    i3 = i3 | 0;
+    vplce = vplce | 0;
+    
     var temp;
     printf("mvlineasm1\n");
     var textureArray = texture.array;
@@ -597,6 +610,8 @@ function mvlineasm4(column, bufplcArray, framebufferOffset, frameBuffer) {
     if (arguments.length != 4) {
         throw new Error("todo: mvlineasm4 should have 4 arguments");
     }
+
+    column = column | 0;
 
     //printf("mvlineasm4\n");
     var i;

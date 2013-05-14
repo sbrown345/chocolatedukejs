@@ -4361,45 +4361,47 @@ function animatesprites(x, y, a, smoothratio) {
                     spritesortcnt++;
                 }
 
-                if (s.owner == -1) {
-                    k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
-                    if (k > 4) {
-                        k = 8 - k;
-                        t.cstat |= 4;
-                    }
-                    else t.cstat &= ~4;
+                PALONLY:
+                    while (true) {
+                        if (s.owner == -1) {
+                            k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                            if (k > 4) {
+                                k = 8 - k;
+                                t.cstat |= 4;
+                            } else t.cstat &= ~4;
 
-                    if (sector[t.sectnum].lotag == 2) k += 1795 - 1405;
-                    else if ((hittype[i].floorz - s.z) > (64 << 8)) k += 60;
+                            if (sector[t.sectnum].lotag == 2) k += 1795 - 1405;
+                            else if ((hittype[i].floorz - s.z) > (64 << 8)) k += 60;
 
-                    t.picnum += k;
-                    t.pal = ps[p].palookup;
+                            t.picnum += k;
+                            t.pal = ps[p].palookup;
 
-                    throw "goto PALONLY;";
-                }
-
-                if (ps[p].on_crane == -1 && (sector[s.sectnum].lotag & 0x7ff) != 1) {
-                    l = s.z - hittype[ps[p].i].floorz + (3 << 8);
-                    if (l > 1024 && s.yrepeat > 32 && s.extra > 0)
-                        s.yoffset = toInt8(l / (s.yrepeat << 2));
-                    else s.yoffset = 0;
-                }
-
-                if (ps[p].newowner > -1) {
-                    t4 = script[actorscrptr[APLAYER] + 1];
-                    t3 = 0;
-                    t1 = script[actorscrptr[APLAYER] + 2];
-                }
-
-                if (ud.camerasprite == -1 && ps[p].newowner == -1)
-                    if (s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0)
-                        if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
-                            t.owner = -1;
-                            t.xrepeat = t.yrepeat = 0;
-                            continue;
+                            break PALONLY;
                         }
 
-                //PALONLY:
+                        if (ps[p].on_crane == -1 && (sector[s.sectnum].lotag & 0x7ff) != 1) {
+                            l = s.z - hittype[ps[p].i].floorz + (3 << 8);
+                            if (l > 1024 && s.yrepeat > 32 && s.extra > 0)
+                                s.yoffset = toInt8(l / (s.yrepeat << 2));
+                            else s.yoffset = 0;
+                        }
+
+                        if (ps[p].newowner > -1) {
+                            t4 = script[actorscrptr[APLAYER] + 1];
+                            t3 = 0;
+                            t1 = script[actorscrptr[APLAYER] + 2];
+                        }
+
+                        if (ud.camerasprite == -1 && ps[p].newowner == -1)
+                            if (s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0)
+                                if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
+                                    t.owner = -1;
+                                    t.xrepeat = t.yrepeat = 0;
+                                    continue;
+                                }
+
+                        break;
+                    } //PALONLY:
 
                 if (sector[sect].floorpal)
                     t.pal = sector[sect].floorpal;
@@ -7239,8 +7241,6 @@ function cameratext(i)
 	}
 	else
 	{
-	    // todo screen doedsnt show static, this might be it??????
-	    console.log("todo screen doedsnt show static, this might be it??????")
 		flipbits = (totalclock<<1)&48;
 		for(x=0;x<394;x+=64)
 			for(y=0;y<200;y+=64)

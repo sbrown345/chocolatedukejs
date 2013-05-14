@@ -392,7 +392,7 @@ Sector.animateCamSprite = function () {
             sprite[i].owner = ps[screenpeek].newowner;
 
         else if(sprite[i].owner >= 0 && dist(sprite[ps[screenpeek].i],sprite[i]) < 2048)
-            xyzmirror(sprite[i].owner,sprite[i].picnum);
+            xyzmirror(sprite[i].owner, sprite[i].picnum); //todo: to fix camera (maybe something todo with setviewback)
     }
     else 
         hittype[i].temp_data[0]++;
