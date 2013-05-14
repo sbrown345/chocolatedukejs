@@ -4,12 +4,12 @@
     var postedData = this.Request.Form["string"];
 
     var fileName = "C:\\temp\\d3d.log";
-    if (this.Request.Form["newFile"] != null)
+    if (this.Request.Form["append"] != null)
     {
-        File.WriteAllText(fileName, postedData);
+        File.AppendAllText(fileName, postedData);
     }
     else
     {
-        File.AppendAllText(fileName, postedData);
+        File.WriteAllText(fileName, postedData);
     }
 %>

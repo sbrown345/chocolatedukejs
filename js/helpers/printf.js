@@ -26,22 +26,22 @@ printf.concat = function (arr) {
 printf.outputCurrent = [];
 printf.output = [/*array of string arrays*/];
 
-printf.flush = function() {
+printf.flush = function(append) {
     for (var i = 0; i < printf.output.length; i++) {
 
         var logText = printf.concat(printf.output[i]);
-        sendTextNew(logText, i == 0);
+        sendTextNew(logText, i !== 0 || append);
     }
 
     printf.outputCurrent = [];
     printf.output = [];
 };
 
-function sendTextNew(string, writeToNewFile) {
+function sendTextNew(string, append) {
     var xhr = new XMLHttpRequest();
     var body = "string=" + encodeURIComponent(string);
-    if (writeToNewFile) {
-        body += "&newFile=true";
+    if (append) {
+        body += "&append=true";
     }
     xhr.open("POST", "log.aspx", false);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
