@@ -7240,6 +7240,7 @@ function cameratext(i)
 	else
 	{
 	    // todo screen doedsnt show static, this might be it??????
+	    console.log("todo screen doedsnt show static, this might be it??????")
 		flipbits = (totalclock<<1)&48;
 		for(x=0;x<394;x+=64)
 			for(y=0;y<200;y+=64)

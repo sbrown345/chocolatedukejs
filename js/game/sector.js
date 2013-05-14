@@ -2830,6 +2830,31 @@ function checksectors(snum) {
 
     p = ps[snum];
 
+    function CLEARCAMERAS() {
+        if (i < 0) {
+            p.posx = p.oposx;
+            p.posy = p.oposy;
+            p.posz = p.oposz;
+            p.ang = p.oang;
+            p.newowner = -1;
+            var cursectnumRef = new Ref(p.cursectnum);
+            updatesector(p.posx, p.posy, cursectnumRef);
+            p.cursectnum = cursectnumRef.$;
+            Player.setPal(p);
+
+
+            i = headspritestat[1];
+            while (i >= 0) {
+                if (sprite[i].picnum == CAMERA1) sprite[i].yvel = 0;
+                i = nextspritestat[i];
+            }
+        } else if (p.newowner >= 0)
+            p.newowner = -1;
+
+        if (KB.keyPressed(sc_Escape))
+            KB.clearKeyDown(sc_Escape);
+    }
+
     switch(sector[p.cursectnum].lotag)
     {
         case 32767:
@@ -2882,7 +2907,8 @@ function checksectors(snum) {
         if( klabs(sync[snum].svel) > 768 || klabs(sync[snum].fvel) > 768 )
         {
             i = -1;
-            throw "goto CLEARCAMERAS";
+            CLEARCAMERAS();
+            return;
         }
     }
 
@@ -2896,7 +2922,8 @@ function checksectors(snum) {
             if( p.newowner >= 0 )
             {
                 i = -1;
-                throw "goto CLEARCAMERAS";
+                CLEARCAMERAS();
+                return;
             }
             return;
         }
@@ -3085,40 +3112,17 @@ function checksectors(snum) {
                         }
                     }
 
-                    CLEARCAMERAS:
-
-                        if(i < 0)
-                        {
-                            p.posx = p.oposx;
-                            p.posy = p.oposy;
-                            p.posz = p.oposz;
-                            p.ang = p.oang;
-                            p.newowner = -1;
-                            var cursectnumRef = new Ref(p.cursectnum);
-                            updatesector(p.posx, p.posy, cursectnumRef);
-                            p.cursectnum = cursectnumRef.$;
-                                Player.setPal(p);
-
-
-                            i = headspritestat[1];
-                            while(i >= 0)
-                            {
-                                if(sprite[i].picnum==CAMERA1) sprite[i].yvel = 0;
-                                i = nextspritestat[i];
-                            }
-                        }
-                        else if(p.newowner >= 0)
-                            p.newowner = -1;
-
-                    if( KB.keyPressed(sc_Escape) )
-                        KB.clearKeyDown(sc_Escape);
-
+                    CLEARCAMERAS();
                     return;
             }
         }
 
         if( (sync[snum].bits&(1<<29)) == 0 ) return;
-        else if(p.newowner >= 0) { i = -1; throw "goto CLEARCAMERAS;" }
+        else if (p.newowner >= 0) {
+            i = -1;
+            CLEARCAMERAS();
+            return;
+        }
 
         if(neartagwall == -1 && neartagsector == -1 && neartagsprite == -1)
             if( klabs(hits(p.i)) < 512 )
@@ -3140,7 +3144,8 @@ function checksectors(snum) {
             else if(p.newowner >= 0)
             {
                 i = -1;
-                throw "goto CLEARCAMERAS";
+                CLEARCAMERAS();
+                return;
             }
         }
 
