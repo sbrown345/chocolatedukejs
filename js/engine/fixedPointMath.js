@@ -1,5 +1,16 @@
 ﻿'use strict';
 
+function swapchar(p1, p1Offset, p2, p2Offset) {
+    var tmp = p1.getByte(p1Offset);
+    p1.setByteOffset(p2.getByte(p2Offset), p1Offset);
+    p2.setByteOffset(tmp, p2Offset);
+}
+
+function swapchar2(p1, p2, xsiz) {
+    swapchar(p1, 0, p2, 0);
+    swapchar(p1, 1, p2, xsiz);
+}
+
 function scale(input1, input2, input3) {
     return (input1 * input2 / input3) | 0;
 }

@@ -2,5 +2,5 @@
 
 function rand() {
     console.log("todo:  rand - make same as c version for testing");
-    return 25000;
+    return Math.random()*10000|0;
 }

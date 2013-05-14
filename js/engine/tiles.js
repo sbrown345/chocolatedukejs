@@ -48,6 +48,39 @@ function setviewtotile(tilenume, tileWidth, tileHeight) {
     setviewcnt++;
 }
 
+function squarerotatetile(tilenume)
+{
+    var i, j, k;
+    var  ptr1, ptr2;
+    
+    var tileDim = new Dimensions();
+    
+    tileDim.width = tiles[tilenume].dim.width;
+    tileDim.height = tiles[tilenume].dim.height;
+    
+    /* supports square tiles only for rotation part */
+    if (tileDim.width === tileDim.height)
+    {
+        k = (tileDim.width<<1);
+        for(i=tileDim.width-1; i>=0; i--)
+        {
+            ptr1 = new PointerHelper(tiles[tilenume].data, i*(tileDim.width+1));
+            ptr2 = new PointerHelper(ptr1.array, ptr1.position);
+            if ((i&1) != 0) {
+                ptr1.position--;
+                ptr2.position -= tileDim.width;
+                swapchar(ptr1, 0, ptr2, 0);
+            }
+            for(j=(i>>1)-1; j>=0; j--)
+            {
+                ptr1.position -= 2;
+                ptr2.position -= k;
+                swapchar2(ptr1,ptr2,tileDim.width);
+            }
+        }
+    }
+}
+
 
 //94
 

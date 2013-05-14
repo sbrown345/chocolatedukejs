@@ -70,6 +70,21 @@ function docacheit() {
     clearbufbyte(gotpic, 0, gotpic.length, 0);
 }
 
+function xyzmirror(i, tileId)
+{
+    if (!tiles[tileId].data)
+        loadTile(tileId);
+    
+	setviewtotile(tileId,tiles[tileId].dim.height,tiles[tileId].dim.width);
+
+	drawrooms(sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].ang,100+sprite[i].shade,sprite[i].sectnum);
+	display_mirror = 1; animatesprites(sprite[i].x,sprite[i].y,sprite[i].ang,65536); display_mirror = 0;
+	drawmasks();
+
+	setviewback();
+	squarerotatetile(tileId);
+}
+
 //357
 PreMap.vscrn = vscrn;
 function vscrn() {

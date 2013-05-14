@@ -386,14 +386,13 @@ Sector.animateCamSprite = function () {
 
     if(hittype[i].temp_data[0] >= 11)
     {
-        throw "todo"
-        //hittype[i].temp_data[0] = 0;
+        hittype[i].temp_data[0] = 0;
 
-        //if(ps[screenpeek].newowner >= 0)
-        //    sprite[i].owner = ps[screenpeek].newowner;
+        if(ps[screenpeek].newowner >= 0)
+            sprite[i].owner = ps[screenpeek].newowner;
 
-        //else if(sprite[i].owner >= 0 && dist(&sprite[ps[screenpeek].i],&sprite[i]) < 2048)
-        //    xyzmirror(sprite[i].owner,sprite[i].picnum);
+        else if(sprite[i].owner >= 0 && dist(sprite[ps[screenpeek].i],sprite[i]) < 2048)
+            xyzmirror(sprite[i].owner,sprite[i].picnum);
     }
     else 
         hittype[i].temp_data[0]++;
@@ -2328,8 +2327,9 @@ function checkhitsprite( i, sn) {
                         ps[p].posy = ps[p].oposy;
                         ps[p].posz = ps[p].oposz;
                         ps[p].ang = ps[p].oang;
-
-                        updatesector(ps[p].posx,ps[p].posy,ps[p].cursectnum);
+                        var cursectnumRef = new Ref(ps[p].cursectnum);
+                        updatesector(ps[p].posx, ps[p].posy, cursectnumRef);
+                        ps[p].cursectnum = cursectnumRef.$;
                         Player.setPal(ps[p]);
 
                         j = headspritestat[1];
@@ -3094,8 +3094,9 @@ function checksectors(snum) {
                             p.posz = p.oposz;
                             p.ang = p.oang;
                             p.newowner = -1;
-
-                            updatesector(p.posx,p.posy,p.cursectnum);
+                            var cursectnumRef = new Ref(p.cursectnum);
+                            updatesector(p.posx, p.posy, cursectnumRef);
+                            p.cursectnum = cursectnumRef.$;
                                 Player.setPal(p);
 
 

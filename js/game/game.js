@@ -7222,6 +7222,32 @@ Game.doMoveThings = function () {
     return 0;
 };
 
+//10321
+function cameratext(i)
+{
+	var  flipbits;
+	var x , y;
+
+	if(!hittype[i].temp_data[0])
+	{
+		rotateSprite(24<<16,33<<16,65536,0,CAMCORNER,0,0,2,windowx1,windowy1,windowx2,windowy2);
+		rotateSprite((320-26)<<16,34<<16,65536,0,CAMCORNER+1,0,0,2,windowx1,windowy1,windowx2,windowy2);
+		rotateSprite(22<<16,163<<16,65536,512,CAMCORNER+1,0,0,2+4,windowx1,windowy1,windowx2,windowy2);
+		rotateSprite((310-10)<<16,163<<16,65536,512,CAMCORNER+1,0,0,2,windowx1,windowy1,windowx2,windowy2);
+		if(totalclock&16)
+			rotateSprite(46<<16,32<<16,65536,0,CAMLIGHT,0,0,2,windowx1,windowy1,windowx2,windowy2);
+	}
+	else
+	{
+	    // todo screen doedsnt show static, this might be it??????
+		flipbits = (totalclock<<1)&48;
+		for(x=0;x<394;x+=64)
+			for(y=0;y<200;y+=64)
+			    rotateSprite(x << 16, y << 16, 65536, 0, STATIC, 0, 0, 2 + flipbits, windowx1, windowy1, windowx2, windowy2);
+	}
+}
+
+
 function vglass(x, y, a, wn, n) {
     var z, zincs;
     var sect;

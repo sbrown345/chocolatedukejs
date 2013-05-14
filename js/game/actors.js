@@ -2024,7 +2024,7 @@ function movestandables()
                 {
                     camsprite = -1;
                     hittype[i].temp_data[0] = 0;
-                    loadtile(s.picnum);
+                    loadTile(s.picnum);
                 }
 
                 {i = nexti; continue BOLT;}

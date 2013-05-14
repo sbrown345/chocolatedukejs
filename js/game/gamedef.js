@@ -2853,10 +2853,10 @@ function parse() {
                     neartagspriteRef = new Ref(neartagsprite),
                     neartaghitdistRef = new Ref(neartaghitdist);
                 neartag(g_sp.x, g_sp.y, g_sp.z - (32 << 8), g_sp.sectnum, g_sp.ang, neartagsectorRef, neartagwallRef, neartagspriteRef, neartaghitdistRef, 768, 1);
-                neartagsector.$ = neartagsectorRef;
-                neartagwall.$ = neartagwallRef;
-                neartagsprite.$ = neartagspriteRef;
-                neartaghitdist.$ = neartaghitdistRef;
+                neartagsector = neartagsectorRef;
+                neartagwall = neartagwallRef;
+                neartagsprite = neartagspriteRef;
+                neartaghitdist = neartaghitdistRef;
 
                 if (neartagsector >= 0 && isanearoperator(sector[neartagsector].lotag))
                     if ((sector[neartagsector].lotag & 0xff) == 23 || sector[neartagsector].floorz == sector[neartagsector].ceilingz)
