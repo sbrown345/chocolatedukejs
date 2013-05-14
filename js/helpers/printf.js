@@ -9,7 +9,11 @@ var printf = skipAllLogging ? function() {
     var formatter = new Formatter(format.replace(/%u/g, "%i"));
     var string = formatter.format.apply(formatter, args);
 
-    printf.output.push(string);
+    if (printf.outputCurrent.length > 100000) {
+        printf.output.push(printf.outputCurrent);
+        printf.outputCurrent = [];
+    }
+    printf.outputCurrent.push(string);
 };
 
 printf.concat = function (arr) {
@@ -19,21 +23,26 @@ printf.concat = function (arr) {
     return s;
 };
 
-printf.output = [];
+printf.outputCurrent = [];
+printf.output = [/*array of string arrays*/];
 
-printf.flush = function () {
-    var logText = printf.concat(printf.output);
-    //console.log(logText);
-    sendTextNew(logText);
-    if (printf.output.length > 100000)
-        debugger; // stop chrome crash
+printf.flush = function() {
+    for (var i = 0; i < printf.output.length; i++) {
+
+        var logText = printf.concat(printf.output[i]);
+        sendTextNew(logText, i == 0);
+    }
+
+    printf.outputCurrent = [];
     printf.output = [];
-    
 };
 
-function sendTextNew(string) {
+function sendTextNew(string, writeToNewFile) {
     var xhr = new XMLHttpRequest();
     var body = "string=" + encodeURIComponent(string);
+    if (writeToNewFile) {
+        body += "&newFile=true";
+    }
     xhr.open("POST", "log.aspx", false);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send(body);
