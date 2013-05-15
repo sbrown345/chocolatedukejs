@@ -5139,7 +5139,7 @@ function cheats() {
 }
 
 //6626
-var nonsharedtimer;
+var nonsharedtimer = 0;
 function nonsharedkeys() {
     var i, ch;
     var j;

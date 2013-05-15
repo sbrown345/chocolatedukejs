@@ -82,8 +82,8 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
 
         destOffset--;
 
-        i5 = (i5 - asm1) ;
-        i4 = (i4 - asm2) ;
+        i5 = (i5 - asm1) >>> 0;
+        i4 = (i4 - asm2) >>> 0;
 
         numPixels--;
     }

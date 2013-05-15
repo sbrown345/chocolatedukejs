@@ -516,20 +516,31 @@ PointerHelper.prototype.setInt32 = function (v) {
 
 
 function PointerHelperInt16(array, position) {
-    this.array = array;
-    this.position = position || 0;
+    this.m = 1;
+
+    if (array instanceof PointerHelperInt16) {
+        this.array = array.array;
+        this.position = array.position + ((position | 0) * this.m);
+    } else {
+        this.array = array;
+        this.position = (position || 0) * this.m;
+    }
 }
 
 PointerHelperInt16.prototype.set = function (v) {
-    this.array[(this.position / 2) | 0] = v;
+    this.array[(this.position / this.m) | 0] = v;
 };
 
 PointerHelperInt16.prototype.setOffset = function (v, offset) {
-    this.array[((this.position + offset) / 2) | 0] = v;
+    this.array[((this.position / this.m) + offset) | 0] = v;
 };
 
 PointerHelperInt16.prototype.get = function (offset) {
-    return this.array[((this.position + (offset || 0)) / 2) | 0];
+    return this.array[((this.position / this.m) + (offset || 0)) | 0];
+};
+
+PointerHelperInt16.prototype.increment = function (amount) {
+    return this.position += (amount * this.m);
 };
 
 function _updateScreenRect(/*int32_t x, int32_t y, int32_t w, int32_t h*/) {

@@ -7785,13 +7785,14 @@ function setBrightness(brightness, dapal) {
 //8503
 //This is only used by drawmapview.
 function fillpolygon(npoints) {
-    return;
+    //todo: force map view on and log this in demo
+
     var z, zz, x1, y1, x2, y2, miny, maxy, y, xinc, cnt;
     var ox, oy, bx, by, p, day1, day2;
     var ptr, ptr2;
 
-    miny = 0x7fffffff | 0;
-    maxy = 0x80000000 | 0;
+    miny = 0x7fffffff|0;
+    maxy = 0x80000000|0;
     for(z=npoints-1; z>=0; z--)
     {
         y = pvWalls[z].cameraSpaceCoo[0][VEC_Y];
@@ -7805,9 +7806,9 @@ function fillpolygon(npoints) {
     ptr = new PointerHelperInt16(smost);    /* They're pointers! - watch how you optimize this thing */
     for(y=miny; y<=maxy; y++)
     {
-        dotp1[y] = ptr;
-        dotp2[y] = new PointerHelperInt16(ptr.array, (MAXNODESPERLINE>>1));
-        ptr.position += MAXNODESPERLINE;
+        dotp1[y] = new PointerHelperInt16(ptr);
+        dotp2[y] = new PointerHelperInt16(ptr, (MAXNODESPERLINE >> 1));
+        ptr.increment(MAXNODESPERLINE); 
     }
 
     for(z=npoints-1; z>=0; z--)
@@ -7826,8 +7827,9 @@ function fillpolygon(npoints) {
             {
                 x1 += mulscale12((day1<<12)+4095-y1,xinc);
                 for(y=day1; y<day2; y++) {
+                    //*dotp2[y]++ = (x1>>12);
                     dotp2[y].set(x1>>12);
-                    dotp2[y].position++;
+                    dotp2[y].increment(1);
                     x1 += xinc;
                 }
             }
@@ -7835,8 +7837,9 @@ function fillpolygon(npoints) {
             {
                 x2 += mulscale12((day2<<12)+4095-y2,xinc);
                 for(y=day2; y<day1; y++) {
+                    //*dotp1[y]++ = (x2>>12);
                     dotp1[y].set(x2>>12);
-                    dotp1[y].position++;
+                    dotp1[y].increment(1);
                     x2 += xinc;
                 }
             }
@@ -7847,16 +7850,15 @@ function fillpolygon(npoints) {
     globaly2 = mulscale16(globaly2,xyaspect);
 
     oy = miny+1-(ydim>>1);
-    globalposx = (globalposx + (oy*globalx1))|0;
-    globalposy = (globalposy + (oy * globaly2))|0;
-
+    globalposx = (globalposx + oy * globalx1)|0;
+    globalposy = (globalposy + oy * globaly2)|0;
     
 
     ptr = new PointerHelperInt16(smost);
     for(y=miny; y<=maxy; y++)
     {
-        cnt = dotp1[y].position-ptr.position;
-        ptr2 = new PointerHelperInt16(ptr.array, ptr.position +(MAXNODESPERLINE>>1));
+        cnt = dotp1[y].position-ptr.position; //todo: check this bit - it's normally 1 on original (manualy setting to 1 makes it draw a bit)
+        ptr2 = new PointerHelperInt16(ptr, ((MAXNODESPERLINE >> 1)));
         for(z=cnt-1; z>=0; z--)
         {
             day1 = 0;
@@ -7867,43 +7869,42 @@ function fillpolygon(npoints) {
                 if (ptr2.get(zz) < ptr2.get(day2)) day2 = zz;
             }
             x1 = ptr.get(day1);
-            ptr.setOffset(ptr.get(z), day1);
-            x2 = ptr2.get(day2)-1;
-            ptr2.setOffset(ptr2.get(z), day2);//ptr2[day2] = ptr2[z];
+            ptr.setOffset(ptr.get(z), day1);//ptr[day1] = ptr[z];
+            x2 = ptr2.get(day2)-1;//x2 = ptr2[day2]-1;
+            ptr2.setOffset(ptr2.get(z), day2);// ptr2[day2] = ptr2[z];
             if (x1 > x2) continue;
 
             if (globalpolytype < 1)
             {
                 /* maphline */
                 ox = x2+1-(xdim>>1);
-                bx = (ox*asm1 + globalposx) | 0;
-                by = (ox*asm2 - globalposy) | 0;
+                bx =(ox*asm1 + globalposx)|0;
+                by =(ox*asm2 - globalposy)|0;
 
-                //p = new PointerHelper(frameplace, ylookup[y] + x2);
+                //p = ylookup[y]+x2+frameplace;
                 hlineasm4(x2 - x1, globalshade << 8, by, bx, ylookup[y] + x2, frameplace);
             }
             else
             {
                 /* maphline */
                 ox = x1+1-(xdim>>1);
-                bx = (ox*asm1 + globalposx) | 0;
-                by = (ox*asm2 - globalposy) | 0;
+                bx = (ox*asm1 + globalposx)|0;
+                by = (ox*asm2 - globalposy)|0;
 
-                //p = new PointerHelper(frameplace.array, ylookup[y] + x1);
+                //p = ylookup[y]+x1+frameplace;
                 if (globalpolytype == 1)
-                    mhline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y] + x1);
+                    mhline(globalbufplc, bx, (x2 - x1) << 16, 0, by,/*p*/ ylookup[y] + x1);
                 else
                 {
-                    thline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y] + x1);
+                    thline(globalbufplc, bx, (x2 - x1) << 16, 0, by,/*p*/ ylookup[y] + x1);
                     transarea += (x2-x1);
                 }
             }
         }
-        globalposx = (globalposx + globalx1) | 0;
-        globalposy = (globalposy + globaly2) | 0;
-        ptr.position += MAXNODESPERLINE;
+        globalposx = (globalposx + globalx1)|0;
+        globalposy = (globalposy + globaly2)|0;
+        ptr.increment(MAXNODESPERLINE);
     }
-    
     faketimerhandler();
 }
 
@@ -8333,8 +8334,8 @@ function drawmapview( dax,  day,  zoome,  ang)
             asm2 = (globalx2<<globalyshift);
             globalx1 <<= globalxshift;
             globaly2 <<= globalyshift;
-            globalposx = (globalposx<<(20+globalxshift))+((sec.floorxpanning)<<24);
-            globalposy = (globalposy<<(20+globalyshift))-((sec.floorypanning)<<24);
+            globalposx = ((globalposx<<(20+globalxshift))+((sec.floorxpanning)<<24))|0;
+            globalposy = ((globalposy<<(20+globalyshift))-((sec.floorypanning)<<24))|0;
 
             fillpolygon(npoints);
         }
@@ -8458,7 +8459,7 @@ function drawmapview( dax,  day,  zoome,  ang)
             else
                 globalshade = (sector[spr.sectnum].floorshade);
             globalshade = Math.max(Math.min(globalshade+spr.shade+6,numpalookups-1),0);
-            asm3 = (palookup[spr.pal][(globalshade<<8)])|0;
+            asm3 = new PointerHelper(palookup[spr.pal], (globalshade << 8));
             globvis = globalhisibility;
             if (sec.visibility != 0) globvis = mulscale4(globvis,(toUint8(sec.visibility+16)));
             globalpolytype = ((spr.cstat&2)>>1)+1;
@@ -8466,14 +8467,14 @@ function drawmapview( dax,  day,  zoome,  ang)
             /* relative alignment stuff */
             ox = x2-x1;
             oy = y2-y1;
-            i = ox*ox+oy*oy;
+            i = (ox*ox+oy*oy)|0;
             if (i == 0) continue;
             i = ((65536*16384)/i)|0;
             globalx1 = mulscale10(dmulscale10(ox,bakgxvect,oy,bakgyvect),i);
             globaly1 = mulscale10(dmulscale10(ox,bakgyvect,-oy,bakgxvect),i);
             ox = y1-y4;
             oy = x4-x1;
-            i = ox*ox+oy*oy;
+            i = (ox*ox+oy*oy)|0;
             if (i == 0) continue;
             i = ((65536*16384)/i)|0;
             globalx2 = mulscale10(dmulscale10(ox,bakgxvect,oy,bakgyvect),i);

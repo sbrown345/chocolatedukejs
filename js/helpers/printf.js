@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var skipAllLogging = false;
+var skipAllLogging = true;
 
 var printf = skipAllLogging ? function() {
 } : function() {
