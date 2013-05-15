@@ -4094,7 +4094,7 @@ function animatesprites(x, y, a, smoothratio) {
         t.shade = l;
     }
 
-
+    NOT_PALONLY:
     for (j = 0; j < spritesortcnt; j++)  //Between drawrooms() and drawmasks()
     {                             //is the perfect time to animate sprites
         t = tsprite[j];
@@ -4397,7 +4397,7 @@ function animatesprites(x, y, a, smoothratio) {
                                 if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
                                     t.owner = -1;
                                     t.xrepeat = t.yrepeat = 0;
-                                    continue;
+                                    continue NOT_PALONLY;
                                 }
 
                         break;
