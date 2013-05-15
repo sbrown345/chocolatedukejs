@@ -1755,7 +1755,7 @@ function displayrest(smoothratio) {
             }
 
             if (ud.overhead_on == 2) {
-                clearview(0);
+                clearView(0);
                 drawmapview(cposx, cposy, pp.zoom, cang);
             }
             drawoverheadmap(cposx, cposy, pp.zoom, cang);

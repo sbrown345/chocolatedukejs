@@ -711,7 +711,7 @@ function newgame(vn, ln, sk) {
         clearView(0);
         nextpage();
         playanm("vol42a.anm",7);
-        //        clearview(0L);
+        //        clearView(0L);
         //      nextpage();
         playanm("vol43a.anm",9);
         clearView(0);

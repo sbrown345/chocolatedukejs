@@ -1443,7 +1443,7 @@ function menus() {
                 //{
                 //    flushperms();
                 //    setview(0,0,xdim-1,ydim-1);
-                //    clearview(0L);
+                //    clearView(0L);
                 //    nextpage();
                 //}
 				
@@ -2300,7 +2300,7 @@ function menus() {
             var udbrightnessRef = new Ref(ud.brightness);
             bar(c+167+40,43+16*4,udbrightnessRef,8,x==4,SHX(-6),PHX(-6));
             ud.brightness = udbrightnessRef.$;
-            if(x==4) setbrightness(ud.brightness>>2,ps[myconnectindex].palette[0]);
+            if(x==4) setBrightness(ud.brightness>>2,ps[myconnectindex].palette[0]);
 
             menutext(c,43+16*5,SHX(-2),PHX(-2),"SHOW FPS");
             menutext(c+160+40,43+16*5,0,0,(ud.tickrate&1)?"ON":"OFF");

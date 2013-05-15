@@ -515,6 +515,23 @@ PointerHelper.prototype.setInt32 = function (v) {
 };
 
 
+function PointerHelperInt16(array, position) {
+    this.array = array;
+    this.position = position || 0;
+}
+
+PointerHelperInt16.prototype.set = function (v) {
+    this.array[(this.position / 2) | 0] = v;
+};
+
+PointerHelperInt16.prototype.setOffset = function (v, offset) {
+    this.array[((this.position + offset) / 2) | 0] = v;
+};
+
+PointerHelperInt16.prototype.get = function (offset) {
+    return this.array[((this.position + (offset || 0)) / 2) | 0];
+};
+
 function _updateScreenRect(/*int32_t x, int32_t y, int32_t w, int32_t h*/) {
     //SDL_UpdateRect(surface, x, y, w, h);
     updateCanvas();
@@ -643,13 +660,13 @@ function getTicks() {
 
 var Timer = { initTime: Date.now(), ticksInOneSecond: 1000 };
 
-////Timer.getPlatformTicks = function() {
-////    return Date.now() - Timer.initTime;
-////};
+Timer.getPlatformTicks = function() {
+    return Date.now() - Timer.initTime;
+};
 
 var fakeTime = 0;
-Timer.getPlatformTicks = function () {
-    fakeTime += 10;
-    printf("fakeTime: %i\n", fakeTime);
-    return fakeTime;
-};
+//Timer.getPlatformTicks = function () {
+//    fakeTime += 10;
+//    printf("fakeTime: %i\n", fakeTime);
+//    return fakeTime;
+//};
