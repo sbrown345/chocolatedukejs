@@ -2843,16 +2843,16 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
     clearbufbyte(visitedSectors, 0, ((numsectors + 7) >> 3), 0);
 
     //Clear the occlusion array.
-    shortptr1 = windowx1;//(short *)&startumost[windowx1];
-    shortptr2 = windowx1;//(short *)&startdmost[windowx1];
+    shortptr1 = new PointerHelperInt16(startumost, windowx1);
+    shortptr2 = new PointerHelperInt16(startdmost, windowx1);
     i = xdimen - 1;
     do {
-        umost[i] = startumost[shortptr1 + i] - windowy1;
-        dmost[i] = startdmost[shortptr2 + i] - windowy1;
+        umost[i] = shortptr1.get(i) - windowy1;
+        dmost[i] = shortptr2.get(i) - windowy1;
         i--;
     } while (i != 0);
-    umost[0] = startumost[shortptr1] - windowy1;
-    dmost[0] = startdmost[shortptr2] - windowy1;
+    umost[0] = shortptr1.get() - windowy1;
+    dmost[0] = shortptr2.get() - windowy1;
 
     // NumHits is the number of column to draw.
     numhits = xdimen;
