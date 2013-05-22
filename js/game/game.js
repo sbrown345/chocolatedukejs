@@ -1189,76 +1189,74 @@ function coolgaugetext(snum) {
 
     if (ss == 4)   //DRAW MINI STATUS BAR:
     {
-        throw 'todo'
-        //    // FIX_00027: Added an extra small statusbar (HUD)
-        //    if(ud.extended_screen_size>0)
-        //    {
-        //        offx = 5; offy = 160;
-        throw 'notice all those divisions !!! e.g. 40000/10'
-        //        sprintf(text,"%d", ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
-        //        minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
-        //        sprintf(text,"%d", ps[screenpeek].last_extra); 
-        //        gametext(offx,offy+20,text,ps[screenpeek].last_extra<=50?15:0,2+8+16); //minitext: 2 red light, 23 yellow
-        //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,20000,0,SHIELD,ps[screenpeek].shield_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+0*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].shield_amount)*20000/10,0,SHIELD,0,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,35000,0,JETPACK_ICON,ps[screenpeek].jetpack_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+1*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].jetpack_amount)*35000/40,0,JETPACK_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,35000,0,STEROIDS_ICON,ps[screenpeek].steroids_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].steroids_amount)*35000/20,0,STEROIDS_ICON,5,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,40000,0,FIRSTAID_ICON,ps[screenpeek].firstaid_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].firstaid_amount)*40000/10,0,FIRSTAID_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
-        //    }
-        //    else
-        //    {
-        //        if (p.inven_icon)
-        //            rotateSprite(69<<16,(200-30)<<16,65536,0,INVENTORYBOX,0,21,10+16,0,0,xdim-1,ydim-1);
-        //        rotateSprite(5<<16,(200-28)<<16,65536,0,HEALTHBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+        // FIX_00027: Added an extra small statusbar (HUD)
+        if(ud.extended_screen_size>0)
+        {
+            offx = 5; offy = 160;
+            text = String(ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
+            minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
+            text = String(ps[screenpeek].last_extra);
+            gametext(offx,offy+20,text,ps[screenpeek].last_extra<=50?15:0,2+8+16); //minitext: 2 red light, 23 yellow
+            rotateSprite((offx+0*10)<<16,(offy+28)<<16,20000,0,SHIELD,ps[screenpeek].shield_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+0*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].shield_amount)*20000/10,0,SHIELD,0,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+1*10)<<16,(offy+28)<<16,35000,0,JETPACK_ICON,ps[screenpeek].jetpack_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+1*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].jetpack_amount)*35000/40,0,JETPACK_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,35000,0,STEROIDS_ICON,ps[screenpeek].steroids_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].steroids_amount)*35000/20,0,STEROIDS_ICON,5,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,40000,0,FIRSTAID_ICON,ps[screenpeek].firstaid_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
+            rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].firstaid_amount)*40000/10,0,FIRSTAID_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
+        }
+        else
+        {
+            if (p.inven_icon)
+                rotateSprite(69<<16,(200-30)<<16,65536,0,INVENTORYBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+            rotateSprite(5<<16,(200-28)<<16,65536,0,HEALTHBOX,0,21,10+16,0,0,xdim-1,ydim-1);
 
-        //        if(sprite[p.i].pal == 1 && p.last_extra < 2)
-        //            digitalnumber(20,200-17,1,-16,10+16);
-        //        else digitalnumber(20,200-17,p.last_extra,-16,10+16);
+            if(sprite[p.i].pal == 1 && p.last_extra < 2)
+                digitalnumber(20,200-17,1,-16,10+16);
+            else digitalnumber(20,200-17,p.last_extra,-16,10+16);
 
-        //        rotateSprite(37<<16,(200-28)<<16,65536,0,AMMOBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+            rotateSprite(37<<16,(200-28)<<16,65536,0,AMMOBOX,0,21,10+16,0,0,xdim-1,ydim-1);
 
-        //        if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
-        //        digitalnumber(53,200-17,p.ammo_amount[i],-16,10+16);
+            if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
+            digitalnumber(53,200-17,p.ammo_amount[i],-16,10+16);
 
-        //        o = 158; permbit = 0;
-        //        if (p.inven_icon)
-        //        {
-        //            switch(p.inven_icon)
-        //            {
-        //                case 1: i = FIRSTAID_ICON; break;
-        //                case 2: i = STEROIDS_ICON; break;
-        //                case 3: i = HOLODUKE_ICON; break;
-        //                case 4: i = JETPACK_ICON; break;
-        //                case 5: i = HEAT_ICON; break;
-        //                case 6: i = AIRTANK_ICON; break;
-        //                case 7: i = BOOT_ICON; break;
-        //                default: i = -1;
-        //            }
-        //            if (i >= 0) rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
+            o = 158; permbit = 0;
+            if (p.inven_icon)
+            {
+                switch(p.inven_icon)
+                {
+                    case 1: i = FIRSTAID_ICON; break;
+                    case 2: i = STEROIDS_ICON; break;
+                    case 3: i = HOLODUKE_ICON; break;
+                    case 4: i = JETPACK_ICON; break;
+                    case 5: i = HEAT_ICON; break;
+                    case 6: i = AIRTANK_ICON; break;
+                    case 7: i = BOOT_ICON; break;
+                    default: i = -1;
+                }
+                if (i >= 0) rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
 
-        //            minitext(292-30-o,190,"%",6,10+16+permbit);
+                minitext(292-30-o,190,"%",6,10+16+permbit);
 
-        //            j = 0x80000000 | 0;
-        //            switch(p.inven_icon)
-        //            {
-        //                case 1: i = p.firstaid_amount; break;
-        //                case 2: i = ((p.steroids_amount+3)>>2); break;
-        //                case 3: i = ((p.holoduke_amount+15)/24); j = p.holoduke_on; break;
-        //                case 4: i = ((p.jetpack_amount+15)>>4); j = p.jetpack_on; break;
-        //                case 5: i = p.heat_amount/12; j = p.heat_on; break;
-        //                case 6: i = ((p.scuba_amount+63)>>6); break;
-        //                case 7: i = (p.boot_amount>>1); break;
-        //            }
-        //            invennum(284-30-o,200-6,(uint8_t )i,0,10+permbit);
-        //            if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-        //            else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
-        //            if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
-        //        }
-        //    }
-        //    return;
+                j = 0x80000000 | 0;
+                switch(p.inven_icon)
+                {
+                    case 1: i = p.firstaid_amount; break;
+                    case 2: i = ((p.steroids_amount+3)>>2); break;
+                    case 3: i = ((p.holoduke_amount+15)/24)|0; j = p.holoduke_on; break;
+                    case 4: i = ((p.jetpack_amount+15)>>4); j = p.jetpack_on; break;
+                    case 5: i = p.heat_amount/12; j = p.heat_on; break;
+                    case 6: i = ((p.scuba_amount+63)>>6); break;
+                    case 7: i = (p.boot_amount>>1); break;
+                }
+                invennum(284-30-o,200-6,i,0,10+permbit);
+                if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
+                else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
+                if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
+            }
+        }
+        return;
     }
 
     //DRAW/UPDATE FULL STATUS BAR:
@@ -1868,7 +1866,6 @@ Game.drawBackground = function drawbackground() {
     // FIX_00081: Screen border in menu
     if (ud.screen_size > 8 && (ps[myconnectindex].gm & MODE_GAME || ud.recstat == 2)) // ud.recstat == 2 => playing demo
     {
-        debugger;
         y = 0;
         if (ud.coop != 1) {
             if (ud.multimode > 1) y += 8;
