@@ -60,8 +60,8 @@ function hlineasm4(numPixels, shade, i4, i5, destOffset, dest) {
     shade = shade & 0xffffff00;
     numPixels++;
 
-    //if (!RENDER_DRAW_CEILING_AND_FLOOR)
-    //    return;
+    if (!RENDER_DRAW_CEILING_AND_FLOOR)
+        return;
 
     var destArray = dest.array;
     // todo: for loop (faster!)
@@ -520,8 +520,8 @@ var vince2;
 var vince3;
 
 function vlineasm4_2(columnIndex, frameBufferPosition) {
-    //if (!RENDER_DRAW_WALL_INSIDE)
-    //    return;
+    if (!RENDER_DRAW_WALL_INSIDE)
+        return;
 
     if (arguments.length != 2) {
         throw new Error("vlineasm4_2 should have 2 arguments");
@@ -889,7 +889,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
 
     //printf("slopevlinCount: %i\n", slopevlinCount);
     var palookupGlobalpal = palookup[globalpal];
-    var frameplaceArray = frameplace.array;
+    var frameoffsetArray = frameoffset.array;
     do {
         // -------------
         // All this is calculating a fixed point approx. of 1/a
@@ -938,7 +938,7 @@ function slopevlin(i1, i2, i3, i4, i5, i6) {
             ebx = esi;
 
             //if (pixelsAllowed-- > 0) {
-            frameplaceArray[i1] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
+            frameoffsetArray[i1 + frameoffset.position] = (eax & 0xff); // *((uint8_t  *)i1) = (eax&0xff);
                 //if (flatColor) frameplace.array[i1] = 44;
                 //printf("doCount: %i, whileCount: %i, eax&0xff: %i\n", doCount, whileCount, eax & 0xff);
                 //wrote++;

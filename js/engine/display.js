@@ -148,7 +148,7 @@ function _platform_init(argc, argv, title, iconName) {
 
 // 226
 var screenalloctype = 255;
-
+var surfacePixels;
 function init_new_res_vars(screenMode, screenWidth, screenHeight) {
     var i = 0, j = 0;
 
@@ -168,7 +168,8 @@ function init_new_res_vars(screenMode, screenWidth, screenHeight) {
 
     //console.assert(ScreenWidth == screenWidth, "todo, match up ScreenWidth and screenWidth");
     //console.assert(ScreenHeight == screenHeight, "todo, match up ScreenHeight and screenHeight");
-    frameoffset = frameplace = new PointerHelper(new Uint8Array(ScreenWidth * ScreenHeight));
+    surfacePixels = new Uint8Array(ScreenWidth * ScreenHeight);
+    frameoffset = new PointerHelper(surfacePixels); frameplace = new PointerHelper(surfacePixels);
 
     j = ydim * 4 * 4;
 

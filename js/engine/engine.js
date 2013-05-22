@@ -633,7 +633,7 @@ function hline(xr, yp) {
     asm2 = globaly2 * r;
     s = (getpalookup(mulscale16(r, globvis), globalshade) << 8);
 
-    hlineasm4(xr - xl, s, globalx2 * r + globalypanning, globaly1 * r + globalxpanning, ylookup[yp] + xr, frameoffset);
+    hlineasm4(xr - xl, s, globalx2 * r + globalypanning, globaly1 * r + globalxpanning, ylookup[yp] + xr + frameoffset.position, frameoffset);
 }
 
 //710
@@ -1220,7 +1220,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
+        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]]+frameoffset.position, frameoffset.array);
     }
     
     for(; x<=x2-3; x+=4)
@@ -1277,39 +1277,39 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         if ((bad != 0) || (u4 >= d4))
         {
             if (!(bad&1))
-                prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + x + 0, frameoffset);
+                prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0], vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + x + 0 + frameoffset.position, frameoffset);
             if (!(bad&2))
-                prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + x + 1, frameoffset);
+                prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - y1ve[1], vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + x + 1 + frameoffset.position, frameoffset);
             if (!(bad&4))
-                prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + x + 2, frameoffset);
+                prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - y1ve[2], vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + x + 2 + frameoffset.position, frameoffset);
             if (!(bad&8))
-                prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + x + 3, frameoffset);
+                prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - y1ve[3], vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + x + 3 + frameoffset.position, frameoffset);
             continue;
         }
 
         if (u4 > y1ve[0])
-            vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data,bufplce[0], ylookup[y1ve[0]] + x + 0, frameoffset);
+            vplce[0] = prevlineasm1(vince[0], palookupoffse[0], u4 - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], ylookup[y1ve[0]] + x + 0 + frameoffset.position, frameoffset);
         if (u4 > y1ve[1])
-            vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + x + 1, frameoffset);
+            vplce[1] = prevlineasm1(vince[1], palookupoffse[1], u4 - y1ve[1] - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], ylookup[y1ve[1]] + x + 1 + frameoffset.position, frameoffset);
         if (u4 > y1ve[2])
-            vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + x + 2, frameoffset);
+            vplce[2] = prevlineasm1(vince[2], palookupoffse[2], u4 - y1ve[2] - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], ylookup[y1ve[2]] + x + 2 + frameoffset.position, frameoffset);
         if (u4 > y1ve[3])
-            vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + x + 3, frameoffset);
+            vplce[3] = prevlineasm1(vince[3], palookupoffse[3], u4 - y1ve[3] - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], ylookup[y1ve[3]] + x + 3 + frameoffset.position, frameoffset);
 
         if (d4 >= u4) {
-            vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x /*+ frameoffset*/);
+            vlineasm4_2(d4 - u4 + 1, ylookup[u4] + x + frameoffset.position);
         }
 
         i = x + ylookup[d4 + 1];
         
         if (y2ve[0] > d4)
-            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], i + 0, frameoffset);
+            prevlineasm1(vince[0], palookupoffse[0], y2ve[0] - d4 - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], i + 0 + frameoffset.position, frameoffset);
         if (y2ve[1] > d4)
-            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], i + 1, frameoffset);
+            prevlineasm1(vince[1], palookupoffse[1], y2ve[1] - d4 - 1, vplce[1], tiles[globalpicnum].data, bufplce[1], i + 1 + frameoffset.position, frameoffset);
         if (y2ve[2] > d4)
-            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], i + 2, frameoffset);
+            prevlineasm1(vince[2], palookupoffse[2], y2ve[2] - d4 - 1, vplce[2], tiles[globalpicnum].data, bufplce[2], i + 2 + frameoffset.position, frameoffset);
         if (y2ve[3] > d4)
-            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3, frameoffset);
+            prevlineasm1(vince[3], palookupoffse[3], y2ve[3] - d4 - 1, vplce[3], tiles[globalpicnum].data, bufplce[3], i + 3 + frameoffset.position, frameoffset);
     }
     for(; x<=x2; x++)
     {
@@ -1337,7 +1337,7 @@ function wallscan( x1,  x2,uwal,  dwal,swal,  lwal) {
         vince[0] = swal[x]*globalyscale;
         vplce[0] = globalzd + vince[0]*(y1ve[0]-globalhoriz+1);
 
-        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]], frameoffset.array);
+        vlineasm1(vince[0], palookupoffse[0], y2ve[0] - y1ve[0] - 1, vplce[0], tiles[globalpicnum].data, bufplce[0], x + ylookup[y1ve[0]] + frameoffset.position, frameoffset.array);
     }
     faketimerhandler();
 }
@@ -1384,7 +1384,7 @@ function maskwallscan(x1, x2,
     x = startx;
     while ((startumost[x+windowx1] > startdmost[x+windowx1]) && (x <= x2)) x++;
 
-    p = new PointerHelper(frameoffset.array, x);
+    p = new PointerHelper(frameoffset.array, x + frameoffset.position);
 
     //printf("(x<=x2): %i\n", (x <= x2) ? 1 : 0);
     for (; (x <= x2) && (p.position &3); x++, p.position++)
@@ -1864,7 +1864,7 @@ function grouscan(dax1, dax2, sectnum, dastat) {
             globalx3 = (globalx2>>10);
             globaly3 = (globaly2>>10);
             asm3 = mulscale16(y2,globalzd) + (globalzx>>6);
-            slopevlin(ylookup[y2] + x, krecipasm(asm3 >> 3) >>> 0, new PointerHelper(nptr2.array, nptr2.position), y2 - y1 + 1, globalx1, globaly1);
+            slopevlin(ylookup[y2] + x, krecipasm(asm3 >> 3) >>> 0 + frameoffset.position, new PointerHelper(nptr2.array, nptr2.position), y2 - y1 + 1, globalx1, globaly1);
       
             if ((x&15) == 0) faketimerhandler();
         }
@@ -2837,7 +2837,7 @@ function drawrooms(daposx, daposy, daposz, daang, dahoriz, dacursectnum) {
         throw "todo - need to cater for viewoffset and frameoffset";
     }
 
-    //todo: frameoffset.position = frameplace.position + viewoffset;    //original: frameoffset = frameplace.position + viewoffset;
+    frameoffset = new PointerHelper(frameplace.array, viewoffset);
 
     //Clear the bit vector that keep track of what sector has been flooded in.
     clearbufbyte(visitedSectors, 0, ((numsectors + 7) >> 3), 0);
@@ -3023,7 +3023,7 @@ function transmaskvline(x) {
 
     bufplc = tiles[globalpicnum].data;// +i*tiles[globalpicnum].dim.height;
 
-    p = ylookup[y1v]+x+frameoffset;
+    p = new PointerHelper(frameoffset.array, ylookup[y1v] + x + frameoffset.position);
 
     tvlineasm1(vinc,palookupoffs,y2v-y1v,vplc,bufplc,p);
 
@@ -3871,8 +3871,7 @@ function doRotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy
                     bad &= ~pow2char[xx];
                 }
 
-                p = frameplace;
-                p.position = x; // could be dodgy sharing this position?
+                p = new PointerHelper(frameplace.array, x);
 
                 //if (ud.playing_demo_rev == 117)
                 appendCanvasImageToPage();
@@ -4571,10 +4570,10 @@ function ceilspritehline(x2, y) {
     asm3 = new PointerHelper((palookup[globalpal]), (getpalookup(mulscale28(klabs(v), globvis), globalshade) << 8));
     
     if ((globalorientation&2) == 0)
-        mhline(globalbufplc, bx, (x2 - x1) << 16, 0, by, ylookup[y] + x1, frameoffset/*,frameoffset*/);
+        mhline(globalbufplc, bx, (x2 - x1) << 16, 0, by, ylookup[y] + x1 + frameoffset.position, frameoffset/*,frameoffset*/);
     else
     {
-        thline(globalbufplc,bx,(x2-x1)<<16,0,by,ylookup[y]+x1, frameoffset/*,frameoffset*/);
+        thline(globalbufplc, bx, (x2 - x1) << 16, 0, by, ylookup[y] + x1 + frameoffset.position, frameoffset/*,frameoffset*/);
         transarea += (x2-x1);
     }
 }
