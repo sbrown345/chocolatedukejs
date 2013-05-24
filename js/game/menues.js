@@ -2676,7 +2676,7 @@ function menus() {
                 if(ud.recstat == 1)
                     closedemowrite();
                 if( ud.m_recstat != 2 && ud.last_level >= 0 && ud.multimode > 1 && ud.coop != 1)
-                    dobonus(1);
+                    dobonus(1);   //todo: as async
                 ud.last_level = -1;
                 cmenu(0);
             }

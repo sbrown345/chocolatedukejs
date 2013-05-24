@@ -873,7 +873,7 @@ function weaponnum999(ind, x, y, num1, num2, ha) {
 
     dabuf = String(num1);
     if (num1 > 99) {
-        rotateSprite((x) << 16, y << 16, 65536,  0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
+        rotateSprite((x) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(0) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 4) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(1) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
         rotateSprite((x + 8) << 16, y << 16, 65536, 0, THREEBYFIVE + dabuf.charCodeAt(2) - '0'.charCodeAt(0), ha, 0, 10 + 128, 0, 0, xdim - 1, ydim - 1);
     }
@@ -1143,7 +1143,7 @@ function coolgaugetext(snum) {
     var permbit;
     var offx = 3, offy = 3, stepx = 60, stepy = 6;
     var text = "";
-    
+
     p = ps[snum];
 
     if (p.invdisptime > 0) {
@@ -1190,42 +1190,38 @@ function coolgaugetext(snum) {
     if (ss == 4)   //DRAW MINI STATUS BAR:
     {
         // FIX_00027: Added an extra small statusbar (HUD)
-        if(ud.extended_screen_size>0)
-        {
+        if (ud.extended_screen_size > 0) {
             offx = 5; offy = 160;
             text = String(ps[screenpeek].ammo_amount[ps[screenpeek].curr_weapon]);
-            minitext(offx+26,offy+21,text,COLOR_ON,2+8+16); //minitext: 2 red light, 23 yellow
+            minitext(offx + 26, offy + 21, text, COLOR_ON, 2 + 8 + 16); //minitext: 2 red light, 23 yellow
             text = String(ps[screenpeek].last_extra);
-            gametext(offx,offy+20,text,ps[screenpeek].last_extra<=50?15:0,2+8+16); //minitext: 2 red light, 23 yellow
-            rotateSprite((offx+0*10)<<16,(offy+28)<<16,20000,0,SHIELD,ps[screenpeek].shield_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+0*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].shield_amount)*20000/10,0,SHIELD,0,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+1*10)<<16,(offy+28)<<16,35000,0,JETPACK_ICON,ps[screenpeek].jetpack_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+1*10)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].jetpack_amount)*35000/40,0,JETPACK_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,35000,0,STEROIDS_ICON,ps[screenpeek].steroids_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+2*10-1)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].steroids_amount)*35000/20,0,STEROIDS_ICON,5,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,40000,0,FIRSTAID_ICON,ps[screenpeek].firstaid_amount?25:100,0,2+8+16,0,0,xdim-1,ydim-1);
-            rotateSprite((offx+3*10-3)<<16,(offy+28)<<16,ksqrt(ps[screenpeek].firstaid_amount)*40000/10,0,FIRSTAID_ICON,0,0,2+8+16,0,0,xdim-1,ydim-1);
+            gametext(offx, offy + 20, text, ps[screenpeek].last_extra <= 50 ? 15 : 0, 2 + 8 + 16); //minitext: 2 red light, 23 yellow
+            rotateSprite((offx + 0 * 10) << 16, (offy + 28) << 16, 20000, 0, SHIELD, ps[screenpeek].shield_amount ? 25 : 100, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 0 * 10) << 16, (offy + 28) << 16, ksqrt(ps[screenpeek].shield_amount) * 20000 / 10, 0, SHIELD, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 1 * 10) << 16, (offy + 28) << 16, 35000, 0, JETPACK_ICON, ps[screenpeek].jetpack_amount ? 25 : 100, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 1 * 10) << 16, (offy + 28) << 16, ksqrt(ps[screenpeek].jetpack_amount) * 35000 / 40, 0, JETPACK_ICON, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 2 * 10 - 1) << 16, (offy + 28) << 16, 35000, 0, STEROIDS_ICON, ps[screenpeek].steroids_amount ? 25 : 100, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 2 * 10 - 1) << 16, (offy + 28) << 16, ksqrt(ps[screenpeek].steroids_amount) * 35000 / 20, 0, STEROIDS_ICON, 5, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 3 * 10 - 3) << 16, (offy + 28) << 16, 40000, 0, FIRSTAID_ICON, ps[screenpeek].firstaid_amount ? 25 : 100, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite((offx + 3 * 10 - 3) << 16, (offy + 28) << 16, ksqrt(ps[screenpeek].firstaid_amount) * 40000 / 10, 0, FIRSTAID_ICON, 0, 0, 2 + 8 + 16, 0, 0, xdim - 1, ydim - 1);
         }
-        else
-        {
+        else {
             if (p.inven_icon)
-                rotateSprite(69<<16,(200-30)<<16,65536,0,INVENTORYBOX,0,21,10+16,0,0,xdim-1,ydim-1);
-            rotateSprite(5<<16,(200-28)<<16,65536,0,HEALTHBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+                rotateSprite(69 << 16, (200 - 30) << 16, 65536, 0, INVENTORYBOX, 0, 21, 10 + 16, 0, 0, xdim - 1, ydim - 1);
+            rotateSprite(5 << 16, (200 - 28) << 16, 65536, 0, HEALTHBOX, 0, 21, 10 + 16, 0, 0, xdim - 1, ydim - 1);
 
-            if(sprite[p.i].pal == 1 && p.last_extra < 2)
-                digitalnumber(20,200-17,1,-16,10+16);
-            else digitalnumber(20,200-17,p.last_extra,-16,10+16);
+            if (sprite[p.i].pal == 1 && p.last_extra < 2)
+                digitalnumber(20, 200 - 17, 1, -16, 10 + 16);
+            else digitalnumber(20, 200 - 17, p.last_extra, -16, 10 + 16);
 
-            rotateSprite(37<<16,(200-28)<<16,65536,0,AMMOBOX,0,21,10+16,0,0,xdim-1,ydim-1);
+            rotateSprite(37 << 16, (200 - 28) << 16, 65536, 0, AMMOBOX, 0, 21, 10 + 16, 0, 0, xdim - 1, ydim - 1);
 
             if (p.curr_weapon == HANDREMOTE_WEAPON) i = HANDBOMB_WEAPON; else i = p.curr_weapon;
-            digitalnumber(53,200-17,p.ammo_amount[i],-16,10+16);
+            digitalnumber(53, 200 - 17, p.ammo_amount[i], -16, 10 + 16);
 
             o = 158; permbit = 0;
-            if (p.inven_icon)
-            {
-                switch(p.inven_icon)
-                {
+            if (p.inven_icon) {
+                switch (p.inven_icon) {
                     case 1: i = FIRSTAID_ICON; break;
                     case 2: i = STEROIDS_ICON; break;
                     case 3: i = HOLODUKE_ICON; break;
@@ -1235,25 +1231,24 @@ function coolgaugetext(snum) {
                     case 7: i = BOOT_ICON; break;
                     default: i = -1;
                 }
-                if (i >= 0) rotateSprite((231-o)<<16,(200-21)<<16,65536,0,i,0,0,10+16+permbit,0,0,xdim-1,ydim-1);
+                if (i >= 0) rotateSprite((231 - o) << 16, (200 - 21) << 16, 65536, 0, i, 0, 0, 10 + 16 + permbit, 0, 0, xdim - 1, ydim - 1);
 
-                minitext(292-30-o,190,"%",6,10+16+permbit);
+                minitext(292 - 30 - o, 190, "%", 6, 10 + 16 + permbit);
 
                 j = 0x80000000 | 0;
-                switch(p.inven_icon)
-                {
+                switch (p.inven_icon) {
                     case 1: i = p.firstaid_amount; break;
-                    case 2: i = ((p.steroids_amount+3)>>2); break;
-                    case 3: i = ((p.holoduke_amount+15)/24)|0; j = p.holoduke_on; break;
-                    case 4: i = ((p.jetpack_amount+15)>>4); j = p.jetpack_on; break;
-                    case 5: i = p.heat_amount/12; j = p.heat_on; break;
-                    case 6: i = ((p.scuba_amount+63)>>6); break;
-                    case 7: i = (p.boot_amount>>1); break;
+                    case 2: i = ((p.steroids_amount + 3) >> 2); break;
+                    case 3: i = ((p.holoduke_amount + 15) / 24) | 0; j = p.holoduke_on; break;
+                    case 4: i = ((p.jetpack_amount + 15) >> 4); j = p.jetpack_on; break;
+                    case 5: i = p.heat_amount / 12; j = p.heat_on; break;
+                    case 6: i = ((p.scuba_amount + 63) >> 6); break;
+                    case 7: i = (p.boot_amount >> 1); break;
                 }
-                invennum(284-30-o,200-6,i,0,10+permbit);
-                if (j > 0) minitext(288-30-o,180,"ON",0,10+16+permbit);
-                else if (j != (0x80000000 | 0)) minitext(284-30-o,180,"OFF",2,10+16+permbit);
-                if (p.inven_icon >= 6) minitext(284-35-o,180,"AUTO",2,10+16+permbit);
+                invennum(284 - 30 - o, 200 - 6, i, 0, 10 + permbit);
+                if (j > 0) minitext(288 - 30 - o, 180, "ON", 0, 10 + 16 + permbit);
+                else if (j != (0x80000000 | 0)) minitext(284 - 30 - o, 180, "OFF", 2, 10 + 16 + permbit);
+                if (p.inven_icon >= 6) minitext(284 - 35 - o, 180, "AUTO", 2, 10 + 16 + permbit);
             }
         }
         return;
@@ -1262,7 +1257,7 @@ function coolgaugetext(snum) {
     //DRAW/UPDATE FULL STATUS BAR:
 
     if (pus) { pus = 0; u = 0xffffffff | 0; } else u = 0;
-    
+
     if (sbar.frag[myconnectindex] != p.frag) { sbar.frag[myconnectindex] = p.frag; u |= 32768; }
     if (sbar.got_access != p.got_access) { sbar.got_access = p.got_access; u |= 16384; }
     if (sbar.last_extra != p.last_extra) { sbar.last_extra = p.last_extra; u |= 1; }
@@ -1568,27 +1563,25 @@ function FTA(q, p, mode) {
 function gameexit(msg) {
     var t = msg, tIdx = 0;
 
-    if(t) ps[myconnectindex].palette = /*(uint8_t  *) &*/palette[0];
+    if (t) ps[myconnectindex].palette = /*(uint8_t  *) &*/palette[0];
 
-    if(numplayers > 1)
+    if (numplayers > 1)
         allowtimetocorrecterrorswhenquitting();
 
-    if(ud.recstat == 1)
+    if (ud.recstat == 1)
         closedemowrite();
 
-    if(frecfilep)
-    {
+    if (frecfilep) {
         fclose(frecfilep);
         frecfilep = null;
     }
 
-    if(qe || cp)
+    if (qe || cp)
         throw "goto GOTOHERE;"
 
     // FIX_00089: scoreboard not shown for last player who quits a DM. Only 19.7 affected. (Sarah)
-    if( ud.m_recstat != 2 && ud.last_level >= 0 && playerswhenstarted > 1 && ud.coop != 1 && t[tIdx] == ' ')
-    {
-        dobonus(1);
+    if (ud.m_recstat != 2 && ud.last_level >= 0 && playerswhenstarted > 1 && ud.coop != 1 && t[tIdx] == ' ') {
+        dobonus(1);  //todo: as async
         // CTW - MODIFICATION
         //      setgamemode();
         // FIX_00028: No need to call the videodriver on gameexit()
@@ -1596,25 +1589,24 @@ function gameexit(msg) {
         // CTW END - MODIFICATION
     }
 
-    if(playerswhenstarted > 1)
+    if (playerswhenstarted > 1)
         uninitmultiplayers();  /* deinits network transport. */
 
     // CTW - MODIFICATION
     /*  if( *t != 0 && *(t+1) != 'V' && *(t+1) != 'Y' && playonten == 0 )
             showtwoscreens();*/
     if (t && t[tIdx + 1] != 'V' && t[tIdx + 1] != 'Y' && true)
-        if(ud.showcinematics) // FIX_00029: toggle cinematics on / off
+        if (ud.showcinematics) // FIX_00029: toggle cinematics on / off
             showtwoscreens(); //todo: will have to by async
     // CTW END - MODIFICATION
 
     //GOTOHERE:
 
-        Shutdown();
+    Shutdown();
 
-    if(t[tIdx])
-    {
+    if (t[tIdx]) {
         setvmode(0x3);
-        
+
         // CTW - MODIFICATION
         /*      if(playonten == 0)
                 {
@@ -1622,8 +1614,7 @@ function gameexit(msg) {
                     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
                     printf("%s%s","\n",t);
                 }*/
-        if(true)
-        {
+        if (true) {
             //if(*t == ' ' && *(t+1) == 0) *t = 0;
             //#if PLATFORM_DOS   // Is there a good reason for this? --ryan.
             //    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -1637,7 +1628,7 @@ function gameexit(msg) {
     uninitgroupfile();
 
     unlink("duke3d.tmp");
-	
+
     Error(EXIT_SUCCESS, "");
 }
 
@@ -1725,14 +1716,14 @@ function displayrest(smoothratio) {
             if (ud.scrollmode == 0) {
                 if (pp.newowner == -1) {
                     if (screenpeek == myconnectindex && numplayers > 1) {
-                        cposx = omyx + mulscale16((myx - omyx)|0, smoothratio);
-                        cposy = omyy + mulscale16((myy - omyy)|0, smoothratio);
-                        cang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024)|0, smoothratio);
+                        cposx = omyx + mulscale16((myx - omyx) | 0, smoothratio);
+                        cposy = omyy + mulscale16((myy - omyy) | 0, smoothratio);
+                        cang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024) | 0, smoothratio);
                     }
                     else {
-                        cposx = pp.oposx + mulscale16((pp.posx - pp.oposx)|0, smoothratio);
-                        cposy = pp.oposy + mulscale16((pp.posy - pp.oposy)|0, smoothratio);
-                        cang = pp.oang + mulscale16((((pp.ang + 1024 - pp.oang) & 2047) - 1024)|0, smoothratio);
+                        cposx = pp.oposx + mulscale16((pp.posx - pp.oposx) | 0, smoothratio);
+                        cposy = pp.oposy + mulscale16((pp.posy - pp.oposy) | 0, smoothratio);
+                        cang = pp.oang + mulscale16((((pp.ang + 1024 - pp.oang) & 2047) - 1024) | 0, smoothratio);
                     }
                 }
                 else {
@@ -2153,7 +2144,7 @@ function EGS_arg_swap(s_ss, s_ow, s_zv, s_ve, s_a, s_yr, s_xr, s_s, s_pn, s_z, s
 function EGS(whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss) {
     var i;
     var s;
-    
+
     printf("EGS whatsect: %i, s_x: %i, s_y: %i, s_z: %i, s_pn: %i,  s_s: %i, s_xr: %i, s_yr: %i, s_a: %i, s_ve: %i, s_zv: %i, ,s_ow: %i, s_ss: %i\n",
 		 whatsect, s_x, s_y, s_z, s_pn, s_s, s_xr, s_yr, s_a, s_ve, s_zv, s_ow, s_ss);
 
@@ -3631,7 +3622,7 @@ function spawn(j, pn) {
                     hittype[i].temp_data[4] = sector[j].floorz;
 
                     if (numplayers < 2) {
-                        setinterpolation(new AnimatePtr(sector,sect,"floorz"/*sector[sect].floorz*/));
+                        setinterpolation(new AnimatePtr(sector, sect, "floorz"/*sector[sect].floorz*/));
                         setinterpolation(new AnimatePtr(sector, sect, "ceilingz" /*sector[sect].ceilingz*/));
                     }
 
@@ -4092,598 +4083,598 @@ function animatesprites(x, y, a, smoothratio) {
     }
 
     NOT_PALONLY:
-    for (j = 0; j < spritesortcnt; j++)  //Between drawrooms() and drawmasks()
-    {                             //is the perfect time to animate sprites
-        t = tsprite[j];
-        i = t.owner;
-        s = sprite[i];
+        for (j = 0; j < spritesortcnt; j++)  //Between drawrooms() and drawmasks()
+        {                             //is the perfect time to animate sprites
+            t = tsprite[j];
+            i = t.owner;
+            s = sprite[i];
 
-        switch (s.picnum) {
-            case SECTOREFFECTOR:
-                if (t.lotag == 27 && ud.recstat == 1) {
-                    t.picnum = 11 + ((totalclock >> 3) & 1);
-                    t.cstat |= 128;
-                }
-                else
-                    t.xrepeat = t.yrepeat = 0;
-                break;
-            case NATURALLIGHTNING:
-                t.shade = -127;
-                break;
-            case FEM1:
-            case FEM2:
-            case FEM3:
-            case FEM4:
-            case FEM5:
-            case FEM6:
-            case FEM7:
-            case FEM8:
-            case FEM9:
-            case FEM10:
-            case MAN:
-            case MAN2:
-            case WOMAN:
-            case NAKED1:
-            case PODFEM1:
-            case FEMMAG1:
-            case FEMMAG2:
-            case FEMPIC1:
-            case FEMPIC2:
-            case FEMPIC3:
-            case FEMPIC4:
-            case FEMPIC5:
-            case FEMPIC6:
-            case FEMPIC7:
-            case BLOODYPOLE:
-            case FEM6PAD:
-            case STATUE:
-            case STATUEFLASH:
-            case OOZ:
-            case OOZ2:
-            case WALLBLOOD1:
-            case WALLBLOOD2:
-            case WALLBLOOD3:
-            case WALLBLOOD4:
-            case WALLBLOOD5:
-            case WALLBLOOD7:
-            case WALLBLOOD8:
-            case SUSHIPLATE1:
-            case SUSHIPLATE2:
-            case SUSHIPLATE3:
-            case SUSHIPLATE4:
-            case FETUS:
-            case FETUSJIB:
-            case FETUSBROKE:
-            case HOTMEAT:
-            case FOODOBJECT16:
-            case DOLPHIN1:
-            case DOLPHIN2:
-            case TOUGHGAL:
-            case TAMPON:
-            case XXXSTACY:
-            case 4946:
-            case 4947:
-            case 693:
-            case 2254:
-            case 4560:
-            case 4561:
-            case 4562:
-            case 4498:
-            case 4957:
-                if (ud.lockout) {
-                    t.xrepeat = t.yrepeat = 0;
-                    continue;
-                }
-        }
-
-        if (t.statnum == 99) continue;
-        if (s.statnum != 1 && s.picnum == APLAYER && ps[s.yvel].newowner == -1 && s.owner >= 0) {
-            t.x -= mulscale16(65536 - smoothratio, ps[s.yvel].posx - ps[s.yvel].oposx);
-            t.y -= mulscale16(65536 - smoothratio, ps[s.yvel].posy - ps[s.yvel].oposy);
-            t.z = ps[s.yvel].oposz + mulscale16(smoothratio, ps[s.yvel].posz - ps[s.yvel].oposz);
-            t.z += (40 << 8);
-        }
-        else if ((s.statnum == 0 && s.picnum != CRANEPOLE) || s.statnum == 10 || s.statnum == 6 || s.statnum == 4 || s.statnum == 5 || s.statnum == 1) {
-            t.x -= mulscale16(65536 - smoothratio, s.x - hittype[i].bposx);
-            t.y -= mulscale16(65536 - smoothratio, s.y - hittype[i].bposy);
-            t.z -= mulscale16(65536 - smoothratio, s.z - hittype[i].bposz);
-        }
-
-        sect = s.sectnum;
-        t1 = hittype[i].temp_data[1]; t3 = hittype[i].temp_data[3]; t4 = hittype[i].temp_data[4];
-
-        switch (s.picnum) {
-            case DUKELYINGDEAD:
-                t.z += (24 << 8);
-                break;
-            case BLOODPOOL:
-            case FOOTPRINTS:
-            case FOOTPRINTS2:
-            case FOOTPRINTS3:
-            case FOOTPRINTS4:
-                if (t.pal == 6)
+            switch (s.picnum) {
+                case SECTOREFFECTOR:
+                    if (t.lotag == 27 && ud.recstat == 1) {
+                        t.picnum = 11 + ((totalclock >> 3) & 1);
+                        t.cstat |= 128;
+                    }
+                    else
+                        t.xrepeat = t.yrepeat = 0;
+                    break;
+                case NATURALLIGHTNING:
                     t.shade = -127;
-            case PUKE:
-            case MONEY:
-            case MONEY + 1:
-            case MAIL:
-            case MAIL + 1:
-            case PAPER:
-            case PAPER + 1:
-                if (ud.lockout && s.pal == 2) {
-                    t.xrepeat = t.yrepeat = 0;
+                    break;
+                case FEM1:
+                case FEM2:
+                case FEM3:
+                case FEM4:
+                case FEM5:
+                case FEM6:
+                case FEM7:
+                case FEM8:
+                case FEM9:
+                case FEM10:
+                case MAN:
+                case MAN2:
+                case WOMAN:
+                case NAKED1:
+                case PODFEM1:
+                case FEMMAG1:
+                case FEMMAG2:
+                case FEMPIC1:
+                case FEMPIC2:
+                case FEMPIC3:
+                case FEMPIC4:
+                case FEMPIC5:
+                case FEMPIC6:
+                case FEMPIC7:
+                case BLOODYPOLE:
+                case FEM6PAD:
+                case STATUE:
+                case STATUEFLASH:
+                case OOZ:
+                case OOZ2:
+                case WALLBLOOD1:
+                case WALLBLOOD2:
+                case WALLBLOOD3:
+                case WALLBLOOD4:
+                case WALLBLOOD5:
+                case WALLBLOOD7:
+                case WALLBLOOD8:
+                case SUSHIPLATE1:
+                case SUSHIPLATE2:
+                case SUSHIPLATE3:
+                case SUSHIPLATE4:
+                case FETUS:
+                case FETUSJIB:
+                case FETUSBROKE:
+                case HOTMEAT:
+                case FOODOBJECT16:
+                case DOLPHIN1:
+                case DOLPHIN2:
+                case TOUGHGAL:
+                case TAMPON:
+                case XXXSTACY:
+                case 4946:
+                case 4947:
+                case 693:
+                case 2254:
+                case 4560:
+                case 4561:
+                case 4562:
+                case 4498:
+                case 4957:
+                    if (ud.lockout) {
+                        t.xrepeat = t.yrepeat = 0;
+                        continue;
+                    }
+            }
+
+            if (t.statnum == 99) continue;
+            if (s.statnum != 1 && s.picnum == APLAYER && ps[s.yvel].newowner == -1 && s.owner >= 0) {
+                t.x -= mulscale16(65536 - smoothratio, ps[s.yvel].posx - ps[s.yvel].oposx);
+                t.y -= mulscale16(65536 - smoothratio, ps[s.yvel].posy - ps[s.yvel].oposy);
+                t.z = ps[s.yvel].oposz + mulscale16(smoothratio, ps[s.yvel].posz - ps[s.yvel].oposz);
+                t.z += (40 << 8);
+            }
+            else if ((s.statnum == 0 && s.picnum != CRANEPOLE) || s.statnum == 10 || s.statnum == 6 || s.statnum == 4 || s.statnum == 5 || s.statnum == 1) {
+                t.x -= mulscale16(65536 - smoothratio, s.x - hittype[i].bposx);
+                t.y -= mulscale16(65536 - smoothratio, s.y - hittype[i].bposy);
+                t.z -= mulscale16(65536 - smoothratio, s.z - hittype[i].bposz);
+            }
+
+            sect = s.sectnum;
+            t1 = hittype[i].temp_data[1]; t3 = hittype[i].temp_data[3]; t4 = hittype[i].temp_data[4];
+
+            switch (s.picnum) {
+                case DUKELYINGDEAD:
+                    t.z += (24 << 8);
+                    break;
+                case BLOODPOOL:
+                case FOOTPRINTS:
+                case FOOTPRINTS2:
+                case FOOTPRINTS3:
+                case FOOTPRINTS4:
+                    if (t.pal == 6)
+                        t.shade = -127;
+                case PUKE:
+                case MONEY:
+                case MONEY + 1:
+                case MAIL:
+                case MAIL + 1:
+                case PAPER:
+                case PAPER + 1:
+                    if (ud.lockout && s.pal == 2) {
+                        t.xrepeat = t.yrepeat = 0;
+                        continue;
+                    }
+                    break;
+                case TRIPBOMB:
                     continue;
-                }
-                break;
-            case TRIPBOMB:
-                continue;
-            case FORCESPHERE:
-                if (t.statnum == 5) {
-                    var sqa, sqb;
+                case FORCESPHERE:
+                    if (t.statnum == 5) {
+                        var sqa, sqb;
 
-                    sqa =
-					    getangle(
-					    sprite[s.owner].x - ps[screenpeek].posx,
-					    sprite[s.owner].y - ps[screenpeek].posy);
-                    sqb =
-					    getangle(
-					    sprite[s.owner].x - t.x,
-					    sprite[s.owner].y - t.y);
+                        sqa =
+                            getangle(
+                            sprite[s.owner].x - ps[screenpeek].posx,
+                            sprite[s.owner].y - ps[screenpeek].posy);
+                        sqb =
+                            getangle(
+                            sprite[s.owner].x - t.x,
+                            sprite[s.owner].y - t.y);
 
-                    if (klabs(getincangle(sqa, sqb)) > 512)
-                        if (ldist(sprite[s.owner], t) < ldist(sprite[ps[screenpeek].i], sprite[s.owner]))
-                            t.xrepeat = t.yrepeat = 0;
-                }
-                continue;
-            case BURNING:
-            case BURNING2:
-                if (sprite[s.owner].statnum == 10) {
-                    if (display_mirror == 0 && sprite[s.owner].yvel == screenpeek && ps[sprite[s.owner].yvel].over_shoulder_on == 0)
-                        t.xrepeat = 0;
-                    else {
-                        t.ang = getangle(x - t.x, y - t.y);
-                        t.x = sprite[s.owner].x;
-                        t.y = sprite[s.owner].y;
-                        t.x += sintable[(t.ang + 512) & 2047] >> 10;
-                        t.y += sintable[t.ang & 2047] >> 10;
+                        if (klabs(getincangle(sqa, sqb)) > 512)
+                            if (ldist(sprite[s.owner], t) < ldist(sprite[ps[screenpeek].i], sprite[s.owner]))
+                                t.xrepeat = t.yrepeat = 0;
                     }
-                }
-                break;
+                    continue;
+                case BURNING:
+                case BURNING2:
+                    if (sprite[s.owner].statnum == 10) {
+                        if (display_mirror == 0 && sprite[s.owner].yvel == screenpeek && ps[sprite[s.owner].yvel].over_shoulder_on == 0)
+                            t.xrepeat = 0;
+                        else {
+                            t.ang = getangle(x - t.x, y - t.y);
+                            t.x = sprite[s.owner].x;
+                            t.y = sprite[s.owner].y;
+                            t.x += sintable[(t.ang + 512) & 2047] >> 10;
+                            t.y += sintable[t.ang & 2047] >> 10;
+                        }
+                    }
+                    break;
 
-            case ATOMICHEALTH:
-                t.z -= (4 << 8);
-                break;
-            case CRYSTALAMMO:
-                t.shade = (sintable[(totalclock << 4) & 2047] >> 10);
-                continue;
-            case VIEWSCREEN:
-            case VIEWSCREEN2:
-                if (camsprite >= 0 && hittype[sprite[i].owner].temp_data[0] == 1) {
-                    t.picnum = STATIC;
-                    t.cstat |= (rand() & 12);
-                    t.xrepeat += 8;
-                    t.yrepeat += 8;
-                }
-                break;
+                case ATOMICHEALTH:
+                    t.z -= (4 << 8);
+                    break;
+                case CRYSTALAMMO:
+                    t.shade = (sintable[(totalclock << 4) & 2047] >> 10);
+                    continue;
+                case VIEWSCREEN:
+                case VIEWSCREEN2:
+                    if (camsprite >= 0 && hittype[sprite[i].owner].temp_data[0] == 1) {
+                        t.picnum = STATIC;
+                        t.cstat |= (rand() & 12);
+                        t.xrepeat += 8;
+                        t.yrepeat += 8;
+                    }
+                    break;
 
-            case SHRINKSPARK:
-                t.picnum = SHRINKSPARK + ((totalclock >> 4) & 3);
-                break;
-            case GROWSPARK:
-                t.picnum = GROWSPARK + ((totalclock >> 4) & 3);
-                break;
-            case RPG:
-                k = getangle(s.x - x, s.y - y);
-                k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
-                if (k > 6) {
-                    k = 12 - k;
-                    t.cstat |= 4;
-                }
-                else t.cstat &= ~4;
-                t.picnum = RPG + k;
-                break;
-
-            case RECON:
-
-                k = getangle(s.x - x, s.y - y);
-                if (hittype[i].temp_data[0] < 4)
+                case SHRINKSPARK:
+                    t.picnum = SHRINKSPARK + ((totalclock >> 4) & 3);
+                    break;
+                case GROWSPARK:
+                    t.picnum = GROWSPARK + ((totalclock >> 4) & 3);
+                    break;
+                case RPG:
+                    k = getangle(s.x - x, s.y - y);
                     k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
-                else k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
-
-                if (k > 6) {
-                    k = 12 - k;
-                    t.cstat |= 4;
-                }
-                else t.cstat &= ~4;
-
-                if (klabs(t3) > 64) k += 7;
-                t.picnum = RECON + k;
-
-                break;
-
-            case APLAYER:
-
-                p = s.yvel;
-
-                if (t.pal == 1) t.z -= (18 << 8);
-
-                if (ps[p].over_shoulder_on > 0 && ps[p].newowner < 0) {
-                    t.cstat |= 2;
-                    if (screenpeek == myconnectindex && numplayers >= 2) {
-                        t.x = omyx + mulscale16((myx - omyx)|0, smoothratio);
-                        t.y = omyy + mulscale16((myy - omyy)|0, smoothratio);
-                        t.z = omyz + mulscale16((myz - omyz)|0, smoothratio) + (40 << 8);
-                        t.ang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024)|0, smoothratio);
-                        t.sectnum = mycursectnum;
+                    if (k > 6) {
+                        k = 12 - k;
+                        t.cstat |= 4;
                     }
-                }
+                    else t.cstat &= ~4;
+                    t.picnum = RPG + k;
+                    break;
 
-                if ((display_mirror == 1 || screenpeek != p || s.owner == -1) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0) {
-                    t.copyTo(tsprite[spritesortcnt]);
+                case RECON:
 
-                    tsprite[spritesortcnt].statnum = 99;
+                    k = getangle(s.x - x, s.y - y);
+                    if (hittype[i].temp_data[0] < 4)
+                        k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
+                    else k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
 
-                    tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
-                    if (t.yrepeat < 4) t.yrepeat = 4;
+                    if (k > 6) {
+                        k = 12 - k;
+                        t.cstat |= 4;
+                    }
+                    else t.cstat &= ~4;
 
-                    tsprite[spritesortcnt].shade = t.shade;
-                    tsprite[spritesortcnt].cstat = 0;
+                    if (klabs(t3) > 64) k += 7;
+                    t.picnum = RECON + k;
 
-                    switch (ps[p].curr_weapon) {
-                        case PISTOL_WEAPON: tsprite[spritesortcnt].picnum = FIRSTGUNSPRITE; break;
-                        case SHOTGUN_WEAPON: tsprite[spritesortcnt].picnum = SHOTGUNSPRITE; break;
-                        case CHAINGUN_WEAPON: tsprite[spritesortcnt].picnum = CHAINGUNSPRITE; break;
-                        case RPG_WEAPON: tsprite[spritesortcnt].picnum = RPGSPRITE; break;
-                        case HANDREMOTE_WEAPON:
-                        case HANDBOMB_WEAPON: tsprite[spritesortcnt].picnum = HEAVYHBOMB; break;
-                        case TRIPBOMB_WEAPON: tsprite[spritesortcnt].picnum = TRIPBOMBSPRITE; break;
-                        case GROW_WEAPON: tsprite[spritesortcnt].picnum = GROWSPRITEICON; break;
-                        case SHRINKER_WEAPON: tsprite[spritesortcnt].picnum = SHRINKERSPRITE; break;
-                        case FREEZE_WEAPON: tsprite[spritesortcnt].picnum = FREEZESPRITE; break;
-                        case DEVISTATOR_WEAPON: tsprite[spritesortcnt].picnum = DEVISTATORSPRITE; break;
+                    break;
+
+                case APLAYER:
+
+                    p = s.yvel;
+
+                    if (t.pal == 1) t.z -= (18 << 8);
+
+                    if (ps[p].over_shoulder_on > 0 && ps[p].newowner < 0) {
+                        t.cstat |= 2;
+                        if (screenpeek == myconnectindex && numplayers >= 2) {
+                            t.x = omyx + mulscale16((myx - omyx) | 0, smoothratio);
+                            t.y = omyy + mulscale16((myy - omyy) | 0, smoothratio);
+                            t.z = omyz + mulscale16((myz - omyz) | 0, smoothratio) + (40 << 8);
+                            t.ang = omyang + mulscale16((((myang + 1024 - omyang) & 2047) - 1024) | 0, smoothratio);
+                            t.sectnum = mycursectnum;
+                        }
                     }
 
-                    if (s.owner >= 0)
-                        tsprite[spritesortcnt].z = ps[p].posz - (12 << 8);
-                    else tsprite[spritesortcnt].z = s.z - (51 << 8);
-                    if (ps[p].curr_weapon == HANDBOMB_WEAPON) {
-                        tsprite[spritesortcnt].xrepeat = 10;
-                        tsprite[spritesortcnt].yrepeat = 10;
-                    }
-                    else {
-                        tsprite[spritesortcnt].xrepeat = 16;
-                        tsprite[spritesortcnt].yrepeat = 16;
-                    }
-                    tsprite[spritesortcnt].pal = 0;
-                    spritesortcnt++;
-                }
+                    if ((display_mirror == 1 || screenpeek != p || s.owner == -1) && ud.multimode > 1 && ud.showweapons && sprite[ps[p].i].extra > 0 && ps[p].curr_weapon > 0) {
+                        t.copyTo(tsprite[spritesortcnt]);
 
-                PALONLY:
-                    while (true) {
-                        if (s.owner == -1) {
-                            k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                        tsprite[spritesortcnt].statnum = 99;
+
+                        tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
+                        if (t.yrepeat < 4) t.yrepeat = 4;
+
+                        tsprite[spritesortcnt].shade = t.shade;
+                        tsprite[spritesortcnt].cstat = 0;
+
+                        switch (ps[p].curr_weapon) {
+                            case PISTOL_WEAPON: tsprite[spritesortcnt].picnum = FIRSTGUNSPRITE; break;
+                            case SHOTGUN_WEAPON: tsprite[spritesortcnt].picnum = SHOTGUNSPRITE; break;
+                            case CHAINGUN_WEAPON: tsprite[spritesortcnt].picnum = CHAINGUNSPRITE; break;
+                            case RPG_WEAPON: tsprite[spritesortcnt].picnum = RPGSPRITE; break;
+                            case HANDREMOTE_WEAPON:
+                            case HANDBOMB_WEAPON: tsprite[spritesortcnt].picnum = HEAVYHBOMB; break;
+                            case TRIPBOMB_WEAPON: tsprite[spritesortcnt].picnum = TRIPBOMBSPRITE; break;
+                            case GROW_WEAPON: tsprite[spritesortcnt].picnum = GROWSPRITEICON; break;
+                            case SHRINKER_WEAPON: tsprite[spritesortcnt].picnum = SHRINKERSPRITE; break;
+                            case FREEZE_WEAPON: tsprite[spritesortcnt].picnum = FREEZESPRITE; break;
+                            case DEVISTATOR_WEAPON: tsprite[spritesortcnt].picnum = DEVISTATORSPRITE; break;
+                        }
+
+                        if (s.owner >= 0)
+                            tsprite[spritesortcnt].z = ps[p].posz - (12 << 8);
+                        else tsprite[spritesortcnt].z = s.z - (51 << 8);
+                        if (ps[p].curr_weapon == HANDBOMB_WEAPON) {
+                            tsprite[spritesortcnt].xrepeat = 10;
+                            tsprite[spritesortcnt].yrepeat = 10;
+                        }
+                        else {
+                            tsprite[spritesortcnt].xrepeat = 16;
+                            tsprite[spritesortcnt].yrepeat = 16;
+                        }
+                        tsprite[spritesortcnt].pal = 0;
+                        spritesortcnt++;
+                    }
+
+                    PALONLY:
+                        while (true) {
+                            if (s.owner == -1) {
+                                k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                                if (k > 4) {
+                                    k = 8 - k;
+                                    t.cstat |= 4;
+                                } else t.cstat &= ~4;
+
+                                if (sector[t.sectnum].lotag == 2) k += 1795 - 1405;
+                                else if ((hittype[i].floorz - s.z) > (64 << 8)) k += 60;
+
+                                t.picnum += k;
+                                t.pal = ps[p].palookup;
+
+                                break PALONLY;
+                            }
+
+                            if (ps[p].on_crane == -1 && (sector[s.sectnum].lotag & 0x7ff) != 1) {
+                                l = s.z - hittype[ps[p].i].floorz + (3 << 8);
+                                if (l > 1024 && s.yrepeat > 32 && s.extra > 0)
+                                    s.yoffset = toInt8(l / (s.yrepeat << 2));
+                                else s.yoffset = 0;
+                            }
+
+                            if (ps[p].newowner > -1) {
+                                t4 = script[actorscrptr[APLAYER] + 1];
+                                t3 = 0;
+                                t1 = script[actorscrptr[APLAYER] + 2];
+                            }
+
+                            if (ud.camerasprite == -1 && ps[p].newowner == -1)
+                                if (s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0)
+                                    if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
+                                        t.owner = -1;
+                                        t.xrepeat = t.yrepeat = 0;
+                                        continue NOT_PALONLY;
+                                    }
+
+                            break;
+                        } //PALONLY:
+
+                    if (sector[sect].floorpal)
+                        t.pal = sector[sect].floorpal;
+
+                    if (s.owner == -1) continue;
+
+                    if (t.z > hittype[i].floorz && t.xrepeat < 32)
+                        t.z = hittype[i].floorz;
+
+                    break;
+
+                case JIBS1:
+                case JIBS2:
+                case JIBS3:
+                case JIBS4:
+                case JIBS5:
+                case JIBS6:
+                case HEADJIB1:
+                case LEGJIB1:
+                case ARMJIB1:
+                case LIZMANHEAD1:
+                case LIZMANARM1:
+                case LIZMANLEG1:
+                case DUKELEG:
+                case DUKEGUN:
+                case DUKETORSO:
+                    if (ud.lockout) {
+                        t.xrepeat = t.yrepeat = 0;
+                        continue;
+                    }
+                    if (t.pal == 6) t.shade = -120;
+
+                case SCRAP1:
+                case SCRAP2:
+                case SCRAP3:
+                case SCRAP4:
+                case SCRAP5:
+                case SCRAP6:
+                case SCRAP6 + 1:
+                case SCRAP6 + 2:
+                case SCRAP6 + 3:
+                case SCRAP6 + 4:
+                case SCRAP6 + 5:
+                case SCRAP6 + 6:
+                case SCRAP6 + 7:
+
+                    if (hittype[i].picnum == BLIMP && t.picnum == SCRAP1 && s.yvel >= 0)
+                        t.picnum = s.yvel;
+                    else t.picnum += hittype[i].temp_data[0];
+                    t.shade -= 6;
+
+                    if (sector[sect].floorpal)
+                        t.pal = sector[sect].floorpal;
+                    break;
+
+                case WATERBUBBLE:
+                    if (sector[t.sectnum].floorpicnum == FLOORSLIME) {
+                        t.pal = 7;
+                        break;
+                    }
+                default:
+
+                    if (sector[sect].floorpal)
+                        t.pal = sector[sect].floorpal;
+                    break;
+            }
+
+            if (actorscrptr[s.picnum]) {
+                printf("todo FIX_00093 in game.c\n");
+                if (t4 > 10000)
+                    // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
+                    // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
+                    // close to blimp bug (search for BLIMP)
+                    // . t4 aka macro hittype[i].temp_data[4] is incremented at DETONATEB: in actor.c
+                    // for a time counter. Instead we want an address.
+                    // Issue happens in confessn.map (do a dnclip + dnkroz + dncoords,
+                    // start with duke3d_w32 /m /q2 -map confessn.map)
+                    // go through the Guilty logo till x = -2932, y = 42174, z = 18416.
+                    // blow up the bomb. Wait in the water. Look at the respawn sign
+                    // at the bottom of the chain. Crashes when it's about to respawn.
+                    // Lame fix. ok for w32. Doesn't work for other plateform.
+                    // How to make a differene between a timer and an address??
+                {
+                    l = script[t4 + 2/*8*/];// *(int32_t *)(t4+8);
+                    printf("l: %i\n", l);
+
+                    switch (l) {
+                        case 2:
+                            k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 1;
+                            break;
+
+                        case 3:
+                        case 4:
+                            k = (((s.ang + 3072 + 128 - a) & 2047) >> 7) & 7;
+                            if (k > 3) {
+                                t.cstat |= 4;
+                                k = 7 - k;
+                            }
+                            else t.cstat &= ~4;
+                            break;
+
+                        case 5:
+                            k = getangle(s.x - x, s.y - y);
+                            k = (((s.ang + 3072 + 128 - k) & 2047) >> 8) & 7;
                             if (k > 4) {
                                 k = 8 - k;
                                 t.cstat |= 4;
-                            } else t.cstat &= ~4;
+                            }
+                            else t.cstat &= ~4;
+                            break;
+                        case 7:
+                            k = getangle(s.x - x, s.y - y);
+                            k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
+                            if (k > 6) {
+                                k = 12 - k;
+                                t.cstat |= 4;
+                            }
+                            else t.cstat &= ~4;
+                            break;
+                        case 8:
+                            k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                            t.cstat &= ~4;
+                            break;
+                        default:
+                            k = 0;
+                            break;
+                    }
 
-                            if (sector[t.sectnum].lotag == 2) k += 1795 - 1405;
-                            else if ((hittype[i].floorz - s.z) > (64 << 8)) k += 60;
+                    t.picnum += k + script[t4] + l * t3; //( *(int32_t *)t4 ) + l * t3;
+                    printf("FIX_00093 picnum %i\n", t.picnum);
 
-                            t.picnum += k;
-                            t.pal = ps[p].palookup;
+                    if (l > 0)
+                        while (tiles[t.picnum].dim.width == 0 && t.picnum > 0)
+                            t.picnum -= l;       //Hack, for actors
 
-                            break PALONLY;
-                        }
-
-                        if (ps[p].on_crane == -1 && (sector[s.sectnum].lotag & 0x7ff) != 1) {
-                            l = s.z - hittype[ps[p].i].floorz + (3 << 8);
-                            if (l > 1024 && s.yrepeat > 32 && s.extra > 0)
-                                s.yoffset = toInt8(l / (s.yrepeat << 2));
-                            else s.yoffset = 0;
-                        }
-
-                        if (ps[p].newowner > -1) {
-                            t4 = script[actorscrptr[APLAYER] + 1];
-                            t3 = 0;
-                            t1 = script[actorscrptr[APLAYER] + 2];
-                        }
-
-                        if (ud.camerasprite == -1 && ps[p].newowner == -1)
-                            if (s.owner >= 0 && display_mirror == 0 && ps[p].over_shoulder_on == 0)
-                                if (ud.multimode < 2 || (ud.multimode > 1 && p == screenpeek)) {
-                                    t.owner = -1;
-                                    t.xrepeat = t.yrepeat = 0;
-                                    continue NOT_PALONLY;
-                                }
-
-                        break;
-                    } //PALONLY:
-
-                if (sector[sect].floorpal)
-                    t.pal = sector[sect].floorpal;
-
-                if (s.owner == -1) continue;
-
-                if (t.z > hittype[i].floorz && t.xrepeat < 32)
-                    t.z = hittype[i].floorz;
-
-                break;
-
-            case JIBS1:
-            case JIBS2:
-            case JIBS3:
-            case JIBS4:
-            case JIBS5:
-            case JIBS6:
-            case HEADJIB1:
-            case LEGJIB1:
-            case ARMJIB1:
-            case LIZMANHEAD1:
-            case LIZMANARM1:
-            case LIZMANLEG1:
-            case DUKELEG:
-            case DUKEGUN:
-            case DUKETORSO:
-                if (ud.lockout) {
-                    t.xrepeat = t.yrepeat = 0;
-                    continue;
+                    if (hittype[i].dispicnum >= 0)
+                        hittype[i].dispicnum = t.picnum;
                 }
-                if (t.pal == 6) t.shade = -120;
-
-            case SCRAP1:
-            case SCRAP2:
-            case SCRAP3:
-            case SCRAP4:
-            case SCRAP5:
-            case SCRAP6:
-            case SCRAP6 + 1:
-            case SCRAP6 + 2:
-            case SCRAP6 + 3:
-            case SCRAP6 + 4:
-            case SCRAP6 + 5:
-            case SCRAP6 + 6:
-            case SCRAP6 + 7:
-
-                if (hittype[i].picnum == BLIMP && t.picnum == SCRAP1 && s.yvel >= 0)
-                    t.picnum = s.yvel;
-                else t.picnum += hittype[i].temp_data[0];
-                t.shade -= 6;
-
-                if (sector[sect].floorpal)
-                    t.pal = sector[sect].floorpal;
-                break;
-
-            case WATERBUBBLE:
-                if (sector[t.sectnum].floorpicnum == FLOORSLIME) {
-                    t.pal = 7;
-                    break;
-                }
-            default:
-
-                if (sector[sect].floorpal)
-                    t.pal = sector[sect].floorpal;
-                break;
-        }
-
-        if (actorscrptr[s.picnum]) {
-            printf("todo FIX_00093 in game.c\n");
-            if (t4 > 10000)
-                // FIX_00093: fixed crashbugs in multiplayer (mine/blimp)
-                // This is the mine issue (confusion bug in hittype[i].temp_data[4] usage)
-                // close to blimp bug (search for BLIMP)
-                // . t4 aka macro hittype[i].temp_data[4] is incremented at DETONATEB: in actor.c
-                // for a time counter. Instead we want an address.
-                // Issue happens in confessn.map (do a dnclip + dnkroz + dncoords,
-                // start with duke3d_w32 /m /q2 -map confessn.map)
-                // go through the Guilty logo till x = -2932, y = 42174, z = 18416.
-                // blow up the bomb. Wait in the water. Look at the respawn sign
-                // at the bottom of the chain. Crashes when it's about to respawn.
-                // Lame fix. ok for w32. Doesn't work for other plateform.
-                // How to make a differene between a timer and an address??
-            {
-                l = script[t4 + 2/*8*/];// *(int32_t *)(t4+8);
-                printf("l: %i\n", l);
-
-                switch (l) {
-                    case 2:
-                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 1;
-                        break;
-
-                    case 3:
-                    case 4:
-                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 7) & 7;
-                        if (k > 3) {
-                            t.cstat |= 4;
-                            k = 7 - k;
-                        }
-                        else t.cstat &= ~4;
-                        break;
-
-                    case 5:
-                        k = getangle(s.x - x, s.y - y);
-                        k = (((s.ang + 3072 + 128 - k) & 2047) >> 8) & 7;
-                        if (k > 4) {
-                            k = 8 - k;
-                            t.cstat |= 4;
-                        }
-                        else t.cstat &= ~4;
-                        break;
-                    case 7:
-                        k = getangle(s.x - x, s.y - y);
-                        k = (((s.ang + 3072 + 128 - k) & 2047) / 170) | 0;
-                        if (k > 6) {
-                            k = 12 - k;
-                            t.cstat |= 4;
-                        }
-                        else t.cstat &= ~4;
-                        break;
-                    case 8:
-                        k = (((s.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
-                        t.cstat &= ~4;
-                        break;
-                    default:
-                        k = 0;
-                        break;
-                }
-
-                t.picnum += k + script[t4] + l * t3; //( *(int32_t *)t4 ) + l * t3;
-                printf("FIX_00093 picnum %i\n", t.picnum);
-
-                if (l > 0)
-                    while (tiles[t.picnum].dim.width == 0 && t.picnum > 0)
-                        t.picnum -= l;       //Hack, for actors
-
-                if (hittype[i].dispicnum >= 0)
-                    hittype[i].dispicnum = t.picnum;
+                else if (display_mirror == 1)
+                    t.cstat |= 4;
             }
-            else if (display_mirror == 1)
-                t.cstat |= 4;
+
+            if (s.statnum == 13 || badguy(s) || (s.picnum == APLAYER && s.owner >= 0))
+                if (t.statnum != 99 && s.picnum != EXPLOSION2 && s.picnum != HANGLIGHT && s.picnum != DOMELITE)
+                    if (s.picnum != HOTMEAT) {
+                        if (hittype[i].dispicnum < 0) {
+                            hittype[i].dispicnum++;
+                            continue;
+                        }
+                        else if (ud.shadows && spritesortcnt < (MAXSPRITESONSCREEN - 2)) {
+                            var daz, xrep, yrep;
+
+                            if ((sector[sect].lotag & 0xff) > 2 || s.statnum == 4 || s.statnum == 5 || s.picnum == DRONE || s.picnum == COMMANDER)
+                                daz = sector[sect].floorz;
+                            else
+                                daz = hittype[i].floorz;
+
+                            if ((s.z - daz) < (8 << 8))
+                                if (ps[screenpeek].posz < daz) {
+                                    t.copyTo(tsprite[spritesortcnt]);
+
+                                    tsprite[spritesortcnt].statnum = 99;
+
+                                    tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
+                                    if (t.yrepeat < 4) t.yrepeat = 4;
+
+                                    tsprite[spritesortcnt].shade = 127;
+                                    tsprite[spritesortcnt].cstat |= 2;
+
+                                    tsprite[spritesortcnt].z = daz;
+                                    xrep = tsprite[spritesortcnt].xrepeat;// - (klabs(daz-t.z)>>11);
+                                    tsprite[spritesortcnt].xrepeat = xrep;
+                                    tsprite[spritesortcnt].pal = 4;
+
+                                    yrep = tsprite[spritesortcnt].yrepeat;// - (klabs(daz-t.z)>>11);
+                                    tsprite[spritesortcnt].yrepeat = yrep;
+                                    spritesortcnt++;
+                                }
+                        }
+
+                        if (ps[screenpeek].heat_amount > 0 && ps[screenpeek].heat_on) {
+                            t.pal = 6;
+                            t.shade = 0;
+                        }
+                    }
+
+
+            switch (s.picnum) {
+                case LASERLINE:
+                    if (sector[t.sectnum].lotag == 2) t.pal = 8;
+                    t.z = sprite[s.owner].z - (3 << 8);
+                    if (lasermode == 2 && ps[screenpeek].heat_on == 0)
+                        t.yrepeat = 0;
+                case EXPLOSION2:
+                case EXPLOSION2BOT:
+                case FREEZEBLAST:
+                case ATOMICHEALTH:
+                case FIRELASER:
+                case SHRINKSPARK:
+                case GROWSPARK:
+                case CHAINGUN:
+                case SHRINKEREXPLOSION:
+                case RPG:
+                case FLOORFLAME:
+                    if (t.picnum == EXPLOSION2) {
+                        ps[screenpeek].visibility = -127;
+                        lastvisinc = totalclock + 32;
+                        restorepalette = 1;
+                    }
+                    t.shade = -127;
+                    break;
+                case FIRE:
+                case FIRE2:
+                case BURNING:
+                case BURNING2:
+                    if (sprite[s.owner].picnum != TREE1 && sprite[s.owner].picnum != TREE2)
+                        t.z = sector[t.sectnum].floorz;
+                    t.shade = -127;
+                    break;
+                case COOLEXPLOSION1:
+                    t.shade = -127;
+                    t.picnum += (s.shade >> 1);
+                    break;
+                case PLAYERONWATER:
+
+                    k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                    if (k > 4) {
+                        k = 8 - k;
+                        t.cstat |= 4;
+                    }
+                    else t.cstat &= ~4;
+
+                    t.picnum = s.picnum + k + ((hittype[i].temp_data[0] < 4) * 5);
+                    t.shade = sprite[s.owner].shade;
+
+                    break;
+
+                case WATERSPLASH2:
+                    t.picnum = WATERSPLASH2 + t1;
+                    break;
+                case REACTOR2:
+                    t.picnum = s.picnum + hittype[i].temp_data[2];
+                    break;
+                case SHELL:
+                    t.picnum = s.picnum + (hittype[i].temp_data[0] & 1);
+                case SHOTGUNSHELL:
+                    t.cstat |= 12;
+                    if (hittype[i].temp_data[0] > 1) t.cstat &= ~4;
+                    if (hittype[i].temp_data[0] > 2) t.cstat &= ~12;
+                    break;
+                case FRAMEEFFECT1:
+                case FRAMEEFFECT1_13CON:
+                    if (s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS) {
+                        if (sprite[s.owner].picnum == APLAYER)
+                            if (ud.camerasprite == -1)
+                                if (screenpeek == sprite[s.owner].yvel && display_mirror == 0) {
+                                    t.owner = -1;
+                                    break;
+                                }
+                        if ((sprite[s.owner].cstat & 32768) == 0) {
+                            t.picnum = hittype[s.owner].dispicnum;
+                            t.pal = sprite[s.owner].pal;
+                            t.shade = sprite[s.owner].shade;
+                            t.ang = sprite[s.owner].ang;
+                            t.cstat = 2 | sprite[s.owner].cstat;
+                        }
+                    }
+                    break;
+
+                case CAMERA1:
+                case RAT:
+                    k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
+                    if (k > 4) {
+                        k = 8 - k;
+                        t.cstat |= 4;
+                    }
+                    else t.cstat &= ~4;
+                    t.picnum = s.picnum + k;
+                    break;
+            }
+
+            hittype[i].dispicnum = t.picnum;
+            if (sector[t.sectnum].floorpicnum == MIRROR)
+                t.xrepeat = t.yrepeat = 0;
         }
-
-        if (s.statnum == 13 || badguy(s) || (s.picnum == APLAYER && s.owner >= 0))
-            if (t.statnum != 99 && s.picnum != EXPLOSION2 && s.picnum != HANGLIGHT && s.picnum != DOMELITE)
-                if (s.picnum != HOTMEAT) {
-                    if (hittype[i].dispicnum < 0) {
-                        hittype[i].dispicnum++;
-                        continue;
-                    }
-                    else if (ud.shadows && spritesortcnt < (MAXSPRITESONSCREEN - 2)) {
-                        var daz, xrep, yrep;
-
-                        if ((sector[sect].lotag & 0xff) > 2 || s.statnum == 4 || s.statnum == 5 || s.picnum == DRONE || s.picnum == COMMANDER)
-                            daz = sector[sect].floorz;
-                        else
-                            daz = hittype[i].floorz;
-
-                        if ((s.z - daz) < (8 << 8))
-                            if (ps[screenpeek].posz < daz) {
-                                t.copyTo(tsprite[spritesortcnt]);
-
-                                tsprite[spritesortcnt].statnum = 99;
-
-                                tsprite[spritesortcnt].yrepeat = (t.yrepeat >> 3);
-                                if (t.yrepeat < 4) t.yrepeat = 4;
-
-                                tsprite[spritesortcnt].shade = 127;
-                                tsprite[spritesortcnt].cstat |= 2;
-
-                                tsprite[spritesortcnt].z = daz;
-                                xrep = tsprite[spritesortcnt].xrepeat;// - (klabs(daz-t.z)>>11);
-                                tsprite[spritesortcnt].xrepeat = xrep;
-                                tsprite[spritesortcnt].pal = 4;
-
-                                yrep = tsprite[spritesortcnt].yrepeat;// - (klabs(daz-t.z)>>11);
-                                tsprite[spritesortcnt].yrepeat = yrep;
-                                spritesortcnt++;
-                            }
-                    }
-
-                    if (ps[screenpeek].heat_amount > 0 && ps[screenpeek].heat_on) {
-                        t.pal = 6;
-                        t.shade = 0;
-                    }
-                }
-
-
-        switch (s.picnum) {
-            case LASERLINE:
-                if (sector[t.sectnum].lotag == 2) t.pal = 8;
-                t.z = sprite[s.owner].z - (3 << 8);
-                if (lasermode == 2 && ps[screenpeek].heat_on == 0)
-                    t.yrepeat = 0;
-            case EXPLOSION2:
-            case EXPLOSION2BOT:
-            case FREEZEBLAST:
-            case ATOMICHEALTH:
-            case FIRELASER:
-            case SHRINKSPARK:
-            case GROWSPARK:
-            case CHAINGUN:
-            case SHRINKEREXPLOSION:
-            case RPG:
-            case FLOORFLAME:
-                if (t.picnum == EXPLOSION2) {
-                    ps[screenpeek].visibility = -127;
-                    lastvisinc = totalclock + 32;
-                    restorepalette = 1;
-                }
-                t.shade = -127;
-                break;
-            case FIRE:
-            case FIRE2:
-            case BURNING:
-            case BURNING2:
-                if (sprite[s.owner].picnum != TREE1 && sprite[s.owner].picnum != TREE2)
-                    t.z = sector[t.sectnum].floorz;
-                t.shade = -127;
-                break;
-            case COOLEXPLOSION1:
-                t.shade = -127;
-                t.picnum += (s.shade >> 1);
-                break;
-            case PLAYERONWATER:
-
-                k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
-                if (k > 4) {
-                    k = 8 - k;
-                    t.cstat |= 4;
-                }
-                else t.cstat &= ~4;
-
-                t.picnum = s.picnum + k + ((hittype[i].temp_data[0] < 4) * 5);
-                t.shade = sprite[s.owner].shade;
-
-                break;
-
-            case WATERSPLASH2:
-                t.picnum = WATERSPLASH2 + t1;
-                break;
-            case REACTOR2:
-                t.picnum = s.picnum + hittype[i].temp_data[2];
-                break;
-            case SHELL:
-                t.picnum = s.picnum + (hittype[i].temp_data[0] & 1);
-            case SHOTGUNSHELL:
-                t.cstat |= 12;
-                if (hittype[i].temp_data[0] > 1) t.cstat &= ~4;
-                if (hittype[i].temp_data[0] > 2) t.cstat &= ~12;
-                break;
-            case FRAMEEFFECT1:
-            case FRAMEEFFECT1_13CON:
-                if (s.owner >= 0 && sprite[s.owner].statnum < MAXSTATUS) {
-                    if (sprite[s.owner].picnum == APLAYER)
-                        if (ud.camerasprite == -1)
-                            if (screenpeek == sprite[s.owner].yvel && display_mirror == 0) {
-                                t.owner = -1;
-                                break;
-                            }
-                    if ((sprite[s.owner].cstat & 32768) == 0) {
-                        t.picnum = hittype[s.owner].dispicnum;
-                        t.pal = sprite[s.owner].pal;
-                        t.shade = sprite[s.owner].shade;
-                        t.ang = sprite[s.owner].ang;
-                        t.cstat = 2 | sprite[s.owner].cstat;
-                    }
-                }
-                break;
-
-            case CAMERA1:
-            case RAT:
-                k = (((t.ang + 3072 + 128 - a) & 2047) >> 8) & 7;
-                if (k > 4) {
-                    k = 8 - k;
-                    t.cstat |= 4;
-                }
-                else t.cstat &= ~4;
-                t.picnum = s.picnum + k;
-                break;
-        }
-
-        hittype[i].dispicnum = t.picnum;
-        if (sector[t.sectnum].floorpicnum == MIRROR)
-            t.xrepeat = t.yrepeat = 0;
-    }
 }
 
 var NUMCHEATCODES = 26;
@@ -6134,85 +6125,111 @@ function main(argc, argv) {
             console.log("Start game loop");
             q.setPositionAtStart()
                 .addWhile(function () {
-                    q.setPositionAtStart(); // important!
                     return !(ps[myconnectindex].gm & MODE_END);
                 }, function () {
-                    sampletimer();
-                    if (ud.recstat == 2 || ud.multimode > 1 || (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) != MODE_MENU))
-                        if (ps[myconnectindex].gm & MODE_GAME) {
+                    q.setPositionAtStart(); // important!
+
+                    q.add(function () {
+                        sampletimer();
+                    }).addIf(
+                        function () {
+                            return (ud.recstat == 2 || ud.multimode > 1 || (ud.show_help == 0 && (ps[myconnectindex].gm & MODE_MENU) != MODE_MENU))
+                                && ps[myconnectindex].gm & MODE_GAME;
+                        },
+                        function () {
+
                             // (" It's stuck here ")
                             //printf("ps[myconnectindex].gm&MODE_GAME\n");
                             if (moveloop()) {
-                                return;//continue;
+                                throw "todo";
+                                return; //continue;
                             }
-                        }
+                        }).endIf();
 
-                    if (ps[myconnectindex].gm & MODE_EOL || ps[myconnectindex].gm & MODE_RESTART) {
 
-                        if (ps[myconnectindex].gm & MODE_EOL) {
-                            closedemowrite();
+                    q.addIf(function() {
+                        return ps[myconnectindex].gm & MODE_EOL || ps[myconnectindex].gm & MODE_RESTART;
+                    }, function() {
+                        q.setPositionAtStart(); // important!
 
+                        q.addIf(function() {
+                            return ps[myconnectindex].gm & MODE_EOL;
+                        }, function() {
+                            q.setPositionAtStart(); // important!
+                            q.add(function() {
+                                closedemowrite();
+
+                                ready2send = 0;
+
+                                i = ud.screen_size;
+                                ud.screen_size = 0;
+                                vscrn();
+                                ud.screen_size = i;
+                            })
+                                .add(function() {
+                                    q.setPositionAtStart(); // important!
+                                    dobonus(0);
+                                })
+                                .addIf(function() {
+                                    return ud.eog;
+                                }, function() {
+                                    q.setPositionAtStart(); // important!
+                                    ud.eog = 0;
+                                    if (ud.multimode < 2) {
+                                        if (VOLUMEONE)
+                                            doorders();
+
+                                        ps[myconnectindex].gm = MODE_MENU;
+                                        cmenu(0);
+                                        probey = 0;
+                                        throw "goto MAIN_LOOP_RESTART";
+                                    } else {
+                                        ud.m_level_number = 0;
+                                        ud.level_number = 0;
+                                    }
+                                }).endIf();
+                        }).endIf();
+
+                        q.add(function() {
                             ready2send = 0;
+                            if (numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
+                            enterlevel(ps[myconnectindex].gm);
+                        });
+                        return; //continue;
+                    }).endIf();
 
-                            i = ud.screen_size;
-                            ud.screen_size = 0;
-                            vscrn();
-                            ud.screen_size = i;
-                            dobonus(0);
-
-                            if (ud.eog) {
-                                ud.eog = 0;
-                                if (ud.multimode < 2) {
-                                    if (VOLUMEONE)
-                                        doorders();
-
-                                    ps[myconnectindex].gm = MODE_MENU;
-                                    cmenu(0);
-                                    probey = 0;
-                                    throw "goto MAIN_LOOP_RESTART";
-                                }
-                                else {
-                                    ud.m_level_number = 0;
-                                    ud.level_number = 0;
-                                }
-                            }
-                        }
-
-                        ready2send = 0;
-                        if (numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
-
-                        enterlevel(ps[myconnectindex].gm);
-                        return;//continue;
-                    }
-
-                    cheats();
-
-                    if (!Console.isActive())
-                        nonsharedkeys();
+                    q.add(function() {
 
 
-                    if ((ud.show_help == 0 && ud.multimode < 2 && !(ps[myconnectindex].gm & MODE_MENU)) || ud.multimode > 1 || ud.recstat == 2)
-                        i = Math.min(Math.max((totalclock - ototalclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
-                    else
-                        i = 65536;
+                        cheats();
 
-                    displayrooms(screenpeek, i);
-                    displayrest(i);
+                        if (!Console.isActive())
+                            nonsharedkeys();
 
-                    if (ps[myconnectindex].gm & MODE_DEMO)
-                        throw "goto MAIN_LOOP_RESTART;";
 
-                    if (debug_on)
-                        caches();
+                        if ((ud.show_help == 0 && ud.multimode < 2 && !(ps[myconnectindex].gm & MODE_MENU)) || ud.multimode > 1 || ud.recstat == 2)
+                            i = Math.min(Math.max((totalclock - ototalclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
+                        else
+                            i = 65536;
 
-                    checksync();
+                        displayrooms(screenpeek, i);
+                        displayrest(i);
 
-                    if (VOLUMEONE)
-                        if (ud.show_help == 0 && show_shareware > 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
-                            rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
+                        if (ps[myconnectindex].gm & MODE_DEMO)
+                            throw "goto MAIN_LOOP_RESTART;";
 
-                    nextpage();
+                        if (debug_on)
+                            caches();
 
+                        checksync();
+
+                        if (VOLUMEONE)
+                            if (ud.show_help == 0 && show_shareware > 0 && (ps[myconnectindex].gm & MODE_MENU) == 0)
+                                rotateSprite((320 - 50) << 16, 9 << 16, 65536, 0, BETAVERSION, 0, 0, 2 + 8 + 16 + 128, 0, 0, xdim - 1, ydim - 1);
+
+                        nextpage();
+
+                    });
                 });
         })
         .flush();
@@ -6296,8 +6313,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 
 //8782
 function closedemowrite() {
-    if (ud.recstat == 1)
-    {
+    if (ud.recstat == 1) {
         throw "todo"
         //if (ud.reccnt > 0)
         //{
@@ -6398,9 +6414,9 @@ Game.playBack = function () {
             }, function () {
                 q.setPositionAtStart();
 
-                q.addWhile(function() {
+                q.addWhile(function () {
                     return totalclock >= (lockclock + TICSPERFRAME);
-                }, function() {
+                }, function () {
                     q.setPositionAtStart();
 
                     if ((i == 0) || (i >= RECSYNCBUFSIZ)) {
@@ -6436,7 +6452,7 @@ Game.playBack = function () {
                     j = Math.min(Math.max((totalclock - lockclock) * ((65536 / TICSPERFRAME) | 0), 0), 65536);
 
                     Game.displayRooms(screenpeek, j);
-                    
+
                     displayrest(j);
 
                     if (ud.multimode > 1 && ps[myconnectindex].gm) {
@@ -7024,7 +7040,7 @@ function moveloop() {
 Game.doMoveThings = function () {
     var i, j;
     var ch;
-    
+
     printf("domovethings\n");
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         if (sync[i].bits & (1 << 17)) {
@@ -7103,11 +7119,11 @@ Game.doMoveThings = function () {
     for (i = connecthead; i >= 0; i = connectpoint2[i]) {
         inputfifo[movefifoplc & (MOVEFIFOSIZ - 1)][i].copyTo(sync[i]);
         printf("copy fifo i: %i\n", i);
-        printf("&sync[i].avel: %i\n",sync[i].avel);
-        printf("&sync[i].horz: %i\n",sync[i].horz);
-        printf("&sync[i].fvel: %i\n",sync[i].fvel);
-        printf("&sync[i].svel: %i\n",sync[i].svel);
-        printf("&sync[i].bits: %i\n",sync[i].bits);
+        printf("&sync[i].avel: %i\n", sync[i].avel);
+        printf("&sync[i].horz: %i\n", sync[i].horz);
+        printf("&sync[i].fvel: %i\n", sync[i].fvel);
+        printf("&sync[i].svel: %i\n", sync[i].svel);
+        printf("&sync[i].bits: %i\n", sync[i].bits);
     }
     movefifoplc++;
 
@@ -7224,6 +7240,8 @@ Game.doMoveThings = function () {
 //9768
 
 function dobonus(bonusonly) {
+    q.setPositionAtStart(); // important!
+    
     var t, tinc, gfx_offset;
     var i, y, xfragtotal, yfragtotal;
     var bonuscnt;
@@ -7251,24 +7269,24 @@ function dobonus(bonusonly) {
 
 
     q.setPositionAtStart()
-        .add(function() {
+        .add(function () {
             q.setPositionAtStart();
 
-            q.add(function() {
+            q.add(function () {
                 q.setPositionAtStart();
                 for (t = 0; t < 64; t += 7) {
-                    q.add(t, function(cb, t) {
+                    q.addFrame(t, function (cb, t) {
                         palto(0, 0, 0, t);
                     });
                 }
             });
 
-            q.add(function() {
+            q.add(function () {
                 setview(0, 0, xdim - 1, ydim - 1);
                 clearView(0);
                 nextpage();
             });
-            q.add(function() {
+            q.addFrame(function () {
 
                 flushperms();
 
@@ -7599,12 +7617,12 @@ function dobonus(bonusonly) {
             if (bonusonly || ud.multimode > 1) throw "return";
 
             switch (ud.volume_number) {
-            case 1:
-                gfx_offset = 5;
-                break;
-            default:
-                gfx_offset = 0;
-                break;
+                case 1:
+                    gfx_offset = 5;
+                    break;
+                default:
+                    gfx_offset = 0;
+                    break;
             }
 
             rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
@@ -7618,216 +7636,214 @@ function dobonus(bonusonly) {
                 sound(BONUSMUSIC);
 
             nextpage();
-        });
+        })
+        .addFrame(function () {
 
-    q.add(function() {
-
-        KB.flushKeyboardQueue();
-
-
-        q.setInsertPosition(0);
-
-        for (t = 0; t < 64; t++) {
-            q.add(t, function(cb, t) {
-                palto(0, 0, 0, 63 - t);
-            });
-        }
+            KB.flushKeyboardQueue();
 
 
-        q.add(i, function() {
-            bonuscnt = 0;
-            totalclock = 0;
-            tinc = 0;
+            q.setInsertPosition(0);
 
-            q.setPositionAtStart();
+            for (t = 0; t < 64; t++) {
+                q.addFrame(t, function (cb, t) {
+                    palto(0, 0, 0, 63 - t);
+                });
+            }
 
-            var breakWhileLoop = false;
-            q.addWhile(function() {
-                return !breakWhileLoop;
-            }, function() {
+
+            q.add(i, function () {
+                bonuscnt = 0;
+                totalclock = 0;
+                tinc = 0;
+
                 q.setPositionAtStart();
 
-                sampletimer();
-                if (ps[myconnectindex].gm & MODE_EOL) {
-                    rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
+                var breakWhileLoop = false;
+                q.addWhile(function () {
+                    return !breakWhileLoop;
+                }, function () {
+                    q.setPositionAtStart();
 
-                    if (totalclock > (1000000000) && totalclock < (1000000320)) {
-                        switch ((totalclock >> 4) % 15) {
-                        case 0:
-                            if (bonuscnt == 6) {
-                                bonuscnt++;
-                                sound(SHOTGUN_COCK);
-                                switch (NORMAL_RAND & 3) {
+                    sampletimer();
+                    if (ps[myconnectindex].gm & MODE_EOL) {
+                        rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
+
+                        if (totalclock > (1000000000) && totalclock < (1000000320)) {
+                            switch ((totalclock >> 4) % 15) {
                                 case 0:
-                                    sound(BONUS_SPEECH1);
-                                    break;
+                                    if (bonuscnt == 6) {
+                                        bonuscnt++;
+                                        sound(SHOTGUN_COCK);
+                                        switch (NORMAL_RAND & 3) {
+                                            case 0:
+                                                sound(BONUS_SPEECH1);
+                                                break;
+                                            case 1:
+                                                sound(BONUS_SPEECH2);
+                                                break;
+                                            case 2:
+                                                sound(BONUS_SPEECH3);
+                                                break;
+                                            case 3:
+                                                sound(BONUS_SPEECH4);
+                                                break;
+                                        }
+                                    }
                                 case 1:
-                                    sound(BONUS_SPEECH2);
+                                case 4:
+                                case 5:
+                                    rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 3 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
                                     break;
                                 case 2:
-                                    sound(BONUS_SPEECH3);
-                                    break;
                                 case 3:
-                                    sound(BONUS_SPEECH4);
+                                    rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 4 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
                                     break;
+                            }
+                        } else if (totalclock > (10240 + 120)) {
+                            console.log("breakWhileLoop = true")
+                            breakWhileLoop = true;
+                            return;
+                        } else {
+                            switch ((totalclock >> 5) & 3) {
+                                case 1:
+                                case 3:
+                                    rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 1 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
+                                    break;
+                                case 2:
+                                    rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 2 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
+                                    break;
+                            }
+                        }
+
+                        menutext(160, 20 - 6, 0, 0, level_names[(ud.volume_number * 11) + ud.last_level - 1]);
+                        menutext(160, 36 - 6, 0, 0, "COMPLETED");
+
+                        gametext(160, 192, "PRESS ANY KEY TO CONTINUE", 16, 2 + 8 + 16);
+
+                        if (totalclock > (60 * 3)) {
+                            gametext(10, 59 + 9, "Your Time:", 0, 2 + 8 + 16);
+                            gametext(10, 69 + 9, "Par time:", 0, 2 + 8 + 16);
+                            gametext(10, 78 + 9, "3D Realms' Time:", 0, 2 + 8 + 16);
+                            if (bonuscnt == 0)
+                                bonuscnt++;
+
+                            if (totalclock > (60 * 4)) {
+                                if (bonuscnt == 1) {
+                                    bonuscnt++;
+                                    sound(PIPEBOMB_EXPLODE);
+                                }
+                                text = sprintf("%02d:%02d",
+                                    (ps[myconnectindex].player_par / (26 * 60) | 0) % 60,
+                                    (ps[myconnectindex].player_par / 26 | 0) % 60);
+                                gametext((320 >> 2) + 71, 60 + 9, text, 0, 2 + 8 + 16);
+
+                                text = sprintf("%02d:%02d",
+                                    (partime[ud.volume_number * 11 + ud.last_level - 1] / (26 * 60) | 0) % 60,
+                                    (partime[ud.volume_number * 11 + ud.last_level - 1] / 26 | 0) % 60);
+                                gametext((320 >> 2) + 71, 69 + 9, text, 0, 2 + 8 + 16);
+
+                                text = sprintf("%02d:%02d",
+                                    (designertime[ud.volume_number * 11 + ud.last_level - 1] / (26 * 60) | 0) % 60,
+                                    (designertime[ud.volume_number * 11 + ud.last_level - 1] / 26 | 0) % 60);
+                                gametext((320 >> 2) + 71, 78 + 9, text, 0, 2 + 8 + 16);
+
+                            }
+                        }
+                        if (totalclock > (60 * 6)) {
+                            gametext(10, 94 + 9, "Enemies Killed:", 0, 2 + 8 + 16);
+                            gametext(10, 99 + 4 + 9, "Enemies Left:", 0, 2 + 8 + 16);
+
+                            if (bonuscnt == 2) {
+                                bonuscnt++;
+                                sound(FLY_BY);
+                            }
+
+                            if (totalclock > (60 * 7)) {
+                                if (bonuscnt == 3) {
+                                    bonuscnt++;
+                                    sound(PIPEBOMB_EXPLODE);
+                                }
+                                text = sprintf(/*"%-3hhd"*/"%-3d", ps[myconnectindex].actors_killed);
+                                gametext((320 >> 2) + 70, 93 + 9, text, 0, 2 + 8 + 16);
+                                if (ud.player_skill > 3) {
+                                    text = sprintf("N/A");
+                                    gametext((320 >> 2) + 70, 99 + 4 + 9, text, 0, 2 + 8 + 16);
+                                } else {
+                                    if ((ps[myconnectindex].max_actors_killed - ps[myconnectindex].actors_killed) < 0)
+                                        text = sprintf("%-3d", 0);
+                                    else text = sprintf("%-3d", ps[myconnectindex].max_actors_killed - ps[myconnectindex].actors_killed);
+                                    gametext((320 >> 2) + 70, 99 + 4 + 9, text, 0, 2 + 8 + 16);
                                 }
                             }
-                        case 1:
-                        case 4:
-                        case 5:
-                            rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 3 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
-                            break;
-                        case 2:
-                        case 3:
-                            rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 4 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
-                            break;
                         }
-                    } else if (totalclock > (10240 + 120)) {
-                        breakWhileLoop = true;
-                        return;
+                        if (totalclock > (60 * 9)) {
+                            gametext(10, 120 + 9, "Secrets Found:", 0, 2 + 8 + 16);
+                            gametext(10, 130 + 9, "Secrets Missed:", 0, 2 + 8 + 16);
+                            if (bonuscnt == 4) bonuscnt++;
+
+                            if (totalclock > (60 * 10)) {
+                                if (bonuscnt == 5) {
+                                    bonuscnt++;
+                                    sound(PIPEBOMB_EXPLODE);
+                                }
+                                text = sprintf("%-3d", ps[myconnectindex].secret_rooms);
+                                gametext((320 >> 2) + 70, 120 + 9, text, 0, 2 + 8 + 16);
+                                if (ps[myconnectindex].secret_rooms > 0)
+                                    text = sprintf("%-3d", (100 * ps[myconnectindex].secret_rooms / ps[myconnectindex].max_secret_rooms | 0));
+                                text = sprintf("%-3d", ps[myconnectindex].max_secret_rooms - ps[myconnectindex].secret_rooms);
+                                gametext((320 >> 2) + 70, 130 + 9, text, 0, 2 + 8 + 16);
+                            }
+                        }
+
+                        if (totalclock > 10240 && totalclock < 10240 + 10240)
+                            totalclock = 1024;
+
+                        if (KB.keyWaiting() && totalclock > (60 * 2)) {
+                            if (KB.keyPressed(sc_F12)) {
+                                KB.clearKeyDown(sc_F12);
+                                takescreenshot();
+                            }
+
+                            if (totalclock < (60 * 13)) {
+                                KB.flushKeyboardQueue();
+                                totalclock = (60 * 13);
+                            } else if (totalclock < (1000000000))
+                                totalclock = (1000000000);
+                        }
                     } else {
-                        switch ((totalclock >> 5) & 3) {
-                        case 1:
-                        case 3:
-                            rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 1 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
-                            break;
-                        case 2:
-                            rotatesprite(199 << 16, 31 << 16, 65536, 0, BONUSSCREEN + 2 + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
-                            break;
-                        }
+                        breakWhileLoop = true;
+                        console.log("!ps[myconnectindex].gm & MODE_EOL")
+                        return;
+                        /*break;*/
                     }
 
-                    menutext(160, 20 - 6, 0, 0, level_names[(ud.volume_number * 11) + ud.last_level - 1]);
-                    menutext(160, 36 - 6, 0, 0, "COMPLETED");
-
-                    gametext(160, 192, "PRESS ANY KEY TO CONTINUE", 16, 2 + 8 + 16);
-
-                    if (totalclock > (60 * 3)) {
-                        gametext(10, 59 + 9, "Your Time:", 0, 2 + 8 + 16);
-                        gametext(10, 69 + 9, "Par time:", 0, 2 + 8 + 16);
-                        gametext(10, 78 + 9, "3D Realms' Time:", 0, 2 + 8 + 16);
-                        if (bonuscnt == 0)
-                            bonuscnt++;
-
-                        if (totalclock > (60 * 4)) {
-                            if (bonuscnt == 1) {
-                                bonuscnt++;
-                                sound(PIPEBOMB_EXPLODE);
-                            }
-                            text = sprintf("%02d:%02d",
-                                (ps[myconnectindex].player_par / (26 * 60) | 0) % 60,
-                                (ps[myconnectindex].player_par / 26 | 0) % 60);
-                            gametext((320 >> 2) + 71, 60 + 9, text, 0, 2 + 8 + 16);
-
-                            text = sprintf("%02d:%02d",
-                                (partime[ud.volume_number * 11 + ud.last_level - 1] / (26 * 60) | 0) % 60,
-                                (partime[ud.volume_number * 11 + ud.last_level - 1] / 26 | 0) % 60);
-                            gametext((320 >> 2) + 71, 69 + 9, text, 0, 2 + 8 + 16);
-
-                            text = sprintf("%02d:%02d",
-                                (designertime[ud.volume_number * 11 + ud.last_level - 1] / (26 * 60) | 0) % 60,
-                                (designertime[ud.volume_number * 11 + ud.last_level - 1] / 26 | 0) % 60);
-                            gametext((320 >> 2) + 71, 78 + 9, text, 0, 2 + 8 + 16);
-
-                        }
-                    }
-                    if (totalclock > (60 * 6)) {
-                        gametext(10, 94 + 9, "Enemies Killed:", 0, 2 + 8 + 16);
-                        gametext(10, 99 + 4 + 9, "Enemies Left:", 0, 2 + 8 + 16);
-
-                        if (bonuscnt == 2) {
-                            bonuscnt++;
-                            sound(FLY_BY);
-                        }
-
-                        if (totalclock > (60 * 7)) {
-                            if (bonuscnt == 3) {
-                                bonuscnt++;
-                                sound(PIPEBOMB_EXPLODE);
-                            }
-                            text = sprintf("%-3hhd", ps[myconnectindex].actors_killed);
-                            gametext((320 >> 2) + 70, 93 + 9, text, 0, 2 + 8 + 16);
-                            if (ud.player_skill > 3) {
-                                text = sprintf("N/A");
-                                gametext((320 >> 2) + 70, 99 + 4 + 9, text, 0, 2 + 8 + 16);
-                            } else {
-                                if ((ps[myconnectindex].max_actors_killed - ps[myconnectindex].actors_killed) < 0)
-                                    text = sprintf("%-3d", 0);
-                                else text = printf("%-3d", ps[myconnectindex].max_actors_killed - ps[myconnectindex].actors_killed);
-                                gametext((320 >> 2) + 70, 99 + 4 + 9, text, 0, 2 + 8 + 16);
-                            }
-                        }
-                    }
-                    if (totalclock > (60 * 9)) {
-                        gametext(10, 120 + 9, "Secrets Found:", 0, 2 + 8 + 16);
-                        gametext(10, 130 + 9, "Secrets Missed:", 0, 2 + 8 + 16);
-                        if (bonuscnt == 4) bonuscnt++;
-
-                        if (totalclock > (60 * 10)) {
-                            if (bonuscnt == 5) {
-                                bonuscnt++;
-                                sound(PIPEBOMB_EXPLODE);
-                            }
-                            text = sprintf("%-3d", ps[myconnectindex].secret_rooms);
-                            gametext((320 >> 2) + 70, 120 + 9, text, 0, 2 + 8 + 16);
-                            if (ps[myconnectindex].secret_rooms > 0)
-                                text = sprintf("%-3d", (100 * ps[myconnectindex].secret_rooms / ps[myconnectindex].max_secret_rooms | 0));
-                            text = sprintf("%-3d", ps[myconnectindex].max_secret_rooms - ps[myconnectindex].secret_rooms);
-                            gametext((320 >> 2) + 70, 130 + 9, text, 0, 2 + 8 + 16);
-                        }
-                    }
-
-                    if (totalclock > 10240 && totalclock < 10240 + 10240)
-                        totalclock = 1024;
-
-                    if (KB.keyWaiting() && totalclock > (60 * 2)) {
-                        if (KB.keyPressed(sc_F12)) {
-                            KB.clearKeyDown(sc_F12);
-                            takescreenshot();
-                        }
-
-                        if (totalclock < (60 * 13)) {
-                            KB.flushKeyboardQueue();
-                            totalclock = (60 * 13);
-                        } else if (totalclock < (1000000000))
-                            totalclock = (1000000000);
-                    }
-                } else {
-                    breakWhileLoop = true;
-                    return;
-                    /*break;*/
-                }
-
-                nextpage();
+                    nextpage();
+                });
             });
         });
-    });
-    
+
     // don't add anything outside async loop here
 }
 
 //10321
-function cameratext(i)
-{
-	var  flipbits;
-	var x , y;
+function cameratext(i) {
+    var flipbits;
+    var x, y;
 
-	if(!hittype[i].temp_data[0])
-	{
-		rotateSprite(24<<16,33<<16,65536,0,CAMCORNER,0,0,2,windowx1,windowy1,windowx2,windowy2);
-		rotateSprite((320-26)<<16,34<<16,65536,0,CAMCORNER+1,0,0,2,windowx1,windowy1,windowx2,windowy2);
-		rotateSprite(22<<16,163<<16,65536,512,CAMCORNER+1,0,0,2+4,windowx1,windowy1,windowx2,windowy2);
-		rotateSprite((310-10)<<16,163<<16,65536,512,CAMCORNER+1,0,0,2,windowx1,windowy1,windowx2,windowy2);
-		if(totalclock&16)
-			rotateSprite(46<<16,32<<16,65536,0,CAMLIGHT,0,0,2,windowx1,windowy1,windowx2,windowy2);
-	}
-	else
-	{
-		flipbits = (totalclock<<1)&48;
-		for(x=0;x<394;x+=64)
-			for(y=0;y<200;y+=64)
-			    rotateSprite(x << 16, y << 16, 65536, 0, STATIC, 0, 0, 2 + flipbits, windowx1, windowy1, windowx2, windowy2);
-	}
+    if (!hittype[i].temp_data[0]) {
+        rotateSprite(24 << 16, 33 << 16, 65536, 0, CAMCORNER, 0, 0, 2, windowx1, windowy1, windowx2, windowy2);
+        rotateSprite((320 - 26) << 16, 34 << 16, 65536, 0, CAMCORNER + 1, 0, 0, 2, windowx1, windowy1, windowx2, windowy2);
+        rotateSprite(22 << 16, 163 << 16, 65536, 512, CAMCORNER + 1, 0, 0, 2 + 4, windowx1, windowy1, windowx2, windowy2);
+        rotateSprite((310 - 10) << 16, 163 << 16, 65536, 512, CAMCORNER + 1, 0, 0, 2, windowx1, windowy1, windowx2, windowy2);
+        if (totalclock & 16)
+            rotateSprite(46 << 16, 32 << 16, 65536, 0, CAMLIGHT, 0, 0, 2, windowx1, windowy1, windowx2, windowy2);
+    }
+    else {
+        flipbits = (totalclock << 1) & 48;
+        for (x = 0; x < 394; x += 64)
+            for (y = 0; y < 200; y += 64)
+                rotateSprite(x << 16, y << 16, 65536, 0, STATIC, 0, 0, 2 + flipbits, windowx1, windowy1, windowx2, windowy2);
+    }
 }
 
 

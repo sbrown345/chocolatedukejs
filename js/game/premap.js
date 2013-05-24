@@ -695,7 +695,7 @@ function newgame(vn, ln, sk) {
     ready2send = 0;
 
     if (ud.m_recstat != 2 && ud.last_level >= 0 && ud.multimode > 1 && ud.coop != 1) {
-        dobonus(1);
+        dobonus(1);  //todo: as async
     }
 
     if (ud.showcinematics && ln == 0 && vn == 3 && ud.multimode < 2 && ud.lockout == 0) {
