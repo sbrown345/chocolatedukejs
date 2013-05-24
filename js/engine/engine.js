@@ -7610,6 +7610,7 @@ function flushperms() {
 
 // Render a sprite on screen. This is used by the Engine but also the Game module
 // when drawing the HUD or the Weapon held by the player !!!
+var rotatesprite = rotateSprite;
 function rotateSprite(sx, sy, z, a, picnum, dashade, dapalnum, dastat, cx1, cy1, cx2, cy2) {
     var i;
     var per, per2;
@@ -8514,6 +8515,7 @@ function drawmapview( dax,  day,  zoome,  ang)
 
 
 //8991
+var clearview = clearView;
 function clearView(dacol) {
     var p, y, dx;
 
