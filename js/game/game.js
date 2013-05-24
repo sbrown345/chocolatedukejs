@@ -268,8 +268,7 @@ function faketimerhandler() {
     avghorz += loc.horz;
     avgbits |= loc.bits;
     if (movefifoend[myconnectindex] & (movesperpacket - 1)) {
-        throw "todo"
-        //copybufbyte(&inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex],
+        throw "todo"; //copybufbyte(&inputfifo[(movefifoend[myconnectindex]-1)&(MOVEFIFOSIZ-1)][myconnectindex],
         //	&inputfifo[movefifoend[myconnectindex]&(MOVEFIFOSIZ-1)][myconnectindex],sizeof(input));
         //movefifoend[myconnectindex]++;
         return;
@@ -446,7 +445,7 @@ function faketimerhandler() {
             return;
         }
 
-    throw "todo, watch out for osyn and nsyn references"
+    throw "todo, watch out for osyn and nsyn references";
     while (1)  //Master
     {
         for (i = connecthead; i >= 0; i = connectpoint2[i])
@@ -527,8 +526,7 @@ var cactype = [];
 
 function caches() {
     // todo
-    console.log("todo caches")
-    //var i,k;
+    console.log("todo caches"); //var i,k;
     //var text = "";
 
     //k = 0;
@@ -1170,7 +1168,7 @@ function coolgaugetext(snum) {
 
     // Draw the multi player frag status bar
     if (ud.multimode > 1 && ud.coop != 1) {
-        throw 'todo'
+        throw 'todo';
         if (pus) {
             displayfragbar();
         }
@@ -1394,8 +1392,7 @@ function coolgaugetext(snum) {
 //static int32_t frameval[AVERAGEFRAMES], framecnt = 0;
 
 function tics(offx, offy, color) {
-    console.warn("todo!")
-    //int32_t i;
+    console.warn("todo!"); //int32_t i;
     //char  fps[512], mapname[512];
     //int32_t currentFps;
     //static int32_t fpsAvg = 0, savedFps = 0;
@@ -1577,9 +1574,7 @@ function gameexit(msg) {
     }
 
     if (qe || cp)
-        throw "goto GOTOHERE;"
-
-    // FIX_00089: scoreboard not shown for last player who quits a DM. Only 19.7 affected. (Sarah)
+        throw "goto GOTOHERE;"; // FIX_00089: scoreboard not shown for last player who quits a DM. Only 19.7 affected. (Sarah)
     if (ud.m_recstat != 2 && ud.last_level >= 0 && playerswhenstarted > 1 && ud.coop != 1 && t[tIdx] == ' ') {
         dobonus(1);  //todo: as async
         // CTW - MODIFICATION
@@ -1949,7 +1944,7 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
     Sector.animateCamSprite();
 
     if (ud.camerasprite >= 0) {
-        throw "todo"
+        throw "todo";
     } else {
         i = divscale22(1, sprite[p.i].yrepeat + 28);
         if (i != oyrepeat) {
@@ -2016,8 +2011,7 @@ var displayrooms = Game.displayRooms = function (snum, smoothratio) {
         else if (p.over_shoulder_on == 0) {
             cposz += p.opyoff + mulscale16((p.pyoff - p.opyoff), smoothratio);
         } else {
-            throw "todo"
-            //view(p,&cposx,&cposy,&cposz,&sect,cang,choriz);
+            throw "todo"; //view(p,&cposx,&cposy,&cposz,&sect,cang,choriz);
         }
 
         printf("snum: %i, cposx: %i, cposy: %i, cposz: %i\n", snum, cposx, cposy, cposz);
@@ -4721,8 +4715,7 @@ function cheats() {
 
                     ch = String.fromCharCode(KB_Getch());
                     ch = ch.toLowerCase();
-                    console.log("char: %s", ch)
-
+                    console.log("char: %s", ch);
                     if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))) {
                         ps[myconnectindex].cheat_phase = 0;
                         //             FTA(46,ps[myconnectindex]);
@@ -4894,8 +4887,7 @@ function cheats() {
                             tempbuf[9] = ud.m_marker;
                             tempbuf[10] = ud.m_ffire;
 
-                            throw "todo sendpacket stuff"
-                            //////for(i=connecthead;i>=0;i=connectpoint2[i])
+                            throw "todo sendpacket stuff"; //////for(i=connecthead;i>=0;i=connectpoint2[i])
                             //////    sendpacket(i,(uint8_t*)tempbuf,11);
                         }
                         else ps[myconnectindex].gm |= MODE_RESTART;
@@ -5283,8 +5275,7 @@ function nonsharedkeys() {
 
             if (ud.lockout == 0)
                 if (SoundToggle && ALT_IS_PRESSED && (RTS_NumSounds() > 0) && rtsplaying == 0 && VoiceToggle) {
-                    throw "todo"
-                    //rtsptr = RTS_GetSound (i-1);
+                    throw "todo"; //rtsptr = RTS_GetSound (i-1);
                     //if(*rtsptr == 'C')
                     //    FX_PlayVOC3D( rtsptr,0,0,0,255,-i);
                     //else FX_PlayWAV3D( rtsptr,0,0,0,255,-i);
@@ -5411,8 +5402,7 @@ function nonsharedkeys() {
             if (movesperpacket == 4 && connecthead != myconnectindex)
                 return;
 
-            if (lastsavedpos == -1) throw "goto FAKE_F2;"
-
+            if (lastsavedpos == -1) throw "goto FAKE_F2;";
             KB.flushKeyboardQueue();
 
             if (sprite[ps[myconnectindex].i].extra <= 0) {
@@ -6147,16 +6137,16 @@ function main(argc, argv) {
                         }).endIf();
 
 
-                    q.addIf(function() {
+                    q.addIf(function () {
                         return ps[myconnectindex].gm & MODE_EOL || ps[myconnectindex].gm & MODE_RESTART;
-                    }, function() {
+                    }, function () {
                         q.setPositionAtStart(); // important!
 
-                        q.addIf(function() {
+                        q.addIf(function () {
                             return ps[myconnectindex].gm & MODE_EOL;
-                        }, function() {
+                        }, function () {
                             q.setPositionAtStart(); // important!
-                            q.add(function() {
+                            q.add(function () {
                                 closedemowrite();
 
                                 ready2send = 0;
@@ -6166,13 +6156,13 @@ function main(argc, argv) {
                                 vscrn();
                                 ud.screen_size = i;
                             })
-                                .add(function() {
+                                .add(function () {
                                     q.setPositionAtStart(); // important!
                                     dobonus(0);
                                 })
-                                .addIf(function() {
+                                .addIf(function () {
                                     return ud.eog;
-                                }, function() {
+                                }, function () {
                                     q.setPositionAtStart(); // important!
                                     ud.eog = 0;
                                     if (ud.multimode < 2) {
@@ -6190,7 +6180,7 @@ function main(argc, argv) {
                                 }).endIf();
                         }).endIf();
 
-                        q.add(function() {
+                        q.add(function () {
                             ready2send = 0;
                             if (numplayers > 1) ps[myconnectindex].gm = MODE_GAME;
                             enterlevel(ps[myconnectindex].gm);
@@ -6198,7 +6188,7 @@ function main(argc, argv) {
                         return; //continue;
                     }).endIf();
 
-                    q.add(function() {
+                    q.add(function () {
 
 
                         cheats();
@@ -6314,8 +6304,7 @@ Game.openDemoRead = function (whichDemo /* 0 = mine */) {
 //8782
 function closedemowrite() {
     if (ud.recstat == 1) {
-        throw "todo"
-        //if (ud.reccnt > 0)
+        throw "todo"; //if (ud.reccnt > 0)
         //{
         //    dfwrite(recsync,sizeof(input)*ud.multimode,ud.reccnt/ud.multimode,frecfilep);
 
@@ -6480,8 +6469,7 @@ Game.playBack = function () {
                     }
                     Console.render();
                     if (ud.multimode > 1) {
-                        throw "todo"
-                        //ControlInfo noshareinfo;
+                        throw "todo"; //ControlInfo noshareinfo;
                         //if( !Console.isActive() )
                         //{
                         //    Control.getInput( &noshareinfo );
@@ -6529,11 +6517,11 @@ Game.playBack = function () {
                 return;
             }
 
-            console.log("bit after demo loop")
+            console.log("bit after demo loop");
             kclose(recfilep);
             ud.playing_demo_rev = 0;
             if (ps[myconnectindex].gm & MODE_MENU) {
-                throw "goto RECHECK;" //can do GOTO with async stuff?
+                throw "goto RECHECK;"; //can do GOTO with async stuff?
             }
 
             //isPlayingBack = true;
@@ -7240,8 +7228,6 @@ Game.doMoveThings = function () {
 //9768
 
 function dobonus(bonusonly) {
-    q.setPositionAtStart(); // important!
-    
     var t, tinc, gfx_offset;
     var i, y, xfragtotal, yfragtotal;
     var bonuscnt;
@@ -7267,27 +7253,27 @@ function dobonus(bonusonly) {
 
     bonuscnt = 0;
 
-
     q.setPositionAtStart()
-        .add(function () {
+        .addFrame(function () {
             q.setPositionAtStart();
+            console.log("(10)");
+            for (t = 0; t < 64; t += 7) {
+                q.addFrame(t, function (cb, t) {
+                    console.log("(20)");
+                    console.log("palto fade to black");
+                    palto(0, 0, 0, t);
+                });
+            }
 
             q.add(function () {
-                q.setPositionAtStart();
-                for (t = 0; t < 64; t += 7) {
-                    q.addFrame(t, function (cb, t) {
-                        palto(0, 0, 0, t);
-                    });
-                }
-            });
-
-            q.add(function () {
+                console.log("(30)");
                 setview(0, 0, xdim - 1, ydim - 1);
                 clearView(0);
                 nextpage();
             });
             q.addFrame(function () {
 
+                console.log("(40)");
                 flushperms();
 
                 FX.stopAllSounds();
@@ -7298,8 +7284,7 @@ function dobonus(bonusonly) {
                 if (bonusonly) throw "goto FRAGBONUS";
 
                 if (numplayers < 2 && ud.eog && ud.from_bonus == 0) {
-                    throw "todo"
-                    //	    switch(ud.volume_number)
+                    throw "todo"; //	    switch(ud.volume_number)
                     //	{
                     //		case 0:
                     //			if(ud.lockout == 0)
@@ -7509,6 +7494,7 @@ function dobonus(bonusonly) {
 
                 //FRAGBONUS:
 
+                console.log("(50)");
                 ps[myconnectindex].palette = palette;
                 KB.flushKeyboardQueue();
                 totalclock = 0;
@@ -7522,10 +7508,10 @@ function dobonus(bonusonly) {
 
             });
 
-
-            if (playerswhenstarted > 1 && ud.coop != 1) {
-                throw "todo"
-                //if(!(MusicToggle == 0 || MusicDevice == NumSoundCards))
+            q.addIf(function () {
+                return playerswhenstarted > 1 && ud.coop != 1;
+            }, function () {
+                throw "todo"; //if(!(MusicToggle == 0 || MusicDevice == NumSoundCards))
                 //	sound(BONUSMUSIC);
 
                 //rotatesprite(0,0,65536,0,MENUSCREEN,16,0,2+8+16+64,0,0,xdim-1,ydim-1);
@@ -7612,46 +7598,54 @@ function dobonus(bonusonly) {
                 //if(bonusonly || ud.multimode > 1) return;
 
                 //for(t=0;t<64;t+=7) palto(0,0,0,t);
-            }
+            });
+            q.addIf(function () {
+                return bonusonly || ud.multimode > 1;
+            }, function () {
+                throw "return";
+            });
+            q.add(function () {
 
-            if (bonusonly || ud.multimode > 1) throw "return";
+                console.log("(60)");
+                switch (ud.volume_number) {
+                    case 1:
+                        gfx_offset = 5;
+                        break;
+                    default:
+                        gfx_offset = 0;
+                        break;
+                }
+                console.log("rotatesprite BONUSSCREEN 1");
+                rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
 
-            switch (ud.volume_number) {
-                case 1:
-                    gfx_offset = 5;
-                    break;
-                default:
-                    gfx_offset = 0;
-                    break;
-            }
+                menutext(160, 20 - 6, 0, 0, level_names[(ud.volume_number * 11) + ud.last_level - 1]);
+                menutext(160, 36 - 6, 0, 0, "COMPLETED");
 
-            rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
+                gametext(160, 192, "PRESS ANY KEY TO CONTINUE", 16, 2 + 8 + 16);
 
-            menutext(160, 20 - 6, 0, 0, level_names[(ud.volume_number * 11) + ud.last_level - 1]);
-            menutext(160, 36 - 6, 0, 0, "COMPLETED");
+                if (!(MusicToggle == 0 || MusicDevice == NumSoundCards))
+                    sound(BONUSMUSIC);
 
-            gametext(160, 192, "PRESS ANY KEY TO CONTINUE", 16, 2 + 8 + 16);
-
-            if (!(MusicToggle == 0 || MusicDevice == NumSoundCards))
-                sound(BONUSMUSIC);
-
-            nextpage();
+                nextpage();
+            });
         })
         .addFrame(function () {
-
+            console.log("(70)");
             KB.flushKeyboardQueue();
-
 
             q.setInsertPosition(0);
 
             for (t = 0; t < 64; t++) {
                 q.addFrame(t, function (cb, t) {
+                    console.log("(80)");
+                    console.log("palto fade in");
                     palto(0, 0, 0, 63 - t);
                 });
             }
 
 
             q.add(i, function () {
+                console.log("(90)");
                 bonuscnt = 0;
                 totalclock = 0;
                 tinc = 0;
@@ -7663,9 +7657,10 @@ function dobonus(bonusonly) {
                     return !breakWhileLoop;
                 }, function () {
                     q.setPositionAtStart();
-
+                    console.log("(95)");
                     sampletimer();
                     if (ps[myconnectindex].gm & MODE_EOL) {
+                        console.log("rotatesprite BONUSSCREEN 2");
                         rotatesprite(0, 0, 65536, 0, BONUSSCREEN + gfx_offset, 0, 0, 2 + 8 + 16 + 64 + 128, 0, 0, xdim - 1, ydim - 1);
 
                         if (totalclock > (1000000000) && totalclock < (1000000320)) {
@@ -7700,7 +7695,7 @@ function dobonus(bonusonly) {
                                     break;
                             }
                         } else if (totalclock > (10240 + 120)) {
-                            console.log("breakWhileLoop = true")
+                            console.log("breakWhileLoop = true");
                             breakWhileLoop = true;
                             return;
                         } else {
@@ -7812,7 +7807,7 @@ function dobonus(bonusonly) {
                         }
                     } else {
                         breakWhileLoop = true;
-                        console.log("!ps[myconnectindex].gm & MODE_EOL")
+                        console.log("!ps[myconnectindex].gm & MODE_EOL");
                         return;
                         /*break;*/
                     }
