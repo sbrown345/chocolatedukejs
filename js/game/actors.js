@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var actor_tog = 0;
 

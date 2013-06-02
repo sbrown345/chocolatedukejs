@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var probey = 0, lastprobey = 0, last_menu, globalskillsound = -1;
 var sh, onbar, buttonstat = 0, deletespot;

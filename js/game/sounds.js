@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 //230
 var menunum = 0;

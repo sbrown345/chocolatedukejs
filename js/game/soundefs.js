@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var SECTOREFFECTOR = 1;
 var ACTIVATOR = 2;

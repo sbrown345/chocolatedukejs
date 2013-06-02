@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 function Dimensions() {
     this.width = 0;

@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 
 var RANCID_ID = 1;

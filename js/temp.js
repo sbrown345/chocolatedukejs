@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 // temp hardcoded values to be replaced later
 var tempConstants = {

@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var MAX_SCRIPTS= 5;
 var Script = {};

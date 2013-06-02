@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 window.requestAnimationFrame = (function () {
     return window.requestAnimationFrame ||

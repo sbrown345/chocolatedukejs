@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var MAX_STRING_LENGTH = 64;
 var MAX_CONSOLE_STRING_LENGTH = 70;

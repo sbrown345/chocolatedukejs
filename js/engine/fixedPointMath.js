@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 function swapchar(p1, p1Offset, p2, p2Offset) {
     var tmp = p1.getByte(p1Offset);

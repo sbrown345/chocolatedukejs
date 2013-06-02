@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var MAXSECTORS = 1024;
 var MAXWALLS = 8192;

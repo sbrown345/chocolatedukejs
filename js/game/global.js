@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var conVersion = 13;
 var grpVersion = 0;

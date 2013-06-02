@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var anim = new Animation();
 var Anim_Started = false;

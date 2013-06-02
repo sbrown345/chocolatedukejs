@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 var ASS_VERSION_STRING = "1.12";
 
