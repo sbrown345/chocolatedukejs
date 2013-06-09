@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>voc</title>
+    </head>
+    <body>
+
+        <script type="text/javascript" src="js/lib/DataStream.js"> </script>
+        <script>
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', 'Example.voc', true);
+            xhr.responseType = 'arraybuffer';
+
+            xhr.onload = function(e) {
+                var uInt8Array = new Uint8Array(this.response); // this.response == uInt8Array.buffer
+                console.log(uInt8Array);
+                console.log(uInt8Array.length);
+                var ds = new DataStream(uInt8Array);
+
+                var psFileInfo = ds.readStruct([
+                    'ucBitsPerSample', 'uint8',
+                    'ucChannels', 'uint8',
+                    'usFileFormat', 'uint16',
+                    'usTimeConstant', 'uint16',
+                    'lSamplesPerSeconds', 'int32',
+                    'lSamplesPerSecondsPadding', 'int32',
+                    'lTotalLength', 'int32',
+                    'lTotalLengthPadding', 'int32'
+                ]);
+
+                console.log(psFileInfo);
+                ds.seek(0x1A);
+                var type = ds.readUint8();
+                console.log(type);
+                var bType;
+                var lLen;
+                var pDataPos = 0;
+                do {
+                    // Read the block type
+                    bType = ds.readUint8(); //fread( &bType, sizeof(bType), 1, pFile );
+
+                    lLen = 0;
+                    switch (bType) {
+                    case 1:
+                        {
+                            var test = ds.readUint8Array(3);
+                            debugger;
+                            test.position -= 3;
+                            lLen = ds.readUint8(); //fread( &lLen, 3, 1, pFile );
+                            lLen -= 2; // Remove Time Constant and File Format bytes
+                            psFileInfo.usTimeConstant = ds.readUint8(); //read( &psFileInfo->usTimeConstant, 1, 1, pFile );
+                            psFileInfo.usFileFormat = ds.readUint8(); // fread( &psFileInfo->usFileFormat, 1, 1, pFile );
+
+                            // For the moment, it's a plain 8-bit mono file
+                            psFileInfo.ucBitsPerSample = 8;
+                            psFileInfo.ucChannels = 1;
+                            psFileInfo.lSamplesPerSeconds = (1000000 /
+                                (256 - (psFileInfo.usTimeConstant % 256))) | 0;
+
+                            // Store this sample in memory
+                            var sampleToDoSOmthingWith = ds.readUint8Array(lLen); // fread( pDataPos, lLen, 1, pFile );
+                            debugger;
+                            pDataPos += lLen;
+                            break;
+                        }
+                    case 8:
+                        {
+                            //                    fseek( pFile, 3, SEEK_CUR );     // Skip the length
+                            //                    fread( &psFileInfo->usTimeConstant, 2, 1, pFile );
+                            //                    fread( &psFileInfo->usFileFormat, 1, 1, pFile );
+                            //                    fread( &psFileInfo->ucChannels, 1, 1, pFile );
+                            //
+                            //                    // Block of type 8 is always followed by a block of type 1
+                            //                    fread( &bType, sizeof(bType), 1, pFile );
+                            //                    fread( &lLen, 3, 1, pFile );
+                            //                    lLen -= 2;     // Remove Time Constant and File Format bytes
+                            //                    fseek( pFile, 2, SEEK_CUR );     // Skip T.C. and F.F.
+                            //
+                            //                    psFileInfo.ucBitsPerSample    = 8;
+                            //                    psFileInfo.ucChannels++;
+                            //                    psFileInfo.usTimeConstant >>= 8;
+                            //                    psFileInfo.lSamplesPerSeconds = 1000000 /
+                            //                            (256-(psFileInfo->usTimeConstant % 256));
+                            //
+                            //                    // Store this sample in memory
+                            //                    var sampleToDoSOmthingWith = ds.readUint8Array(lLen); //fread( pDataPos, lLen, 1, pFile );
+                            debugger;
+                            pDataPos += lLen;
+                            break;
+                        }
+                    case 9:
+                        {
+                            //                    fread( &lLen, 3, 1, pFile );
+                            //                    lLen -= 12;
+                            //                    fread( &psFileInfo->lSamplesPerSeconds, 4, 1, pFile );
+                            //                    fread( &psFileInfo->ucBitsPerSample, 1, 1, pFile );
+                            //                    fread( &psFileInfo->ucChannels, 1, 1, pFile );
+                            //                    fread( &psFileInfo->usFileFormat, 2, 1, pFile );
+                            //
+                            //                    // Store this sample in memory
+                            //                    fread( pDataPos, lLen, 1, pFile );
+                            //                    pDataPos += lLen;
+                            debugger;
+                            break;
+                        }
+                    }
+                    ;
+                } while (bType != 0);
+
+                psFileInfo.lTotalLength = pDataPos; //-pData;
+
+            };
+
+            xhr.send();
+        </script>
+    </body>
+</html>
