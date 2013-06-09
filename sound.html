@@ -4,7 +4,10 @@
         <title>voc</title>
     </head>
     <body>
- 
+        <a href="?audio">audio ctx</a> 
+        |
+        <a href="?">audio</a> 
+
         <script type="text/javascript" src="js/lib/DataStream.js"> </script>
         <script>
 
@@ -48,8 +51,8 @@
             FastBase64.Init();
 
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'Example.voc', true);
-            //xhr.open('GET', 'THINK06.VOC', true);
+            //xhr.open('GET', 'Example.voc', true);
+            xhr.open('GET', 'THINK06.VOC', true);
 
 
             xhr.responseType = 'arraybuffer';
@@ -96,48 +99,34 @@
                 //ds.save("test.wav");
                 console.log(wavDs.buffer.byteLength);
                 var dataView = new DataView(wavDs.buffer);
-                var blob = new Blob([dataView], { type: "audio/wav" });
+                //var blob = new Blob([dataView], { type: "audio/wav" });
 
-                console.log(blob); //
-//
-//
-//
-//            var URL = (window.webkitURL || window.URL);
-//
-//                var url = URL.createObjectURL(blob);
-//            console.log(url)
-//                var a = document.createElement('a');
-//                a.setAttribute('href', url);
-//                a.setAttribute('download', "test2.wav");
-//                a.click();
-//                URL.revokeObjectURL(url);
-//
-//
+                //console.log(blob);
 
 
-//
-                var mediaElement = new Audio();
-                mediaElement.autoplay = true;
+                if (location.search.indexOf("audio") != -1) {
 
-                mediaElement.src = "data:audio/wav;base64," + FastBase64.Encode(new Uint8Array(wavDs.buffer));
-                document.body.appendChild(mediaElement);
-                console.log(mediaElement.src);
-                mediaElement.load();
+                    var mediaElement = new Audio();
+                    mediaElement.autoplay = true;
 
+                    mediaElement.src = "data:audio/wav;base64," + FastBase64.Encode(new Uint8Array(wavDs.buffer));
+                    document.body.appendChild(mediaElement);
+                    console.log(mediaElement.src);
+                    mediaElement.load();
+                } else {
+                    if (typeof AudioContext == "function") {
+                        var audioContext = new AudioContext();
+                    } else if (typeof webkitAudioContext == "function") {
+                        var audioContext = new webkitAudioContext();
+                    }
 
-//
-//            if (typeof AudioContext == "function") {
-//                var audioContext = new AudioContext();
-//            } else if (typeof webkitAudioContext == "function") {
-//                var audioContext = new webkitAudioContext();
-//            }
-//
-//            var source = audioContext.createBufferSource();
-//            source.connect(audioContext.destination);
-//
-//            var buffer = audioContext.createBuffer(wavDs.buffer, false);
-//            source.buffer = buffer;
-//            source.noteOn(0);
+                    var source = audioContext.createBufferSource();
+                    source.connect(audioContext.destination);
+
+                    var buffer = audioContext.createBuffer(wavDs.buffer, false);
+                    source.buffer = buffer;
+                    source.noteOn(0);
+                }
             };
 
             xhr.send();
