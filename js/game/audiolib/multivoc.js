@@ -9,6 +9,12 @@ function MIX_VOLUME(volume) {
     return ((Math.max(0, Math.min((volume), 255)) * (MV_MaxVolume + 1)) >> 8);
 }
 
+//76
+// wavedata enum
+var Raw = 0,
+    VOC = 1,
+    DemandFeed = 2,
+    WAV = 3;
 
 //91
 
@@ -363,8 +369,8 @@ function MV_PlayLoopedVOC(
     ////    return( MV_Error );
     ////}
 
-    ////voice.wavetype    = VOC;
-    ////voice.bits        = 8;
+    voice.wavetype    = VOC;
+    voice.bits        = 8;
     ////voice.GetSound    = MV_GetNextVOCBlock;
     ////voice.NextBlock   = ptr + *( uint16_t  * )( ptr + 0x14 );
     voice.tempPtr = ptr;
@@ -376,17 +382,17 @@ function MV_PlayLoopedVOC(
     ////voice.length      = 0;
     ////voice.next        = NULL;
     ////voice.prev        = NULL;
-    ////voice.priority    = priority;
+    voice.priority    = priority;
     ////voice.GLast       = -1;
     ////voice.GPos        = 0;
     ////voice.GVal[0]     = 0;
     ////voice.GVal[1]     = 0;
     ////voice.GVal[2]     = 0;
     ////voice.GVal[3]     = 0;
-    ////voice.callbackval = callbackval;
-    ////voice.LoopStart   = /*( char * )*/loopstart;
-    ////voice.LoopEnd     = /*( char * )*/loopend;
-    ////voice.LoopSize    = loopend - loopstart + 1;
+    voice.callbackval = callbackval;
+    voice.LoopStart   = /*( char * )*/loopstart;
+    voice.LoopEnd     = /*( char * )*/loopend;
+    ///voice.LoopSize    = loopend - loopstart + 1;
 
     ////if ( loopstart < 0 )
     ////{

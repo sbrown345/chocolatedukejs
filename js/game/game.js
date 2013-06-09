@@ -6080,7 +6080,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    //logo();
+                    logo();
                 })
             .endIf();
 
