@@ -5847,8 +5847,8 @@ function Startup() {
         networkmode = 1;
     }
 
-    //console.log("Checking sound inits.");
-    //todo: SoundStartup(); 
+    console.log("Checking sound inits.");
+    SoundStartup(); 
     //console.log("Checking music inits.");
     //todo: MusicStartup();
 

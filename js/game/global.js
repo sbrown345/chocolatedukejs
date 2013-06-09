@@ -131,7 +131,7 @@ var volume_names = ["L.A. MELTDOWN", "LUNAR APOCALYPSE", "SHRAPNEL CITY", ""]; /
 var skill_names = ["PIECE OF CAKE", "LET'S ROCK", "COME GET SOME", "DAMN I'M GOOD", ""];
 
 //volatile int32_t checksume;
-//int32_t soundsiz[NUM_SOUNDS];
+var soundsiz = new Int32Array(NUM_SOUNDS);
 
 var soundps = new Int16Array(NUM_SOUNDS), soundpe = new Int16Array(NUM_SOUNDS), soundvo = new Int16Array(NUM_SOUNDS);
 var soundm = new Uint8Array(NUM_SOUNDS), soundpr = new Uint8Array(NUM_SOUNDS);

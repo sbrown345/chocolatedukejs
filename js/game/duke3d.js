@@ -167,6 +167,7 @@ Object.defineProperty(window, 'duke_sync', { get: function () { return sync; }, 
 
 function SAMPLE() {
     this.ptr = null;
+    this.ptrIdx = 0;
     this.lock = 0;
     this.length = 0;
     this.num = 0;

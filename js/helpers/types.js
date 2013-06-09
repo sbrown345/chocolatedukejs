@@ -10,10 +10,10 @@ function structArray($class, count) {
     return array;
 }
 
-function multiDimArray($class, num, arrLength) {
+function multiDimArray(arrayClass, num, arrLength) {
     var multiDimArray = new Array(num);
     for (var i = 0; i < num; i++) {
-        multiDimArray[i] = new $class(arrLength);
+        multiDimArray[i] = new arrayClass(arrLength);
     }
     return multiDimArray;
 }

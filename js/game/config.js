@@ -246,7 +246,45 @@ Config.readSetup = function () {
 
     // todo: Config.readSetup
     
+    
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "FXVolume",&FXVolume);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MusicVolume",&MusicVolume);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "SoundToggle",&SoundToggle);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MusicToggle",&MusicToggle);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "VoiceToggle",&VoiceToggle);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "AmbienceToggle",&AmbienceToggle);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "OpponentSoundToggle",&OpponentSoundToggle);   
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "NumVoices",&NumVoices);
+    NumVoices = 32;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "NumChannels",&NumChannels);
+    NumChannels = 2;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "NumBits",&NumBits);
+    NumBits = 16;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MixRate",&MixRate);
+    MixRate = 44100;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MidiPort",&MidiPort);
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterAddress",&dummy);
+    //BlasterConfig.Address = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterType",&dummy);
+    //BlasterConfig.Type = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterInterrupt",&dummy);
+    //BlasterConfig.Interrupt = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterDma8",&dummy);
+    //BlasterConfig.Dma8 = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterDma16",&dummy);
+    //BlasterConfig.Dma16 = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "BlasterEmu",&dummy);
+    //BlasterConfig.Emu = dummy;
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "ReverseStereo",&ReverseStereo);
 
+    //SCRIPT_GetNumber( scripthandle, "Controls","ControllerType",&ControllerType);
+    //SCRIPT_GetNumber( scripthandle, "Controls","MouseAimingFlipped",&ud.mouseflip);
+    //SCRIPT_GetNumber( scripthandle, "Controls","MouseAiming",&MouseAiming);
+    //SCRIPT_GetNumber( scripthandle, "Controls","GameMouseAiming",(int32 *)&ps[0].aim_mode);
+    //SCRIPT_GetNumber( scripthandle, "Controls","AimingFlag",(int32 *)&myaimmode);
+
+    //CONTROL_ClearAssignments();
+    
     CONFIG_ReadKeys();
 
     // todo
