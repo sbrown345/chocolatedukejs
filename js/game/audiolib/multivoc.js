@@ -94,21 +94,23 @@ if (typeof AudioContext == "function") {
 }
 
 function MV_PlayVoice(voice) {
-    var flags;
+    if (!audioContext) {
+        // todo: support <audio> like sound.html
+        return;
+    }
 
-    //flags = DisableInterrupts();
-    //LL_SortedInsertion(VoiceList, voice, prev, next, VoiceNode, priority);
-
-    //++sounddebugActiveSounds;
-    //++sounddebugAllocateSoundCalls;
-
-    //RestoreInterrupts(flags);
-    console.log("Playvoice", voice);
+    console.log("MV_PlayVoice", voice);
 
     var source = audioContext.createBufferSource();
-    source.connect(audioContext.destination);
+    
+    var volumeNode = audioContext.createGainNode();
+    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) | 2) / 100; // cannot set left/right volume, yet?
+    console.log("    volumeNode.gain.value ", volumeNode.gain.value)
 
-    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), false);
+    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true/*make mono*/);
+
+    source.connect(volumeNode);
+    volumeNode.connect(audioContext.destination);
     source.buffer = buffer;
     source.noteOn(0);
 }
