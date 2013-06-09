@@ -92,11 +92,17 @@ var MV_MaxVolume = 63;
 
    Adds a voice to the play list.
 ---------------------------------------------------------------------*/
-var audioContext;
+var audioContext, audioAnalyser; // todo: move to init
 if (typeof AudioContext == "function") {
-     audioContext = new AudioContext();
+    audioContext = new AudioContext();
 } else if (typeof webkitAudioContext == "function") {
-     audioContext = new webkitAudioContext();
+    audioContext = new webkitAudioContext();
+}
+
+if (audioContext) {
+    audioAnalyser = audioContext.createAnalyser();
+    audioAnalyser.connect(audioContext.destination);
+    setInterval(drawSpectrum, 1000);
 }
 
 function MV_PlayVoice(voice) {
@@ -107,18 +113,28 @@ function MV_PlayVoice(voice) {
 
     console.log("MV_PlayVoice", voice);
 
-    var source = audioContext.createBufferSource();
-    
-    var volumeNode = audioContext.createGainNode();
-    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) | 2) / 100; // cannot set left/right volume, yet?
-    console.log("    volumeNode.gain.value ", volumeNode.gain.value)
+    var sourceLeft = audioContext.createBufferSource();
+    var sourceRight = audioContext.createBufferSource();
 
-    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true/*make mono*/);
+    var gainLeft = audioContext.createGainNode();
+    gainLeft.gain.value = voice.LeftVolume / 100;
+    var gainRight = audioContext.createGainNode();
+    gainRight.gain.value = voice.RightVolume / 100;
 
-    source.connect(volumeNode);
-    volumeNode.connect(audioContext.destination);
-    source.buffer = buffer;
-    source.noteOn(0);
+    var channelMerger = audioContext.createChannelMerger();
+
+    var wav = vocToWav(voice.tempPtr);
+    var bufferLeft = audioContext.createBuffer(wav, true/*make mono*/); // maybe try panner anyway: developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
+    var bufferRight = audioContext.createBuffer(wav, true/*make mono*/);
+    sourceLeft.buffer = bufferLeft;
+    sourceRight.buffer = bufferRight;
+    sourceLeft.connect(gainLeft);
+    sourceRight.connect(gainRight);
+    gainLeft.connect(channelMerger, 0, 1);
+    gainRight.connect(channelMerger, 0, 0);
+    channelMerger.connect(audioContext.destination);
+    sourceLeft.noteOn(0);
+    sourceRight.noteOn(0);
 }
 
 // todo: cache...
@@ -161,6 +177,29 @@ function vocToWav(uInt8Array) {
 
     return wavDs.buffer;
 }
+
+
+function drawSpectrum() {
+    var canvas = document.getElementById('spectrumCanvas');
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width;
+    var height = canvas.height;
+    var barWidth = 10;
+
+    ctx.clearRect(0, 0, width, height);
+
+    var freqByteData = new Uint8Array(audioAnalyser.frequencyBinCount);
+    audioAnalyser.getByteFrequencyData(freqByteData);
+
+    var barCount = Math.round(width / barWidth);
+    console.log(freqByteData)
+    for (var i = 0; i < barCount; i++) {
+        var magnitude = freqByteData[i];
+        // some values need adjusting to fit on the canvas
+        ctx.fillRect(barWidth * i, height, barWidth - 2, -magnitude + 60);
+    }
+}
+
 
 ///*---------------------------------------------------------------------
 //   Function: MV_StopVoice
@@ -369,8 +408,8 @@ function MV_PlayLoopedVOC(
     ////    return( MV_Error );
     ////}
 
-    voice.wavetype    = VOC;
-    voice.bits        = 8;
+    voice.wavetype = VOC;
+    voice.bits = 8;
     ////voice.GetSound    = MV_GetNextVOCBlock;
     ////voice.NextBlock   = ptr + *( uint16_t  * )( ptr + 0x14 );
     voice.tempPtr = ptr;
@@ -382,7 +421,7 @@ function MV_PlayLoopedVOC(
     ////voice.length      = 0;
     ////voice.next        = NULL;
     ////voice.prev        = NULL;
-    voice.priority    = priority;
+    voice.priority = priority;
     ////voice.GLast       = -1;
     ////voice.GPos        = 0;
     ////voice.GVal[0]     = 0;
@@ -390,9 +429,9 @@ function MV_PlayLoopedVOC(
     ////voice.GVal[2]     = 0;
     ////voice.GVal[3]     = 0;
     voice.callbackval = callbackval;
-    voice.LoopStart   = /*( char * )*/loopstart;
-    voice.LoopEnd     = /*( char * )*/loopend;
-    ///voice.LoopSize    = loopend - loopstart + 1;
+    voice.LoopStart = /*( char * )*/loopstart;
+    voice.LoopEnd = /*( char * )*/loopend;
+    ////voice.LoopSize    = loopend - loopstart + 1;
 
     ////if ( loopstart < 0 )
     ////{
@@ -427,7 +466,7 @@ function MV_CalcPanTable() {
 
     for (distance = 0; distance <= MV_MaxVolume; distance++) {
         level = (255 * (MV_MaxVolume - distance)) / MV_MaxVolume;
-        for (angle = 0; angle <= (HalfAngle / 2 | 0); angle++) {
+        for (angle = 0; angle <= (HalfAngle / 2 | 0) ; angle++) {
             ramp = level - ((level * angle) /
                 (MV_NumPanPositions / 4 | 0));
 
