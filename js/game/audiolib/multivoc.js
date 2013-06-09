@@ -86,6 +86,12 @@ var MV_MaxVolume = 63;
 
    Adds a voice to the play list.
 ---------------------------------------------------------------------*/
+var audioContext;
+if (typeof AudioContext == "function") {
+     audioContext = new AudioContext();
+} else if (typeof webkitAudioContext == "function") {
+     audioContext = new webkitAudioContext();
+}
 
 function MV_PlayVoice(voice) {
     var flags;
@@ -98,8 +104,55 @@ function MV_PlayVoice(voice) {
 
     //RestoreInterrupts(flags);
     console.log("Playvoice", voice);
+
+    var source = audioContext.createBufferSource();
+    source.connect(audioContext.destination);
+
+    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), false);
+    source.buffer = buffer;
+    source.noteOn(0);
 }
 
+// todo: cache...
+function vocToWav(uInt8Array) {
+    // very simplistic, will probalby break on anything other than default sounds, eg sample rate not read from voc
+
+    var ds = new DataStream(uInt8Array);
+
+    ds.seek(0x20);
+    var sinfo = {
+        length: uInt8Array.length,
+        samprate: 8000
+    };
+    var rawBytes = ds.readUint8Array(uInt8Array.length - 0x20);
+    var wavDs = new DataStream();
+    var bl;
+    var bi;
+
+    wavDs.writeString("RIFF"); // Write "RIFF"
+    bl = sinfo.length + 36;
+    wavDs.writeInt32(bl, 4); // Write Size of file with header
+    wavDs.writeString("WAVE"); // Write "WAVE"
+    wavDs.writeString("fmt "); // Write "fmt "
+    bl = 16;
+    wavDs.writeInt32(bl); // Size of previous header (fixed)
+    bi = 1;
+    wavDs.writeInt16(bi); // formatTag
+    wavDs.writeInt16(bi); // nChannels
+    bl = sinfo.samprate;
+    wavDs.writeInt32(bl); // nSamplesPerSec
+    wavDs.writeInt32(bl); // nAvgBytesPerSec
+    wavDs.writeInt16(bi); // nBlockAlign (always 1?)
+    bi = 8;
+    wavDs.writeInt16(bi); // nBitsPerSample (8 or 16 I assume)
+    wavDs.writeString("data"); // Write "data"
+    bl = sinfo.length;
+    wavDs.writeInt32(bl); // True length of sample data
+
+    wavDs.writeUint8Array(rawBytes);
+
+    return wavDs.buffer;
+}
 
 ///*---------------------------------------------------------------------
 //   Function: MV_StopVoice
@@ -312,6 +365,7 @@ function MV_PlayLoopedVOC(
     ////voice.bits        = 8;
     ////voice.GetSound    = MV_GetNextVOCBlock;
     ////voice.NextBlock   = ptr + *( uint16_t  * )( ptr + 0x14 );
+    voice.tempPtr = ptr;
     ////voice.DemandFeed  = NULL;
     ////voice.LoopStart   = NULL;
     ////voice.LoopCount   = 0;
