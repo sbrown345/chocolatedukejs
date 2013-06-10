@@ -105,6 +105,38 @@ if (audioContext) {
     setInterval(drawSpectrum, 1000);
 }
 
+//function MV_PlayVoice(voice) {
+//    if (!audioContext) {
+//        // todo: support <audio> like sound.html
+//        return;
+//    }
+
+//    console.log("MV_PlayVoice", voice);
+
+//    var sourceLeft = audioContext.createBufferSource();
+//    var sourceRight = audioContext.createBufferSource();
+
+//    var gainLeft = audioContext.createGainNode();
+//    gainLeft.gain.value = voice.LeftVolume / 1000;
+//    var gainRight = audioContext.createGainNode();
+//    gainRight.gain.value = voice.RightVolume / 1000;
+
+//    var channelMerger = audioContext.createChannelMerger();
+
+//    var wav = vocToWav(voice.tempPtr);
+//    var bufferLeft = audioContext.createBuffer(wav, true/*make mono*/); // maybe try panner anyway: developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
+//    var bufferRight = audioContext.createBuffer(wav, true/*make mono*/);
+//    sourceLeft.buffer = bufferLeft;
+//    sourceRight.buffer = bufferRight;
+//    sourceLeft.connect(gainLeft);
+//    sourceRight.connect(gainRight);
+//    gainLeft.connect(channelMerger, 0, 1);
+//    gainRight.connect(channelMerger, 0, 0);
+//    channelMerger.connect(audioContext.destination);
+//    sourceLeft.noteOn(0);
+//    sourceRight.noteOn(0);
+//}
+
 function MV_PlayVoice(voice) {
     if (!audioContext) {
         // todo: support <audio> like sound.html
@@ -113,29 +145,43 @@ function MV_PlayVoice(voice) {
 
     console.log("MV_PlayVoice", voice);
 
-    var sourceLeft = audioContext.createBufferSource();
-    var sourceRight = audioContext.createBufferSource();
+    var source = audioContext.createBufferSource();
+    var panner = audioContext.createPanner();
 
-    var gainLeft = audioContext.createGainNode();
-    gainLeft.gain.value = voice.LeftVolume / 100;
-    var gainRight = audioContext.createGainNode();
-    gainRight.gain.value = voice.RightVolume / 100;
+    var volumeNode = audioContext.createGainNode();
+    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) / 2) / 1000; // cannot set left/right volume, yet?
+    console.log("volumeNode.gain.value ", volumeNode.gain.value);
 
-    var channelMerger = audioContext.createChannelMerger();
+    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true);
+    pan((-voice.LeftVolume) + voice.RightVolume, panner);
 
-    var wav = vocToWav(voice.tempPtr);
-    var bufferLeft = audioContext.createBuffer(wav, true/*make mono*/); // maybe try panner anyway: developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
-    var bufferRight = audioContext.createBuffer(wav, true/*make mono*/);
-    sourceLeft.buffer = bufferLeft;
-    sourceRight.buffer = bufferRight;
-    sourceLeft.connect(gainLeft);
-    sourceRight.connect(gainRight);
-    gainLeft.connect(channelMerger, 0, 1);
-    gainRight.connect(channelMerger, 0, 0);
-    channelMerger.connect(audioContext.destination);
-    sourceLeft.noteOn(0);
-    sourceRight.noteOn(0);
+    source.connect(panner);
+    panner.connect(volumeNode);
+    volumeNode.connect(audioContext.destination);
+    source.buffer = buffer;
+    source.noteOn(0);
 }
+
+var panPos = 0;
+
+ //stackoverflow.com/questions/14378305/how-to-create-very-basic-left-right-equal-power-panning-with-createpanner
+function pan(range, panner) {
+    console.log("pan range", range);
+    var xDeg = parseInt(range);
+    var zDeg = xDeg + 90;
+    if (zDeg > 90) {
+        zDeg = 180 - zDeg;
+    }
+    var x = Math.sin(xDeg * (Math.PI / 180));
+    var z = Math.sin(zDeg * (Math.PI / 180));
+    panner.setPosition(x, 0, z);
+}
+
+//function pan(range, panner) {
+//    var x = Math.sin(range * (Math.PI / 180));
+//    console.log("pan x", x);
+//    panner.setPosition(x, 0, 0);
+//}
 
 // todo: cache...
 function vocToWav(uInt8Array) {
@@ -192,7 +238,7 @@ function drawSpectrum() {
     audioAnalyser.getByteFrequencyData(freqByteData);
 
     var barCount = Math.round(width / barWidth);
-    console.log(freqByteData)
+    console.log(freqByteData);
     for (var i = 0; i < barCount; i++) {
         var magnitude = freqByteData[i];
         // some values need adjusting to fit on the canvas
