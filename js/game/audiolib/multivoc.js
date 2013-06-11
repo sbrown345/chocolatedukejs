@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿//'use strict';
 
 //h
 var MV_MaxPanPosition = 31;
@@ -99,42 +99,10 @@ if (typeof AudioContext == "function") {
     audioContext = new webkitAudioContext();
 }
 
-if (audioContext) {
-    audioAnalyser = audioContext.createAnalyser();
-    audioAnalyser.connect(audioContext.destination);
-    setInterval(drawSpectrum, 1000);
-}
-
-//function MV_PlayVoice(voice) {
-//    if (!audioContext) {
-//        // todo: support <audio> like sound.html
-//        return;
-//    }
-
-//    console.log("MV_PlayVoice", voice);
-
-//    var sourceLeft = audioContext.createBufferSource();
-//    var sourceRight = audioContext.createBufferSource();
-
-//    var gainLeft = audioContext.createGainNode();
-//    gainLeft.gain.value = voice.LeftVolume / 1000;
-//    var gainRight = audioContext.createGainNode();
-//    gainRight.gain.value = voice.RightVolume / 1000;
-
-//    var channelMerger = audioContext.createChannelMerger();
-
-//    var wav = vocToWav(voice.tempPtr);
-//    var bufferLeft = audioContext.createBuffer(wav, true/*make mono*/); // maybe try panner anyway: developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
-//    var bufferRight = audioContext.createBuffer(wav, true/*make mono*/);
-//    sourceLeft.buffer = bufferLeft;
-//    sourceRight.buffer = bufferRight;
-//    sourceLeft.connect(gainLeft);
-//    sourceRight.connect(gainRight);
-//    gainLeft.connect(channelMerger, 0, 1);
-//    gainRight.connect(channelMerger, 0, 0);
-//    channelMerger.connect(audioContext.destination);
-//    sourceLeft.noteOn(0);
-//    sourceRight.noteOn(0);
+//if (audioContext) {
+//    audioAnalyser = audioContext.createAnalyser();
+//    audioAnalyser.connect(audioContext.destination);
+//    setInterval(drawSpectrum, 1000);
 //}
 
 function MV_PlayVoice(voice) {
@@ -145,22 +113,87 @@ function MV_PlayVoice(voice) {
 
     console.log("MV_PlayVoice", voice);
 
+    // source - gainLeft/gainRight - merger - dest
     var source = audioContext.createBufferSource();
-    var panner = audioContext.createPanner();
 
-    var volumeNode = audioContext.createGainNode();
-    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) / 2) / 1000; // cannot set left/right volume, yet?
-    console.log("volumeNode.gain.value ", volumeNode.gain.value);
+    var gainLeft = audioContext.createGainNode();
+    gainLeft.gain.value = voice.LeftVolume / 1000; // LeftVolume value: 0-64
+    var gainRight = audioContext.createGainNode();
+    gainRight.gain.value = voice.RightVolume / 1000;
 
-    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true);
-    pan((-voice.LeftVolume) + voice.RightVolume, panner);
+    console.log("gainLeft: %i gainRight: %i", gainLeft.gain.value, gainRight.gain.value);
 
-    source.connect(panner);
-    panner.connect(volumeNode);
-    volumeNode.connect(audioContext.destination);
+    var merger = audioContext.createChannelMerger();
+    var wav = vocToWav(voice.tempPtr);
+    var buffer = audioContext.createBuffer(wav, true); 
     source.buffer = buffer;
+    source.connect(gainLeft);
+    source.connect(gainRight);
+    gainLeft.connect(merger, 0, 1);
+    gainRight.connect(merger, 0, 1);
+    merger.connect(audioContext.destination);
     source.noteOn(0);
 }
+
+//function MV_PlayVoice(voice) {
+//    if (!audioContext) {
+//        // todo: support <audio> like sound.html
+//        return;
+//    }
+
+//    console.log("MV_PlayVoice", voice);
+
+//    var source = audioContext.createBufferSource();
+//    var panner = audioContext.createPanner();
+
+//    var volumeNode = audioContext.createGainNode();
+//    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) / 2) / 1000; // cannot set left/right volume, yet?
+//    console.log("volumeNode.gain.value ", volumeNode.gain.value);
+
+//    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true);
+//    pan((-voice.LeftVolume) + voice.RightVolume, panner);
+
+//    source.connect(panner);
+//    panner.connect(volumeNode);
+//    volumeNode.connect(audioContext.destination);
+//    source.buffer = buffer;
+//    source.noteOn(0);
+//}
+
+//////http://jsbin.com/ayijoy/16/edit
+////function MV_PlayVoice(voice) {
+////    if (!audioContext) {
+////        // todo: support <audio> like sound.html
+////        return;
+////    }
+
+////    console.log("MV_PlayVoice", voice);
+
+////// source - splitter - gain (l/r) - merger - dest
+
+////    var destination = audioContext.destination,
+////        bufferSource = audioContext.createBufferSource(),
+////        buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true),
+////        splitter = audioContext.createChannelSplitter(2), //https://github.com/adobe/webkit/blob/master/LayoutTests/webaudio/audiochannelsplitter.html
+////        gainL = audioContext.createGainNode(),
+////        gainR = audioContext.createGainNode(),
+////        merger = audioContext.createChannelMerger(2);
+
+////    bufferSource.buffer = buffer;
+
+////    bufferSource.connect(gainL);
+////    bufferSource.connect(gainR);
+
+////    gainL.connect(merger, 0, 0);
+////    gainR.connect(merger, 0, 1);
+
+////    bufferSource.noteOn(0);
+
+////    gainL.gain.value = 0.01;
+////    gainR.gain.value = 0.09;
+
+////    merger.connect(destination);
+////}
 
 var panPos = 0;
 
@@ -225,26 +258,26 @@ function vocToWav(uInt8Array) {
 }
 
 
-function drawSpectrum() {
-    var canvas = document.getElementById('spectrumCanvas');
-    var ctx = canvas.getContext('2d');
-    var width = canvas.width;
-    var height = canvas.height;
-    var barWidth = 10;
+//function drawSpectrum() {
+//    var canvas = document.getElementById('spectrumCanvas');
+//    var ctx = canvas.getContext('2d');
+//    var width = canvas.width;
+//    var height = canvas.height;
+//    var barWidth = 10;
 
-    ctx.clearRect(0, 0, width, height);
+//    ctx.clearRect(0, 0, width, height);
 
-    var freqByteData = new Uint8Array(audioAnalyser.frequencyBinCount);
-    audioAnalyser.getByteFrequencyData(freqByteData);
+//    var freqByteData = new Uint8Array(audioAnalyser.frequencyBinCount);
+//    audioAnalyser.getByteFrequencyData(freqByteData);
 
-    var barCount = Math.round(width / barWidth);
-    console.log(freqByteData);
-    for (var i = 0; i < barCount; i++) {
-        var magnitude = freqByteData[i];
-        // some values need adjusting to fit on the canvas
-        ctx.fillRect(barWidth * i, height, barWidth - 2, -magnitude + 60);
-    }
-}
+//    var barCount = Math.round(width / barWidth);
+//    console.log(freqByteData);
+//    for (var i = 0; i < barCount; i++) {
+//        var magnitude = freqByteData[i];
+//        // some values need adjusting to fit on the canvas
+//        ctx.fillRect(barWidth * i, height, barWidth - 2, -magnitude + 60);
+//    }
+//}
 
 
 ///*---------------------------------------------------------------------
