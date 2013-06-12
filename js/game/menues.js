@@ -1620,7 +1620,7 @@ function menus() {
             }
 
             if (SoundToggle && FXDevice != NumSoundCards) menutext(c + 160 + 40, 43, 0, (FXDevice == NumSoundCards) ? 1 : 0, "ON");
-            else menutext(c+160+40,43,0,(FXDevice == NumSoundCards),"OFF");
+            else menutext(c+160+40,43,0,(FXDevice == NumSoundCards)? 1 : 0,"OFF");
 
             if(MusicToggle && (MusicDevice != NumSoundCards) && (!eightytwofifty||numplayers<2))
                 menutext(c + 160 + 40, 43 + 16, 0, (MusicDevice == NumSoundCards) ? 1 : 0, "ON");
@@ -1632,7 +1632,7 @@ function menus() {
                 l = FXVolume;
                 FXVolume >>= 2;
                 var FXVolumeRef = new Ref(FXVolume);
-                bar(c+167+40,43+16+16,FXVolumeRef,4,(FXDevice!=NumSoundCards)&&x==2,SHX(-4),SoundToggle==0||(FXDevice==NumSoundCards));
+                bar(c+167+40,43+16+16,FXVolumeRef,4,(FXDevice!=NumSoundCards)&&x==2,SHX(-4),(SoundToggle==0||(FXDevice==NumSoundCards)?1:0));
                 FXVolume = FXVolumeRef.$;
                 if(l != FXVolume)
                     FXVolume <<= 2;
@@ -1648,7 +1648,7 @@ function menus() {
                 bar(c+167+40,43+16+16+16,
                     MusicVolumeRef,4,
                     (eightytwofifty==0||numplayers < 2) && (MusicDevice!=NumSoundCards) && x==3,SHX(-5),
-                    (numplayers > 1 && eightytwofifty)||MusicToggle==0||(MusicDevice==NumSoundCards));
+                    ((numplayers > 1 && eightytwofifty)||MusicToggle==0||(MusicDevice==NumSoundCards))? 1 : 0);
                 MusicVolume = MusicVolumeRef.$;
                 MusicVolume <<= 2;
                 if(l != MusicVolume)
