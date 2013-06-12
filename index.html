@@ -19,6 +19,7 @@
     <script src="js/helpers/rand.js"></script>
     <script src="js/helpers/printf.js"></script>
     <script src="js/lib/DataStream.js"></script>
+    <script src="js/lib/fpsmeter.min.js"></script>
     <script src="js/lib/sprintf.js"></script>
     <script src="js/lib/canvas-toBlob.js"></script>
     <script src="js/lib/FileSaver.js"></script>
@@ -61,6 +62,22 @@
     <script src="js/game/player.js"></script>
     <script src="js/temp.js"></script>
     <script>
+        var meter = new FPSMeter({
+            interval: 1000,    
+            theme: 'transparent', // Meter theme. Build in: 'dark', 'light', 'transparent', 'colorful'.
+            heat: true, 
+            graph: true, 
+            history: 40 
+        });
+        
+        function startFrame() {
+            meter.tickStart();
+        }
+        
+        function endFrame() {
+            meter.tick();
+        }
+        
         window.onload = function () {
             main(0, null);
         };

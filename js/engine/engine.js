@@ -4177,6 +4177,8 @@ function nextpage() {
     beforedrawrooms = 1;
     numframes++;
     //printf("numframes: %i\n", numframes);
+
+    endFrame();
 }
 
 

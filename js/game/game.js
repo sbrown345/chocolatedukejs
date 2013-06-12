@@ -6118,6 +6118,7 @@ function main(argc, argv) {
                     return !(ps[myconnectindex].gm & MODE_END);
                 }, function () {
                     q.setPositionAtStart(); // important!
+                    startFrame();
 
                     q.add(function () {
                         sampletimer();
@@ -6398,13 +6399,15 @@ Game.playBack = function () {
             q.setPositionAtStart();
             //console.log("demo loopframeCount: %i", frameCount++);
 
+            startFrame();
+            
             q.addIf(function () {
                 return foundemo;
             }, function () {
                 q.setPositionAtStart();
 
                 q.addWhile(function () {
-                    return totalclock >= (lockclock + TICSPERFRAME);
+                    return totalclock >= (lockclock + TICSPERFRAME); // todo: use timeout,  not req anm frame??? or just run once?
                 }, function () {
                     q.setPositionAtStart();
 
