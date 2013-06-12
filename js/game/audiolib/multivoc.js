@@ -99,162 +99,94 @@ if (typeof AudioContext == "function") {
     audioContext = new webkitAudioContext();
 }
 
-//if (audioContext) {
-//    audioAnalyser = audioContext.createAnalyser();
-//    audioAnalyser.connect(audioContext.destination);
-//    setInterval(drawSpectrum, 1000);
-//}
-
 function MV_PlayVoice(voice) {
     if (!audioContext) {
         // todo: support <audio> like sound.html
         return;
     }
 
-    console.log("MV_PlayVoice", voice);
-
     // source - gainLeft/gainRight - merger - dest
     var source = audioContext.createBufferSource();
 
     var gainLeft = audioContext.createGainNode();
-    gainLeft.gain.value = voice.LeftVolume / 1000; // LeftVolume value: 0-64
+    gainLeft.gain.value = voice.LeftVolume / 100;
     var gainRight = audioContext.createGainNode();
-    gainRight.gain.value = voice.RightVolume / 1000;
+    gainRight.gain.value = voice.RightVolume / 100;
 
-    console.log("gainLeft: %i gainRight: %i", gainLeft.gain.value, gainRight.gain.value);
+    // TODO: USE THE MAX VOICE CODE THING - PERF
 
     var merger = audioContext.createChannelMerger();
-    var wav = vocToWav(voice.tempPtr);
+    var wav = getWav(voice);
+    //saveVoice(wav, voice);
+
     var buffer = audioContext.createBuffer(wav, true); 
     source.buffer = buffer;
     source.connect(gainLeft);
     source.connect(gainRight);
-    gainLeft.connect(merger, 0, 1);
+    gainLeft.connect(merger, 0, 0);
     gainRight.connect(merger, 0, 1);
     merger.connect(audioContext.destination);
     source.noteOn(0);
 }
 
-//function MV_PlayVoice(voice) {
-//    if (!audioContext) {
-//        // todo: support <audio> like sound.html
-//        return;
-//    }
+var savedVoices = {};
 
-//    console.log("MV_PlayVoice", voice);
-
-//    var source = audioContext.createBufferSource();
-//    var panner = audioContext.createPanner();
-
-//    var volumeNode = audioContext.createGainNode();
-//    volumeNode.gain.value = ((voice.LeftVolume + voice.RightVolume) / 2) / 1000; // cannot set left/right volume, yet?
-//    console.log("volumeNode.gain.value ", volumeNode.gain.value);
-
-//    var buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true);
-//    pan((-voice.LeftVolume) + voice.RightVolume, panner);
-
-//    source.connect(panner);
-//    panner.connect(volumeNode);
-//    volumeNode.connect(audioContext.destination);
-//    source.buffer = buffer;
-//    source.noteOn(0);
-//}
-
-//////http://jsbin.com/ayijoy/16/edit
-////function MV_PlayVoice(voice) {
-////    if (!audioContext) {
-////        // todo: support <audio> like sound.html
-////        return;
-////    }
-
-////    console.log("MV_PlayVoice", voice);
-
-////// source - splitter - gain (l/r) - merger - dest
-
-////    var destination = audioContext.destination,
-////        bufferSource = audioContext.createBufferSource(),
-////        buffer = audioContext.createBuffer(vocToWav(voice.tempPtr), true),
-////        splitter = audioContext.createChannelSplitter(2), //https://github.com/adobe/webkit/blob/master/LayoutTests/webaudio/audiochannelsplitter.html
-////        gainL = audioContext.createGainNode(),
-////        gainR = audioContext.createGainNode(),
-////        merger = audioContext.createChannelMerger(2);
-
-////    bufferSource.buffer = buffer;
-
-////    bufferSource.connect(gainL);
-////    bufferSource.connect(gainR);
-
-////    gainL.connect(merger, 0, 0);
-////    gainR.connect(merger, 0, 1);
-
-////    bufferSource.noteOn(0);
-
-////    gainL.gain.value = 0.01;
-////    gainR.gain.value = 0.09;
-
-////    merger.connect(destination);
-////}
-
-var panPos = 0;
-
- //stackoverflow.com/questions/14378305/how-to-create-very-basic-left-right-equal-power-panning-with-createpanner
-function pan(range, panner) {
-    console.log("pan range", range);
-    var xDeg = parseInt(range);
-    var zDeg = xDeg + 90;
-    if (zDeg > 90) {
-        zDeg = 180 - zDeg;
+function saveVoice(wav, voice) {
+    var filename = voice.callbackval;
+    if (!savedVoices[filename]) {
+        saveAs(new Blob(new Array(wav)), filename + ".wav");
+        saveAs(new Blob(new Array(voice.tempPtr)), filename + ".voc");
+        savedVoices[filename] = true;
     }
-    var x = Math.sin(xDeg * (Math.PI / 180));
-    var z = Math.sin(zDeg * (Math.PI / 180));
-    panner.setPosition(x, 0, z);
 }
 
-//function pan(range, panner) {
-//    var x = Math.sin(range * (Math.PI / 180));
-//    console.log("pan x", x);
-//    panner.setPosition(x, 0, 0);
-//}
+var cachedWav = {};
 
-// todo: cache...
-function vocToWav(uInt8Array) {
+function getWav(voice) {
     // very simplistic, will probalby break on anything other than default sounds, eg sample rate not read from voc
 
-    var ds = new DataStream(uInt8Array);
+    if (voice.wavetype == WAV) {
+        return voice.tempPtr;
+    }
 
-    ds.seek(0x20);
-    var sinfo = {
-        length: uInt8Array.length,
-        samprate: 8000
-    };
-    var rawBytes = ds.readUint8Array(uInt8Array.length - 0x20);
-    var wavDs = new DataStream();
-    var bl;
-    var bi;
+    if (!cachedWav[voice.callbackval]) {
+        var ds = new DataStream(voice.tempPtr);
 
-    wavDs.writeString("RIFF"); // Write "RIFF"
-    bl = sinfo.length + 36;
-    wavDs.writeInt32(bl, 4); // Write Size of file with header
-    wavDs.writeString("WAVE"); // Write "WAVE"
-    wavDs.writeString("fmt "); // Write "fmt "
-    bl = 16;
-    wavDs.writeInt32(bl); // Size of previous header (fixed)
-    bi = 1;
-    wavDs.writeInt16(bi); // formatTag
-    wavDs.writeInt16(bi); // nChannels
-    bl = sinfo.samprate;
-    wavDs.writeInt32(bl); // nSamplesPerSec
-    wavDs.writeInt32(bl); // nAvgBytesPerSec
-    wavDs.writeInt16(bi); // nBlockAlign (always 1?)
-    bi = 8;
-    wavDs.writeInt16(bi); // nBitsPerSample (8 or 16 I assume)
-    wavDs.writeString("data"); // Write "data"
-    bl = sinfo.length;
-    wavDs.writeInt32(bl); // True length of sample data
+        ds.seek(0x20);
+        var sinfo = {
+            length: voice.tempPtr.length,
+            samprate: 8000
+        };
+        var rawBytes = ds.readUint8Array(voice.tempPtr.length - 0x20);
+        var wavDs = new DataStream();
+        var bl;
+        var bi;
 
-    wavDs.writeUint8Array(rawBytes);
+        wavDs.writeString("RIFF"); // Write "RIFF"
+        bl = sinfo.length + 36;
+        wavDs.writeInt32(bl, 4); // Write Size of file with header
+        wavDs.writeString("WAVE"); // Write "WAVE"
+        wavDs.writeString("fmt "); // Write "fmt "
+        bl = 16;
+        wavDs.writeInt32(bl); // Size of previous header (fixed)
+        bi = 1;
+        wavDs.writeInt16(bi); // formatTag
+        wavDs.writeInt16(bi); // nChannels
+        bl = sinfo.samprate;
+        wavDs.writeInt32(bl); // nSamplesPerSec
+        wavDs.writeInt32(bl); // nAvgBytesPerSec
+        wavDs.writeInt16(bi); // nBlockAlign (always 1?)
+        bi = 8;
+        wavDs.writeInt16(bi); // nBitsPerSample (8 or 16 I assume)
+        wavDs.writeString("data"); // Write "data"
+        bl = sinfo.length;
+        wavDs.writeInt32(bl); // True length of sample data
 
-    return wavDs.buffer;
+        wavDs.writeUint8Array(rawBytes);
+        cachedWav[voice.callbackval] = wavDs.buffer;
+    }
+    
+    return cachedWav[voice.callbackval];
 }
 
 
@@ -493,7 +425,7 @@ function MV_PlayLoopedVOC(
     ////voice.NextBlock   = ptr + *( uint16_t  * )( ptr + 0x14 );
     voice.tempPtr = ptr;
     ////voice.DemandFeed  = NULL;
-    ////voice.LoopStart   = NULL;
+    voice.LoopStart = null;//NULL;
     ////voice.LoopCount   = 0;
     ////voice.BlockLength = 0;
     ////voice.PitchScale  = PITCH_GetScale( pitchoffset );
@@ -512,11 +444,14 @@ function MV_PlayLoopedVOC(
     voice.LoopEnd = /*( char * )*/loopend;
     ////voice.LoopSize    = loopend - loopstart + 1;
 
-    ////if ( loopstart < 0 )
-    ////{
-    ////    voice.LoopStart = 0;
-    ////    voice.LoopEnd   = 0;
-    ////}
+    if ( loopstart < 0 )
+    {
+        voice.LoopStart = 0;
+        voice.LoopEnd   = 0;
+    }
+
+    console.assert(voice.LoopStart == 0);
+    console.assert(voice.LoopEnd == 0);
 
     MV_SetVoiceVolume(voice, vol, left, right);
     MV_PlayVoice(voice);
@@ -544,7 +479,7 @@ function MV_CalcPanTable() {
     HalfAngle = (MV_NumPanPositions / 2) | 0;
 
     for (distance = 0; distance <= MV_MaxVolume; distance++) {
-        level = (255 * (MV_MaxVolume - distance)) / MV_MaxVolume;
+        level = ((255 * (MV_MaxVolume - distance)) / MV_MaxVolume) | 0;
         for (angle = 0; angle <= (HalfAngle / 2 | 0) ; angle++) {
             ramp = level - ((level * angle) /
                 (MV_NumPanPositions / 4 | 0));
