@@ -42,8 +42,8 @@ function FX_Init(SoundCard,
 }
 
 //364
-FX.setVolume = function () {
-    //todo
+FX.setVolume = function (volume) {
+    MV_SetVolume(volume);
 };
 
 //949
