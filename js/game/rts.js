@@ -12,6 +12,7 @@ var RTS = {};
 var numlumps;
 var lumpinfo;
 
+var lumplockbyte = new Uint8Array(11);
 
 RTS.init = function(filename) {
     numlumps = 0;

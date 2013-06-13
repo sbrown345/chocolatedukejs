@@ -246,7 +246,12 @@ Config.readSetup = function () {
 
     // todo: Config.readSetup
     
+    //if (FXDevice != NumSoundCards)
+        FXDevice = SoundScape;
+
+    //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MusicDevice",&MusicDevice);
     
+
     //SCRIPT_GetNumber( scripthandle, "Sound Setup", "FXVolume",&FXVolume);
     //SCRIPT_GetNumber( scripthandle, "Sound Setup", "MusicVolume",&MusicVolume);
     //SCRIPT_GetNumber( scripthandle, "Sound Setup", "SoundToggle",&SoundToggle);

@@ -131,6 +131,11 @@ function AFLAMABLE(X) { (X === BOX || X === TREE1 || X === TREE2 || X === TIRE |
 //317
 function rnd(X) { return ((TRAND >> 8) >= (255 - (X))) | 0; }
 
+function SOUNDOWNER() {
+    this.i = 0;
+    this.voice = 0;
+}
+
 function Input() {
     //var avel = new Int8Array(1);
     //var horz = new Int8Array(1);

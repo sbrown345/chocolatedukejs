@@ -38,7 +38,38 @@ function FX_Init(SoundCard,
     devicestatus = MV_Init(SoundCard, FX_MixRate, numvoices,
            numchannels, samplebits);
 
+    FX_Installed = true;
+
     return status;
+}
+
+
+/*---------------------------------------------------------------------
+   Function: FX_SetCallback
+
+   Sets the function to call when a voice is done.
+---------------------------------------------------------------------*/
+
+function FX_SetCallBack($function) {
+    var status = FX_Ok;
+
+    switch (FX_SoundDevice) {
+    case SoundBlaster:
+    case Awe32:
+    case ProAudioSpectrum:
+    case SoundMan16:
+    case SoundScape:
+    case SoundSource:
+    case TandySoundSource:
+    case UltraSound:
+        MV_SetCallBack($function);
+        break;
+    default:
+        FX_SetErrorCode(FX_InvalidCard);
+        status = FX_Error;
+    }
+
+    return (status);
 }
 
 //364
@@ -68,8 +99,8 @@ FX.setReverbDelay = function () {
 
 //502
 
-function FX_VoiceAvailable() {
-    //todo
+function FX_VoiceAvailable(priority) {
+    return MV_VoiceAvailable(priority);
 }
 
 //502

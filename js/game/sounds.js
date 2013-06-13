@@ -10,6 +10,8 @@ function SoundStartup() {
     if (ReverseStereo == 1) {
         FX_SetReverseStereo(!FX_GetReverseStereo());
     }
+
+    status = FX_SetCallBack(TestCallBack);
 }
 
 //230
@@ -278,7 +280,44 @@ function stopenvsound() { }
 //525
 function pan3dsound() { }
 
-function testcallback() { }
+//606
+function TestCallBack(num) {
+    var tempi, tempj, tempk;
+
+    if (num < 0) {
+        if (lumplockbyte[-num] >= 200)
+            lumplockbyte[-num]--;
+        return;
+    }
+
+    tempk = Sound[num].num;
+
+    if (tempk > 0) {
+        if ((soundm[num] & 16) == 0)
+            for (tempj = 0; tempj < tempk; tempj++) {
+                tempi = SoundOwner[num][tempj].i;
+                if (sprite[tempi].picnum == MUSICANDSFX && sector[sprite[tempi].sectnum].lotag < 3 && sprite[tempi].lotag < 999) {
+                    hittype[tempi].temp_data[0] = 0;
+                    if ((tempj + 1) < tempk) {
+                        SoundOwner[num][tempj].voice = SoundOwner[num][tempk - 1].voice;
+                        SoundOwner[num][tempj].i = SoundOwner[num][tempk - 1].i;
+                    }
+                    break;
+                }
+            }
+
+        Sound[num].num--;
+        SoundOwner[num][tempk - 1].i = -1;
+    }
+
+    Sound[num].lock--;
+}
+
+//656
+// no idea if this is right. I added this function.  --ryan.
+function testcallback() {
+    TestCallBack();
+}
 
 //652
 function clearsoundlocks() {
