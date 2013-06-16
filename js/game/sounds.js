@@ -282,6 +282,7 @@ function pan3dsound() { }
 
 //606
 function TestCallBack(num) {
+    console.log("TestCallBack %i", num)
     var tempi, tempj, tempk;
 
     if (num < 0) {

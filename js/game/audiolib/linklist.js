@@ -20,6 +20,14 @@ function LL_ListEmpty(list, next, prev) {
         ((list)[prev] == (list));
 }
 
+function LL_SortedInsertion(rootnode, insertnode, next, prev, type, sortparm) {
+    var hoya = (rootnode)[next];
+    while ((hoya != (rootnode)) && ((insertnode)[sortparm] > hoya[sortparm])) {
+        hoya = hoya[next];
+    }
+    LL_AddNode(hoya, (insertnode), next, prev);
+}
+
 var LL_Reset = function (list, next, prev) {
     (list)[next] = (list)[prev] = (list);
 };

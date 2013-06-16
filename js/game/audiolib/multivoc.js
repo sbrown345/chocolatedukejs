@@ -113,8 +113,8 @@ var MV_TotalMemory;
 var MV_FooMemory;
 
 var MV_BufferDescriptor;
-//var   MV_BufferEmpty[ NumberOfBuffers ];
-//var MV_MixBuffer[ NumberOfBuffers + 1 ];
+var MV_BufferEmpty = new Int32Array(NumberOfBuffers);
+var MV_MixBuffer = new Int32Array(NumberOfBuffers + 1);
 var MV_FooBuffer = null;
 
 //125
@@ -149,6 +149,97 @@ var MV_MixPosition;
 //#define MV_SetErrorCode( status ) \
 //MV_ErrorCode   = ( status );
 
+//273
+
+/**********************************************************************
+
+   Memory locked functions:
+
+**********************************************************************/
+
+
+var MV_LockStart = MV_Mix;
+
+
+/*---------------------------------------------------------------------
+   Function: MV_Mix
+
+   Mixes the sound into the buffer.
+---------------------------------------------------------------------*/
+
+function MV_Mix(voice) {
+    var start;
+    var length;
+    var voclength;
+    var position;
+    var rate;
+    var FixedPointBufferSize;
+
+    if ((voice.length == 0)
+        && (voice.GetSound(voice) != KeepPlaying)) {
+        return;
+    }
+
+    length = MixBufferSize;
+    FixedPointBufferSize = voice.FixedPointBufferSize;
+
+    MV_MixDestination = MV_FooBuffer;
+    MV_LeftVolume = voice.LeftVolume;
+    MV_RightVolume = voice.RightVolume;
+    MV_GLast = voice.GLast;
+    MV_GPos = voice.GPos;
+    MV_GVal = voice.GVal;
+
+    if ((MV_Channels == 2) && (IS_QUIET(MV_LeftVolume))) {
+        MV_LeftVolume = MV_RightVolume;
+        MV_MixDestination += 8;
+    }
+
+    // Add this voice to the mix
+    while (length > 0) {
+        start = voice.sound;
+        rate = voice.RateScale;
+        position = voice.position;
+
+        // Check if the last sample in this buffer would be
+        // beyond the length of the sample block
+        if ((position + FixedPointBufferSize) >= voice.length) {
+            if (position < voice.length) {
+                voclength = (voice.length - position + rate - 1) / rate | 0;
+            }
+            else {
+                voice.GetSound(voice);
+                return;
+            }
+        }
+        else {
+            voclength = length;
+        }
+
+        voice.mix(position, rate, start, voclength);
+
+        if (voclength & 1) {
+            MV_MixPosition += rate;
+            voclength -= 1;
+        }
+        voice.position = MV_MixPosition;
+
+        length -= voclength;
+
+        if (voice.position >= voice.length) {
+            // Get the next block of sound
+            if (voice.GetSound(voice) != KeepPlaying) {
+                return;
+            }
+
+            if (length > 0) {
+                // Get the position of the last sample in the buffer
+                FixedPointBufferSize = voice.RateScale * (length - 1);
+            }
+        }
+    }
+}
+
 //381
 /*---------------------------------------------------------------------
    Function: MV_PlayVoice
@@ -162,11 +253,29 @@ if (typeof AudioContext == "function") {
     audioContext = new webkitAudioContext();
 }
 
+//function MV_PlayVoice( voice ) {
+//   //var flags;
+
+//   //flags = DisableInterrupts();
+//    LL_SortedInsertion(VoiceList, voice, "prev", "next", "VoiceNode", "priority");
+
+//   ++sounddebugActiveSounds;
+//   ++sounddebugAllocateSoundCalls;
+
+//   //RestoreInterrupts( flags );
+//}
+
 function MV_PlayVoice(voice) {
     if (!audioContext) {
         // todo: support <audio> like sound.html
         return;
     }
+    
+    LL_SortedInsertion(VoiceList, voice, "prev", "next", "VoiceNode", "priority");
+
+    ++sounddebugActiveSounds;
+    ++sounddebugAllocateSoundCalls;
+
 
     // source - gainLeft/gainRight - merger - dest
     var source = audioContext.createBufferSource();
@@ -192,9 +301,11 @@ function MV_PlayVoice(voice) {
     source.noteOn(0);
     setTimeout(function () {
         if (MV_CallBackFunc) {
-            MV_CallBackFunc(voice.callbackval);
+            console.log("MV_CallBackFunc")
+            //MV_CallBackFunc(voice.callbackval);
+            mixer_callback();
         }
-    }, (buffer.duration * 1000) + 5); // https://bugs.webkit.org/show_bug.cgi?id=71942
+    }, (buffer.duration * 1000)); // https://bugs.webkit.org/show_bug.cgi?id=71942
 }
 
 var savedVoices = {};
@@ -258,27 +369,6 @@ function getWav(voice) {
 }
 
 
-//function drawSpectrum() {
-//    var canvas = document.getElementById('spectrumCanvas');
-//    var ctx = canvas.getContext('2d');
-//    var width = canvas.width;
-//    var height = canvas.height;
-//    var barWidth = 10;
-
-//    ctx.clearRect(0, 0, width, height);
-
-//    var freqByteData = new Uint8Array(audioAnalyser.frequencyBinCount);
-//    audioAnalyser.getByteFrequencyData(freqByteData);
-
-//    var barCount = Math.round(width / barWidth);
-//    console.log(freqByteData);
-//    for (var i = 0; i < barCount; i++) {
-//        var magnitude = freqByteData[i];
-//        // some values need adjusting to fit on the canvas
-//        ctx.fillRect(barWidth * i, height, barWidth - 2, -magnitude + 60);
-//    }
-//}
-
 //401
 /*---------------------------------------------------------------------
    Function: MV_StopVoice
@@ -299,7 +389,7 @@ function MV_StopVoice(voice) {
     pNext = voice.next;
 
     // move the voice from the play list to the free list
-    LL_Remove(voice, next, prev);
+    LL_Remove(voice, "next", "prev");
     LL_Add(VoicePool, voice, "next", "prev");
 
     if (!pPrev) {
@@ -315,6 +405,91 @@ function MV_StopVoice(voice) {
 
 
     //RestoreInterrupts( flags );
+}
+
+//436
+
+/*---------------------------------------------------------------------
+   Function: MV_ServiceVoc
+
+   Starts playback of the waiting buffer and mixes the next one.
+---------------------------------------------------------------------*/
+
+// static int backcolor = 1;
+
+function MV_ServiceVoc() {
+    var voice;
+    var next;
+
+	debugger 
+    // Toggle which buffer we'll mix next
+    MV_MixPage++;
+    if ( MV_MixPage >= MV_NumberOfBuffers )
+    {
+        MV_MixPage -= MV_NumberOfBuffers;
+    }
+	
+    {
+        ClearBuffer_DW( MV_FooBuffer, 0, (8 / 4 * MV_BufferSize / MV_SampleSize * MV_Channels) | 0);
+        MV_BufferEmpty[ MV_MixPage ] = 1;
+    }
+	
+    // Play any waiting voices
+    for( voice = VoiceList.next; voice != VoiceList; voice = next )
+    {
+        //      if ( ( voice < &MV_Voices[ 0 ] ) || ( voice > &MV_Voices[ 8 ] ) )
+        //         {
+        //         SetBorderColor(backcolor++);
+        //         break;
+        //         }
+
+        if(!voice.GetSound)
+        {
+            console.debug("MV_ServiceVoc() voice.GetSound == NULL, break;\n");
+
+            // This sound is null, early out, or face a nasty crash.
+            break;		
+        }
+		
+        MV_BufferEmpty[ MV_MixPage ] = 0;
+		
+        MV_MixFunction( voice );
+	
+        next = voice.next;
+		
+        // Is this voice done?
+        if ( !voice.Playing )
+        {
+            MV_StopVoice( voice );
+			
+            if ( MV_CallBackFunc )
+            {
+                MV_CallBackFunc( voice.callbackval );
+            }
+        }
+    }
+	
+    if ( MV_ReverbLevel > 0)
+    {
+        if (MV_ReverbTable != -1) MV_FPReverb(MV_ReverbTable);
+    }
+
+    {
+        var dest;
+        var count;
+		
+        dest = MV_MixBuffer[ MV_MixPage ];
+        count = (MV_BufferSize / MV_SampleSize * MV_Channels) | 0;
+        if ( MV_Bits == 16 )
+        {
+            MV_16BitDownmix(dest, count);
+        }
+        else
+        {
+            MV_8BitDownmix(dest, count);
+        }
+			
+    }
 }
 
 
@@ -537,7 +712,7 @@ function MV_SetVoiceVolume(
     voice.RightVolume = MV_GetVolumeTable(right);
 }
 
-
+//1715
 /*---------------------------------------------------------------------
    Function: MV_SetMixMode
 
@@ -590,6 +765,54 @@ function MV_SetMixMode(numchannels, samplebits) {
     MV_RightChannelOffset = MV_SampleSize / 2 | 0;
 
     return (MV_Ok);
+}
+
+//1824
+
+/*---------------------------------------------------------------------
+   Function: MV_StartPlayback
+
+   Starts the sound playback engine.
+---------------------------------------------------------------------*/
+
+function MV_StartPlayback() 
+{
+    var status;
+    var buffer;
+
+    // Initialize the buffers
+    ClearBuffer_DW( MV_MixBuffer , 0,MV_Silence, TotalBufferSize >> 2 );
+    for( buffer = 0; buffer < MV_NumberOfBuffers; buffer++ )
+    {
+        MV_BufferEmpty[ buffer ] = 1 /*TRUE*/;
+    }
+
+    // Set the mix buffer variables
+    MV_MixPage = 1;
+
+    MV_MixFunction = MV_Mix;
+
+    //JIM
+    //   MV_MixRate = MV_RequestedMixRate;
+    //   return( MV_Ok );
+
+    // Start playback
+    status = DSL_BeginBufferedPlayback( MV_MixBuffer[ 0 ],
+										TotalBufferSize, 
+										MV_NumberOfBuffers,
+										MV_RequestedMixRate, 
+										MV_MixMode, 
+										MV_ServiceVoc );
+
+    if ( status != DSL_Ok )
+    {
+        MV_SetErrorCode( MV_BlasterError );
+        return( MV_Error );
+    }
+
+    MV_MixRate = DSL_GetPlaybackRate();
+
+    return( MV_Ok );
 }
 
 
@@ -880,7 +1103,19 @@ function MV_Init(
 
     //MV_FooBuffer = ptr;
 
-    //MV_StartPlayback();
+    MV_StartPlayback();
 
     return (0/*MV_Ok*/);
+}
+
+//3391
+
+function ClearBuffer_DW(ptr, ptrIdx, data, length) {
+    var d = ptr, dIdx = ptrIdx;
+
+    while (length--) {
+        d[dIdx] = data;
+
+        dIdx++;
+    }
 }
