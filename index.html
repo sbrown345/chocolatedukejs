@@ -9,7 +9,7 @@
         <div id="asyncDebug" style="display: block"></div>
         <div id="canvasDebug" style="display: block"></div>
     </div>
-    <canvas id="gameCanvas" style="width:100%"></canvas>
+    <canvas id="gameCanvas" style="width: 100%"></canvas>
 
     <script src="js/helpers/async.js"></script>
     <script src="js/helpers/types.js"></script>
@@ -65,25 +65,29 @@
     <script src="js/temp.js"></script>
     <script>
         var meter = new FPSMeter({
-            interval: 1000,    
+            interval: 1000,
             theme: 'transparent',
-            heat: true, 
-            graph: true, 
-            history: 40 
+            heat: true,
+            graph: true,
+            history: 40
         });
-        
+
         function startFrame() {
-            meter.tickStart();
+            if (meter) {
+                meter.tickStart();
+            }
         }
-        
+
         function endFrame() {
-            meter.tick();
+            if (meter) {
+                meter.tick();
+            }
         }
-        
+
         window.onload = function () {
             main(0, null);
 
-            setTimeout(function() {
+            setTimeout(function () {
                 FX.setVolume(10); // todo: set default config values somewhere properly
             });
         };
