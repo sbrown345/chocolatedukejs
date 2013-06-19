@@ -1,9 +1,5 @@
 ﻿'use strict';
 
-//h
-var MUSIC_Warning = -2,
-    MUSIC_Error = -1,
-    MUSIC_Ok = 0;
 
 //c
 var LOUDESTVOLUME = 150;
@@ -233,8 +229,7 @@ function xyzsound(num, i, x, y, z) {
     if (sndist < ((255 - LOUDESTVOLUME) << 6))
         sndist = ((255 - LOUDESTVOLUME) << 6);
     if (soundm[num] & 1) {
-        throw "todo"
-        ////var start;
+        throw "todo"; ////var start;
 
         ////if(Sound[num].num > 0) return -1;
 
@@ -294,8 +289,7 @@ function sound(num) {
     }
 
     if (soundm[num] & 1) {
-        throw "todo"
-        //if(Sound[num].ptr[Sound[num].ptrIdx] == 'C'.charCodeAt(0))
+        throw "todo"; //if(Sound[num].ptr[Sound[num].ptrIdx] == 'C'.charCodeAt(0))
         //{
         //    start = (int32_t)*(uint16_t *)(Sound[num].ptr + 0x14);
         //    voice = FX_PlayLoopedVOC( Sound[num].ptr, start, start + soundsiz[num],
@@ -337,7 +331,7 @@ function pan3dsound() { }
 
 //606
 function TestCallBack(num) {
-    console.log("TestCallBack %i", num)
+    console.log("TestCallBack %i", num);
     var tempi, tempj, tempk;
 
     if (num < 0) {

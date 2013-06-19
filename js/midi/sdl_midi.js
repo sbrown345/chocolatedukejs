@@ -1,5 +1,16 @@
 ﻿//'use strict';
 
+//music h
+var MUSIC_Warning = -2,
+    MUSIC_Error = -1,
+    MUSIC_Ok = 0;
+
+var MUSIC_LoopSong = (1 == 1);
+var MUSIC_PlayOnce = (!MUSIC_LoopSong);
+
+
+//sdl_midi c
+
 var Music = {};
 
 // https://github.com/qiao/euphony used both these:
@@ -36,7 +47,7 @@ Music.stopSong = function () {
 };
 
 //95
-function MUSIC_PlaySong(songFilename, loopflag)
+function MUSIC_PlaySong________Midi(songFilename, loopflag)
 {
     debugger 
     var fd =  0;
@@ -62,6 +73,10 @@ function MUSIC_PlaySong(songFilename, loopflag)
     kread( fd, musicDataBuffer, fileSize);
     kclose( fd );
     
+    // no decent way to play midi files I can see
+    // when midi api comes available should be able to use something like jsmid 
+    // with it to load the midi and play the notes
+
     //Ok, the file is in memory
     rw = SDL_RWFromMem(musicDataBuffer, fileSize); 
     
@@ -71,6 +86,75 @@ function MUSIC_PlaySong(songFilename, loopflag)
     
     return 1;
 }
+function MUSIC_PlaySong(songFilename, loopflag) {
+    var useOgg = true;
+    var fixedFilename = songFilename.replace(/\.mid/i, useOgg ? ".ogg" : ".mp3"); // todo - make better-er- e.g. replace last 4 chars?, throw errors 
+
+    var ds = new DataStream(open("music/" + fixedFilename));
+
+    debugger
+    
+    if (audioContext) {
+        var source = audioContext.createBufferSource();
+        source.connect(audioContext.destination);
+
+        var buffer = audioContext.createBuffer(ds.buffer, false);
+        source.buffer = buffer;
+        source.loop = loopflag; // todo check
+        source.noteOn(0);
+        
+    } else {
+        var mediaElement = new Audio();
+        mediaElement.autoplay = true;
+        mediaElement.loop = loopflag;
+
+        mediaElement.src = "data:audio/wav;base64," + FastBase64.Encode(new Uint8Array(ds.buffer));
+        document.body.appendChild(mediaElement);
+        mediaElement.load();
+    }
+
+    
+    return 1;
+}
+
+var FastBase64 = {
+    chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+    encLookup: [],
+
+    Init: function () {
+        for (var i = 0; i < 4096; i++) {
+            this.encLookup[i] = this.chars[i >> 6] + this.chars[i & 0x3F];
+        }
+    },
+
+    Encode: function (src) {
+        var len = src.length;
+        var dst = '';
+        var i = 0;
+        while (len > 2) {
+            n = (src[i] << 16) | (src[i + 1] << 8) | src[i + 2];
+            dst += this.encLookup[n >> 12] + this.encLookup[n & 0xFFF];
+            len -= 3;
+            i += 3;
+        }
+        if (len > 0) {
+            var n1 = (src[i] & 0xFC) >> 2;
+            var n2 = (src[i] & 0x03) << 4;
+            if (len > 1) n2 |= (src[++i] & 0xF0) >> 4;
+            dst += this.chars[n1];
+            dst += this.chars[n2];
+            if (len == 2) {
+                var n3 = (src[i++] & 0x0F) << 2;
+                n3 |= (src[i] & 0xC0) >> 6;
+                dst += this.chars[n3];
+            }
+            if (len == 1) dst += '=';
+            dst += '=';
+        }
+        return dst;
+    } // end Encode
+};
+FastBase64.Init();
 
 //181
 Music.registerTimbreBank = function () {

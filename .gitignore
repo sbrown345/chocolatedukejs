@@ -2,3 +2,7 @@
 *.GRP
 *.suo
 *.user
+*.MID
+*.VOC
+/StyleCop.Cache
+*.mp3
