@@ -421,7 +421,6 @@ function MV_ServiceVoc() {
     var voice;
     var next;
 
-	debugger 
     // Toggle which buffer we'll mix next
     MV_MixPage++;
     if ( MV_MixPage >= MV_NumberOfBuffers )

@@ -1,5 +1,11 @@
 ﻿'use strict';
 
+//h
+var MUSIC_Warning = -2,
+    MUSIC_Error = -1,
+    MUSIC_Ok = 0;
+
+//c
 var LOUDESTVOLUME = 150;
 var backflag, numenvsnds;
 
@@ -12,6 +18,54 @@ function SoundStartup() {
     }
 
     status = FX_SetCallBack(TestCallBack);
+}
+
+//135
+/*
+===================
+=
+= MusicStartup
+=
+===================
+*/
+
+function MusicStartup() {
+    var status;
+
+    // if they chose None lets return
+    if ((MusicDevice == NumSoundCards) || (eightytwofifty && numplayers > 1))
+        return;
+
+    // satisfy AWE32 and WAVEBLASTER stuff
+    BlasterConfig.Midi = MidiPort;
+
+    //// Do special Sound Blaster, AWE32 stuff
+    //if (
+    //      ( FXDevice == SoundBlaster ) ||
+    //      ( FXDevice == Awe32 )
+    //   )
+    //{
+    //    var MaxVoices;
+    //    var MaxBits;
+    //    var MaxChannels;
+
+    //    FX_SetupSoundBlaster(BlasterConfig, MaxVoices, (MaxBits, MaxChannels);
+    //}
+    status = MUSIC_Init(MusicDevice, MidiPort);
+
+    if (status == MUSIC_Ok) {
+        Music.setVolume(MusicVolume);
+    } else {
+        SoundShutdown();
+        uninittimer();
+        uninitengine();
+        CONTROL_Shutdown();
+        CONFIG_WriteSetup();
+        KB_Shutdown();
+        uninitgroupfile();
+        unlink("duke3d.tmp");
+        Error(EXIT_FAILURE, "Couldn't find selected sound card, or, error w/ sound card itself\n");
+    }
 }
 
 //230
@@ -43,11 +97,12 @@ function intomenusounds() {
 }
 
 //258
-function playmusic(filename) {
+function playmusic(fn) {
     if (MusicToggle == 0) return;
-    //if (MusicDevice == NumSoundCards) return;
+    if (MusicDevice == NumSoundCards) return;
 
-    // todo!
+    // the SDL_mixer version does more or less this same thing.  --ryan.
+    PlayMusic(fn);
 }
 
 function loadsound(num) {

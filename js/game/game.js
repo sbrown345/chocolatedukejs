@@ -5849,8 +5849,8 @@ function Startup() {
 
     console.log("Checking sound inits.");
     SoundStartup(); 
-    //console.log("Checking music inits.");
-    //todo: MusicStartup();
+    console.log("Checking music inits.");
+    MusicStartup();
 
     // AutoAim
     if (nHostForceDisableAutoaim)
@@ -6080,7 +6080,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    //logo();
+                    logo();
                 })
             .endIf();
 

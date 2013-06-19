@@ -12,7 +12,7 @@ var MusicToggle;
 var VoiceToggle;
 var AmbienceToggle;
 var OpponentSoundToggle; // xduke to toggle opponent's sounds on/off in DM (duke 1.3d scheme)
-var BlasterConfig;
+var BlasterConfig = {/*fx_blaster_config struct*/};
 var NumVoices;
 var NumChannels;
 var NumBits;
