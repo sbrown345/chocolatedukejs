@@ -474,19 +474,21 @@ function MV_ServiceVoc() {
     }
 
     {
-        var dest;
-        var count;
+        
+        // TODO: NEEDED??
+        //var dest;
+        //var count;
 		
-        dest = MV_MixBuffer[ MV_MixPage ];
-        count = (MV_BufferSize / MV_SampleSize * MV_Channels) | 0;
-        if ( MV_Bits == 16 )
-        {
-            MV_16BitDownmix(dest, count);
-        }
-        else
-        {
-            MV_8BitDownmix(dest, count);
-        }
+        //dest = MV_MixBuffer[ MV_MixPage ];
+        //count = (MV_BufferSize / MV_SampleSize * MV_Channels) | 0;
+        //if ( MV_Bits == 16 )
+        //{
+        //    MV_16BitDownmix(dest, count);
+        //}
+        //else
+        //{
+        //    MV_8BitDownmix(dest, count);
+        //}
 			
     }
 }

@@ -26,15 +26,22 @@ var Music = {};
 var KILOBYTE = (1024 * 1024);
 var musicDataBuffer = new Uint8Array(100 * KILOBYTE);
 
+var musicAudio = new Audio();
+
 //28
 function MUSIC_Init() {
     return MUSIC_Ok;
 }
 
 //47
-Music.setVolume = function () {
-    //todo 
+Music.setVolume = function (volume) {
+    Mix_VolumeMusic(volume / 2 | 0);
 };
+
+function Mix_VolumeMusic(volume) {
+    musicAudio.volume = volume / 100;
+}
+
 
 //74
 function MUSIC_Continue() { }
@@ -47,72 +54,58 @@ Music.stopSong = function () {
 };
 
 //95
-function MUSIC_PlaySong________Midi(songFilename, loopflag)
-{
-    debugger 
-    var fd =  0;
-    var fileSize;
-    var rw;
-    var sdlMusic;
+//function MUSIC_PlaySong________Midi(songFilename, loopflag)
+//{
+//    debugger 
+//    var fd =  0;
+//    var fileSize;
+//    var rw;
+//    var sdlMusic;
     
-    fd = kopen4load(songFilename,0);
+//    fd = kopen4load(songFilename,0);
     
-	if(fd == -1){ 
-	    console.log("The music '%s' cannot be found in the GRP or the filesystem.\n", songFilename);
-	    throw "error";
-    }
+//	if(fd == -1){ 
+//	    console.log("The music '%s' cannot be found in the GRP or the filesystem.\n", songFilename);
+//	    throw "error";
+//    }
     
-    fileSize = kfilelength( fd );
-    if (fileSize >= musicDataBuffer.length)
-    {
-        console.log("The music '%s' was found but is too big (%dKB)to fit in the buffer (%luKB).\n", songFilename, fileSize / 1024 | 0, musicDataBuffer.length / 1024 | 0);
-        kclose(fd);
-        throw "error";
-    }
+//    fileSize = kfilelength( fd );
+//    if (fileSize >= musicDataBuffer.length)
+//    {
+//        console.log("The music '%s' was found but is too big (%dKB)to fit in the buffer (%luKB).\n", songFilename, fileSize / 1024 | 0, musicDataBuffer.length / 1024 | 0);
+//        kclose(fd);
+//        throw "error";
+//    }
     
-    kread( fd, musicDataBuffer, fileSize);
-    kclose( fd );
+//    kread( fd, musicDataBuffer, fileSize);
+//    kclose( fd );
     
-    // no decent way to play midi files I can see
-    // when midi api comes available should be able to use something like jsmid 
-    // with it to load the midi and play the notes
+//    // no decent way to play midi files I can see
+//    // when midi api comes available should be able to use something like jsmid 
+//    // with it to load the midi and play the notes
 
-    //Ok, the file is in memory
-    rw = SDL_RWFromMem(musicDataBuffer, fileSize); 
+//    //Ok, the file is in memory
+//    rw = SDL_RWFromMem(musicDataBuffer, fileSize); 
     
-    sdlMusic = Mix_LoadMUS_RW(rw);
+//    sdlMusic = Mix_LoadMUS_RW(rw);
     
-    Mix_PlayMusic(sdlMusic, (loopflag == MUSIC_PlayOnce) ? 0 : -1);
+//    Mix_PlayMusic(sdlMusic, (loopflag == MUSIC_PlayOnce) ? 0 : -1);
     
-    return 1;
-}
+//    return 1;
+//}
+
+var musicAudio = new Audio();
 function MUSIC_PlaySong(songFilename, loopflag) {
-    var useOgg = true;
+    var useOgg = musicAudio.canPlayType('audio/ogg') == 1;
     var fixedFilename = songFilename.replace(/\.mid/i, useOgg ? ".ogg" : ".mp3"); // todo - make better-er- e.g. replace last 4 chars?, throw errors 
 
-    var ds = new DataStream(open("music/" + fixedFilename));
+ 
+    musicAudio.autoplay = true;
+    musicAudio.loop = loopflag;
 
-    debugger
-    
-    if (audioContext) {
-        var source = audioContext.createBufferSource();
-        source.connect(audioContext.destination);
-
-        var buffer = audioContext.createBuffer(ds.buffer, false);
-        source.buffer = buffer;
-        source.loop = loopflag; // todo check
-        source.noteOn(0);
-        
-    } else {
-        var mediaElement = new Audio();
-        mediaElement.autoplay = true;
-        mediaElement.loop = loopflag;
-
-        mediaElement.src = "data:audio/wav;base64," + FastBase64.Encode(new Uint8Array(ds.buffer));
-        document.body.appendChild(mediaElement);
-        mediaElement.load();
-    }
-
+    musicAudio.src = "music/" + fixedFilename;
+    musicAudio.load();
+    musicAudio.play();
     
     return 1;
 }
@@ -131,6 +124,7 @@ var FastBase64 = {
         var len = src.length;
         var dst = '';
         var i = 0;
+        var n;
         while (len > 2) {
             n = (src[i] << 16) | (src[i + 1] << 8) | src[i + 2];
             dst += this.encLookup[n >> 12] + this.encLookup[n & 0xFFF];
