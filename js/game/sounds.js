@@ -346,7 +346,7 @@ function TestCallBack(num) {
         if ((soundm[num] & 16) == 0)
             for (tempj = 0; tempj < tempk; tempj++) {
                 tempi = SoundOwner[num][tempj].i;
-                if (sprite[tempi].picnum == MUSICANDSFX && sector[sprite[tempi].sectnum].lotag < 3 && sprite[tempi].lotag < 999) {
+                if (sprite[tempi].picnum == MUSICANDSFX && sector[sprite[tempi].sectnum] && sector[sprite[tempi].sectnum].lotag < 3 && sprite[tempi].lotag < 999) {
                     hittype[tempi].temp_data[0] = 0;
                     if ((tempj + 1) < tempk) {
                         SoundOwner[num][tempj].voice = SoundOwner[num][tempk - 1].voice;
