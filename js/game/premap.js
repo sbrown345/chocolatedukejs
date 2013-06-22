@@ -685,10 +685,6 @@ function newgame(vn, ln, sk) {
     var p = ps[0];
     var i;
 
-    if (globalskillsound >= 0) {
-        while (Sound[globalskillsound].lock >= 200);
-    }
-
     globalskillsound = -1;
 
     PreMap.waitForEverybody();
