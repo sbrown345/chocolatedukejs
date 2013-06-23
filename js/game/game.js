@@ -5891,8 +5891,17 @@ function getNames() {
 // 7977
 
 function findGRPToUse() {
-    return "DUKE3D.GRP";
+    return getParameterByName("grp") || "DUKE3D.GRP"; // the original is a bit fancier
+    
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
 }
+
+
 
 // 8082
 
@@ -6055,23 +6064,7 @@ function main(argc, argv) {
     }
 
     // MAIN_LOOP_RESTART:
-
-    // if game is loaded without /V or /L cmd arguments.{
-    //if (ud.warp_on === 0) {
-    //    if (numplayers > 1 && boardfilename) //check if a user map is loaded and in multiplayer.
-    //    {
-    //        throw new Error("todo");
-    //    } else {
-    //        logo(); //play logo, (game must be started via menus).
-    //    }
-    //}
-    //else if (ud.warp_on == 1) {
-    //    throw new Error("todo");
-    //} else {
-    //    preMap.vscrn();
-    //}
-
-
+    
     q.addIf(function () {
         return ud.warp_on == 0;
     }, function () {
@@ -6080,7 +6073,7 @@ function main(argc, argv) {
                 function () {
                     throw new Error("todo");
                 }).addElse(function () {
-                    logo();
+                    //logo();
                 })
             .endIf();
 
@@ -6321,7 +6314,7 @@ function closedemowrite() {
 //8800
 var isPlayingBack = true; // set to false later to simulate returning 0
 Game.inMenu = 0;
-Game.whichDemo = 2;
+Game.whichDemo = 3;
 var frameCount = 0;
 Game.playBack = function () {
     q.setPositionAtStart();
