@@ -175,7 +175,7 @@ var movefifoend = new Int32Array(MAXPLAYERS);
 
 //Game recording variables
 
-var playerreadyflag = new Uint8Array(MAXPLAYERS), ready2send;
+var playerreadyflag = new Uint8Array(MAXPLAYERS), ready2send = 0;
 var playerquitflag = new Uint8Array(MAXPLAYERS);
 var vel, svel, angvel, horiz, ototalclock = 0, respawnactortime = 768, respawnitemtime = 768, groupfile;
 
