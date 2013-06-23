@@ -4,15 +4,15 @@
     <title>Duke3d JS</title>
 </head>
 <body style="margin: 0;">
-    <h1>MV_StartPlayback - DSL_BeginBufferedPlayback, which gets passed: MV_ServiceVoc
-    </h1>
+  
     <div style="float: right; overflow: auto; width: 640px;">
         <div id="paletteDebug" style="display: block"></div>
         <div id="asyncDebug" style="display: block"></div>
         <div id="canvasDebug" style="display: block"></div>
     </div>
-    <canvas id="gameCanvas" style="width: 100%"></canvas>
-
+    <canvas id="gameCanvas"></canvas>
+  <h1>MV_StartPlayback - DSL_BeginBufferedPlayback, which gets passed: MV_ServiceVoc
+    </h1>
     <script src="js/helpers/async.js"></script>
     <script src="js/helpers/types.js"></script>
     <script src="js/helpers/strings.js"></script>
@@ -66,13 +66,14 @@
     <script src="js/game/player.js"></script>
     <script src="js/temp.js"></script>
     <script>
-        var meter = new FPSMeter({
-            interval: 1000,
-            theme: 'transparent',
-            heat: true,
-            graph: true,
-            history: 40
-        });
+        var meter;
+        //meter = new FPSMeter({
+        //    interval: 1000,
+        //    theme: 'transparent',
+        //    heat: true,
+        //    graph: true,
+        //    history: 40
+        //});
 
         function startFrame() {
             if (meter) {
@@ -89,10 +90,10 @@
         window.onload = function () {
             main(0, null);
 
-            setTimeout(function () {
-                FX.setVolume(50); // todo: set default config values somewhere properly
-                Music.setVolume(40);
-            });
+            
+            FX.setVolume(50); // todo: set default config values somewhere properly
+            Music.setVolume(40);
+           
         };
     </script>
 </body>
